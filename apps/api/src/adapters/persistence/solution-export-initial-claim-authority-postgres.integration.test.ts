@@ -1354,7 +1354,7 @@ suite(
         ).rows[0]?.["expires_at"],
       ).toBe(deadline);
     }, 30_000);
-    it("holds creator, exact root/run/snapshot and published metadata locks until the caller transaction ends", async () => {
+    it("holds mutable authority and object locks while immutable claim/snapshot bindings remain stable without row locks", async () => {
       const f = await fixture();
       const before = await state(f.root.jobId);
       await database.transaction(async (tx) => {
@@ -1391,14 +1391,6 @@ suite(
             "SELECT solution_export_run_id FROM solution_export_runs WHERE solution_export_run_id=$1 FOR NO KEY UPDATE NOWAIT",
             [f.root.jobId],
           ),
-          sql(
-            "SELECT job_id FROM async_job_creation_claims WHERE organization_id=$1 AND job_id=$2 FOR NO KEY UPDATE NOWAIT",
-            [f.record.organizationId, f.root.jobId],
-          ),
-          sql(
-            "SELECT job_id FROM async_job_record_snapshots WHERE organization_id=$1 AND job_id=$2 AND record_version=$3 FOR NO KEY UPDATE NOWAIT",
-            [f.record.organizationId, f.root.jobId, f.root.recordVersion],
-          ),
           ...[
             binding.rootSnapshot.objectId,
             f.prepared.snapshot.objectId,
@@ -1417,6 +1409,45 @@ suite(
           await expect(
             database.transaction((other) => other.query(probe)),
           ).rejects.toMatchObject({ code: "55P03" });
+        }
+        // These must fail from schema invariants, not from a reader lock. The
+        // ordinary export role intentionally has SELECT-only binding access.
+        await expect(
+          database.transaction((other) =>
+            other.query(
+              sql(
+                "UPDATE async_job_creation_claims SET record_version=record_version+1,updated_at=clock_timestamp() WHERE organization_id=$1 AND job_id=$2",
+                [f.record.organizationId, f.root.jobId],
+              ),
+            ),
+          ),
+        ).rejects.toMatchObject({ code: "55000" });
+        await expect(
+          database.transaction(async (other) => {
+            await other.query(
+              sql(
+                "DELETE FROM async_job_creation_claims WHERE organization_id=$1 AND job_id=$2",
+                [f.record.organizationId, f.root.jobId],
+              ),
+            );
+            await other.query(sql("SET CONSTRAINTS ALL IMMEDIATE"));
+          }),
+        ).rejects.toMatchObject({ code: "23503" });
+        for (const statement of [
+          "UPDATE async_job_record_snapshots SET snapshot_size_bytes=snapshot_size_bytes+1 WHERE organization_id=$1 AND job_id=$2 AND record_version=$3",
+          "DELETE FROM async_job_record_snapshots WHERE organization_id=$1 AND job_id=$2 AND record_version=$3",
+        ]) {
+          await expect(
+            database.transaction((other) =>
+              other.query(
+                sql(statement, [
+                  f.record.organizationId,
+                  f.root.jobId,
+                  f.root.recordVersion,
+                ]),
+              ),
+            ),
+          ).rejects.toMatchObject({ code: "55000" });
         }
       });
       expect(await state(f.root.jobId)).toEqual(before);

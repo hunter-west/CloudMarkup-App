@@ -80,7 +80,7 @@ export function parseSolutionExportExecutionEnvelope(
  * Call after those reads and immediately before claim; do not perform S3 I/O here.
  *
  * Lock order: exact project SHARE; root UPDATE; prepared run and current creator
- * authority SHARE; immutable original creation claim/root snapshot/manifest
+ * authority SHARE; completed original claim and immutable versioned snapshot
  * read under the root lock; exact stored-object rows in sorted identity order SHARE. Project SHARE
  * blocks lifecycle mutation while remaining compatible with FK KEY SHARE.
  *
@@ -179,6 +179,12 @@ export async function authorizeSolutionExportClaim(
     row["input_sha256"] !== envelope.inputDigest.slice(7)
   )
     stale();
+  // This statement takes a fresh READ COMMITTED snapshot after the root UPDATE
+  // lock. The completed claim cannot transition again; its identity reservation
+  // FK prevents removal while the root exists. Record snapshots reject UPDATE
+  // and DELETE and are unique by root/version. Thus these exact binding rows
+  // need no row lock (which requires UPDATE privilege even for FOR SHARE).
+  // Keep mutable root/run/creator and published-object locks through the CAS.
   const prepared = await tx.query(
     sql(
       `SELECT s.snapshot_object_id,s.snapshot_sha256,s.snapshot_size_bytes,
@@ -205,8 +211,7 @@ export async function authorizeSolutionExportClaim(
        AND (j.attempt_count=0 OR EXISTS (SELECT 1 FROM async_job_attempts a
          WHERE a.organization_id=j.organization_id AND a.job_id=j.job_id
            AND a.attempt_number=j.attempt_count AND a.lifecycle_status IN ('failed','orphaned')
-           AND a.retry_disposition='retry' AND a.retry_not_before IS NOT NULL))
-      FOR SHARE OF c,s`,
+           AND a.retry_disposition='retry' AND a.retry_not_before IS NOT NULL))`,
       [organizationId, projectId ?? null, envelope.jobId],
     ),
   );

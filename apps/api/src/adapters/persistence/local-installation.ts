@@ -10,6 +10,7 @@ import { FilesystemObjectStore } from "./filesystem-object-store.js";
 import { runSeedFile } from "./migrations.js";
 import { PostgresDatabase } from "./postgres-driver.js";
 import { PostgresCloudMarkupRepository } from "./repositories.js";
+import { OrdinaryRuntimeDatabase } from "./ordinary-runtime-database.js";
 import { sql, type SqlDatabase } from "./sql.js";
 
 export interface LocalPersistenceConfiguration {
@@ -110,13 +111,31 @@ export async function seedContributorSql(
   });
 }
 
+function createDatabase(connectionString: string): SqlDatabase {
+  return new PostgresDatabase({
+    application_name: "cloudmarkup-local-persistence",
+    connectionString,
+    max: 2,
+  });
+}
+
+/** The contributor's restricted API login needs the same guarded helper-lock
+ * routing as the standalone/hosted ordinary runtime, never elevated grants. */
+export function createLocalRuntimeDatabase(
+  connectionString: string,
+  factory: (connectionString: string) => SqlDatabase = createDatabase,
+): SqlDatabase {
+  return new OrdinaryRuntimeDatabase(factory(connectionString), "api");
+}
+
 const defaults = {
-  createDatabase: (connectionString: string): SqlDatabase =>
-    new PostgresDatabase({
-      application_name: "cloudmarkup-local-persistence",
-      connectionString,
-      max: 2,
-    }),
+  createDatabase: (
+    connectionString: string,
+    purpose: "migrator" | "runtime",
+  ): SqlDatabase =>
+    purpose === "runtime"
+      ? createLocalRuntimeDatabase(connectionString)
+      : createDatabase(connectionString),
   loadProfile: loadSelfHostMigrationProfile,
   applyProfile: applySelfHostMigrationProfile,
   assertProfile: assertSelfHostMigrationProfileReady,
@@ -137,7 +156,10 @@ export async function runLocalPersistenceCommand(
   dependencies = defaults,
 ): Promise<number> {
   const profile = await dependencies.loadProfile();
-  const migrator = dependencies.createDatabase(configuration.migratorUrl);
+  const migrator = dependencies.createDatabase(
+    configuration.migratorUrl,
+    "migrator",
+  );
   try {
     await dependencies.applyProfile(migrator, profile);
     if (command === "seed")
@@ -149,7 +171,10 @@ export async function runLocalPersistenceCommand(
     await migrator.close();
   }
   if (command === "migrate") return 0;
-  const runtime = dependencies.createDatabase(configuration.runtimeUrl);
+  const runtime = dependencies.createDatabase(
+    configuration.runtimeUrl,
+    "runtime",
+  );
   try {
     await dependencies.assertProfile(runtime, profile);
     const projects = await dependencies.seedProjects(

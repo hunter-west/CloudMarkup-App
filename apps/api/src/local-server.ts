@@ -22,11 +22,14 @@ import {
 import { createApp } from "./app.js";
 import { LOCAL_CORS_EXPOSED_HEADERS_VALUE_V1 } from "./local-cors-policy.js";
 import { FilesystemObjectStore } from "./adapters/persistence/filesystem-object-store.js";
-import { PostgresDatabase } from "./adapters/persistence/postgres-driver.js";
+import { createLocalRuntimeDatabase } from "./adapters/persistence/local-installation.js";
+import {
+  assertSelfHostMigrationProfileReady,
+  loadSelfHostMigrationProfile,
+} from "./self-host/migration-profile.js";
 import { PostgresCloudMarkupRepository } from "./adapters/persistence/repositories.js";
 import { PostgresProjectEditingLeases } from "./adapters/persistence/project-editing-leases.js";
 import { PostgresSolutionRecordRepository } from "./adapters/persistence/solution-record-repository.js";
-import { sql } from "./adapters/persistence/sql.js";
 import { ContinuousConformanceApplicationService } from "./application/continuous-conformance.js";
 import { ComposingContinuousConformanceReportSource } from "./application/continuous-conformance-composition.js";
 import { InMemoryLocalConformanceIssueHistory } from "./local-development/in-memory-conformance-issue-history.js";
@@ -163,12 +166,11 @@ async function main(): Promise<void> {
   const databaseUrl = requireEnvironment("CLOUDMARKUP_DATABASE_URL");
   const objectRoot = requireEnvironment("CLOUDMARKUP_FILESYSTEM_OBJECT_ROOT");
   await mkdir(objectRoot, { recursive: true });
-  const database = new PostgresDatabase({
-    application_name: "cloudmarkup-local-api",
-    connectionString: databaseUrl,
-    max: 5,
-  });
-  await database.query(sql("SELECT 1"));
+  const database = createLocalRuntimeDatabase(databaseUrl);
+  await assertSelfHostMigrationProfileReady(
+    database,
+    await loadSelfHostMigrationProfile(),
+  );
 
   const repository = new PostgresCloudMarkupRepository(database, {
     draftEditingLeases: "required",

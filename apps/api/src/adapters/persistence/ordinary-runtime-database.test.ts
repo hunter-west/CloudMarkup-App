@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { createLocalRuntimeDatabase } from "./local-installation.js";
 import {
   assertOrdinaryRuntimeBinding,
   OrdinaryRuntimeDatabase,
@@ -86,7 +87,13 @@ function fixture(
     database,
     directQuery,
     close,
-    guarded: new OrdinaryRuntimeDatabase(database, host),
+    guarded:
+      host === "api"
+        ? createLocalRuntimeDatabase(
+            "postgresql://synthetic-local-target",
+            () => database,
+          )
+        : new OrdinaryRuntimeDatabase(database, host),
     statements,
     events,
   };

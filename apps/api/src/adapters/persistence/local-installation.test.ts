@@ -121,6 +121,14 @@ describe("standalone-profile contributor persistence", () => {
     ]);
     expect(migrator.close).toHaveBeenCalledTimes(2);
     expect(runtime.close).toHaveBeenCalledOnce();
+    expect(dependencies.createDatabase).toHaveBeenCalledWith(
+      configuration.migratorUrl,
+      "migrator",
+    );
+    expect(dependencies.createDatabase).toHaveBeenCalledWith(
+      configuration.runtimeUrl,
+      "runtime",
+    );
   });
   it("failed profile or publication closes pools and cannot fall back to a canonical seed", async () => {
     const pool = database();
