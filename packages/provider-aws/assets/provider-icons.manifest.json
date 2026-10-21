@@ -14,14 +14,14 @@
     "trademarkUseAcknowledgment": "Product-owner approval for AWS service/resource identification only; not Cloud Markup branding, AWS endorsement, or outside-counsel advice."
   },
   "assetSet": {
-    "digest": "sha256:7a10ef64014ff683b87ae5dd6f1dd3a7b56dc7a38f661453ec830be847dfac08",
+    "digest": "sha256:71f743c499e2d6bba4b3390c3e2da324870ec372f6c2a747b63f1a0cfc055b9c",
     "id": "aws.cloudmarkup.provider-icons",
     "providerId": "aws.cloudmarkup",
-    "version": "1.20.0"
+    "version": "1.21.0"
   },
   "catalogs": [
     {
-      "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+      "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
       "id": "aws.cloudmarkup.notes-api-catalog",
       "version": "0.30.0"
     }
@@ -1117,6 +1117,20 @@
         "verify-selected-source-v1"
       ],
       "viewBox": "0 0 64 64"
+    },
+    {
+      "file": null,
+      "iconId": "aws.wafv2.alb-association.icon",
+      "placeholderReason": "missing",
+      "serviceName": "WAF ALB association (proof)",
+      "state": "placeholder"
+    },
+    {
+      "file": null,
+      "iconId": "aws.wafv2.web-acl.icon",
+      "placeholderReason": "missing",
+      "serviceName": "Regional WAF Web ACL (proof)",
+      "state": "placeholder"
     }
   ],
   "kind": "cloudmarkup.provider-icon-asset-set",

@@ -16,6 +16,7 @@ import {
   frozenModelEvaluationDatasetV1,
   modelEvaluationOperationalBudgetsV1,
 } from "./model-evaluation.js";
+import { assertRegionalWafEvaluationCatalogV1 } from "./regional-waf-evaluation-source.js";
 const catalog: unknown = JSON.parse(
   readFileSync(
     new URL("../../provider-aws/src/compiled/catalog-v1.json", import.meta.url),
@@ -77,10 +78,13 @@ describe("frozen full beta evaluation source", () => {
       ),
     ).toBe(true);
   });
-  it("binds the installed 71-service catalog and checks unsupported business behavior separately", () => {
+  it("preserves the historical 71-service input and binds the current 73-service artifact separately", () => {
+    expect(() => {
+      assertRegionalWafEvaluationCatalogV1(catalog);
+    }).not.toThrow();
     expect(() => {
       assertFullBetaEvaluationCatalogV1(catalog);
-    }).not.toThrow();
+    }).toThrow();
     expect(fullBetaEvaluationCatalogV1.services).toHaveLength(71);
     const cases = frozenFullBetaEvaluationDatasetV1.cases;
     expect(
@@ -135,7 +139,7 @@ describe("frozen full beta evaluation source", () => {
       modified.digest = digestCanonicalValue(body);
     }
     expect(() => {
-      assertFullBetaEvaluationCatalogV1(modified);
+      assertRegionalWafEvaluationCatalogV1(modified);
     }).toThrow();
   });
 });

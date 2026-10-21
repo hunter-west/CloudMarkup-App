@@ -1,6 +1,6 @@
 # Application semantic summary: naming-collisions
 
-- Artifact digest: `sha256:2d202e313de80b04c052a431c6d97b953ca7ff43c2e88748cd9d4d2bd76065ec`
+- Artifact digest: `sha256:282b1044975e7fd61d30c37175a9c8c98ee5013b513660dbb27bf0dff0d0f38e`
 - Coverage: `complete-supported-pattern`
 - Generated file records: 18
 - Build contracts: 1

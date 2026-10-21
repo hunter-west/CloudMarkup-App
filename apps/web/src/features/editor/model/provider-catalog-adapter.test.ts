@@ -40,10 +40,17 @@ describe("adaptProviderCatalogForEditor", () => {
     );
 
     for (const service of awsEditorCatalog.services) {
-      expect(service.supportLevel).toBe("production-oriented");
-      expect(service.supportLabel).toBe("Production-oriented");
+      const wafProof = service.serviceType.startsWith("aws.wafv2.");
+      expect(service.supportLevel).toBe(
+        wafProof ? "proof" : "production-oriented",
+      );
+      expect(service.supportLabel).toBe(
+        wafProof ? "Proof metadata" : "Production-oriented",
+      );
       expect(service.supportDetail).toBe(
-        "This catalog definition is production-oriented metadata, not curated service support.",
+        wafProof
+          ? "This catalog definition is proof metadata and is not a product support claim."
+          : "This catalog definition is production-oriented metadata, not curated service support.",
       );
       expect(service.regionAvailability.state).toBe("unknown");
       const mappings = service.mappings.map(

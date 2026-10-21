@@ -401,7 +401,7 @@
     "catalog": {
       "id": "aws.cloudmarkup.notes-api-catalog",
       "version": "0.30.0",
-      "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+      "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94"
     },
     "compilerCompatibility": {
       "inputContractVersion": 1,
@@ -2746,8 +2746,8 @@
   "solutionRevision": {
     "aiExtensionIds": [],
     "architecture": {
-      "contentHash": "sha256:8b96cd8dbf916dc4d7d525f4ca55f9e28cd181011dd1fcf4d14e2d44ea615e99",
-      "documentHash": "sha256:745008e7250ecb6a72da9f1eba54fd6af01525efc41b59a425189be33ee02028",
+      "contentHash": "sha256:e87ab31c06e961e53a65315474c50153fd6c553d1eeda482e89d4ebe2c23c344",
+      "documentHash": "sha256:05fbd928909f964f1afa779c9dd2800e1c71b4d17668503d478e2c2f8a9b82dd",
       "documentKind": "cloudmarkup.architecture-document",
       "revisionId": "revision_event_sns_fanout_consumer_primary_1",
       "schemaVersion": 3,
@@ -2810,7 +2810,7 @@
         }
       },
       "catalog": {
-        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+        "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
         "id": "aws.cloudmarkup.notes-api-catalog",
         "version": "0.30.0"
       },

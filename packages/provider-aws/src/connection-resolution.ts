@@ -1,3 +1,4 @@
+import { wafConnectionRules } from "./catalog/services/regional-waf.js";
 import { awsEbsConnectionRules } from "./catalog/connections/ebs-connections.js";
 import { awsElbConnectionRules } from "./catalog/connections/elb-connections.js";
 import { awsCloudfrontConnectionRules } from "./catalog/connections/cloudfront-connections.js";
@@ -1596,6 +1597,7 @@ export const awsConnectionRuleRegistrationsV1 = Object.freeze([
     });
   }),
   ...[
+    ...wafConnectionRules,
     ...awsDnsConnectionRules,
     ...awsAuroraConnectionRules,
     ...awsRdsConnectionRules,

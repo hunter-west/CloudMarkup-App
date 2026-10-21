@@ -19,7 +19,9 @@ export { awsNetworkingConnectionRulesV1 } from "./networking-connections.js";
 export { awsEventDrivenConnectionRulesV1 } from "./event-driven-connections.js";
 export { awsOwnedConfigurationConnectionRulesV1 } from "./owned-configuration-connections.js";
 
+import { wafConnectionRules } from "../services/regional-waf.js";
 export const awsNotesApiConnectionRulesV1 = [
+  ...wafConnectionRules,
   ...notesApiConnectionRules,
   ...awsOwnedConfigurationConnectionRulesV1,
   ...awsNetworkingConnectionRulesV1,

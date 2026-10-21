@@ -497,7 +497,7 @@ describe("AWS connection resolution v1", () => {
     }
 
     expect(fixture.catalogVersion).toBe(awsCatalogV1.artifact.catalog.version);
-    expect(awsConnectionRuleRegistrationsV1).toHaveLength(110);
+    expect(awsConnectionRuleRegistrationsV1).toHaveLength(112);
     for (const [index, fixtureCase] of fixture.cases.entries()) {
       const operationId = `fixture_${String(index)}`;
       const first = awsConnectionResolverV1.resolve(

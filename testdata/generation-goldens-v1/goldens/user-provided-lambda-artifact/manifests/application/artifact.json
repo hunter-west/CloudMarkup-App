@@ -73,7 +73,7 @@
       "buildContracts": [],
       "contractVersion": 1,
       "catalog": {
-        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+        "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
         "id": "aws.cloudmarkup.notes-api-catalog",
         "version": "0.30.0"
       },
@@ -87,9 +87,9 @@
       "kind": "cloudmarkup.application-source-manifest",
       "inputDigests": {
         "applicationContracts": "sha256:7df95bf4b42a5a32bdc2e6d72e9e3050b07bd653845b6ed3d9509f383f0bcd04",
-        "architectureDocument": "sha256:70b9733e8006ce5a3d86d33973239465beed4e0fc97c733d9f76770613eadaf3",
-        "normalizedSolution": "sha256:b06fd56e698691cc798cea97bb04924bc75a54609ac4691c29f4c73b5aa264f6",
-        "solutionRevision": "sha256:86bd8d21b2c245cacdd1527e16cc0289ffa70819105b01edd45b3b4225eb0ffb",
+        "architectureDocument": "sha256:f7111e0c9df33cf3df9a3e72030a94fb328c2eec16836a1d069ca34afb2713cc",
+        "normalizedSolution": "sha256:86c3febc3efc43682ea076f22d41ac9400d4281eb7fee91b27d108aa55b24771",
+        "solutionRevision": "sha256:cd5645153724d1e4e8cd8a5d6bd79baadff979b9b3fae1cb4f5c017b39202f04",
         "workloadBehavior": "sha256:408e29202608d59fe13bb3f1a7f9352de9d81b841559c1763d0af4f9ab59ba69"
       },
       "manifestPath": "application/manifest.json",
@@ -115,7 +115,7 @@
         "version": "1.0.0"
       }
     },
-    "sourceManifestDigest": "sha256:fc8baa2d0c2651e03bad53f9e9380d9642ebf76a5d303913a94da3315785a583",
+    "sourceManifestDigest": "sha256:7f784e6dbe0e6502cc51c63ea8ea61fa3229ea8fe4caffbcd478debd1dcbfe94",
     "template": {
       "digest": "sha256:c7721961d935faa1e0c87b7356bc6d90112a02f3c7f716be33a648bf99740604",
       "id": "cloudmarkup.template.aws-lambda-notes-typescript",
@@ -139,5 +139,5 @@
       }
     ]
   },
-  "artifactDigest": "sha256:bb9fd41693378269f20c2432df73e16338144e1167aedf7b42091e6ef520ba10"
+  "artifactDigest": "sha256:a2f4184e345cb6a1e140b373a9af88f4cb2b01157b0ce03b77adc54d7a25c4a8"
 }

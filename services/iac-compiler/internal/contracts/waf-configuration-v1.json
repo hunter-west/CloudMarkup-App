@@ -1,0 +1,91 @@
+{
+  "name": {
+    "type": "string",
+    "minLength": 1,
+    "maxLength": 100,
+    "pattern": "^[A-Za-z0-9_-]+$"
+  },
+  "webAclRegion": {
+    "type": "string",
+    "minLength": 9,
+    "maxLength": 32,
+    "pattern": "^(?:af|ap|ca|eu|il|me|mx|sa|us)-[a-z]+-[0-9]+$"
+  },
+  "scope": {
+    "type": "string",
+    "enum": ["REGIONAL"],
+    "default": "REGIONAL"
+  },
+  "defaultAction": {
+    "type": "string",
+    "enum": ["allow"],
+    "default": "allow"
+  },
+  "managedRuleGroup": {
+    "type": "string",
+    "enum": ["AWSManagedRulesKnownBadInputsRuleSet"],
+    "default": "AWSManagedRulesKnownBadInputsRuleSet"
+  },
+  "managedRuleVersionPolicy": {
+    "type": "string",
+    "enum": ["vendor-default"],
+    "default": "vendor-default"
+  },
+  "managedRuleMode": {
+    "type": "string",
+    "enum": ["count", "enforce"],
+    "default": "count"
+  },
+  "managedRulePriority": {
+    "type": "integer",
+    "minimum": 0,
+    "maximum": 100,
+    "default": 10
+  },
+  "rateLimit": {
+    "type": "integer",
+    "minimum": 10,
+    "maximum": 2000000000,
+    "default": 2000
+  },
+  "rateWindowSeconds": {
+    "type": "integer",
+    "enum": [60, 120, 300, 600],
+    "default": 300
+  },
+  "rateAction": {
+    "type": "string",
+    "enum": ["count", "block"],
+    "default": "count"
+  },
+  "ratePriority": {
+    "type": "integer",
+    "minimum": 0,
+    "maximum": 100,
+    "default": 0
+  },
+  "aggregateKey": {
+    "type": "string",
+    "enum": ["IP"],
+    "default": "IP"
+  },
+  "cloudWatchMetricsEnabled": {
+    "type": "boolean",
+    "default": true
+  },
+  "sampledRequestsEnabled": {
+    "type": "boolean",
+    "const": false,
+    "default": false
+  },
+  "requestLogging": {
+    "type": "string",
+    "enum": ["disabled"],
+    "default": "disabled"
+  },
+  "retain": {
+    "type": "boolean",
+    "const": true,
+    "default": true
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "WafAlb": {
+    "Type": "AWS::WAFv2::WebACLAssociation",
+    "Properties": {
+      "ResourceArn": {
+        "Ref": "Alb"
+      },
+      "WebACLArn": {
+        "Fn::GetAtt": [
+          "WebWaf",
+          "Arn"
+        ]
+      }
+    },
+    "Metadata": {
+      "CloudMarkup": {
+        "DeploymentKey": "waf_alb",
+        "GraphId": "waf_alb",
+        "Ownership": "user",
+        "TargetKey": "waf_alb"
+      }
+    }
+  },
+  "WebWaf": {
+    "Type": "AWS::WAFv2::WebACL",
+    "Properties": {
+      "DefaultAction": {
+        "Allow": {}
+      },
+      "Name": "synthetic_web_waf",
+      "Rules": [
+        {
+          "Action": {
+            "Count": {}
+          },
+          "Name": "synthetic_web_waf_rate",
+          "Priority": 0,
+          "Statement": {
+            "RateBasedStatement": {
+              "AggregateKeyType": "IP",
+              "EvaluationWindowSec": 300,
+              "Limit": 2000
+            }
+          },
+          "VisibilityConfig": {
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "synthetic_web_waf_rate",
+            "SampledRequestsEnabled": false
+          }
+        },
+        {
+          "Name": "synthetic_web_waf_bad_inputs",
+          "OverrideAction": {
+            "Count": {}
+          },
+          "Priority": 10,
+          "Statement": {
+            "ManagedRuleGroupStatement": {
+              "Name": "AWSManagedRulesKnownBadInputsRuleSet",
+              "VendorName": "AWS"
+            }
+          },
+          "VisibilityConfig": {
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "synthetic_web_waf_bad_inputs",
+            "SampledRequestsEnabled": false
+          }
+        }
+      ],
+      "Scope": "REGIONAL",
+      "Tags": [
+        {
+          "Key": "CloudMarkupArchitecture",
+          "Value": "architecture_regional_waf_synthetic"
+        },
+        {
+          "Key": "CloudMarkupRevision",
+          "Value": "revision_regional_waf_1"
+        },
+        {
+          "Key": "ManagedBy",
+          "Value": "CloudMarkup"
+        }
+      ],
+      "VisibilityConfig": {
+        "CloudWatchMetricsEnabled": true,
+        "MetricName": "synthetic_web_waf_web_acl",
+        "SampledRequestsEnabled": false
+      }
+    },
+    "Metadata": {
+      "CloudMarkup": {
+        "DeploymentKey": "web_waf",
+        "GraphId": "web_waf",
+        "Ownership": "user",
+        "TargetKey": "web_waf"
+      }
+    },
+    "DeletionPolicy": "Retain",
+    "UpdateReplacePolicy": "Retain"
+  }
+}

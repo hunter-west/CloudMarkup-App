@@ -17,6 +17,8 @@ import {
 } from "./catalog-v1-accessors.js";
 import { awsCatalogSourceV1 } from "./catalog/source.js";
 const cloudFormationImplementedServiceIds = new Set([
+  "aws.wafv2.web-acl",
+  "aws.wafv2.alb-association",
   "aws.ebs.volume",
   "aws.ebs.volume-attachment",
   "aws.elb.application-load-balancer",
@@ -196,8 +198,10 @@ describe("AWS notes API catalog v1", () => {
       "aws.sqs.queue",
       "aws.sqs.redrive-configuration",
       "aws.stepfunctions.state-machine",
+      "aws.wafv2.alb-association",
+      "aws.wafv2.web-acl",
     ]);
-    expect(awsCatalogV1.listConnectionRules()).toHaveLength(137);
+    expect(awsCatalogV1.listConnectionRules()).toHaveLength(139);
     const currentCatalogJson = JSON.stringify(awsCatalogV1.artifact);
     for (const legacyDirectPolicyToken of [
       ["aws", "iam", "contains-policy-statement"].join("."),
@@ -206,7 +210,7 @@ describe("AWS notes API catalog v1", () => {
     ]) {
       expect(currentCatalogJson).not.toContain(legacyDirectPolicyToken);
     }
-    expect(awsCatalogV1.artifact.validationRules).toHaveLength(33);
+    expect(awsCatalogV1.artifact.validationRules).toHaveLength(34);
     expect(
       awsCatalogV1.artifact.validationRules.map((rule) => rule.id),
     ).toEqual([
@@ -239,6 +243,7 @@ describe("AWS notes API catalog v1", () => {
       "aws.cloudmarkup.validation.network-routing",
       "aws.cloudmarkup.validation.rds-postgres-readiness",
       "aws.cloudmarkup.validation.region-availability",
+      "aws.cloudmarkup.validation.regional-waf-readiness",
       "aws.cloudmarkup.validation.s3-bucket-name",
       "aws.cloudmarkup.validation.s3-notification-filters",
       "aws.cloudmarkup.validation.secret-readiness",
@@ -248,7 +253,7 @@ describe("AWS notes API catalog v1", () => {
       awsCatalogV1
         .listConnectionRules()
         .filter((rule) => rule.implementation.status === "implemented"),
-    ).toHaveLength(110);
+    ).toHaveLength(112);
     for (const rule of awsCatalogV1.listConnectionRules()) {
       expect(rule.lifecycle).toEqual({
         provenance: "connection-rule",
@@ -275,7 +280,9 @@ describe("AWS notes API catalog v1", () => {
         "aws.sqs.redrive-configuration",
       ].includes(serviceId);
       expect(service).toMatchObject({
-        supportLevel: "production-oriented",
+        supportLevel: serviceId.startsWith("aws.wafv2.")
+          ? "proof"
+          : "production-oriented",
         regionAvailability: {
           state: "unknown",
         },
@@ -306,19 +313,27 @@ describe("AWS notes API catalog v1", () => {
       expect(service.unsupportedCapabilities.length).toBeGreaterThan(0);
       const mappingTargets = service.mappings.map((mapping) => mapping.target);
       expect(mappingTargets).toEqual(
-        serviceId === "aws.lambda.vpc-access-configuration"
-          ? ["terraform"]
-          : isTerraformOnlyEventConfiguration
+        serviceId.startsWith("aws.wafv2.")
+          ? ["cloudformation"]
+          : serviceId === "aws.lambda.vpc-access-configuration"
             ? ["terraform"]
-            : mappingTargets.length === 0
-              ? []
-              : ["cloudformation", "terraform"],
+            : isTerraformOnlyEventConfiguration
+              ? ["terraform"]
+              : mappingTargets.length === 0
+                ? []
+                : ["cloudformation", "terraform"],
       );
       const isNetworking =
         serviceId.startsWith("aws.ec2.") ||
         serviceId === "aws.lambda.vpc-access-configuration" ||
         serviceId === "aws.region.boundary";
-      if (isNetworking && mappingTargets.length > 0) {
+      if (serviceId.startsWith("aws.wafv2.")) {
+        expect(service.mappings).toHaveLength(1);
+        expect(service.mappings[0]).toMatchObject({
+          target: "cloudformation",
+          implementationStatus: "implemented",
+        });
+      } else if (isNetworking && mappingTargets.length > 0) {
         expect(
           service.mappings.find((mapping) => mapping.target === "terraform")
             ?.implementationStatus,

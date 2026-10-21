@@ -23,7 +23,7 @@ func TestCurrentAwsCatalogCompatibility(t *testing.T) {
 	if err := json.Unmarshal(data, &artifact); err != nil {
 		t.Fatal(err)
 	}
-	if artifact.Catalog.ID != TerraformCatalogID || artifact.Catalog.Version != CurrentAwsCatalogVersion || artifact.Digest != CurrentAwsCatalogDigest || len(artifact.Services) != 71 || len(artifact.Migrations) != 0 {
+	if artifact.Catalog.ID != TerraformCatalogID || artifact.Catalog.Version != CurrentAwsCatalogVersion || artifact.Digest != CurrentAwsCatalogDigest || len(artifact.Services) != 73 || len(artifact.Migrations) != 0 {
 		t.Fatal("installed catalog and compiler admission differ")
 	}
 	registry := DefaultCompatibilityRegistry()

@@ -1,3 +1,4 @@
+import { awsWafServiceExtensions } from "./regional-waf-presentation.js";
 import { awsEbsServiceExtensions } from "./ebs-presentation.js";
 import { awsElbServiceExtensions } from "./elb-presentation.js";
 import { awsCloudfrontServiceExtensions } from "./cloudfront-presentation.js";
@@ -318,6 +319,7 @@ const awsServiceExtensionsV1: ProviderServiceExtensionDefinitionV1Input[] = [
   ...awsDnsServiceExtensions,
   ...awsCloudfrontServiceExtensions,
   ...awsEbsServiceExtensions,
+  ...awsWafServiceExtensions,
   ...awsElbServiceExtensions,
 ];
 

@@ -164,6 +164,7 @@ func validateCloudFormationTemplate(content []byte) error {
 		"AWS::EC2::SubnetRouteTableAssociation": true, "AWS::EC2::InternetGateway": true,
 		"AWS::EC2::VPCGatewayAttachment": true, "AWS::EC2::NatGateway": true,
 		"AWS::EC2::VPCEndpoint": true, "AWS::EC2::SecurityGroup": true,
+		"AWS::WAFv2::WebACL": true, "AWS::WAFv2::WebACLAssociation": true,
 		"AWS::EC2::SecurityGroupIngress": true, "AWS::EC2::SecurityGroupEgress": true,
 		"AWS::S3::Bucket": true, "AWS::S3::BucketPolicy": true,
 		"AWS::SQS::Queue": true, "AWS::SQS::QueuePolicy": true,

@@ -1,6 +1,6 @@
 # Terraform semantic summary: minimal-lambda-infrastructure-only
 
-- Artifact digest: `sha256:083991fb733810ae9613df4294e65ecd2bc6b246d4607eb347e82464223bccd4`
+- Artifact digest: `sha256:dc6fc375bfaebb5cbd2b7ae84b08b1da3fe79cd45580bd17b3533c980465f8ac`
 - Generated files: 14
 - Resources: 2
 - Application artifact contracts: 1

@@ -29,6 +29,9 @@ func TestS3CORSMethodsAtPublicCompilerBoundary(t *testing.T) {
 	for _, target := range []TargetKind{TargetTerraform, TargetCloudFormation} {
 		t.Run(string(target), func(t *testing.T) {
 			document := decodeMap(t, source.ArchitectureDocument)
+			// Construct a fresh current-catalog test request without rewriting the
+			// retained repository fixture or admitting a historical catalog.
+			document["catalog"] = CatalogReference{ID: TerraformCatalogID, Version: CurrentAwsCatalogVersion, Digest: CurrentAwsCatalogDigest}
 			const nodeID = "node_cors_methods"
 			const bucketID = "upload_bucket"
 			values := map[string]ConfigurationValue{

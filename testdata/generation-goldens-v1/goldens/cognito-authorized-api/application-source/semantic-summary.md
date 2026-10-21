@@ -1,6 +1,6 @@
 # Application semantic summary: cognito-authorized-api
 
-- Artifact digest: `sha256:085678b8f517f67a8d88a4b006af979cd661cce4b88928ecf1d848fb9768292d`
+- Artifact digest: `sha256:2a1bc40f991e0bcd2b8ea9afe588e33fc71526646ab971836214be514c6d4ed1`
 - Coverage: `complete-supported-pattern`
 - Generated file records: 18
 - Build contracts: 1

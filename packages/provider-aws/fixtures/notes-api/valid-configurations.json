@@ -891,6 +891,83 @@
           "value": "gp3"
         }
       }
+    },
+    {
+      "serviceId": "aws.wafv2.web-acl",
+      "values": {
+        "name": {
+          "kind": "string",
+          "value": "synthetic_web_waf"
+        },
+        "webAclRegion": {
+          "kind": "string",
+          "value": "us-east-1"
+        },
+        "scope": {
+          "kind": "string",
+          "value": "REGIONAL"
+        },
+        "defaultAction": {
+          "kind": "string",
+          "value": "allow"
+        },
+        "managedRuleGroup": {
+          "kind": "string",
+          "value": "AWSManagedRulesKnownBadInputsRuleSet"
+        },
+        "managedRuleVersionPolicy": {
+          "kind": "string",
+          "value": "vendor-default"
+        },
+        "managedRuleMode": {
+          "kind": "string",
+          "value": "count"
+        },
+        "managedRulePriority": {
+          "kind": "integer",
+          "value": 10
+        },
+        "rateLimit": {
+          "kind": "integer",
+          "value": 2000
+        },
+        "rateWindowSeconds": {
+          "kind": "integer",
+          "value": 300
+        },
+        "rateAction": {
+          "kind": "string",
+          "value": "count"
+        },
+        "ratePriority": {
+          "kind": "integer",
+          "value": 0
+        },
+        "aggregateKey": {
+          "kind": "string",
+          "value": "IP"
+        },
+        "cloudWatchMetricsEnabled": {
+          "kind": "boolean",
+          "value": true
+        },
+        "sampledRequestsEnabled": {
+          "kind": "boolean",
+          "value": false
+        },
+        "requestLogging": {
+          "kind": "string",
+          "value": "disabled"
+        },
+        "retain": {
+          "kind": "boolean",
+          "value": true
+        }
+      }
+    },
+    {
+      "serviceId": "aws.wafv2.alb-association",
+      "values": {}
     }
   ]
 }

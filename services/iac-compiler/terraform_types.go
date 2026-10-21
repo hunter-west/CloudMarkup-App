@@ -2,7 +2,7 @@ package compiler
 
 const (
 	CurrentAwsCatalogVersion                        = "0.30.0"
-	CurrentAwsCatalogDigest                         = "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+	CurrentAwsCatalogDigest                         = "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94"
 	TerraformArtifactContractVersion                = 1
 	TargetArtifactContractVersion                   = TerraformArtifactContractVersion
 	ApplicationArtifactContractVersion              = 1

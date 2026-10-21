@@ -1,6 +1,6 @@
 # Application semantic summary: api-gateway-lambda
 
-- Artifact digest: `sha256:16b931ffc704c68a55459f916f89e7d64e91ce44ef1286a561ede3948fdec97f`
+- Artifact digest: `sha256:e9d513e82895aefe2cbc3434cf5abc041ebc04fb1810649d848876a62a6e3001`
 - Coverage: `starter-application`
 - Generated file records: 16
 - Build contracts: 1

@@ -1,12 +1,12 @@
 {
   "canonicalization": "cloudmarkup.provider-service-extension.canonical-json.v1",
   "catalog": {
-    "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+    "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
     "id": "aws.cloudmarkup.notes-api-catalog",
     "version": "0.30.0"
   },
   "contractVersion": 1,
-  "digest": "sha256:fb4ba434f0dbaaa63543d16a886778109eb69bec730d1b2ca384d2acb32db341",
+  "digest": "sha256:f6e84fdf8253117361ba1ca6dcd18f7183f2cdbf693b5ea95d7b0c562337b5e1",
   "kind": "cloudmarkup.provider-service-extension",
   "services": [
     {
@@ -3510,6 +3510,66 @@
         },
         "validation": {
           "reason": "Step Functions state machine participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.wafv2.alb-association",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed current-catalog structured renderer and offline goldens; AWS runtime and traffic qualification remain separate.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed bounded rules, actions, priorities, Region and independent visibility controls.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "WAF infrastructure generates no application code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Current exact regional ACL and user-owned ALB association.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "No WAF Terraform renderer or provider execution is enabled.",
+          "status": "pending"
+        },
+        "validation": {
+          "reason": "Pure provider and compiler checks; no live traffic or availability proof.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.wafv2.web-acl",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed current-catalog structured renderer and offline goldens; AWS runtime and traffic qualification remain separate.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed bounded rules, actions, priorities, Region and independent visibility controls.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "WAF infrastructure generates no application code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Current exact regional ACL and user-owned ALB association.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "No WAF Terraform renderer or provider execution is enabled.",
+          "status": "pending"
+        },
+        "validation": {
+          "reason": "Pure provider and compiler checks; no live traffic or availability proof.",
           "status": "supported"
         }
       }

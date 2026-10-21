@@ -11878,10 +11878,230 @@
         "aws.cloudmarkup.validation.event-delivery",
         "aws.cloudmarkup.validation.event-topology"
       ]
+    },
+    {
+      "category": "network-and-security",
+      "configuration": {
+        "jsonSchema": {
+          "$id": "urn:cloudmarkup:configuration:aws.wafv2.association-protects-alb.connection:1.0.0",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "additionalProperties": false,
+          "properties": {},
+          "required": [],
+          "title": "Protects ALB",
+          "type": "object"
+        },
+        "schemaId": "aws.wafv2.association-protects-alb.connection",
+        "schemaVersion": "1.0.0",
+        "uiHints": []
+      },
+      "education": {
+        "considerations": [
+          "Operations: Graph changes are export intent; separately deploying removal can disassociate protection.",
+          "Security: One Web ACL per ALB; no HTTP API or CloudFront targets."
+        ],
+        "documentation": [
+          {
+            "id": "aws.wafv2.documentation.association",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "WAF associations and testing",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-associating-aws-resource.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.association-cfn",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation Web ACL association",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-wafv2-webaclassociation.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.rate",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation rate rule",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-wafv2-webacl-ratebasedstatement.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.resources",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "Resources protected by AWS WAF",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/how-aws-waf-works-resources.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.rules",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "AWS managed baseline rules",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.visibility",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "Metrics and sampling",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-wafv2-webacl-visibilityconfig.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.web-acl",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation Web ACL",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-wafv2-webacl.html"
+          }
+        ],
+        "guidedExplanation": "Associate one explicit regional ACL with an ALB in this project. Count mode observes only.",
+        "professionalExplanation": "Exact typed endpoints, canonical owned association, bounded cardinality and closed empty binding; no IAM generation.",
+        "summary": "Protects ALB"
+      },
+      "iamEffects": [],
+      "id": "aws.wafv2.association-protects-alb",
+      "implementation": {
+        "implementationId": "aws.wafv2.association-protects-alb.resolve",
+        "interfaceVersion": 1,
+        "status": "implemented"
+      },
+      "lifecycle": {
+        "adoption": "required-before-customization",
+        "deletion": "release-generated-resources",
+        "provenance": "connection-rule",
+        "sharedResource": "retain-while-referenced"
+      },
+      "maximumConnectionsPerEndpointPair": 1,
+      "maximumConnectionsPerSource": 1,
+      "maximumConnectionsPerTarget": 1,
+      "missingInformationFindings": [],
+      "questions": [],
+      "relationshipType": "aws.wafv2.association-protects-alb",
+      "ruleVersion": "1.0.0",
+      "source": {
+        "portId": "aws.wafv2.alb-association.alb",
+        "serviceId": "aws.wafv2.alb-association"
+      },
+      "supportingChanges": [],
+      "target": {
+        "portId": "aws.elb.application-load-balancer.waf",
+        "serviceId": "aws.elb.application-load-balancer"
+      },
+      "validationRuleIds": [
+        "aws.cloudmarkup.validation.connection-cardinality",
+        "aws.cloudmarkup.validation.regional-waf-readiness"
+      ]
+    },
+    {
+      "category": "network-and-security",
+      "configuration": {
+        "jsonSchema": {
+          "$id": "urn:cloudmarkup:configuration:aws.wafv2.association-uses-web-acl.connection:1.0.0",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "additionalProperties": false,
+          "properties": {},
+          "required": [],
+          "title": "Uses regional Web ACL",
+          "type": "object"
+        },
+        "schemaId": "aws.wafv2.association-uses-web-acl.connection",
+        "schemaVersion": "1.0.0",
+        "uiHints": []
+      },
+      "education": {
+        "considerations": [
+          "Operations: Graph changes are export intent; separately deploying removal can disassociate protection.",
+          "Security: One Web ACL per ALB; no HTTP API or CloudFront targets."
+        ],
+        "documentation": [
+          {
+            "id": "aws.wafv2.documentation.association",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "WAF associations and testing",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-associating-aws-resource.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.association-cfn",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation Web ACL association",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-wafv2-webaclassociation.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.rate",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation rate rule",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-wafv2-webacl-ratebasedstatement.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.resources",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "Resources protected by AWS WAF",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/how-aws-waf-works-resources.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.rules",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "AWS managed baseline rules",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.visibility",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "Metrics and sampling",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-wafv2-webacl-visibilityconfig.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.web-acl",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation Web ACL",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-wafv2-webacl.html"
+          }
+        ],
+        "guidedExplanation": "Associate one explicit regional ACL with an ALB in this project. Count mode observes only.",
+        "professionalExplanation": "Exact typed endpoints, canonical owned association, bounded cardinality and closed empty binding; no IAM generation.",
+        "summary": "Uses regional Web ACL"
+      },
+      "iamEffects": [],
+      "id": "aws.wafv2.association-uses-web-acl",
+      "implementation": {
+        "implementationId": "aws.wafv2.association-uses-web-acl.resolve",
+        "interfaceVersion": 1,
+        "status": "implemented"
+      },
+      "lifecycle": {
+        "adoption": "required-before-customization",
+        "deletion": "release-generated-resources",
+        "provenance": "connection-rule",
+        "sharedResource": "retain-while-referenced"
+      },
+      "maximumConnectionsPerEndpointPair": 1,
+      "maximumConnectionsPerSource": 1,
+      "maximumConnectionsPerTarget": 128,
+      "missingInformationFindings": [],
+      "questions": [],
+      "relationshipType": "aws.wafv2.association-uses-web-acl",
+      "ruleVersion": "1.0.0",
+      "source": {
+        "portId": "aws.wafv2.alb-association.web-acl",
+        "serviceId": "aws.wafv2.alb-association"
+      },
+      "supportingChanges": [],
+      "target": {
+        "portId": "aws.wafv2.web-acl.association",
+        "serviceId": "aws.wafv2.web-acl"
+      },
+      "validationRuleIds": [
+        "aws.cloudmarkup.validation.connection-cardinality",
+        "aws.cloudmarkup.validation.regional-waf-readiness"
+      ]
     }
   ],
   "contractVersion": 1,
-  "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+  "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
   "kind": "cloudmarkup.provider-catalog",
   "migrations": [],
   "provider": {
@@ -22422,6 +22642,16 @@
           "displayName": "Uses ALB VPC",
           "id": "aws.elb.application-load-balancer.vpc",
           "required": true
+        },
+        {
+          "capability": "aws.wafv2.association-protects-alb",
+          "cardinality": "one",
+          "category": "network-and-security",
+          "description": "Accept an exact same-Region WAF association.",
+          "direction": "input",
+          "displayName": "Protects ALB",
+          "id": "aws.elb.application-load-balancer.waf",
+          "required": false
         }
       ],
       "regionAvailability": {
@@ -22431,7 +22661,7 @@
       "supportLevel": "production-oriented",
       "unsupportedCapabilities": [
         {
-          "explanation": "NLB/GWLB, IPv6, Outposts/Local Zones, imported/external/adopted resources, arbitrary IP/Lambda/cross-VPC/shared/multiple targets, multiple listeners/groups, rules/redirects/weighted routing/authentication/mTLS, extra SNI certificates, backend HTTPS/HTTP2/gRPC, other ECS capacity/deployments, WAF/logging/LCU reservations, Auto Scaling, ALB DNS aliases, application generation and live health require separate contracts.",
+          "explanation": "NLB/GWLB, IPv6, Outposts/Local Zones, imported/external/adopted resources, arbitrary IP/Lambda/cross-VPC/shared/multiple targets, multiple listeners/groups, rules/redirects/weighted routing/authentication/mTLS, extra SNI certificates, backend HTTPS/HTTP2/gRPC, other ECS capacity/deployments, expanded WAF/logging/LCU reservations, Auto Scaling, ALB DNS aliases, application generation and live health require separate contracts.",
           "id": "aws.elb.application-load-balancer.unsupported.expanded",
           "title": "Expanded load balancing pending"
         }
@@ -22440,7 +22670,8 @@
         "aws.cloudmarkup.validation.compiler-readiness",
         "aws.cloudmarkup.validation.connection-cardinality",
         "aws.cloudmarkup.validation.elb-readiness",
-        "aws.cloudmarkup.validation.region-availability"
+        "aws.cloudmarkup.validation.region-availability",
+        "aws.cloudmarkup.validation.regional-waf-readiness"
       ]
     },
     {
@@ -33104,6 +33335,644 @@
         "aws.cloudmarkup.validation.network-placement",
         "aws.cloudmarkup.validation.region-availability"
       ]
+    },
+    {
+      "configuration": {
+        "jsonSchema": {
+          "$id": "urn:cloudmarkup:configuration:aws.wafv2.alb-association.configuration:1.0.0",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "additionalProperties": false,
+          "properties": {},
+          "required": [],
+          "title": "Regional ALB association",
+          "type": "object"
+        },
+        "schemaId": "aws.wafv2.alb-association.configuration",
+        "schemaVersion": "1.0.0",
+        "uiHints": []
+      },
+      "definitionVersion": "1.0.0",
+      "description": "Bounded regional WAFv2 intent for a modeled ALB; CloudFormation infrastructure proof only. Terraform and live traffic qualification remain unavailable.",
+      "displayName": "WAF ALB association (proof)",
+      "education": {
+        "considerations": [
+          "Connections: Use one explicit owned association from the regional Web ACL to an existing modeled ALB in this project; no permissions are inferred.",
+          "Cost: Separately deploying WAF incurs ACL and request-processing charges; deterministic offline exports do not call AWS or establish live protection.",
+          "Operations: Same project/account/Region modeled ALBs only. Verify regional availability, quotas, managed-group availability and traffic effects externally.",
+          "Security: Count mode does not block or replace application authorization, input validation or network controls. Request sampling and logging stay disabled; metrics are independent."
+        ],
+        "documentation": [
+          {
+            "id": "aws.wafv2.documentation.association",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "WAF associations and testing",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-associating-aws-resource.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.association-cfn",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation Web ACL association",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-wafv2-webaclassociation.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.rate",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation rate rule",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-wafv2-webacl-ratebasedstatement.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.resources",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "Resources protected by AWS WAF",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/how-aws-waf-works-resources.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.rules",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "AWS managed baseline rules",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.visibility",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "Metrics and sampling",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-wafv2-webacl-visibilityconfig.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.web-acl",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation Web ACL",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-wafv2-webacl.html"
+          }
+        ],
+        "guidedExplanation": "Create a regional ACL, start both rules in count mode and add an owned association to your existing ALB. Metrics are separate from request logs. Review traffic before changing enforcement.",
+        "professionalExplanation": "Closed REGIONAL WebACL and canonical owned WebACLAssociation. Exact typed ARN bindings, unique ordered priorities, origin-IP approximate rate limit and one AWS managed group. Vendor default rules can evolve outside the graph.",
+        "summary": "Candidate infrastructure only; no deployment, live traffic proof or application code."
+      },
+      "iconId": "aws.wafv2.alb-association.icon",
+      "id": "aws.wafv2.alb-association",
+      "mappings": [
+        {
+          "configurationBindings": [],
+          "declarationVersion": 1,
+          "implementationStatus": "implemented",
+          "kind": "resource",
+          "mappingId": "aws.wafv2.alb-association.cloudformation",
+          "portBindings": [],
+          "projection": {
+            "generatedResourceTypes": [],
+            "kind": "relationship-resource",
+            "rendererContractId": "cloudmarkup.iac.regional-waf-cloudformation",
+            "rendererContractVersion": "1.0.0"
+          },
+          "semanticConfigurationKeys": [],
+          "target": "cloudformation",
+          "typeName": "AWS::WAFv2::WebACLAssociation"
+        }
+      ],
+      "nodeKind": {
+        "deployable": true,
+        "kind": "resource",
+        "resourceType": "aws.wafv2.alb-association"
+      },
+      "placement": {
+        "allowedParentTypes": [
+          {
+            "relationshipType": "aws.wafv2.association-uses-web-acl",
+            "serviceId": "aws.wafv2.web-acl"
+          }
+        ],
+        "maximumDepth": 2,
+        "regionConstraint": "same-region",
+        "rootPlacement": "forbidden"
+      },
+      "ports": [
+        {
+          "capability": "aws.wafv2.association-protects-alb",
+          "cardinality": "one",
+          "category": "network-and-security",
+          "description": "Exact regional WAF association; no IAM or traffic rules are inferred.",
+          "direction": "output",
+          "displayName": "Protects ALB",
+          "id": "aws.wafv2.alb-association.alb",
+          "required": true
+        },
+        {
+          "capability": "aws.wafv2.association-uses-web-acl",
+          "cardinality": "one",
+          "category": "network-and-security",
+          "description": "Exact regional WAF association; no IAM or traffic rules are inferred.",
+          "direction": "output",
+          "displayName": "Uses regional Web ACL",
+          "id": "aws.wafv2.alb-association.web-acl",
+          "required": true
+        }
+      ],
+      "regionAvailability": {
+        "reason": "No version-bound regional WAF availability inventory or live AWS check is installed.",
+        "state": "unknown"
+      },
+      "supportLevel": "proof",
+      "unsupportedCapabilities": [
+        {
+          "explanation": "CloudFront/global scope, API Gateway HTTP APIs, REST stages, other AWS targets, Outposts, cross-account/Region, external/adopted resources, custom/IP/regex rules, forwarded-IP/custom aggregation, scope-down expressions, rule exceptions, pinned managed versions, CAPTCHA/challenge, Bot/Fraud Control, request sampling/log destinations, Terraform/provider execution and application generation are unavailable.",
+          "id": "aws.wafv2.alb-association.unsupported.expanded",
+          "title": "Expanded WAF support deferred"
+        }
+      ],
+      "validationRuleIds": [
+        "aws.cloudmarkup.validation.compiler-readiness",
+        "aws.cloudmarkup.validation.connection-cardinality",
+        "aws.cloudmarkup.validation.region-availability",
+        "aws.cloudmarkup.validation.regional-waf-readiness"
+      ]
+    },
+    {
+      "configuration": {
+        "jsonSchema": {
+          "$id": "urn:cloudmarkup:configuration:aws.wafv2.web-acl.configuration:1.0.0",
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "additionalProperties": false,
+          "properties": {
+            "aggregateKey": {
+              "default": "IP",
+              "enum": [
+                "IP"
+              ],
+              "type": "string"
+            },
+            "cloudWatchMetricsEnabled": {
+              "default": true,
+              "type": "boolean"
+            },
+            "defaultAction": {
+              "default": "allow",
+              "enum": [
+                "allow"
+              ],
+              "type": "string"
+            },
+            "managedRuleGroup": {
+              "default": "AWSManagedRulesKnownBadInputsRuleSet",
+              "enum": [
+                "AWSManagedRulesKnownBadInputsRuleSet"
+              ],
+              "type": "string"
+            },
+            "managedRuleMode": {
+              "default": "count",
+              "enum": [
+                "count",
+                "enforce"
+              ],
+              "type": "string"
+            },
+            "managedRulePriority": {
+              "default": 10,
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "managedRuleVersionPolicy": {
+              "default": "vendor-default",
+              "enum": [
+                "vendor-default"
+              ],
+              "type": "string"
+            },
+            "name": {
+              "maxLength": 100,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            "rateAction": {
+              "default": "count",
+              "enum": [
+                "count",
+                "block"
+              ],
+              "type": "string"
+            },
+            "rateLimit": {
+              "default": 2000,
+              "maximum": 2000000000,
+              "minimum": 10,
+              "type": "integer"
+            },
+            "ratePriority": {
+              "default": 0,
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "rateWindowSeconds": {
+              "default": 300,
+              "enum": [
+                60,
+                120,
+                300,
+                600
+              ],
+              "type": "integer"
+            },
+            "requestLogging": {
+              "default": "disabled",
+              "enum": [
+                "disabled"
+              ],
+              "type": "string"
+            },
+            "retain": {
+              "const": true,
+              "default": true,
+              "type": "boolean"
+            },
+            "sampledRequestsEnabled": {
+              "const": false,
+              "default": false,
+              "type": "boolean"
+            },
+            "scope": {
+              "default": "REGIONAL",
+              "enum": [
+                "REGIONAL"
+              ],
+              "type": "string"
+            },
+            "webAclRegion": {
+              "maxLength": 32,
+              "minLength": 9,
+              "pattern": "^(?:af|ap|ca|eu|il|me|mx|sa|us)-[a-z]+-[0-9]+$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "aggregateKey",
+            "cloudWatchMetricsEnabled",
+            "defaultAction",
+            "managedRuleGroup",
+            "managedRuleMode",
+            "managedRulePriority",
+            "managedRuleVersionPolicy",
+            "name",
+            "rateAction",
+            "rateLimit",
+            "ratePriority",
+            "rateWindowSeconds",
+            "requestLogging",
+            "retain",
+            "sampledRequestsEnabled",
+            "scope",
+            "webAclRegion"
+          ],
+          "title": "Regional WAF intent",
+          "type": "object"
+        },
+        "schemaId": "aws.wafv2.web-acl.configuration",
+        "schemaVersion": "1.0.0",
+        "uiHints": [
+          {
+            "advanced": false,
+            "control": "text",
+            "costImpact": "cost-sensitive",
+            "helpText": "Explicit Web ACL name. Renaming replaces the retained ACL; review cleanup separately. Metric suffixes are derived from this name.",
+            "label": "Web ACL name",
+            "order": 0,
+            "property": "name",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": false,
+            "control": "text",
+            "costImpact": "cost-sensitive",
+            "helpText": "Must equal this project's AWS Region and the ALB's modeled Region. WAF availability remains unknown until separately checked.",
+            "label": "Web ACL Region",
+            "order": 1,
+            "property": "webAclRegion",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": true,
+            "control": "select",
+            "costImpact": "cost-sensitive",
+            "helpText": "Regional ALBs only. CloudFront global/us-east-1, Outposts and other resource types are deferred.",
+            "label": "Scope",
+            "order": 2,
+            "property": "scope",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": false,
+            "control": "select",
+            "costImpact": "cost-sensitive",
+            "helpText": "Allow requests that do not match an enforcing rule. Count mode observes traffic and does not block it.",
+            "label": "Default action",
+            "order": 3,
+            "property": "defaultAction",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": false,
+            "control": "select",
+            "costImpact": "cost-sensitive",
+            "helpText": "One reviewed AWS Known Bad Inputs group. This is bounded protection, not a complete application security guarantee. ALB body inspection is limited to 8 KB.",
+            "label": "Managed rule group",
+            "order": 4,
+            "property": "managedRuleGroup",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": true,
+            "control": "select",
+            "costImpact": "cost-sensitive",
+            "helpText": "Uses the AWS vendor default, which can change independently of this saved graph. No static rule-content version or fixed WCU claim is made.",
+            "label": "Managed rule version policy",
+            "order": 5,
+            "property": "managedRuleVersionPolicy",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": false,
+            "control": "select",
+            "costImpact": "cost-sensitive",
+            "helpText": "Count overrides the group's result to count. Enforce retains each vendor rule's own actions. Test/tune in count mode before enforcement; a group override does not count every internal rule independently.",
+            "label": "Managed group mode",
+            "order": 6,
+            "property": "managedRuleMode",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": true,
+            "control": "number",
+            "costImpact": "cost-sensitive",
+            "helpText": "Unique integer priority; lower values evaluate first. Must differ from the rate priority.",
+            "label": "Managed rule priority",
+            "order": 7,
+            "property": "managedRulePriority",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": false,
+            "control": "number",
+            "costImpact": "cost-sensitive",
+            "helpText": "Approximate requests per origin IP over the selected lookback window. This is not an exact application quota. NAT/proxy users can share an origin IP.",
+            "label": "Rate limit",
+            "order": 8,
+            "property": "rateLimit",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": false,
+            "control": "number",
+            "costImpact": "cost-sensitive",
+            "helpText": "Lookback window: 60, 120, 300 or 600 seconds. It is not the interval between WAF evaluations.",
+            "label": "Rate window seconds",
+            "order": 9,
+            "property": "rateWindowSeconds",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": false,
+            "control": "select",
+            "costImpact": "cost-sensitive",
+            "helpText": "Count observes over-limit requests; block can interrupt legitimate clients. Review the threshold against traffic before blocking.",
+            "label": "Rate rule action",
+            "order": 10,
+            "property": "rateAction",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": true,
+            "control": "number",
+            "costImpact": "cost-sensitive",
+            "helpText": "Unique integer priority; lower values evaluate first. Must differ from the managed-rule priority.",
+            "label": "Rate rule priority",
+            "order": 11,
+            "property": "ratePriority",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": true,
+            "control": "select",
+            "costImpact": "cost-sensitive",
+            "helpText": "Use request origin IP only. Forwarded headers, custom keys and scope-down expressions are deferred.",
+            "label": "Aggregation key",
+            "order": 12,
+            "property": "aggregateKey",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": false,
+            "control": "checkbox",
+            "costImpact": "cost-sensitive",
+            "helpText": "Enable metrics on the ACL and each rule. Metrics do not enable full request logging or prove traffic was inspected.",
+            "label": "CloudWatch metrics enabled",
+            "order": 13,
+            "property": "cloudWatchMetricsEnabled",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": true,
+            "control": "checkbox",
+            "costImpact": "cost-sensitive",
+            "helpText": "Request sampling is disabled in this slice. Logging redaction would not redact sampled requests.",
+            "label": "Sampled requests enabled",
+            "order": 14,
+            "property": "sampledRequestsEnabled",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": true,
+            "control": "select",
+            "costImpact": "cost-sensitive",
+            "helpText": "Full request logging is disabled. No log destination, logging resource, resource policy or service-linked role is generated.",
+            "label": "Request logging",
+            "order": 15,
+            "property": "requestLogging",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          },
+          {
+            "advanced": true,
+            "control": "checkbox",
+            "costImpact": "cost-sensitive",
+            "helpText": "Retain the Web ACL on stack removal/replacement. Associations follow explicit graph removal and can disassociate traffic; review separately deployed changes.",
+            "label": "Retain Web ACL",
+            "order": 16,
+            "property": "retain",
+            "securityImpact": "security-sensitive",
+            "valueSource": "literal"
+          }
+        ]
+      },
+      "definitionVersion": "1.0.0",
+      "description": "Bounded regional WAFv2 intent for a modeled ALB; CloudFormation infrastructure proof only. Terraform and live traffic qualification remain unavailable.",
+      "displayName": "Regional WAF Web ACL (proof)",
+      "education": {
+        "considerations": [
+          "Connections: Use one explicit owned association from the regional Web ACL to an existing modeled ALB in this project; no permissions are inferred.",
+          "Cost: Separately deploying WAF incurs ACL and request-processing charges; deterministic offline exports do not call AWS or establish live protection.",
+          "Operations: Same project/account/Region modeled ALBs only. Verify regional availability, quotas, managed-group availability and traffic effects externally.",
+          "Security: Count mode does not block or replace application authorization, input validation or network controls. Request sampling and logging stay disabled; metrics are independent."
+        ],
+        "documentation": [
+          {
+            "id": "aws.wafv2.documentation.association",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "WAF associations and testing",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-associating-aws-resource.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.association-cfn",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation Web ACL association",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-wafv2-webaclassociation.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.rate",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation rate rule",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-wafv2-webacl-ratebasedstatement.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.resources",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "Resources protected by AWS WAF",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/how-aws-waf-works-resources.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.rules",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "AWS managed baseline rules",
+            "url": "https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.visibility",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "Metrics and sampling",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-wafv2-webacl-visibilityconfig.html"
+          },
+          {
+            "id": "aws.wafv2.documentation.web-acl",
+            "kind": "official",
+            "publisher": "Amazon Web Services",
+            "title": "CloudFormation Web ACL",
+            "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-wafv2-webacl.html"
+          }
+        ],
+        "guidedExplanation": "Create a regional ACL, start both rules in count mode and add an owned association to your existing ALB. Metrics are separate from request logs. Review traffic before changing enforcement.",
+        "professionalExplanation": "Closed REGIONAL WebACL and canonical owned WebACLAssociation. Exact typed ARN bindings, unique ordered priorities, origin-IP approximate rate limit and one AWS managed group. Vendor default rules can evolve outside the graph.",
+        "summary": "Candidate infrastructure only; no deployment, live traffic proof or application code."
+      },
+      "iconId": "aws.wafv2.web-acl.icon",
+      "id": "aws.wafv2.web-acl",
+      "mappings": [
+        {
+          "configurationBindings": [],
+          "declarationVersion": 1,
+          "implementationStatus": "implemented",
+          "kind": "resource",
+          "mappingId": "aws.wafv2.web-acl.cloudformation",
+          "portBindings": [],
+          "projection": {
+            "generatedResourceTypes": [],
+            "kind": "relationship-resource",
+            "rendererContractId": "cloudmarkup.iac.regional-waf-cloudformation",
+            "rendererContractVersion": "1.0.0"
+          },
+          "semanticConfigurationKeys": [
+            "aggregateKey",
+            "cloudWatchMetricsEnabled",
+            "defaultAction",
+            "managedRuleGroup",
+            "managedRuleMode",
+            "managedRulePriority",
+            "managedRuleVersionPolicy",
+            "name",
+            "rateAction",
+            "rateLimit",
+            "ratePriority",
+            "rateWindowSeconds",
+            "requestLogging",
+            "retain",
+            "sampledRequestsEnabled",
+            "scope",
+            "webAclRegion"
+          ],
+          "target": "cloudformation",
+          "typeName": "AWS::WAFv2::WebACL"
+        }
+      ],
+      "nodeKind": {
+        "deployable": true,
+        "kind": "resource",
+        "resourceType": "aws.wafv2.web-acl"
+      },
+      "placement": {
+        "allowedParentTypes": [],
+        "maximumDepth": 1,
+        "regionConstraint": "same-region",
+        "rootPlacement": "allowed"
+      },
+      "ports": [
+        {
+          "capability": "aws.wafv2.association-uses-web-acl",
+          "cardinality": "many",
+          "category": "network-and-security",
+          "description": "Accept an exact same-Region WAF association.",
+          "direction": "input",
+          "displayName": "Uses regional Web ACL",
+          "id": "aws.wafv2.web-acl.association",
+          "required": true
+        }
+      ],
+      "regionAvailability": {
+        "reason": "No version-bound regional WAF availability inventory or live AWS check is installed.",
+        "state": "unknown"
+      },
+      "supportLevel": "proof",
+      "unsupportedCapabilities": [
+        {
+          "explanation": "CloudFront/global scope, API Gateway HTTP APIs, REST stages, other AWS targets, Outposts, cross-account/Region, external/adopted resources, custom/IP/regex rules, forwarded-IP/custom aggregation, scope-down expressions, rule exceptions, pinned managed versions, CAPTCHA/challenge, Bot/Fraud Control, request sampling/log destinations, Terraform/provider execution and application generation are unavailable.",
+          "id": "aws.wafv2.web-acl.unsupported.expanded",
+          "title": "Expanded WAF support deferred"
+        }
+      ],
+      "validationRuleIds": [
+        "aws.cloudmarkup.validation.compiler-readiness",
+        "aws.cloudmarkup.validation.connection-cardinality",
+        "aws.cloudmarkup.validation.region-availability",
+        "aws.cloudmarkup.validation.regional-waf-readiness"
+      ]
     }
   ],
   "validationRules": [
@@ -33260,7 +34129,9 @@
         "aws.rds.db-subnet-group",
         "aws.region.boundary",
         "aws.route53.public-hosted-zone",
-        "aws.secretsmanager.secret"
+        "aws.secretsmanager.secret",
+        "aws.wafv2.alb-association",
+        "aws.wafv2.web-acl"
       ]
     },
     {
@@ -33329,7 +34200,9 @@
         "aws.rds.db-subnet-group",
         "aws.region.boundary",
         "aws.route53.public-hosted-zone",
-        "aws.secretsmanager.secret"
+        "aws.secretsmanager.secret",
+        "aws.wafv2.alb-association",
+        "aws.wafv2.web-acl"
       ]
     },
     {
@@ -34036,7 +34909,71 @@
         "aws.rds.db-subnet-group",
         "aws.region.boundary",
         "aws.route53.public-hosted-zone",
-        "aws.secretsmanager.secret"
+        "aws.secretsmanager.secret",
+        "aws.wafv2.alb-association",
+        "aws.wafv2.web-acl"
+      ]
+    },
+    {
+      "documentation": [
+        {
+          "id": "aws.wafv2.documentation.association",
+          "kind": "official",
+          "publisher": "Amazon Web Services",
+          "title": "WAF associations and testing",
+          "url": "https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-associating-aws-resource.html"
+        },
+        {
+          "id": "aws.wafv2.documentation.association-cfn",
+          "kind": "official",
+          "publisher": "Amazon Web Services",
+          "title": "CloudFormation Web ACL association",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-wafv2-webaclassociation.html"
+        },
+        {
+          "id": "aws.wafv2.documentation.rate",
+          "kind": "official",
+          "publisher": "Amazon Web Services",
+          "title": "CloudFormation rate rule",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-wafv2-webacl-ratebasedstatement.html"
+        },
+        {
+          "id": "aws.wafv2.documentation.resources",
+          "kind": "official",
+          "publisher": "Amazon Web Services",
+          "title": "Resources protected by AWS WAF",
+          "url": "https://docs.aws.amazon.com/waf/latest/developerguide/how-aws-waf-works-resources.html"
+        },
+        {
+          "id": "aws.wafv2.documentation.rules",
+          "kind": "official",
+          "publisher": "Amazon Web Services",
+          "title": "AWS managed baseline rules",
+          "url": "https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-baseline.html"
+        },
+        {
+          "id": "aws.wafv2.documentation.visibility",
+          "kind": "official",
+          "publisher": "Amazon Web Services",
+          "title": "Metrics and sampling",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-wafv2-webacl-visibilityconfig.html"
+        },
+        {
+          "id": "aws.wafv2.documentation.web-acl",
+          "kind": "official",
+          "publisher": "Amazon Web Services",
+          "title": "CloudFormation Web ACL",
+          "url": "https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-wafv2-webacl.html"
+        }
+      ],
+      "id": "aws.cloudmarkup.validation.regional-waf-readiness",
+      "implementationId": "aws.cloudmarkup.validation.regional-waf-readiness.evaluate",
+      "interfaceVersion": 1,
+      "ruleVersion": "1.0.0",
+      "serviceIds": [
+        "aws.elb.application-load-balancer",
+        "aws.wafv2.alb-association",
+        "aws.wafv2.web-acl"
       ]
     },
     {

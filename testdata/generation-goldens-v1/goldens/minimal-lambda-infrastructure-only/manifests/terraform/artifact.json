@@ -20,7 +20,7 @@
     "catalog": {
       "id": "aws.cloudmarkup.notes-api-catalog",
       "version": "0.30.0",
-      "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+      "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94"
     }
   },
   "metadata": {
@@ -129,7 +129,7 @@
       "path": "infrastructure/README.md",
       "mediaType": "text/markdown",
       "ownership": "generated",
-      "digest": "sha256:6d3f3bf8e1e23f967547930c7a3a8cf7bb7495446093b10b4806ce66c50e12ae",
+      "digest": "sha256:c60dd6f6301481fb24fa2578d61f2eae3e789a0a22c4ca4ba8c2925e70d34321",
       "sizeBytes": 1083
     }
   ],
@@ -181,5 +181,5 @@
       }
     }
   ],
-  "digest": "sha256:083991fb733810ae9613df4294e65ecd2bc6b246d4607eb347e82464223bccd4"
+  "digest": "sha256:dc6fc375bfaebb5cbd2b7ae84b08b1da3fe79cd45580bd17b3533c980465f8ac"
 }

@@ -75,7 +75,7 @@
           },
           "sourceInputs": [
             {
-              "checksum": "sha256:7e15aff5e37986d103299fa0d5845762b637b1ff051b43f02f271116d27afa95",
+              "checksum": "sha256:789ef91bd8d0fc4d11879318ca07e85e4dfa3584b32799d92273ee6a16f86486",
               "path": "application/README.md"
             },
             {
@@ -183,7 +183,7 @@
           ],
           "workloadId": "workload_notes_api"
         },
-        "contractDigest": "sha256:781049aae1d63193a3ae300e900b629b839ec849a090826385af813442ee3e7e"
+        "contractDigest": "sha256:2312bf6409689a0860f2678356e11f1ad434509e8bd46a2cac1c57a048683db8"
       }
     ],
     "contractVersion": 1,
@@ -234,14 +234,14 @@
     "diff": {
       "files": [
         {
-          "afterChecksum": "sha256:7e15aff5e37986d103299fa0d5845762b637b1ff051b43f02f271116d27afa95",
+          "afterChecksum": "sha256:789ef91bd8d0fc4d11879318ca07e85e4dfa3584b32799d92273ee6a16f86486",
           "change": "create",
           "ownership": "generated",
           "path": "application/README.md",
           "reason": "The deterministic path does not exist in the supplied repository inventory."
         },
         {
-          "afterChecksum": "sha256:951e38e6c6fa0f62230af8837b0d4944412a2ad0cbea856894d5a3051b7b624a",
+          "afterChecksum": "sha256:3e49f31e750f8fdc862fadc8759c842b641a91e075176978df6d62fb07fb5562",
           "change": "create",
           "ownership": "generated",
           "path": "application/build-contracts/workload_notes_api.json",
@@ -388,7 +388,7 @@
           "summary": "Validated environment binding represented without resolving secret values."
         },
         {
-          "afterDigest": "sha256:781049aae1d63193a3ae300e900b629b839ec849a090826385af813442ee3e7e",
+          "afterDigest": "sha256:2312bf6409689a0860f2678356e11f1ad434509e8bd46a2cac1c57a048683db8",
           "kind": "build-contract",
           "semanticId": "build:workload_notes_api",
           "sourceReferences": [
@@ -673,7 +673,7 @@
     "solutionRevisionId": "solution_notes_revision_1",
     "sourceFiles": [
       {
-        "checksum": "sha256:7e15aff5e37986d103299fa0d5845762b637b1ff051b43f02f271116d27afa95",
+        "checksum": "sha256:789ef91bd8d0fc4d11879318ca07e85e4dfa3584b32799d92273ee6a16f86486",
         "mediaType": "text/markdown",
         "path": "application/README.md",
         "provenance": {
@@ -687,7 +687,7 @@
             "workload_notes_api"
           ]
         },
-        "semanticChecksum": "sha256:7e15aff5e37986d103299fa0d5845762b637b1ff051b43f02f271116d27afa95",
+        "semanticChecksum": "sha256:789ef91bd8d0fc4d11879318ca07e85e4dfa3584b32799d92273ee6a16f86486",
         "sizeBytes": 1674,
         "sourceReferences": [
           {
@@ -699,7 +699,7 @@
         "ownership": "generated"
       },
       {
-        "checksum": "sha256:951e38e6c6fa0f62230af8837b0d4944412a2ad0cbea856894d5a3051b7b624a",
+        "checksum": "sha256:3e49f31e750f8fdc862fadc8759c842b641a91e075176978df6d62fb07fb5562",
         "mediaType": "application/json",
         "path": "application/build-contracts/workload_notes_api.json",
         "provenance": {
@@ -728,7 +728,7 @@
             "workload_notes_api"
           ]
         },
-        "semanticChecksum": "sha256:951e38e6c6fa0f62230af8837b0d4944412a2ad0cbea856894d5a3051b7b624a",
+        "semanticChecksum": "sha256:3e49f31e750f8fdc862fadc8759c842b641a91e075176978df6d62fb07fb5562",
         "sizeBytes": 7813,
         "sourceReferences": [
           {
@@ -1724,32 +1724,32 @@
       "architectureRevisionId": "revision_notes_1",
       "buildContracts": [
         {
-          "contractDigest": "sha256:781049aae1d63193a3ae300e900b629b839ec849a090826385af813442ee3e7e",
+          "contractDigest": "sha256:2312bf6409689a0860f2678356e11f1ad434509e8bd46a2cac1c57a048683db8",
           "workloadId": "workload_notes_api"
         }
       ],
       "contractVersion": 1,
       "catalog": {
-        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+        "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
         "id": "aws.cloudmarkup.notes-api-catalog",
         "version": "0.30.0"
       },
       "coverageDigest": "sha256:1eb9e29fb18eca88bda429854ddc1588cf9fc393cb9e17fde3eca4938d22b398",
       "files": [
         {
-          "checksum": "sha256:7e15aff5e37986d103299fa0d5845762b637b1ff051b43f02f271116d27afa95",
+          "checksum": "sha256:789ef91bd8d0fc4d11879318ca07e85e4dfa3584b32799d92273ee6a16f86486",
           "mediaType": "text/markdown",
           "ownership": "generated",
           "path": "application/README.md",
-          "semanticChecksum": "sha256:7e15aff5e37986d103299fa0d5845762b637b1ff051b43f02f271116d27afa95",
+          "semanticChecksum": "sha256:789ef91bd8d0fc4d11879318ca07e85e4dfa3584b32799d92273ee6a16f86486",
           "sizeBytes": 1674
         },
         {
-          "checksum": "sha256:951e38e6c6fa0f62230af8837b0d4944412a2ad0cbea856894d5a3051b7b624a",
+          "checksum": "sha256:3e49f31e750f8fdc862fadc8759c842b641a91e075176978df6d62fb07fb5562",
           "mediaType": "application/json",
           "ownership": "generated",
           "path": "application/build-contracts/workload_notes_api.json",
-          "semanticChecksum": "sha256:951e38e6c6fa0f62230af8837b0d4944412a2ad0cbea856894d5a3051b7b624a",
+          "semanticChecksum": "sha256:3e49f31e750f8fdc862fadc8759c842b641a91e075176978df6d62fb07fb5562",
           "sizeBytes": 7813
         },
         {
@@ -1889,9 +1889,9 @@
       "kind": "cloudmarkup.application-source-manifest",
       "inputDigests": {
         "applicationContracts": "sha256:7b218be168b24e657191dafce12eafd5f6f43ed5263cbb892d8c392895b7d987",
-        "architectureDocument": "sha256:4162ecaeb0a409fd697c91560daf3751b83f6ef04a8f54601d0d53354f3581b2",
-        "normalizedSolution": "sha256:dd9dccd6ba568b0f79c1fb4b9cacd632ad50b953e7ae57a5216dbb7f5f44e089",
-        "solutionRevision": "sha256:7da348516d7f53e875882d6d4740297084c38224fefbcd266f787b12ddc4ff92",
+        "architectureDocument": "sha256:a93c84ca83c901aa75a099c6aa693ad831f23d8d1a87bc5cf32530f377f92b12",
+        "normalizedSolution": "sha256:564a340679b26af1c51205d42196a887cf9714037271680284bd0961226bfb5a",
+        "solutionRevision": "sha256:dd1b8e1dbfb22c4999616129daa62e4623b6b691d0e7765a3ac20d6702a8631d",
         "workloadBehavior": "sha256:364a0fea86b0353b8bb5e94479b4d7cfff77990b3bca4d0742e2e0e1b1b29f40"
       },
       "manifestPath": "application/manifest.json",
@@ -1917,7 +1917,7 @@
         "version": "1.0.0"
       }
     },
-    "sourceManifestDigest": "sha256:f6f6c95134dbf6e48161e8a027ebf5a7cd4beb97ea554bae8a092fbab49eefb7",
+    "sourceManifestDigest": "sha256:f2583f383afcda264bb5edcd7618a9ac374b60a8511797e1049ad879537e3e3c",
     "template": {
       "digest": "sha256:c7721961d935faa1e0c87b7356bc6d90112a02f3c7f716be33a648bf99740604",
       "id": "cloudmarkup.template.aws-lambda-notes-typescript",
@@ -2015,5 +2015,5 @@
       }
     ]
   },
-  "artifactDigest": "sha256:085678b8f517f67a8d88a4b006af979cd661cce4b88928ecf1d848fb9768292d"
+  "artifactDigest": "sha256:2a1bc40f991e0bcd2b8ea9afe588e33fc71526646ab971836214be514c6d4ed1"
 }

@@ -248,6 +248,8 @@ describe("DevelopmentVisualGallery", () => {
       "aws.iam.instance-profile",
       "aws.kms.key",
       "aws.secretsmanager.secret",
+      "aws.wafv2.alb-association",
+      "aws.wafv2.web-acl",
     ]);
 
     render(<CloudMarkupDevelopmentGallery />);

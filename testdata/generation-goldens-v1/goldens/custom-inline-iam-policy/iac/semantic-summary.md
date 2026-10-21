@@ -1,6 +1,6 @@
 # Terraform semantic summary: custom-inline-iam-policy
 
-- Artifact digest: `sha256:919ae847c836aab292fa3353232c66810e8403fc853308b08187fd7aeab0b3de`
+- Artifact digest: `sha256:ca2966a318df82ccba91736de9669fb34dd26629c3141a9748c2291f8c46b5f1`
 - Generated files: 14
 - Resources: 4
 - Application artifact contracts: 1

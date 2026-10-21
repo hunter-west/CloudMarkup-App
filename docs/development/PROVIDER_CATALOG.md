@@ -23,9 +23,9 @@ Provider-specific facts cannot move into `@cloudmarkup/domain`.
 
 ## Installed AWS catalog 0.30.0
 
-The installed catalog contains 71 definitions, 137 connections and 33
+The installed catalog source contains 73 definitions, 139 connections and 34
 validators. Its exact digest is
-`sha256:84c6691236f5767565afc3d49fd9ec25786c61a4c49883387dfcf1a6e9f3ec35`.
+`sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94`.
 Current services, configurations, validators and export mappings retain the
 prepared 0.29.0 behavior. Removing historical migration metadata changes the
 artifact identity, so 0.30.0 has a new version and digest.
@@ -41,6 +41,22 @@ and a recovery download. No field, node or connection is dropped, and unknown
 document versions still fail closed. Immutable historical revisions and their
 export evidence are never rebound. Git preserves old source; no arbitrary
 historical replay dispatcher is installed.
+
+The two additional proof-level definitions are a regional WAF Web ACL and its
+explicit owned ALB association. Their current-catalog configuration, connection
+resolution, validation and native CloudFormation export cover a bounded managed
+rule group and origin-IP rate rule. Both default to count mode. Sampling and
+request logging are disabled, and the ACL is retained on removal/replacement.
+The association uses exact modeled ACL/ALB ARNs; no IAM or deployment authority
+is inferred. The new icon identities use neutral missing-artwork placeholders.
+
+This is CloudFormation infrastructure proof, not full MVP support. Terraform,
+CloudFront/global scope, HTTP API targets, arbitrary statements, external or
+cross-Region targets, request logging/sampling and live traffic qualification
+remain unavailable. Existing ALB behavior remains intact. The source plan
+records current-catalog and native export qualification; release admission,
+dependent synthetic baselines and frozen model/evaluation qualification remain
+separate from this source capability.
 
 The following numbered release descriptions are historical development records.
 Their retention/upgrade claims describe earlier implementations; the installed

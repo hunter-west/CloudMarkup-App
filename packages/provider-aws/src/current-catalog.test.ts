@@ -9,9 +9,9 @@ describe("installed current AWS catalog", () => {
   it("binds all current services and service metadata to their verified digest", () => {
     const current = resolveAwsCurrentCatalogV1();
     expect(current.catalog).toBe(awsCatalogV1);
-    expect(current.catalog.listServices()).toHaveLength(71);
-    expect(current.catalog.listConnectionRules()).toHaveLength(137);
-    expect(current.catalog.listValidationRules()).toHaveLength(33);
+    expect(current.catalog.listServices()).toHaveLength(73);
+    expect(current.catalog.listConnectionRules()).toHaveLength(139);
+    expect(current.catalog.listValidationRules()).toHaveLength(34);
     expect(current.serviceExtension.artifact.catalog).toEqual(
       AWS_CURRENT_CATALOG_BINDING_V1,
     );

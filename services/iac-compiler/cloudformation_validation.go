@@ -25,6 +25,7 @@ func (renderer *cloudFormationRenderer) validateCuratedModel() {
 	shared.validateCloudfrontModel()
 	shared.validateElbModel()
 	shared.validateEbsModel()
+	shared.validateWafModel()
 	for _, diagnostic := range shared.diagnostics {
 		diagnostic.Code = cloudFormationDiagnosticCode(diagnostic.Code)
 		diagnostic.Message = strings.ReplaceAll(diagnostic.Message, "Terraform", "CloudFormation")

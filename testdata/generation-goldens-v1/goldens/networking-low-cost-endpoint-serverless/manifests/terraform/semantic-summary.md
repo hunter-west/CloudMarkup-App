@@ -1,6 +1,6 @@
 # Terraform semantic summary: networking-low-cost-endpoint-serverless
 
-- Artifact digest: `sha256:c1313ebd55ffc523708052a87f1ef061ba29cb7c263da92a8c66ebc65f88a679`
+- Artifact digest: `sha256:9a12eca6cf23c6dc966b97066fc76f127377447b92f4d637c5a1f21185208415`
 - Generated files: 14
 - Resources: 14
 - Application artifact contracts: 1

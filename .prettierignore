@@ -44,5 +44,9 @@ services/iac-compiler/testdata/cloudfront-goldens-v1/
 services/iac-compiler/testdata/elb-goldens-v1/
 services/iac-compiler/testdata/ebs-goldens-v1/
 
+# Canonical regional WAF inputs/output; owning provider and native tests verify them.
+packages/provider-aws/fixtures/waf-v1/
+services/iac-compiler/testdata/waf-goldens-v1/
+
 # Compact source-bound authorization receipt.
 apps/api/authorization-proposals/ordinary-local-business-acl.json

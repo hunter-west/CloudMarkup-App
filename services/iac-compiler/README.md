@@ -21,10 +21,20 @@ support. Unsupported or metadata-only mappings never become executable by
 implication.
 
 The default registry installs one exact AWS catalog: 0.30.0, with digest
-`sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682`. Older
-AWS projects are rejected and require a new project. Historical catalog
-dispatch, replay tuples and upgrades are not installed. The neutral example
-catalog still supports the existing provider-independent normalization contract.
+`sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94`. Older
+immutable AWS bindings are rejected. Mutable drafts may use the editor's
+lossless catalog-opening review before a new immutable freeze; old revisions and
+evidence remain unchanged. Historical catalog dispatch, replay tuples and
+upgrades are not installed. The neutral example catalog still supports the
+existing provider-independent normalization contract.
+
+The current catalog adds a bounded regional WAF Web ACL and canonical ALB
+association as CloudFormation-only infrastructure proof. Exact literal fields,
+Region, ownership, association endpoints and ordered unique priorities are
+validated before export. ACL removal/replacement retains the resource;
+association removal follows explicit graph intent. Request sampling/logging and
+Terraform WAF remain unsupported. Offline native export does not establish AWS
+permissions, traffic protection, application generation or deployment.
 
 The current AWS catalog includes one regional AWS-generated symmetric KMS
 encryption key. Both targets require its explicit user-owned canonical key

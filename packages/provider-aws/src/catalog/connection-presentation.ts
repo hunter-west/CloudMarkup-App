@@ -1,4 +1,9 @@
 import {
+  awsWafServicePresentations,
+  extendWafPresentation,
+} from "./regional-waf-presentation.js";
+import { wafBindings } from "./services/regional-waf.js";
+import {
   awsEbsServicePresentations,
   extendEbsPresentation,
 } from "./ebs-presentation.js";
@@ -827,6 +832,7 @@ export function createAwsConnectionPresentationSourceV1(
       ...awsDnsServicePresentations,
       ...awsCloudfrontServicePresentations,
       ...awsEbsServicePresentations,
+      ...awsWafServicePresentations,
       ...awsElbServicePresentations,
     ]
       .map(extendFsxPresentation)
@@ -838,8 +844,10 @@ export function createAwsConnectionPresentationSourceV1(
       .map(extendAuroraPresentation)
       .map(extendEbsPresentation)
       .map(extendElbPresentation)
-      .map(extendCloudfrontPresentation),
+      .map(extendCloudfrontPresentation)
+      .map(extendWafPresentation),
     relationshipLabels: [
+      ...wafBindings.map((b) => ({ ruleId: b[0], label: b[7] })),
       ...ecsBindings.map((b) => ({ ruleId: b[0], label: b[7] })),
       ...ec2Bindings.map((b) => ({ ruleId: b[0], label: b[8] })),
       { ruleId: "aws.kms.key-encrypts-secret", label: "Encrypts secret" },

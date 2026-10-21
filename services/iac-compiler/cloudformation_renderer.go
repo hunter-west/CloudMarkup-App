@@ -200,7 +200,7 @@ func (renderer *cloudFormationRenderer) validateModelSupport() {
 	}
 	for _, connection := range renderer.model.Connections {
 		_, curatedSupported := terraformRelationshipSupport[connection.RelationshipType]
-		if current && !curatedSupported {
+		if current && !curatedSupported && !isWafRelationship(connection.RelationshipType) {
 			renderer.error("CLOUDFORMATION_RELATIONSHIP_UNSUPPORTED", "Architecture relationship is outside the exact reviewed CloudFormation catalog surface.", SourceReference{Document: DocumentArchitecture, EdgeID: connection.ID})
 		}
 	}

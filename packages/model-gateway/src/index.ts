@@ -105,6 +105,13 @@ export {
   typedPlanningFullBetaEvaluationSourceDigestV1,
 } from "./typed-planning-full-beta-evaluation-dataset.js";
 
+export {
+  assertRegionalWafEvaluationCatalogV1,
+  frozenRegionalWafEvaluationDatasetV1,
+  regionalWafEvaluationCatalogV1,
+  regionalWafEvaluationSourceDigestV1,
+} from "./regional-waf-evaluation-source.js";
+
 export * from "./bedrock-model-registry.js";
 
 export { reviewedHostBoundedRepairPromptV4 } from "./prompts/host-bounded-repair.js";

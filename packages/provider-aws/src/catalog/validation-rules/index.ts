@@ -224,7 +224,7 @@ export const awsValidationRuleDescriptors0_28_0 = [
 
 import { ebsReadinessValidationRuleDescriptor } from "./ebs-readiness.js";
 import { ebsProperties } from "../services/ebs.js";
-export const awsValidationRuleDescriptorsV1 = [
+const awsValidationRuleDescriptorsBeforeWaf = [
   ...awsValidationRuleDescriptors0_28_0.map((d) =>
     [
       "aws.cloudmarkup.validation.connection-cardinality",
@@ -235,4 +235,21 @@ export const awsValidationRuleDescriptorsV1 = [
       : d,
   ),
   ebsReadinessValidationRuleDescriptor,
+];
+
+import {
+  wafServices,
+  wafValidationDescriptor,
+} from "../services/regional-waf.js";
+export const awsValidationRuleDescriptorsV1 = [
+  ...awsValidationRuleDescriptorsBeforeWaf.map((d) =>
+    [
+      "aws.cloudmarkup.validation.connection-cardinality",
+      "aws.cloudmarkup.validation.compiler-readiness",
+      "aws.cloudmarkup.validation.region-availability",
+    ].includes(d.id)
+      ? { ...d, serviceIds: [...d.serviceIds, ...wafServices.map((s) => s.id)] }
+      : d,
+  ),
+  wafValidationDescriptor,
 ];

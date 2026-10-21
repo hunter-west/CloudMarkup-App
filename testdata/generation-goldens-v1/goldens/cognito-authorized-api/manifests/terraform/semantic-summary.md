@@ -1,6 +1,6 @@
 # Terraform semantic summary: cognito-authorized-api
 
-- Artifact digest: `sha256:514a402e9ef310e100278df9d9eee417bcb74aea800270468b2366a2406eadc3`
+- Artifact digest: `sha256:241c92c49c4aa6aebeaffb0eb6068d5da79fddf99c84b13d8bcf753122e9b6d5`
 - Generated files: 14
 - Resources: 10
 - Application artifact contracts: 1

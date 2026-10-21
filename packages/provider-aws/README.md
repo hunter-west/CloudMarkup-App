@@ -1,12 +1,18 @@
 # `@cloudmarkup/provider-aws`
 
-The installed catalog is **0.30.0**: 71 resource, boundary and owned
-configuration definitions, 137 connection descriptors and 33 validation
+The current catalog source is **0.30.0**: 73 resource, boundary and owned
+configuration definitions, 139 connection descriptors and 34 validation
 descriptors. These cover bounded AWS service slices, including serverless,
 networking, events, FSx, KMS, Secrets Manager, EC2, ECR, ECS Fargate, PostgreSQL
 RDS and Aurora, Route 53, ACM, CloudFront, ALB and EBS. Definition counts
 include supporting configurations; they are not counts of independent AWS
 services. Source support and live beta release admission remain separate.
+
+The added regional WAF Web ACL and owned ALB association are visibly marked
+proof-level. Their bounded configuration, typed connections, validation and
+native CloudFormation export are implemented. Terraform, expanded WAF modes, new
+artwork approval and actual AWS traffic qualification remain unavailable. They
+add no model, credential, runtime permission or deployment authority.
 
 ## Current projects
 

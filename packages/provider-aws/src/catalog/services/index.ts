@@ -315,7 +315,13 @@ export const awsServices0_28_0: ProviderServiceDefinitionV1[] = [
 ];
 
 import { awsEbsServices, extendServiceForEbs } from "./ebs.js";
-export const awsServicesV1: ProviderServiceDefinitionV1[] = [
+const awsServicesBeforeWaf: ProviderServiceDefinitionV1[] = [
   ...awsServices0_28_0.map(extendServiceForEbs),
   ...awsEbsServices,
+];
+
+import { wafServices, extendServiceForRegionalWaf } from "./regional-waf.js";
+export const awsServicesV1: ProviderServiceDefinitionV1[] = [
+  ...awsServicesBeforeWaf.map(extendServiceForRegionalWaf),
+  ...wafServices,
 ];

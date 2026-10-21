@@ -1,6 +1,6 @@
 # Terraform semantic summary: user-provided-lambda-artifact
 
-- Artifact digest: `sha256:74802e1f5b5d0fb006af90880d5d20ddfa72db6a5942b963dc4796771386e366`
+- Artifact digest: `sha256:2f5e0f8f5f0cb060a76403addfcb9859be8a1bb94ca2b5eaff0cb6b0921f4ca0`
 - Generated files: 14
 - Resources: 2
 - Application artifact contracts: 1

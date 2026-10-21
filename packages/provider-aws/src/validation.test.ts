@@ -902,6 +902,7 @@ describe("AWS notes API validation rules v1", () => {
         String(registration.rule.id),
       ),
     ).toEqual([
+      "aws.cloudmarkup.validation.regional-waf-readiness",
       "aws.cloudmarkup.validation.ebs-readiness",
       "aws.cloudmarkup.validation.elb-readiness",
       "aws.cloudmarkup.validation.cloudfront-readiness",

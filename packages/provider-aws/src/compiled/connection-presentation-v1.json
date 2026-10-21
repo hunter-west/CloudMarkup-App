@@ -1,12 +1,12 @@
 {
   "canonicalization": "cloudmarkup.provider-connection-presentation.canonical-json.v1",
   "catalog": {
-    "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+    "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
     "id": "aws.cloudmarkup.notes-api-catalog",
     "version": "0.30.0"
   },
   "contractVersion": 1,
-  "digest": "sha256:85a663b5106d97ad919cfb129135f4543ec6cc0603cb946a80a11e8cdff500f8",
+  "digest": "sha256:ee9c7035fd964e251adeca448c64bef518eda05f14bd5312083fb7aa9f96435c",
   "kind": "cloudmarkup.provider-connection-presentation",
   "relationshipLabels": [
     {
@@ -556,6 +556,14 @@
     {
       "label": "Runs task",
       "ruleId": "aws.stepfunctions.state-machine-invokes-lambda"
+    },
+    {
+      "label": "Protects ALB",
+      "ruleId": "aws.wafv2.association-protects-alb"
+    },
+    {
+      "label": "Uses regional Web ACL",
+      "ruleId": "aws.wafv2.association-uses-web-acl"
     }
   ],
   "services": [
@@ -2860,6 +2868,27 @@
             "aws.elb.application-load-balancer.vpc"
           ],
           "professionalExplanation": "Presentation reflects canonical bindings and does not confer provisioning or application authority."
+        },
+        {
+          "allowsMultipleEdges": false,
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "category": "networking",
+          "containsExclusiveRelationships": true,
+          "description": "Accept an exact same-Region WAF association.",
+          "directionPolicy": "input-only",
+          "guidedExplanation": "Connect the exact regional WAF association. Count mode observes traffic.",
+          "id": "aws.elb.application-load-balancer.dock.waf",
+          "label": "Protects ALB",
+          "order": 100,
+          "placement": "left",
+          "portIds": [
+            "aws.elb.application-load-balancer.waf"
+          ],
+          "professionalExplanation": "Stable presentation only; typed endpoints, cardinality and native association retain deployment meaning."
         }
       ],
       "serviceId": "aws.elb.application-load-balancer"
@@ -4964,6 +4993,79 @@
         }
       ],
       "serviceId": "aws.stepfunctions.state-machine"
+    },
+    {
+      "docks": [
+        {
+          "allowsMultipleEdges": false,
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 1
+          },
+          "category": "networking",
+          "containsExclusiveRelationships": true,
+          "description": "Exact regional WAF association; no IAM or traffic rules are inferred.",
+          "directionPolicy": "output-only",
+          "guidedExplanation": "Connect the exact regional WAF association. Count mode observes traffic.",
+          "id": "aws.wafv2.alb-association.dock.alb",
+          "label": "Protects ALB",
+          "order": 101,
+          "placement": "right",
+          "portIds": [
+            "aws.wafv2.alb-association.alb"
+          ],
+          "professionalExplanation": "Stable presentation only; typed endpoints, cardinality and native association retain deployment meaning."
+        },
+        {
+          "allowsMultipleEdges": false,
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 1
+          },
+          "category": "networking",
+          "containsExclusiveRelationships": true,
+          "description": "Exact regional WAF association; no IAM or traffic rules are inferred.",
+          "directionPolicy": "output-only",
+          "guidedExplanation": "Connect the exact regional WAF association. Count mode observes traffic.",
+          "id": "aws.wafv2.alb-association.dock.web-acl",
+          "label": "Uses regional Web ACL",
+          "order": 100,
+          "placement": "right",
+          "portIds": [
+            "aws.wafv2.alb-association.web-acl"
+          ],
+          "professionalExplanation": "Stable presentation only; typed endpoints, cardinality and native association retain deployment meaning."
+        }
+      ],
+      "serviceId": "aws.wafv2.alb-association"
+    },
+    {
+      "docks": [
+        {
+          "allowsMultipleEdges": true,
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 1
+          },
+          "category": "networking",
+          "containsExclusiveRelationships": false,
+          "description": "Accept an exact same-Region WAF association.",
+          "directionPolicy": "input-only",
+          "guidedExplanation": "Connect the exact regional WAF association. Count mode observes traffic.",
+          "id": "aws.wafv2.web-acl.dock.association",
+          "label": "Uses regional Web ACL",
+          "order": 100,
+          "placement": "left",
+          "portIds": [
+            "aws.wafv2.web-acl.association"
+          ],
+          "professionalExplanation": "Stable presentation only; typed endpoints, cardinality and native association retain deployment meaning."
+        }
+      ],
+      "serviceId": "aws.wafv2.web-acl"
     }
   ]
 }

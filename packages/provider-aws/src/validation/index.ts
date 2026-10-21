@@ -1,3 +1,5 @@
+import { wafValidationDescriptor } from "../catalog/services/regional-waf.js";
+import { createRegionalWafReadinessRule } from "./regional-waf-rule.js";
 import {
   defineProviderValidationRuleRegistrationV1,
   type ProviderValidationRuleRegistrationV1,
@@ -96,6 +98,10 @@ export function createAwsValidationRuleRegistrationsV1(
   catalog: AwsValidationCatalogV1 = awsCatalogArtifactV1,
 ): readonly ProviderValidationRuleRegistrationV1[] {
   return Object.freeze([
+    defineProviderValidationRuleRegistrationV1({
+      descriptor: wafValidationDescriptor,
+      rule: createRegionalWafReadinessRule(catalog),
+    }),
     defineProviderValidationRuleRegistrationV1({
       descriptor: ebsReadinessValidationRuleDescriptor,
       rule: createEbsReadinessRuleV1(catalog),

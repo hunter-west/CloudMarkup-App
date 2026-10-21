@@ -75,7 +75,7 @@
       "buildContracts": [],
       "contractVersion": 1,
       "catalog": {
-        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+        "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
         "id": "aws.cloudmarkup.notes-api-catalog",
         "version": "0.30.0"
       },
@@ -89,9 +89,9 @@
       "kind": "cloudmarkup.application-source-manifest",
       "inputDigests": {
         "applicationContracts": "sha256:7df95bf4b42a5a32bdc2e6d72e9e3050b07bd653845b6ed3d9509f383f0bcd04",
-        "architectureDocument": "sha256:0f60f112fb0236020c190a8d46600f4a7f8902cf85cab88975963d560374c8d3",
-        "normalizedSolution": "sha256:33d2f9d183bc8a25d94c0c7109ad30b2f0fe7f112e2821575d1dea0c3caac92d",
-        "solutionRevision": "sha256:9a0f9df557e403ff9b35df76d1247dd868f817b27cc45a291cb6411197e4c076",
+        "architectureDocument": "sha256:dbcabe4441b7c62fa8f262d7154a899be8837820fe9d318f540d1f344a39409b",
+        "normalizedSolution": "sha256:c6c18ba466b0af4119dd8ddb8f1a515c12a339350668400b9abf01bac5335336",
+        "solutionRevision": "sha256:3548b579d1d863fc88ec41cb3268cfef8d47f45238b04301f4f88ddbb5fc97b3",
         "workloadBehavior": "sha256:2a27dbeb9d033f0fcdd09993aa27494181e87d10fbbaa009ec5911336b103fd0"
       },
       "manifestPath": "application/manifest.json",
@@ -117,7 +117,7 @@
         "version": "1.0.0"
       }
     },
-    "sourceManifestDigest": "sha256:d9cf9892de28c2b32e381daf8314d37875841e61b9ebdcaa385f8ce7aaa6c404",
+    "sourceManifestDigest": "sha256:95489210f245dca2f788f18d6fd297572d065e1cb2aa054b65becf841eab42ba",
     "template": {
       "digest": "sha256:c7721961d935faa1e0c87b7356bc6d90112a02f3c7f716be33a648bf99740604",
       "id": "cloudmarkup.template.aws-lambda-notes-typescript",
@@ -132,5 +132,5 @@
       }
     ]
   },
-  "artifactDigest": "sha256:8d583c1dd29bbab1b739311f9d17c2aab2827d90d0b241db8f73e3078f1afa2c"
+  "artifactDigest": "sha256:03a6a8822c91b7b460930229a0fd9e2a5156f705cc8230fa18c2e11e66dfb8bd"
 }

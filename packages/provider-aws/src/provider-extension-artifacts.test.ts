@@ -268,7 +268,11 @@ describe("AWS provider extension artifacts v1", () => {
         serviceId === "aws.region.boundary" ||
         serviceId === "aws.ec2.availability-zone";
       expect(service.targetReadiness.terraform.status).toBe(
-        isAmbientBoundary ? "not-applicable" : "supported",
+        isAmbientBoundary
+          ? "not-applicable"
+          : serviceId.startsWith("aws.wafv2.")
+            ? "pending"
+            : "supported",
       );
       expect(service.targetReadiness.cloudformation.status).toBe(
         isAmbientBoundary ? "not-applicable" : "supported",

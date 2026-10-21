@@ -41,6 +41,8 @@ func (renderer *cloudFormationRenderer) renderResources() {
 			continue
 		}
 		switch resource.ServiceType {
+		case serviceWaf, serviceWafAssociation:
+			renderer.renderWafResource(resource)
 		case serviceEbsVolume, serviceEbsAttachment:
 			renderer.renderEbsResource(resource)
 		case serviceAlb, serviceAlbTarget, serviceAlbListener:

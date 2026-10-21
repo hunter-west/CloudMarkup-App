@@ -1,6 +1,6 @@
 # Terraform semantic summary: naming-collisions
 
-- Artifact digest: `sha256:ee6f3e3c72334d0dd29eafe50db854362b0f643c896b3d3acd402467ea2d0e58`
+- Artifact digest: `sha256:d04473f0eb2c43184ec873ceda6bca6733cc6b83739d6be5e1db8d1567b3dc5c`
 - Generated files: 14
 - Resources: 4
 - Application artifact contracts: 1
