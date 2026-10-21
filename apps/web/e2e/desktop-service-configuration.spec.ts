@@ -28,7 +28,7 @@ async function readViewport(viewport: Locator) {
 async function expectExpandedServiceFits(
   page: Page,
   node: Locator,
-  expectedZoom: number,
+  expectedViewport: { x: number; y: number; zoom: number },
 ) {
   const canvas = page.locator(".architecture-canvas__flow");
   const viewport = page.locator(".react-flow__viewport");
@@ -46,7 +46,9 @@ async function expectExpandedServiceFits(
         card.y >= bounds.y - 1 &&
         card.x + card.width <= bounds.x + bounds.width + 1 &&
         card.y + card.height <= bounds.y + bounds.height + 1 &&
-        Math.abs(current.zoom - expectedZoom) < 0.00001
+        Math.abs(current.x - expectedViewport.x) < 0.01 &&
+        Math.abs(current.y - expectedViewport.y) < 0.01 &&
+        Math.abs(current.zoom - expectedViewport.zoom) < 0.00001
       );
     })
     .toBe(true);
@@ -121,25 +123,14 @@ test("expands the service on canvas and prioritizes IAM permissions without meta
   if (!before) throw new Error("Expected a visible service");
   await node.dblclick({ force: true, position: { x: 10, y: 10 } });
   await expect(node).toHaveAttribute("data-collapsed", "false");
-  await expectExpandedServiceFits(
-    page,
-    node,
-    Math.min(initialViewport.zoom, 1),
-  );
-  // Expansion pans the rendered card while preserving its graph position.
-  await expect
-    .poll(async () => {
-      const current = await readViewport(viewport);
-      return Math.hypot(
-        current.x - initialViewport.x,
-        current.y - initialViewport.y,
-      );
-    })
-    .toBeGreaterThan(1);
+  await expectExpandedServiceFits(page, node, initialViewport);
+  // Floating details leave the card, graph position, and viewport unchanged.
   await expect
     .poll(async () => (await node.boundingBox())?.width ?? 0)
-    .toBeGreaterThan(before.width);
-  const details = node.locator(".architecture-service-details");
+    .toBeCloseTo(before.width, 1);
+  const details = page.locator(
+    '[data-architecture-service-details-for="node_iam_role_policy_fixture"]',
+  );
   await expect(details).toBeVisible();
   const expanded = await node.boundingBox();
   const content = await details.boundingBox();
@@ -149,25 +140,17 @@ test("expands the service on canvas and prioritizes IAM permissions without meta
   if (!expanded || !content || !collapseControl)
     throw new Error("Expected an expanded service and collapse control");
   expect(collapseControl.x).toBeGreaterThan(expanded.x);
-  expect(collapseControl.y).toBeGreaterThan(expanded.y + expanded.height / 2);
-  expect(content.x).toBeGreaterThanOrEqual(expanded.x);
-  expect(content.x + content.width).toBeLessThanOrEqual(
-    expanded.x + expanded.width + 1,
-  );
+  expect(content.width).toBeGreaterThan(expanded.width);
   await node
     .getByRole("button", { name: /^Collapse /u })
     .click({ force: true });
   await expect(node).toHaveAttribute("data-collapsed", "true");
   await node.getByRole("button", { name: /^Expand /u }).click({ force: true });
   await expect(node).toHaveAttribute("data-collapsed", "false");
-  await expectExpandedServiceFits(
-    page,
-    node,
-    Math.min(initialViewport.zoom, 1),
-  );
+  await expectExpandedServiceFits(page, node, initialViewport);
   await expect(editor).toHaveAttribute("data-content-hash", contentHash ?? "");
   await expect(editor).toHaveAttribute("data-visual-hash", visualHash ?? "");
-  await node.getByRole("button", { name: "Configure", exact: true }).click();
+  await details.getByRole("button", { name: "Configure", exact: true }).click();
   await expect(
     page.getByText("Custom inline policies", { exact: true }).first(),
   ).toBeVisible();
@@ -190,7 +173,12 @@ test.describe("configuration inspector containment", () => {
       '[data-architecture-node-id="node_iam_role_policy_fixture"]',
     );
     await node.dblclick({ force: true, position: { x: 10, y: 10 } });
-    await node.getByRole("button", { name: "Configure", exact: true }).click();
+    await page
+      .locator(
+        '[data-architecture-service-details-for="node_iam_role_policy_fixture"]',
+      )
+      .getByRole("button", { name: "Configure", exact: true })
+      .click();
     const inspector = page.getByRole("dialog", { name: "Configure inspector" });
     const configuration = inspector.locator(".owned-configuration");
     await expect(
@@ -227,16 +215,16 @@ test.describe("expanded service safe area", () => {
     const tools = page.getByRole("navigation", { name: "Workspace tools" });
     const visualHash = await editor.getAttribute("data-visual-hash");
     const contentHash = await editor.getAttribute("data-content-hash");
-    const zoom = await viewport.evaluate(
-      (element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).a,
-    );
-    expect(zoom).toBeGreaterThan(1);
+    const initialViewport = await readViewport(viewport);
+    expect(initialViewport.zoom).toBeGreaterThan(1);
 
     await node.getByRole("button", { name: /^Expand /u }).click();
-    const details = node.locator(".architecture-service-details");
+    const details = page.locator(
+      '[data-architecture-service-details-for="node_iam_role_policy_fixture"]',
+    );
     const collapse = node.getByRole("button", { name: /^Collapse /u });
     await expect(details).toBeVisible();
-    await expectExpandedServiceFits(page, node, 1);
+    await expectExpandedServiceFits(page, node, initialViewport);
     await expect(collapse).toBeInViewport();
     const [control, toolbar] = await Promise.all([
       collapse.boundingBox(),
@@ -369,7 +357,10 @@ test("puts Lambda application function first at a wide desktop size", async ({
   await page.setViewportSize({ width: 1920, height: 1080 });
   const node = page.locator('[data-architecture-node-id="node_api_handler"]');
   await node.dblclick({ force: true, position: { x: 10, y: 10 } });
-  await node.getByRole("button", { name: "Configure", exact: true }).click();
+  await page
+    .locator('[data-architecture-service-details-for="node_api_handler"]')
+    .getByRole("button", { name: "Configure", exact: true })
+    .click();
   const inspector = page.locator("#responsive-inspector-panel");
   await expect(
     inspector.getByRole("textbox", { name: /Purpose/u }),

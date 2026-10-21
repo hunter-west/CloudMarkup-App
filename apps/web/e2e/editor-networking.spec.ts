@@ -720,7 +720,10 @@ test("shows the exact networking hierarchy, readable associations, education, mi
     "node_nat_gateway_a",
     "NAT gateway · AZ A",
   );
-  await nat.getByRole("button", { name: "Explain NAT gateway · AZ A" }).click();
+  await page
+    .locator('[data-architecture-service-details-for="node_nat_gateway_a"]')
+    .getByRole("button", { name: "Explain NAT gateway · AZ A" })
+    .click();
   const natHelp = page.getByRole("dialog", {
     name: "Learn inspector",
   });
@@ -740,7 +743,10 @@ test("shows the exact networking hierarchy, readable associations, education, mi
     "node_s3_gateway_endpoint",
     "S3 gateway endpoint",
   );
-  await endpoint
+  await page
+    .locator(
+      '[data-architecture-service-details-for="node_s3_gateway_endpoint"]',
+    )
     .getByRole("button", { name: "Explain S3 gateway endpoint" })
     .click();
   const endpointHelp = page.getByRole("dialog", {
@@ -761,9 +767,13 @@ test("shows the exact networking hierarchy, readable associations, education, mi
     "node_application_security_group",
     "Application security group",
   );
-  const securityGroupAssociations = securityGroup.getByRole("list", {
-    name: "Network associations for Application security group",
-  });
+  const securityGroupAssociations = page
+    .locator(
+      '[data-architecture-service-details-for="node_application_security_group"]',
+    )
+    .getByRole("list", {
+      name: "Network associations for Application security group",
+    });
   for (const badge of [
     {
       count: "1",
@@ -836,7 +846,8 @@ test("shows the exact networking hierarchy, readable associations, education, mi
       routeTable.nodeId,
       routeTable.label,
     );
-    await node
+    await page
+      .locator(`[data-architecture-service-details-for="${routeTable.nodeId}"]`)
       .getByRole("button", { name: `Explain ${routeTable.label}` })
       .click();
     const help = page.getByRole("dialog", {
@@ -877,12 +888,13 @@ test("shows the exact networking hierarchy, readable associations, education, mi
       .click();
   }
 
-  const lambda = await expandResource(
+  await expandResource(
     page,
     "node_networked_lambda",
     "Private application function",
   );
-  await lambda
+  await page
+    .locator('[data-architecture-service-details-for="node_networked_lambda"]')
     .getByRole("button", { name: "Explain Private application function" })
     .click();
   const lambdaHelp = page.getByRole("dialog", {
@@ -1738,6 +1750,7 @@ test("turns nested network boundaries into readable overview tiles as the canvas
   const subnet = architectureNode(page, "node_public_subnet_a");
   const region = architectureNode(page, "node_network_region");
   await expect(subnet).toBeVisible();
+  await expect(subnet).toHaveAttribute("data-condensed-heading", "true");
   await expect
     .poll(async () =>
       subnet

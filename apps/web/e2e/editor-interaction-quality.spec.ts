@@ -227,7 +227,10 @@ test("closes the connection chooser before opening the compact wizard below the 
   await apiNode
     .getByRole("button", { name: "Expand API Gateway HTTP API" })
     .click();
-  await apiNode
+  await page
+    .locator(
+      '[data-architecture-service-details-for="node_apigateway_http_api"]',
+    )
     .getByRole("button", { name: "Add connection", exact: true })
     .click();
   const chooser = page.getByRole("dialog", {
@@ -264,10 +267,9 @@ test("closes the Connect inspector when its modal connection workflow starts", a
   const lambdaNode = page.locator(
     '[data-architecture-node-id="node_api_handler"]',
   );
-  await lambdaNode
-    .locator(":scope > header")
-    .getByText("Notes API handler", { exact: true })
-    .click();
+  await lambdaNode.locator(":scope > header").click({
+    position: { x: 8, y: 8 },
+  });
   await page
     .getByRole("navigation", { name: "Inspector tools" })
     .getByRole("button", { name: "Connect" })
@@ -328,9 +330,9 @@ test("keeps the blank-canvas message inside the unobscured canvas safe area", as
     page.getByRole("navigation", { name: "Workspace tools" }),
     "workspace launcher",
   );
-  const topStackBounds = await requiredBox(
-    page.locator(".architecture-top-stack"),
-    "canvas top stack",
+  const headerBounds = await requiredBox(
+    page.getByRole("banner", { name: "Application header" }),
+    "application header",
   );
 
   expect(emptyBounds.x).toBeGreaterThanOrEqual(
@@ -340,7 +342,7 @@ test("keeps the blank-canvas message inside the unobscured canvas safe area", as
     inspectorBounds.x + 1,
   );
   expect(emptyBounds.y).toBeGreaterThanOrEqual(
-    topStackBounds.y + topStackBounds.height - 1,
+    headerBounds.y + headerBounds.height - 1,
   );
   expect(emptyBounds.y + emptyBounds.height).toBeLessThanOrEqual(
     workspaceBounds.y + 1,

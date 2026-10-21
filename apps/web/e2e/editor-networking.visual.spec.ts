@@ -94,9 +94,11 @@ test.describe("AWS networking visual baselines", () => {
       .getByRole("button", { name: "Expand Private application function" })
       .click();
     await fitArchitecture(page);
-    const explain = lambda.getByRole("button", {
-      name: "Explain Private application function",
-    });
+    const explain = page
+      .locator(
+        '[data-architecture-service-details-for="node_networked_lambda"]',
+      )
+      .getByRole("button", { name: "Explain Private application function" });
     const inspectorLauncher = page.getByRole("navigation", {
       name: "Inspector tools",
     });

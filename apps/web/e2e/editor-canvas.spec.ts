@@ -404,7 +404,7 @@ test("defaults every service to compact aggregate connection points without chan
   ).toBeLessThanOrEqual(1);
 
   const mountedDetails = lambda.locator(
-    '[data-architecture-service-details-for="node_api_handler"]',
+    "#architecture-service-details-node_api_handler",
   );
   await expect(mountedDetails).toHaveCount(1);
   await expect(mountedDetails).toHaveAttribute("hidden", "");
@@ -2743,10 +2743,14 @@ test("draws a typed API connection, closes its dock, and confirms by keyboard", 
   }
   await expandServiceNode(apiNode, "API Gateway HTTP API");
 
-  const addConnection = apiNode.getByRole("button", {
-    name: "Add connection",
-    exact: true,
-  });
+  const addConnection = editor
+    .locator(
+      '[data-architecture-service-details-for="node_apigateway_http_api"]',
+    )
+    .getByRole("button", {
+      name: "Add connection",
+      exact: true,
+    });
   await addConnection.focus();
   await expect(addConnection).toBeFocused();
   await addConnection.press("Enter");
