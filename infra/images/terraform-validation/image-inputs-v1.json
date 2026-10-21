@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "kind": "cloudmarkup.image-context-inputs",
+  "contextId": "terraform-validation",
+  "platform": "linux/amd64",
+  "self": {
+    "path": "image-inputs-v1.json",
+    "role": "context-manifest",
+    "executable": false
+  },
+  "tools": {
+    "node": {
+      "version": "24.18.0",
+      "baseImage": "node:24.18.0-alpine3.24",
+      "indexDigest": "sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd",
+      "imageDigest": "sha256:4ba75f835bb8802193e4c114572113d4b26f95f6f094f4b5229d2a77773e0afc"
+    },
+    "terraform": {
+      "version": "1.16.2"
+    },
+    "tflint": {
+      "version": "0.64.0"
+    },
+    "trivy": {
+      "version": "0.74.0",
+      "binarySha256": "2f78848b474c6f0b27d0df1833ae8fc7d297640344c6d5c7a25f63cc9e22d3dc"
+    },
+    "provider": {
+      "source": "registry.terraform.io/hashicorp/aws",
+      "version": "6.63.0",
+      "platform": "linux_amd64"
+    }
+  },
+  "offlineInputs": {
+    "acquisition": {
+      "path": "offline/acquisition-v1.json",
+      "sha256": "64f3662a35c81085c8123a130cc145c3d028b45a96e3689410a029dbba1639a6",
+      "sizeBytes": 5850
+    },
+    "providerLock": {
+      "path": "offline/.terraform.lock.hcl",
+      "sha256": "01cb33612cba1305153a125d0a8f099b7d1b5a1642d1236c388883f82e7514ea",
+      "sizeBytes": 410
+    },
+    "providerMirror": {
+      "indexPath": "offline/provider-mirror/index-v1.json",
+      "indexSha256": "21b5d76c0a3a633011fe8b91f14317768c31d85116cccd0ec2e6cc5206b2d0a7"
+    },
+    "terraformCliConfig": {
+      "path": "offline/terraform.rc",
+      "sha256": "030170e12086e5587775f589eae9eb45027df55d8e6b088e0623340484d2682a",
+      "sizeBytes": 182
+    },
+    "trivyDatabase": {
+      "manifestDigest": "sha256:98e1c199793bfcbe64fa41538fa3cf2c55650689a7920075bbba6165404a44d0",
+      "layerDigest": "sha256:1edf7a495c6d68e691fb710b63926e4f1a3dbffa392fd8057cd10bdfd8c3eef5",
+      "layerSizeBytes": 117915639
+    }
+  },
+  "generatedPrefixes": [
+    {
+      "path": "offline/apk",
+      "role": "verified-runtime-package"
+    },
+    {
+      "path": "offline/bin",
+      "role": "verified-tool-binaries"
+    },
+    {
+      "path": "offline/licenses",
+      "role": "verified-tool-licenses"
+    },
+    {
+      "path": "offline/provider-mirror",
+      "role": "verified-provider-mirror"
+    },
+    {
+      "path": "offline/trivy-cache",
+      "role": "verified-trivy-database"
+    }
+  ],
+  "members": [
+    {
+      "path": "Dockerfile",
+      "role": "container-build-definition",
+      "sha256": "d9e8a9a1746d80b3dc56e9726b3a49039ef7f70319f94113f19cf8790c8fc920",
+      "sizeBytes": 5341,
+      "executable": false
+    },
+    {
+      "path": "README.md",
+      "role": "documentation",
+      "sha256": "dc18edb115b0475ea5fdfd18e5fc60c08a8b1c5f64bbb23ec9708ce060987ef0",
+      "sizeBytes": 8259,
+      "executable": false
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "role": "third-party-notices",
+      "sha256": "97f5035692aa4115892e94c876e323c7d38ee2df4d933808d060beef8f334c87",
+      "sizeBytes": 1798,
+      "executable": false
+    },
+    {
+      "path": "offline/.terraform.lock.hcl",
+      "role": "provider-lock",
+      "sha256": "01cb33612cba1305153a125d0a8f099b7d1b5a1642d1236c388883f82e7514ea",
+      "sizeBytes": 410,
+      "executable": false
+    },
+    {
+      "path": "offline/acquisition-v1.json",
+      "role": "offline-acquisition",
+      "sha256": "64f3662a35c81085c8123a130cc145c3d028b45a96e3689410a029dbba1639a6",
+      "sizeBytes": 5850,
+      "executable": false
+    },
+    {
+      "path": "offline/provider-mirror/index-v1.json",
+      "role": "provider-mirror-index",
+      "sha256": "21b5d76c0a3a633011fe8b91f14317768c31d85116cccd0ec2e6cc5206b2d0a7",
+      "sizeBytes": 846,
+      "executable": false
+    },
+    {
+      "path": "offline/terraform.rc",
+      "role": "terraform-cli-config",
+      "sha256": "030170e12086e5587775f589eae9eb45027df55d8e6b088e0623340484d2682a",
+      "sizeBytes": 182,
+      "executable": false
+    },
+    {
+      "path": "offline/tool-binaries-v1.json",
+      "role": "tool-binary-manifest",
+      "sha256": "c71eb91ce77d0514005c848955c5786ab416d8583bb2013a232949befab114fd",
+      "sizeBytes": 766,
+      "executable": false
+    },
+    {
+      "path": "schemas/self-test-result-v1.schema.json",
+      "role": "contract-schema",
+      "sha256": "46d70a41b338203415837f248ab5eaf77591d33f55eacb38de240abab642d8c7",
+      "sizeBytes": 911,
+      "executable": false
+    },
+    {
+      "path": "schemas/service-error-v1.schema.json",
+      "role": "contract-schema",
+      "sha256": "c1ebf93ba297e272cc2ef974757d8429f6e585571ebc1a6ff9ac81f73a066635",
+      "sizeBytes": 942,
+      "executable": false
+    },
+    {
+      "path": "self-test/context.test.cjs",
+      "role": "source-self-test",
+      "sha256": "af0013c8eb88cdada33c0cf2a9fa2422940026898c2736691cd9e2c838b1355a",
+      "sizeBytes": 12642,
+      "executable": false
+    },
+    {
+      "path": "self-test/fixtures/accepted/versions.tf",
+      "role": "accepted-fixture",
+      "sha256": "e0320fddc8a46c6e621f4e00279674abb53ca8fcdbef8f079e4f61097242f665",
+      "sizeBytes": 260,
+      "executable": false
+    },
+    {
+      "path": "self-test/fixtures/missing-provider/versions.tf",
+      "role": "negative-fixture",
+      "sha256": "01216c20dac2d7858c15b43b85dbead728678a3a7ee7dc55cd520e1392d31589",
+      "sizeBytes": 164,
+      "executable": false
+    },
+    {
+      "path": "self-test/fixtures/syntax-failure/main.tf",
+      "role": "negative-fixture",
+      "sha256": "fa4deb38a288832598166507762025b46a43b82a061c5ec403d5d0cbbf5a0e61",
+      "sizeBytes": 88,
+      "executable": false
+    },
+    {
+      "path": "self-test/run.mjs",
+      "role": "built-image-self-test",
+      "sha256": "baaed4b14261bc58df750eb8ab998ddc377bf352566eaa12638edb4086cfb50d",
+      "sizeBytes": 9277,
+      "executable": false
+    },
+    {
+      "path": "service/runtime.cjs",
+      "role": "service-runtime",
+      "sha256": "074153f19e597e8fcad3f4fc8accd2dd5322d83a6d561137670682690655241f",
+      "sizeBytes": 20601,
+      "executable": false
+    },
+    {
+      "path": "service/terraform-validation-service",
+      "role": "service-entrypoint",
+      "sha256": "eba6f772dcb8932e1ff0a2e0e7441df8f5cc1b5554b6712d0e0f2f2a9ae7b680",
+      "sizeBytes": 450,
+      "executable": true
+    },
+    {
+      "path": "service/terraform-validation-stage",
+      "role": "staging-entrypoint",
+      "sha256": "798a57aa2e85f0f794284be795ea84f2aa27dbabbe3c56a9c02bf9f40a4fa6a0",
+      "sizeBytes": 3117,
+      "executable": true
+    }
+  ]
+}

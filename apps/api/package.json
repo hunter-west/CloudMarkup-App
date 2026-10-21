@@ -1,0 +1,113 @@
+{
+  "name": "@cloudmarkup/api",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/app.js",
+  "types": "./src/app.ts",
+  "exports": {
+    ".": {
+      "types": "./src/app.ts",
+      "import": "./dist/app.js"
+    },
+    "./billing": {
+      "types": "./src/billing.ts",
+      "import": "./dist/billing.js"
+    },
+    "./identity": {
+      "types": "./src/identity.ts",
+      "import": "./dist/identity.js"
+    },
+    "./lambda": {
+      "types": "./src/lambda.ts",
+      "import": "./dist/lambda.js"
+    },
+    "./local-solution-export": {
+      "types": "./src/local-development/solution-export-composition.ts",
+      "import": "./dist/local-development/solution-export-composition.js"
+    },
+    "./persistence": {
+      "types": "./src/persistence.ts",
+      "import": "./dist/persistence.js"
+    },
+    "./project-cleanup": {
+      "types": "./src/production-project-content-cleanup.ts",
+      "import": "./dist/production-project-content-cleanup.js"
+    },
+    "./solution-export-worker": {
+      "types": "./src/production-solution-export-worker.ts",
+      "import": "./dist/production-solution-export-worker.js"
+    },
+    "./solution-export-profile": {
+      "types": "./src/production-solution-export-profile.ts",
+      "import": "./dist/production-solution-export-profile.js"
+    },
+    "./solution-export-assets": {
+      "types": "./src/production-solution-export-assets.ts",
+      "import": "./dist/production-solution-export-assets.js"
+    },
+    "./self-host-configuration": {
+      "types": "./src/self-host/configuration.ts",
+      "import": "./dist/self-host/configuration.js"
+    },
+    "./self-host-model-history": {
+      "types": "./src/self-host-model-history.ts",
+      "import": "./dist/self-host-model-history.js"
+    },
+    "./self-host-owner": {
+      "types": "./src/self-host-owner.ts",
+      "import": "./dist/self-host-owner.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev:local": "tsx src/local-server.ts",
+    "migrate:local": "tsx src/adapters/persistence/local-cli.ts migrate",
+    "seed:local": "tsx src/adapters/persistence/local-cli.ts seed",
+    "type-check": "tsc -p tsconfig.json",
+    "test": "pnpm --dir ../.. exec vitest run --project api",
+    "test:postgres": "tsx src/adapters/persistence/require-postgres-test-url.ts && pnpm --dir ../.. exec vitest run --project api postgres.integration.test.ts hosted-validation.integration.test.ts async-job-repository.integration.test.ts model-runtime-invocation-store.integration.test.ts model-platform-spend-store.integration.test.ts",
+    "start:self-host": "node dist/self-host/server.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "catalog:",
+    "@aws-sdk/client-kms": "catalog:",
+    "@aws-sdk/client-rds-data": "catalog:",
+    "@aws-sdk/client-rds": "catalog:",
+    "@aws-sdk/client-s3": "catalog:",
+    "@aws-sdk/client-secrets-manager": "catalog:",
+    "@aws-sdk/client-sqs": "catalog:",
+    "@cloudmarkup/ai-extension-generation": "workspace:*",
+    "@cloudmarkup/api-contract": "workspace:*",
+    "@cloudmarkup/application-build-runner": "workspace:*",
+    "@cloudmarkup/application-generator": "workspace:*",
+    "@cloudmarkup/customer-ci-workflow": "workspace:*",
+    "@cloudmarkup/domain": "workspace:*",
+    "@cloudmarkup/diagram-export": "workspace:*",
+    "@cloudmarkup/github-repository-export": "workspace:*",
+    "@cloudmarkup/job-framework": "workspace:*",
+    "@cloudmarkup/model-gateway": "workspace:*",
+    "@cloudmarkup/provider-aws": "workspace:*",
+    "@cloudmarkup/provider-sdk": "workspace:*",
+    "@cloudmarkup/repository-importer": "workspace:*",
+    "@cloudmarkup/schemas": "workspace:*",
+    "@cloudmarkup/solution-export": "workspace:*",
+    "@cloudmarkup/solution-export-workflow": "workspace:*",
+    "@cloudmarkup/terraform-validation-runner": "workspace:*",
+    "@resvg/resvg-js": "catalog:",
+    "aws-jwt-verify": "catalog:",
+    "hono": "catalog:",
+    "pg": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudmarkup/config": "workspace:*",
+    "@types/aws-lambda": "catalog:",
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "contractVersion": 1,
+  "fixtures": [
+    {
+      "id": "api-gateway-lambda",
+      "intent": "One reviewed HTTP API integration invokes one Lambda.",
+      "layers": ["application", "iac"],
+      "support": "supported"
+    },
+    {
+      "id": "cognito-authorized-api",
+      "intent": "Cognito issuer and audience authorize the reviewed HTTP API.",
+      "layers": ["application", "iac"],
+      "support": "supported"
+    },
+    {
+      "id": "complete-supported-notes-api",
+      "intent": "The complete authenticated notes CRUD pattern is represented.",
+      "layers": ["application", "iac"],
+      "support": "supported"
+    },
+    {
+      "id": "custom-inline-iam-policy",
+      "intent": "A user-owned inline IAM policy remains distinct.",
+      "layers": ["iac"],
+      "support": "supported"
+    },
+    {
+      "id": "generated-plus-custom-policies",
+      "intent": "Generated edge permissions and user policy ownership coexist.",
+      "layers": ["iac"],
+      "support": "supported"
+    },
+    {
+      "id": "generated-resource-adoption",
+      "intent": "A reviewed imported resource emits deterministic adoption metadata.",
+      "layers": ["iac"],
+      "support": "supported"
+    },
+    {
+      "id": "generated-resource-deletion",
+      "intent": "Removing one generated edge removes only its owned permission closure.",
+      "layers": ["iac"],
+      "support": "supported"
+    },
+    {
+      "id": "generated-starter-lambda",
+      "intent": "A supported generated starter has deterministic IaC and source contracts.",
+      "layers": ["application", "iac"],
+      "support": "supported"
+    },
+    {
+      "id": "invalid-and-unsupported-configurations",
+      "intent": "Unsupported target and behavior shapes fail closed.",
+      "layers": ["application", "iac"],
+      "support": "negative"
+    },
+    {
+      "id": "lambda-dynamodb-read-only",
+      "intent": "One Lambda reads one DynamoDB table with exact generated IAM.",
+      "layers": ["application", "iac"],
+      "support": "supported"
+    },
+    {
+      "id": "lambda-dynamodb-read-write",
+      "intent": "One Lambda reads and writes DynamoDB with exact separate actions.",
+      "layers": ["application", "iac"],
+      "support": "supported"
+    },
+    {
+      "id": "malformed-solution-revision-or-workload-reference",
+      "intent": "Malformed immutable revision and workload references are rejected.",
+      "layers": ["application", "iac"],
+      "support": "negative"
+    },
+    {
+      "id": "minimal-lambda-infrastructure-only",
+      "intent": "A minimal Lambda emits infrastructure plus explicit code readiness.",
+      "layers": ["application", "iac"],
+      "support": "supported"
+    },
+    {
+      "id": "multiple-downstream-dependencies",
+      "intent": "One Lambda binds independent read and write table dependencies.",
+      "layers": ["application", "iac"],
+      "support": "supported"
+    },
+    {
+      "id": "multiple-trigger-compatible",
+      "intent": "Reviewed homogeneous trigger contracts dispatch deterministically.",
+      "layers": ["application"],
+      "support": "supported"
+    },
+    {
+      "id": "multiple-trigger-incompatible",
+      "intent": "Heterogeneous unreviewed trigger contracts fail closed.",
+      "layers": ["application"],
+      "support": "negative"
+    },
+    {
+      "id": "networking-low-cost-endpoint-serverless",
+      "intent": "Two private Availability Zones reach S3 through a gateway endpoint without NAT or internet-gateway resources.",
+      "layers": ["iac"],
+      "support": "supported"
+    },
+    {
+      "id": "networking-two-az-public-private",
+      "intent": "Two Availability Zones contain explicit public/private routing, zonal NAT gateways, an S3 endpoint, security policy, and Lambda VPC access.",
+      "layers": ["iac"],
+      "support": "supported"
+    },
+    {
+      "id": "mutable-display-label-changes",
+      "intent": "Mutable labels cannot alter deployment addresses or source paths.",
+      "layers": ["application", "iac"],
+      "support": "metamorphic"
+    },
+    {
+      "id": "naming-collisions",
+      "intent": "Stable identifiers disambiguate portable source and Terraform paths.",
+      "layers": ["application", "iac"],
+      "support": "supported"
+    },
+    {
+      "id": "stable-visual-only-changes",
+      "intent": "Layout and assistance-only changes leave semantic output identical.",
+      "layers": ["application", "iac"],
+      "support": "metamorphic"
+    },
+    {
+      "id": "unresolved-business-behavior",
+      "intent": "Unresolved behavior produces diagnostics and never complete coverage.",
+      "layers": ["application"],
+      "support": "negative"
+    },
+    {
+      "id": "user-owned-source-conflict",
+      "intent": "Existing user-owned source is preserved or conflicts explicitly.",
+      "layers": ["application"],
+      "support": "negative"
+    },
+    {
+      "id": "user-provided-lambda-artifact",
+      "intent": "User source yields only the validated artifact and handler contract.",
+      "layers": ["application", "iac"],
+      "support": "supported"
+    }
+  ]
+}

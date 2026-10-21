@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:17.11-alpine3.24
+    restart: "no"
+    environment:
+      POSTGRES_DB: cloudmarkup
+      POSTGRES_USER: cloudmarkup_owner
+      POSTGRES_PASSWORD:
+        ${CLOUDMARKUP_LOCAL_BOOTSTRAP_PASSWORD:?Use the local launcher}
+    ports:
+      - "127.0.0.1:${CLOUDMARKUP_LOCAL_POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloudmarkup_owner -d cloudmarkup"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    stop_grace_period: 10s
+
+volumes:
+  postgres-data:

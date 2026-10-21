@@ -1,0 +1,6 @@
+interface:
+  display_name: "Add Validation Rule"
+  short_description: "Add one deterministic provider validation rule"
+  default_prompt:
+    "Use $add-validation-rule to add one reviewed provider validation rule and
+    descriptor."

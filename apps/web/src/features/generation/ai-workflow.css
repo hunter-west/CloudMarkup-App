@@ -1,0 +1,112 @@
+.ai-workflow-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2) var(--cm-space-3);
+  list-style: none;
+  padding: 0;
+  margin: var(--cm-space-2) 0;
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-1);
+}
+.ai-workflow-steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ai-workflow-steps li > span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--cm-color-border);
+  border-radius: 50%;
+  font-variant-numeric: tabular-nums;
+}
+.ai-workflow-steps [aria-current="step"] {
+  color: var(--cm-color-action);
+  font-weight: 600;
+}
+.ai-workflow-steps [data-complete="true"] > span {
+  background: var(--cm-color-action-subtle);
+  color: var(--cm-color-action);
+}
+.ai-review,
+.ai-context {
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-lg);
+  padding: var(--cm-space-3);
+  background: var(--cm-color-surface);
+  margin-block: var(--cm-space-2);
+  min-width: 0;
+}
+.ai-eyebrow {
+  color: var(--cm-color-action);
+  font-size: var(--cm-font-size-1);
+  font-weight: 600;
+}
+.ai-review h4 {
+  margin: 6px 0 12px;
+}
+.ai-review-resources {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--cm-space-2);
+}
+.ai-review-resources > li {
+  border: 1px solid var(--cm-color-border);
+  border-radius: 12px;
+  padding: var(--cm-space-2);
+}
+.ai-review-resources > li > span {
+  display: block;
+  color: var(--cm-color-text-muted);
+  margin-top: 4px;
+}
+.ai-review table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--cm-font-size-1);
+}
+.ai-review td,
+.ai-review th {
+  padding: 8px;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--cm-color-border);
+}
+.ai-review caption {
+  text-align: left;
+  padding-block: 8px;
+}
+.ai-review dd {
+  overflow-wrap: anywhere;
+  margin-inline-start: 0;
+}
+.ai-review-evidence,
+.ai-context > p,
+.ai-credit-summary {
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-1);
+}
+.ai-prompt-starters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 12px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ai-review {
+    animation: ai-review-enter 180ms ease-out;
+  }
+  @keyframes ai-review-enter {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}

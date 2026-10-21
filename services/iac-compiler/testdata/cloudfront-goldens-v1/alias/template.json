@@ -1,0 +1,507 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudMarkup deterministic curated serverless, networking, and event-driven application infrastructure.",
+  "Metadata": {
+    "CloudMarkup": {
+      "ArchitectureRevisionId": "revision_notes_1",
+      "CatalogDigest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+      "CatalogVersion": "0.30.0",
+      "Compiler": "cloudmarkup.iac-compiler@1.2.1",
+      "SolutionRevisionId": "solution_notes_1"
+    }
+  },
+  "Resources": {
+    "Certificate": {
+      "Type": "AWS::CertificateManager::Certificate",
+      "Properties": {
+        "CertificateExport": "DISABLED",
+        "CertificateTransparencyLoggingPreference": "ENABLED",
+        "DomainName": "app.example.test",
+        "DomainValidationOptions": [
+          {
+            "DomainName": "app.example.test",
+            "HostedZoneId": {
+              "Ref": "PublicZone"
+            }
+          }
+        ],
+        "KeyAlgorithm": "RSA_2048",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "ValidationMethod": "DNS"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "certificate",
+          "GraphId": "certificate",
+          "Ownership": "user",
+          "TargetKey": "certificate"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Distribution": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Aliases": [
+            "app.example.test"
+          ],
+          "Comment": "Synthetic public static delivery",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD"
+            ],
+            "CachePolicyId": {
+              "Ref": "StaticCache"
+            },
+            "CachedMethods": [
+              "GET",
+              "HEAD"
+            ],
+            "Compress": true,
+            "TargetOriginId": "private-s3",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          "DefaultRootObject": "index.html",
+          "Enabled": false,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "DomainName": {
+                "Fn::GetAtt": [
+                  "Origin",
+                  "RegionalDomainName"
+                ]
+              },
+              "Id": "private-s3",
+              "OriginAccessControlId": {
+                "Ref": "DistributionOac"
+              },
+              "S3OriginConfig": {
+                "OriginAccessIdentity": ""
+              }
+            }
+          ],
+          "PriceClass": "PriceClass_100",
+          "Restrictions": {
+            "GeoRestriction": {
+              "RestrictionType": "none"
+            }
+          },
+          "ViewerCertificate": {
+            "AcmCertificateArn": {
+              "Ref": "Certificate"
+            },
+            "MinimumProtocolVersion": "TLSv1.2_2021",
+            "SslSupportMethod": "sni-only"
+          }
+        },
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "distribution",
+          "GraphId": "distribution",
+          "Ownership": "user",
+          "TargetKey": "distribution"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "DistributionOac": {
+      "Type": "AWS::CloudFront::OriginAccessControl",
+      "Properties": {
+        "OriginAccessControlConfig": {
+          "Description": "Graph-owned read-only private S3 origin",
+          "Name": "cm-1a902f9300494e1e9c08bfb2",
+          "OriginAccessControlOriginType": "s3",
+          "SigningBehavior": "always",
+          "SigningProtocol": "sigv4"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "distribution",
+          "GraphId": "distribution",
+          "Ownership": "user",
+          "TargetKey": "distribution"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Origin": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "BucketName": "cloudmarkup-synthetic-static-origin",
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "BucketOwnerEnforced"
+            }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "origin",
+          "GraphId": "origin",
+          "Ownership": "user",
+          "TargetKey": "origin"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "OriginPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "Origin"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "AWS:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":cloudfront::",
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
+                        ":distribution/",
+                        {
+                          "Ref": "Distribution"
+                        }
+                      ]
+                    ]
+                  }
+                }
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "cloudfront.amazonaws.com"
+                ]
+              },
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Origin",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ],
+              "Sid": "originpolicy"
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "origin_policy",
+          "GraphId": "origin_policy",
+          "Ownership": "generated",
+          "TargetKey": "origin_policy"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "PublicZone": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "HostedZoneConfig": {
+          "Comment": "Synthetic public DNS authority"
+        },
+        "HostedZoneTags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "Name": "example.test"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "public_zone",
+          "GraphId": "public_zone",
+          "Ownership": "user",
+          "TargetKey": "public_zone"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "StaticCache": {
+      "Type": "AWS::CloudFront::CachePolicy",
+      "Properties": {
+        "CachePolicyConfig": {
+          "Comment": "Synthetic bounded static cache",
+          "DefaultTTL": 300,
+          "MaxTTL": 3600,
+          "MinTTL": 0,
+          "Name": "StaticExample",
+          "ParametersInCacheKeyAndForwardedToOrigin": {
+            "CookiesConfig": {
+              "CookieBehavior": "none"
+            },
+            "EnableAcceptEncodingBrotli": true,
+            "EnableAcceptEncodingGzip": true,
+            "HeadersConfig": {
+              "HeaderBehavior": "none"
+            },
+            "QueryStringsConfig": {
+              "QueryStringBehavior": "none"
+            }
+          }
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "static_cache",
+          "GraphId": "static_cache",
+          "Ownership": "user",
+          "TargetKey": "static_cache"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "ViewerAliasA": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "Distribution",
+              "DomainName"
+            ]
+          },
+          "EvaluateTargetHealth": false,
+          "HostedZoneId": "Z2FDTNDATAQYW2"
+        },
+        "HostedZoneId": {
+          "Ref": "PublicZone"
+        },
+        "Name": "app.example.test",
+        "Type": "A"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "viewer_alias",
+          "GraphId": "viewer_alias",
+          "Ownership": "user",
+          "TargetKey": "viewer_alias"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "ViewerAliasAAAA": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "Distribution",
+              "DomainName"
+            ]
+          },
+          "EvaluateTargetHealth": false,
+          "HostedZoneId": "Z2FDTNDATAQYW2"
+        },
+        "HostedZoneId": {
+          "Ref": "PublicZone"
+        },
+        "Name": "app.example.test",
+        "Type": "AAAA"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "viewer_alias",
+          "GraphId": "viewer_alias",
+          "Ownership": "user",
+          "TargetKey": "viewer_alias"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    }
+  },
+  "Outputs": {
+    "CacheIdOutput": {
+      "Description": "Architecture output cache_id.",
+      "Value": {
+        "Ref": "StaticCache"
+      }
+    },
+    "CertificateArnOutput": {
+      "Description": "Architecture output certificate_arn.",
+      "Value": {
+        "Ref": "Certificate"
+      }
+    },
+    "DistributionArnOutput": {
+      "Description": "Architecture output distribution_arn.",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "arn:",
+            {
+              "Ref": "AWS::Partition"
+            },
+            ":cloudfront::",
+            {
+              "Ref": "AWS::AccountId"
+            },
+            ":distribution/",
+            {
+              "Ref": "Distribution"
+            }
+          ]
+        ]
+      }
+    },
+    "DistributionDomainNameOutput": {
+      "Description": "Architecture output distribution_domainName.",
+      "Value": {
+        "Fn::GetAtt": [
+          "Distribution",
+          "DomainName"
+        ]
+      }
+    },
+    "DistributionHostedZoneIdOutput": {
+      "Description": "Architecture output distribution_hostedZoneId.",
+      "Value": "Z2FDTNDATAQYW2"
+    },
+    "DistributionIdOutput": {
+      "Description": "Architecture output distribution_id.",
+      "Value": {
+        "Ref": "Distribution"
+      }
+    },
+    "PublicZoneNameServersOutput": {
+      "Description": "Architecture output public_zone_nameServers.",
+      "Value": {
+        "Fn::GetAtt": [
+          "PublicZone",
+          "NameServers"
+        ]
+      }
+    },
+    "PublicZoneZoneIdOutput": {
+      "Description": "Architecture output public_zone_zoneId.",
+      "Value": {
+        "Ref": "PublicZone"
+      }
+    }
+  }
+}

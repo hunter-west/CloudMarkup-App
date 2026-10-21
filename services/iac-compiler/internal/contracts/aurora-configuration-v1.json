@@ -1,0 +1,212 @@
+{
+  "aws.aurora.postgresql-cluster": {
+    "allowMajorUpgrade": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "autoMinorUpgrade": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "autoPause": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "backupRetentionDays": {
+      "default": 7,
+      "maximum": 35,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "backupWindow": {
+      "default": "02:00-02:30",
+      "pattern": "^(?:[01][0-9]|2[0-3]):[0-5][0-9]-(?:[01][0-9]|2[0-3]):[0-5][0-9]$",
+      "type": "string"
+    },
+    "capacityMode": {
+      "default": "serverless-v2",
+      "enum": ["serverless-v2"],
+      "type": "string"
+    },
+    "dataApi": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "databaseName": {
+      "maxLength": 63,
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9]*$",
+      "type": "string"
+    },
+    "deletionProtection": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "encryptionMode": {
+      "default": "aws-managed",
+      "enum": ["aws-managed"],
+      "type": "string"
+    },
+    "engine": {
+      "default": "aurora-postgresql",
+      "enum": ["aurora-postgresql"],
+      "type": "string"
+    },
+    "engineMode": {
+      "default": "provisioned",
+      "enum": ["provisioned"],
+      "type": "string"
+    },
+    "engineVersion": {
+      "pattern": "^16\\.[1-9][0-9]?$",
+      "type": "string"
+    },
+    "extendedSupport": {
+      "default": "disabled",
+      "enum": ["disabled"],
+      "type": "string"
+    },
+    "iamAuthentication": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "identifier": {
+      "maxLength": 63,
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string"
+    },
+    "maintenanceWindow": {
+      "default": "sun:03:00-sun:03:30",
+      "pattern": "^(?:mon|tue|wed|thu|fri|sat|sun):(?:[01][0-9]|2[0-3]):[0-5][0-9]-(?:mon|tue|wed|thu|fri|sat|sun):(?:[01][0-9]|2[0-3]):[0-5][0-9]$",
+      "type": "string"
+    },
+    "masterAuthMode": {
+      "default": "rds-managed",
+      "enum": ["rds-managed"],
+      "type": "string"
+    },
+    "masterUsername": {
+      "maxLength": 16,
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+      "type": "string"
+    },
+    "maximumCapacityAcus": {
+      "default": "4",
+      "enum": ["1", "2", "4", "8", "16", "32", "64"],
+      "type": "string"
+    },
+    "minimumCapacityAcus": {
+      "default": "0.5",
+      "enum": ["0.5", "1", "2", "4", "8", "16", "32", "64"],
+      "type": "string"
+    },
+    "port": {
+      "default": 5432,
+      "enum": [5432],
+      "type": "integer"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "storageEncrypted": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "storageType": {
+      "default": "aurora",
+      "enum": ["aurora"],
+      "type": "string"
+    }
+  },
+  "aws.aurora.postgresql-cluster-parameter-group": {
+    "description": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "family": {
+      "default": "aurora-postgresql16",
+      "enum": ["aurora-postgresql16"],
+      "type": "string"
+    },
+    "forceTls": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "name": {
+      "maxLength": 63,
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    }
+  },
+  "aws.aurora.postgresql-instance": {
+    "autoMinorUpgrade": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "availabilityZone": {
+      "pattern": "^[a-z]{2}(?:-[a-z]+)+-[1-9][a-z]$",
+      "type": "string"
+    },
+    "caIdentifier": {
+      "enum": ["rds-ca-rsa2048-g1", "rds-ca-rsa4096-g1", "rds-ca-ecc384-g1"],
+      "type": "string"
+    },
+    "identifier": {
+      "maxLength": 63,
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string"
+    },
+    "instanceClass": {
+      "default": "db.serverless",
+      "enum": ["db.serverless"],
+      "type": "string"
+    },
+    "monitoringInterval": {
+      "default": 0,
+      "enum": [0],
+      "type": "integer"
+    },
+    "performanceInsights": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "promotionTier": {
+      "default": 0,
+      "maximum": 15,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "publicAccess": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    }
+  }
+}

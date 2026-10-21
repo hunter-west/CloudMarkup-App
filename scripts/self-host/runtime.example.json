@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "server": {
+    "host": "127.0.0.1",
+    "port": 3000,
+    "publicOrigin": "http://127.0.0.1:4317",
+    "requestDeadlineMilliseconds": 60000,
+    "maximumInFlightRequests": 16
+  },
+  "identity": {
+    "mode": "local-owner",
+    "ownerPrincipalId": "principal_local_owner",
+    "operatorSecretReference": "operator.owner-proof"
+  },
+  "persistence": {
+    "objectRoot": "/data/cloudmarkup/objects",
+    "expectedSchemaVersion": "0138",
+    "readinessTimeoutMillis": 10000,
+    "shutdownTimeoutMillis": 30000,
+    "databases": {
+      "api": {
+        "host": "postgres",
+        "port": 5432,
+        "database": "cloudmarkup",
+        "user": "cloudmarkup_beta_api_runtime",
+        "passwordReference": "operator.database.api",
+        "tls": "disable",
+        "maxConnections": 2,
+        "connectionTimeoutMillis": 5000,
+        "idleTimeoutMillis": 10000,
+        "statementTimeoutMillis": 30000
+      },
+      "proposal": {
+        "host": "postgres",
+        "port": 5432,
+        "database": "cloudmarkup",
+        "user": "cloudmarkup_beta_proposal_runtime",
+        "passwordReference": "operator.database.proposal",
+        "tls": "disable",
+        "maxConnections": 2,
+        "connectionTimeoutMillis": 5000,
+        "idleTimeoutMillis": 10000,
+        "statementTimeoutMillis": 30000
+      },
+      "export": {
+        "host": "postgres",
+        "port": 5432,
+        "database": "cloudmarkup",
+        "user": "cloudmarkup_beta_export_runtime",
+        "passwordReference": "operator.database.export",
+        "tls": "disable",
+        "maxConnections": 2,
+        "connectionTimeoutMillis": 5000,
+        "idleTimeoutMillis": 10000,
+        "statementTimeoutMillis": 30000
+      },
+      "cleanup": {
+        "host": "postgres",
+        "port": 5432,
+        "database": "cloudmarkup",
+        "user": "cloudmarkup_beta_cleanup_runtime",
+        "passwordReference": "operator.database.cleanup",
+        "tls": "disable",
+        "maxConnections": 2,
+        "connectionTimeoutMillis": 5000,
+        "idleTimeoutMillis": 10000,
+        "statementTimeoutMillis": 30000
+      },
+      "billing": {
+        "host": "postgres",
+        "port": 5432,
+        "database": "cloudmarkup",
+        "user": "cloudmarkup_beta_billing_runtime",
+        "passwordReference": "operator.database.billing",
+        "tls": "disable",
+        "maxConnections": 2,
+        "connectionTimeoutMillis": 5000,
+        "idleTimeoutMillis": 10000,
+        "statementTimeoutMillis": 30000
+      }
+    }
+  },
+  "models": null,
+  "adapters": {
+    "proposalJobs": null,
+    "solutionExports": null,
+    "projectCleanup": null,
+    "billing": null,
+    "commercial": null,
+    "github": null,
+    "gitlab": null,
+    "continuousConformance": null
+  },
+  "credentialSources": {
+    "operator.database.api": {
+      "kind": "file",
+      "path": "/run/cloudmarkup/secrets/database/api.password"
+    },
+    "operator.database.proposal": {
+      "kind": "file",
+      "path": "/run/cloudmarkup/secrets/database/proposal.password"
+    },
+    "operator.database.export": {
+      "kind": "file",
+      "path": "/run/cloudmarkup/secrets/database/export.password"
+    },
+    "operator.database.cleanup": {
+      "kind": "file",
+      "path": "/run/cloudmarkup/secrets/database/cleanup.password"
+    },
+    "operator.database.billing": {
+      "kind": "file",
+      "path": "/run/cloudmarkup/secrets/database/billing.password"
+    },
+    "operator.owner-proof": {
+      "kind": "file",
+      "path": "/run/cloudmarkup/secrets/owner-proof.txt"
+    }
+  }
+}

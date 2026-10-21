@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.cloudmarkup.com/application-build-executor-result-v1.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": { "const": 1 },
+    "diagnostics": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "code": { "maxLength": 256, "minLength": 1, "type": "string" },
+          "detail": { "maxLength": 2000, "minLength": 1, "type": "string" },
+          "source": { "maxLength": 64, "minLength": 1, "type": "string" },
+          "summary": { "maxLength": 500, "minLength": 1, "type": "string" }
+        },
+        "required": ["code", "detail", "source", "summary"],
+        "type": "object"
+      },
+      "maxItems": 16,
+      "type": "array"
+    },
+    "kind": { "const": "cloudmarkup.application-build-executor-result" },
+    "profileId": { "type": "string" },
+    "reportDigest": { "$ref": "#/$defs/sha256" },
+    "requestDigest": { "$ref": "#/$defs/sha256" },
+    "solutionRevisionDigest": { "$ref": "#/$defs/sha256" },
+    "state": { "enum": ["blocked", "cancelled", "error", "failed", "passed"] },
+    "steps": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "executable": {
+            "enum": ["eslint", "pnpm", "trivy", "tsc", "vitest"]
+          },
+          "outputBytes": { "minimum": 0, "type": "integer" },
+          "state": {
+            "enum": [
+              "cancelled",
+              "failed",
+              "output-limit",
+              "passed",
+              "timeout",
+              "unavailable"
+            ]
+          },
+          "step": {
+            "enum": [
+              "compile",
+              "contract-tests",
+              "dependency-scan",
+              "install",
+              "lint",
+              "production-prune",
+              "secret-scan",
+              "typecheck",
+              "unit-tests"
+            ]
+          }
+        },
+        "required": ["executable", "outputBytes", "state", "step"],
+        "type": "object"
+      },
+      "maxItems": 9,
+      "type": "array"
+    },
+    "workloadId": { "type": "string" }
+  },
+  "required": [
+    "contractVersion",
+    "diagnostics",
+    "kind",
+    "reportDigest",
+    "state",
+    "steps"
+  ],
+  "type": "object",
+  "$defs": {
+    "sha256": { "pattern": "^sha256:[0-9a-f]{64}$", "type": "string" }
+  }
+}

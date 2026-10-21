@@ -1,0 +1,9 @@
+{
+  "extends": "@cloudmarkup/config/tsconfig/node.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "src/test-support.ts"]
+}

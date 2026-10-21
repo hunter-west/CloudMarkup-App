@@ -1,0 +1,36 @@
+{
+  "authenticationMethod": "oidc",
+  "claims": [
+    {
+      "name": "sub",
+      "required": true,
+      "sensitive": false,
+      "source": "identity-token",
+      "valueType": "string"
+    }
+  ],
+  "contractId": "contracts.notes.auth",
+  "contractKind": "auth",
+  "contractVersion": "1.0.0",
+  "displayName": "Notes authorization",
+  "provenance": {
+    "recordedAt": "2026-08-17T12:00:00Z",
+    "recordedBy": "actor_fixture",
+    "source": "designed",
+    "sourceReferenceIds": [
+      "requirement_notes_api"
+    ]
+  },
+  "roles": [
+    {
+      "claimRequirements": [
+        {
+          "claimName": "sub",
+          "match": "present"
+        }
+      ],
+      "displayName": "Member",
+      "roleId": "role_member"
+    }
+  ]
+}

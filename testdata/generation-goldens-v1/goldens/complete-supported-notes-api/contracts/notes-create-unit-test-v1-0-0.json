@@ -1,0 +1,40 @@
+{
+  "contractId": "contracts.notes.create-unit-test",
+  "contractKind": "test-case",
+  "contractVersion": "1.0.0",
+  "displayName": "unit create note test",
+  "expectations": [
+    {
+      "category": "application.validation",
+      "expectationId": "expect_create_unit_validation",
+      "kind": "error-category"
+    }
+  ],
+  "fixtureReferences": [],
+  "level": "unit",
+  "preconditions": [
+    {
+      "contract": {
+        "contractId": "contracts.notes.entity",
+        "contractKind": "data-entity",
+        "contractVersion": "1.0.0",
+        "digest": "sha256:32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5"
+      },
+      "kind": "contract-available"
+    }
+  ],
+  "provenance": {
+    "recordedAt": "2026-08-17T12:00:00Z",
+    "recordedBy": "actor_fixture",
+    "source": "designed",
+    "sourceReferenceIds": [
+      "requirement_notes_api"
+    ]
+  },
+  "target": {
+    "contractId": "contracts.notes.create-operation",
+    "contractKind": "behavior-operation",
+    "contractVersion": "1.0.0",
+    "digest": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac"
+  }
+}

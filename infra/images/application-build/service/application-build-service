@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+umask 077
+
+if [ "$#" -ne 0 ]; then
+  echo "application-build-service accepts no arguments" >&2
+  exit 2
+fi
+
+exec /usr/bin/env -i \
+  CI=1 \
+  HOME=/tmp \
+  LANG=C.UTF-8 \
+  LC_ALL=C.UTF-8 \
+  NO_COLOR=1 \
+  PATH=/opt/cloudmarkup/bin:/usr/local/bin:/usr/bin:/bin \
+  SOURCE_DATE_EPOCH=0 \
+  TZ=UTC \
+  /usr/local/bin/node /opt/cloudmarkup/service/application-build-service.mjs

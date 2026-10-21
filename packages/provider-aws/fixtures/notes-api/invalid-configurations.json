@@ -1,0 +1,142 @@
+{
+  "catalogVersion": "0.30.0",
+  "cases": [
+    {
+      "id": "client-secret-cannot-be-enabled",
+      "serviceId": "aws.cognito.user-pool-client",
+      "values": {
+        "generateClientSecret": {
+          "kind": "boolean",
+          "value": true
+        }
+      },
+      "expectedIssueCodes": ["invalid-value"]
+    },
+    {
+      "id": "policy-resource-cannot-be-inline",
+      "serviceId": "aws.iam.policy-statement",
+      "values": {
+        "actions": {
+          "kind": "string-list",
+          "value": ["dynamodb:GetItem"]
+        },
+        "resourceNode": {
+          "kind": "string",
+          "value": "inline-table-resource"
+        }
+      },
+      "expectedIssueCodes": ["invalid-value-kind"]
+    },
+    {
+      "id": "policy-actions-cannot-be-empty",
+      "serviceId": "aws.iam.policy-statement",
+      "values": {
+        "actions": {
+          "kind": "string-list",
+          "value": []
+        },
+        "resourceNode": {
+          "kind": "node-reference",
+          "nodeId": "node_notes_table",
+          "attribute": "aws.dynamodb.table.arn"
+        }
+      },
+      "expectedIssueCodes": ["invalid-value"]
+    },
+    {
+      "id": "lambda-timeout-is-bounded",
+      "serviceId": "aws.lambda.function",
+      "values": {
+        "timeoutSeconds": {
+          "kind": "integer",
+          "value": 31
+        }
+      },
+      "expectedIssueCodes": ["invalid-value"]
+    },
+    {
+      "id": "unknown-table-property-is-rejected",
+      "serviceId": "aws.dynamodb.table",
+      "values": {
+        "rawProviderProperty": {
+          "kind": "string",
+          "value": "unexpected"
+        }
+      },
+      "expectedIssueCodes": ["unknown-property"]
+    },
+    {
+      "id": "policy-actions-are-required",
+      "serviceId": "aws.iam.policy-statement",
+      "values": {},
+      "expectedIssueCodes": ["missing-required-property"]
+    },
+    {
+      "id": "lambda-runtime-kind-is-typed",
+      "serviceId": "aws.lambda.function",
+      "values": {
+        "runtime": {
+          "kind": "integer",
+          "value": 24
+        }
+      },
+      "expectedIssueCodes": ["invalid-value-kind"]
+    },
+    {
+      "id": "vpc-cidr-kind-is-typed",
+      "serviceId": "aws.ec2.vpc",
+      "values": {
+        "cidrBlock": {
+          "kind": "integer",
+          "value": 10
+        }
+      },
+      "expectedIssueCodes": ["invalid-value-kind"]
+    },
+    {
+      "id": "gateway-endpoint-interface-mode-is-rejected",
+      "serviceId": "aws.ec2.gateway-vpc-endpoint",
+      "values": {
+        "service": {
+          "kind": "string",
+          "value": "s3"
+        },
+        "endpointType": {
+          "kind": "string",
+          "value": "Interface"
+        },
+        "policyMode": {
+          "kind": "string",
+          "value": "full-access"
+        }
+      },
+      "expectedIssueCodes": ["invalid-value"]
+    },
+    {
+      "id": "lambda-vpc-dual-stack-is-rejected",
+      "serviceId": "aws.lambda.vpc-access-configuration",
+      "values": {
+        "ipv6AllowedForDualStack": {
+          "kind": "boolean",
+          "value": true
+        }
+      },
+      "expectedIssueCodes": ["invalid-value"]
+    },
+    {
+      "id": "lambda-vpc-egress-requirement-is-bounded",
+      "serviceId": "aws.lambda.vpc-access-configuration",
+      "values": {
+        "egressRequirement": {
+          "kind": "string",
+          "value": "automatic"
+        },
+        "ipv6AllowedForDualStack": {
+          "kind": "boolean",
+          "value": false
+        }
+      },
+      "expectedIssueCodes": ["invalid-value"]
+    }
+  ]
+}

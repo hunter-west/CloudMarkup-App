@@ -1,0 +1,12 @@
+diff --git a/dist/esm/types/nodes.d.ts b/dist/esm/types/nodes.d.ts
+--- a/dist/esm/types/nodes.d.ts
++++ b/dist/esm/types/nodes.d.ts
+@@ -80,7 +80,7 @@ export type NodeBase<NodeData extends Record<string, unknown> = Record<string,
+     /** Type of node defined in nodeTypes */
+     type: NodeType;
+ });
+-export type InternalNodeBase<NodeType extends NodeBase = NodeBase> = Omit<NodeType, 'measured'> & {
++export type InternalNodeBase<NodeType extends NodeBase = NodeBase> = NodeType & {
+     measured: {
+         width?: number;
+         height?: number;

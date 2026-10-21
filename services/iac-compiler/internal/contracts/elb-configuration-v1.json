@@ -1,0 +1,190 @@
+{
+  "aws.elb.application-load-balancer": {
+    "deletionProtection": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "desyncMitigation": {
+      "default": "defensive",
+      "enum": ["defensive"],
+      "type": "string"
+    },
+    "dropInvalidHeaders": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "http2": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "idleTimeoutSeconds": {
+      "default": 60,
+      "maximum": 300,
+      "minimum": 30,
+      "type": "integer"
+    },
+    "ipAddressType": {
+      "default": "ipv4",
+      "enum": ["ipv4"],
+      "type": "string"
+    },
+    "loadBalancerType": {
+      "default": "application",
+      "enum": ["application"],
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 32,
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "scheme": {
+      "enum": ["internal", "internet-facing"],
+      "type": "string"
+    }
+  },
+  "aws.elb.backend-access-configuration": {
+    "description": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string",
+      "pattern": "^[A-Za-z0-9 ._:/()#,@\\[\\]+=;{}!$*\\-]+(?![\\s\\S])"
+    },
+    "protocol": {
+      "default": "tcp",
+      "enum": ["tcp"],
+      "type": "string"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    }
+  },
+  "aws.elb.https-listener": {
+    "defaultAction": {
+      "default": "forward",
+      "enum": ["forward"],
+      "type": "string"
+    },
+    "domainMappingMode": {
+      "default": "external",
+      "enum": ["external"],
+      "type": "string"
+    },
+    "port": {
+      "default": 443,
+      "maximum": 443,
+      "minimum": 443,
+      "type": "integer"
+    },
+    "protocol": {
+      "default": "HTTPS",
+      "enum": ["HTTPS"],
+      "type": "string"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "securityPolicy": {
+      "default": "ELBSecurityPolicy-TLS13-1-2-2021-06",
+      "enum": ["ELBSecurityPolicy-TLS13-1-2-2021-06"],
+      "type": "string"
+    },
+    "serverName": {
+      "maxLength": 253,
+      "minLength": 3,
+      "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+      "type": "string"
+    }
+  },
+  "aws.elb.target-group": {
+    "backendMode": {
+      "enum": ["ec2-instance", "ecs-fargate"],
+      "type": "string"
+    },
+    "deregistrationDelaySeconds": {
+      "default": 60,
+      "maximum": 300,
+      "minimum": 30,
+      "type": "integer"
+    },
+    "healthIntervalSeconds": {
+      "default": 30,
+      "maximum": 30,
+      "minimum": 30,
+      "type": "integer"
+    },
+    "healthPath": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^/[A-Za-z0-9._~/-]*$",
+      "type": "string"
+    },
+    "healthStatus": {
+      "default": "200",
+      "enum": ["200"],
+      "type": "string"
+    },
+    "healthTimeoutSeconds": {
+      "default": 5,
+      "maximum": 5,
+      "minimum": 5,
+      "type": "integer"
+    },
+    "healthyThreshold": {
+      "default": 2,
+      "maximum": 2,
+      "minimum": 2,
+      "type": "integer"
+    },
+    "name": {
+      "maxLength": 32,
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string"
+    },
+    "port": {
+      "maximum": 65535,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "protocol": {
+      "default": "HTTP",
+      "enum": ["HTTP"],
+      "type": "string"
+    },
+    "protocolVersion": {
+      "default": "HTTP1",
+      "enum": ["HTTP1"],
+      "type": "string"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "startupGraceSeconds": {
+      "maximum": 300,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "unhealthyThreshold": {
+      "default": 2,
+      "maximum": 2,
+      "minimum": 2,
+      "type": "integer"
+    }
+  }
+}

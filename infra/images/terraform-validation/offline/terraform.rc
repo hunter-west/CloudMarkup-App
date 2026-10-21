@@ -1,0 +1,8 @@
+disable_checkpoint = true
+
+provider_installation {
+  filesystem_mirror {
+    path    = "/opt/cloudmarkup/provider-mirror"
+    include = ["registry.terraform.io/hashicorp/aws"]
+  }
+}

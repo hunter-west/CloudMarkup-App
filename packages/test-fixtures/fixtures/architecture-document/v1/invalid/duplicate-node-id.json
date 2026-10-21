@@ -1,0 +1,88 @@
+{
+  "kind": "cloudmarkup.architecture-document",
+  "schemaVersion": 1,
+  "documentId": "doc_duplicate_node",
+  "architectureId": "architecture_invalid",
+  "revision": {
+    "revisionId": "revision_0001",
+    "revisionNumber": 1,
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "createdBy": "actor_fixture"
+  },
+  "provider": {
+    "id": "example.cloud",
+    "region": "example-region-1"
+  },
+  "catalog": {
+    "id": "example.cloud.catalog",
+    "version": "1.0.0",
+    "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "compilerCompatibility": {
+    "inputContractVersion": 1,
+    "minimumCompilerVersion": "1.0.0"
+  },
+  "metadata": {
+    "source": "user",
+    "serialization": {
+      "mediaType": "application/json",
+      "encoding": "utf-8",
+      "canonicalization": "cloudmarkup.canonical-json.v1"
+    }
+  },
+  "nodes": [
+    {
+      "id": "node_duplicate",
+      "semantic": {
+        "deploymentKey": "first",
+        "serviceType": "example.compute",
+        "resourceType": "example.compute.application",
+        "configuration": {
+          "schemaId": "example.compute.application-config",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      "presentation": {
+        "label": "First",
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": "node_duplicate",
+      "semantic": {
+        "deploymentKey": "second",
+        "serviceType": "example.compute",
+        "resourceType": "example.compute.application",
+        "configuration": {
+          "schemaId": "example.compute.application-config",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      "presentation": {
+        "label": "Second",
+        "position": {
+          "x": 100,
+          "y": 0
+        }
+      }
+    }
+  ],
+  "edges": [],
+  "variables": [],
+  "outputs": [],
+  "assumptions": [],
+  "unresolvedRequirements": []
+}

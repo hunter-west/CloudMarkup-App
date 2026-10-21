@@ -1,0 +1,109 @@
+.github-repository-import {
+  display: grid;
+  gap: var(--cm-space-3);
+}
+
+.github-repository-import form,
+.github-repository-import__evidence,
+.github-repository-import__evidence-grid,
+.github-repository-import__history {
+  display: grid;
+  gap: var(--cm-space-3);
+}
+
+.github-repository-import__selection,
+.github-repository-import__scope,
+.github-repository-import__evidence-grid {
+  display: grid;
+  gap: var(--cm-space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.github-repository-import label {
+  display: grid;
+  gap: var(--cm-space-1);
+}
+
+.github-repository-import__webhook {
+  align-items: start;
+  grid-template-columns: auto 1fr;
+}
+
+.github-repository-import__actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-3);
+}
+
+.github-repository-import__history,
+.github-repository-import__evidence ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.github-repository-import__history li,
+.github-repository-import__evidence li {
+  background: var(--cm-color-surface-subtle);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  display: grid;
+  gap: var(--cm-space-1);
+  padding: var(--cm-space-3);
+}
+
+.github-repository-import__warning {
+  border-inline-start: 0.25rem solid var(--cm-color-status-warning);
+  padding-inline-start: var(--cm-space-3);
+}
+
+.github-repository-import__evidence small {
+  color: var(--cm-color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.github-repository-import__evidence [data-observed-only="true"] {
+  border-style: dashed;
+}
+
+.github-repository-import__evidence [data-change="added"],
+.github-repository-import__evidence [data-change="modified"] {
+  border-color: var(--cm-color-status-warning);
+}
+
+@media (max-width: 48rem) {
+  .github-repository-import__selection,
+  .github-repository-import__scope,
+  .github-repository-import__evidence-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.github-repository-import__picker {
+  display: grid;
+  gap: var(--cm-space-3);
+  padding-block: var(--cm-space-3);
+}
+.github-repository-import__files {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--cm-space-2);
+}
+.github-repository-import__files label {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  min-height: 2.75rem;
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  padding: var(--cm-space-2);
+}
+.github-repository-import__files span {
+  overflow-wrap: anywhere;
+}
+.github-repository-import__files small {
+  display: block;
+  color: var(--cm-color-text-muted);
+}

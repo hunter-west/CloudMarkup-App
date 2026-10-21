@@ -1,0 +1,258 @@
+.solution-export,
+.solution-export__record-grid,
+.solution-export-create__form {
+  display: grid;
+  gap: var(--cm-space-3);
+}
+
+.solution-export-create__diagram,
+.solution-export__diagram-panel {
+  display: grid;
+  gap: var(--cm-space-3);
+}
+
+.solution-export-create__diagram {
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-lg);
+}
+
+.solution-export-create__diagram legend,
+.solution-export-create__diagram p,
+.solution-export-create__diagram small {
+  grid-column: 1 / -1;
+}
+
+.solution-export-create__checkbox,
+.solution-export__diagram-formats {
+  display: flex;
+  align-items: center;
+  gap: var(--cm-space-2);
+}
+
+.solution-export__diagram-preview {
+  display: grid;
+  gap: var(--cm-space-2);
+  margin: 0;
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-lg);
+  background: var(--cm-color-surface);
+}
+
+.solution-export__diagram-preview img {
+  display: block;
+  width: 100%;
+  max-height: 42rem;
+  object-fit: contain;
+}
+
+.solution-export__diagram-preview figcaption {
+  overflow-wrap: anywhere;
+}
+
+.solution-export__assistance {
+  min-block-size: 3rem;
+}
+
+.solution-export__metadata,
+.solution-export__file-metadata {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--cm-space-3);
+  margin: 0;
+}
+
+.solution-export__metadata div,
+.solution-export__file-metadata div {
+  min-width: 0;
+}
+
+.solution-export__metadata dt,
+.solution-export__file-metadata dt {
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-2);
+  font-weight: 700;
+}
+
+.solution-export__metadata dd,
+.solution-export__file-metadata dd {
+  margin: var(--cm-space-1) 0 0;
+  overflow-wrap: anywhere;
+}
+
+.solution-export__stages,
+.solution-export__coverage-list,
+.solution-export__diagnostics,
+.solution-export__evidence,
+.solution-export__diff,
+.solution-export__file-list ul {
+  display: grid;
+  gap: var(--cm-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.solution-export__stages li,
+.solution-export__diff li,
+.solution-export__evidence li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cm-space-2);
+}
+
+.solution-export__record-grid {
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+
+.solution-export__references {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2);
+  margin-block-start: var(--cm-space-1);
+}
+
+.solution-export__artifact {
+  display: grid;
+  gap: var(--cm-space-3);
+}
+
+.solution-export__file-review {
+  display: grid;
+  grid-template-columns: minmax(15rem, 22rem) minmax(0, 1fr);
+  gap: var(--cm-space-3);
+  min-width: 0;
+}
+
+.solution-export__file-list button {
+  width: 100%;
+  padding: var(--cm-space-2) var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  background: var(--cm-color-surface);
+  color: inherit;
+  text-align: left;
+}
+
+.solution-export__file-list button[aria-current="true"] {
+  border-color: var(--cm-color-border-strong);
+  outline: 2px solid var(--cm-color-focus);
+  outline-offset: 1px;
+}
+
+.solution-export__file-list button span,
+.solution-export__file-list button small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.solution-export__preview {
+  min-width: 0;
+}
+
+.solution-export__download {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cm-space-3);
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-lg);
+}
+
+.solution-export__dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--cm-space-2);
+}
+
+.solution-export__truncated {
+  font-weight: 700;
+}
+
+@media (max-width: 50rem) {
+  .solution-export__file-review {
+    grid-template-columns: 1fr;
+  }
+}
+
+.solution-export-create__form {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+}
+.solution-export-create__form > :not(.field) {
+  grid-column: 1 / -1;
+}
+.solution-export-create__form > .cm-button {
+  justify-self: start;
+}
+.solution-export progress {
+  width: 100%;
+  accent-color: var(--cm-color-action);
+}
+.solution-export .feature-card {
+  padding: var(--cm-space-3);
+  gap: var(--cm-space-2);
+}
+.solution-export__assistance {
+  min-block-size: 0;
+}
+.solution-export__record-grid > :has(#solution-export-diagnostics-title) {
+  order: -1;
+}
+@media (max-width: 760px) {
+  .solution-export-create__form {
+    grid-template-columns: 1fr;
+  }
+}
+
+.solution-export-create__checkbox input {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  flex: 0 0 18px;
+  margin: 0;
+}
+.solution-export__download h3,
+.solution-export__download p {
+  margin: 0;
+}
+.solution-export__download {
+  background: var(--cm-color-action-subtle);
+}
+.solution-export__evidence code {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.solution-export__artifact {
+  gap: var(--cm-space-3);
+}
+.solution-export__complete {
+  display: flex;
+  align-items: center;
+  gap: var(--cm-space-3);
+}
+.solution-export__complete h2 {
+  margin: 0;
+  font-size: var(--cm-font-size-4);
+}
+
+.solution-export__record-grid {
+  align-items: start;
+}
+.solution-export__record-grid > .cm-disclosure {
+  grid-column: 1 / -1;
+}
+.solution-export__record-grid .status-label {
+  display: none;
+}
+.solution-export__record-grid h2 {
+  font-size: var(--cm-font-size-3);
+}
+.solution-export__record-grid ul {
+  margin-block: var(--cm-space-1);
+}

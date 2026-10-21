@@ -1,0 +1,179 @@
+name: ${CLOUDMARKUP_SELF_HOST_PROJECT:-cloudmarkup-self-host}
+services:
+  postgres:
+    image:
+      ${CLOUDMARKUP_POSTGRES_IMAGE:?Supply a reviewed PostgreSQL image digest}
+    restart: "no"
+    environment:
+      POSTGRES_DB: cloudmarkup
+      POSTGRES_USER: cloudmarkup_owner
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_owner_password
+    secrets: [postgres_owner_password]
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloudmarkup_owner -d cloudmarkup"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    stop_grace_period: 60s
+  app:
+    image: ${CLOUDMARKUP_SELF_HOST_IMAGE:-cloudmarkup-self-host:local}
+    build:
+      context: ../..
+      dockerfile: scripts/self-host/Dockerfile
+      args:
+        NODE_IMAGE:
+          ${CLOUDMARKUP_NODE_IMAGE:?Supply reviewed Node 24.18.0 bookworm image
+          digest}
+        GO_IMAGE:
+          ${CLOUDMARKUP_GO_IMAGE:?Supply reviewed Go 1.26.8 bookworm image
+          digest}
+    init: true
+    restart: "no"
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      CLOUDMARKUP_SELF_HOST_CONFIGURATION_FILE: /run/secrets/self_host_configuration
+    secrets: [self_host_configuration]
+    volumes:
+      - objects:/data/cloudmarkup
+      - type: bind
+        source:
+          ${CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY:?Supply private runtime secret
+          references directory}
+        target: /run/cloudmarkup/secrets
+        read_only: true
+        bind:
+          create_host_path: false
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=256m,uid=10001,gid=10001,mode=700"]
+    # Local-owner stays on container loopback; the foreground transport owns
+    # the host loopback socket. Publishing a bridge port cannot reach it.
+    depends_on:
+      postgres:
+        condition: service_healthy
+    stop_grace_period: 120s
+  provisioner:
+    image: ${CLOUDMARKUP_SELF_HOST_IMAGE:-cloudmarkup-self-host:local}
+    profiles: [operator]
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    entrypoint: ["node", "scripts/self-host/bootstrap.mjs"]
+    command: ["inspect"]
+    environment:
+      CLOUDMARKUP_SELF_HOST_PROVISIONING_CONFIGURATION_FILE: /run/secrets/provisioning_configuration
+    secrets:
+      [provisioning_configuration, postgres_owner_password, migrator_password]
+    volumes:
+      - type: bind
+        source:
+          ${CLOUDMARKUP_DATABASE_SECRETS_DIRECTORY:?Supply private
+          five-runtime-password directory}
+        target: /run/cloudmarkup/secrets/database
+        read_only: true
+        bind:
+          create_host_path: false
+    depends_on:
+      postgres:
+        condition: service_healthy
+  permissions:
+    image: ${CLOUDMARKUP_SELF_HOST_IMAGE:-cloudmarkup-self-host:local}
+    profiles: [operator]
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    entrypoint: ["node", "scripts/self-host/bootstrap.mjs"]
+    command: ["inspect"]
+    environment:
+      CLOUDMARKUP_SELF_HOST_PROVISIONING_CONFIGURATION_FILE: /run/secrets/provisioning_configuration
+    secrets: [provisioning_configuration, migrator_password]
+    depends_on:
+      postgres:
+        condition: service_healthy
+  runtime-check:
+    image: ${CLOUDMARKUP_SELF_HOST_IMAGE:-cloudmarkup-self-host:local}
+    profiles: [operator]
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    entrypoint: ["node", "scripts/self-host/bootstrap.mjs"]
+    command: ["inspect"]
+    environment:
+      CLOUDMARKUP_SELF_HOST_PROVISIONING_CONFIGURATION_FILE: /run/secrets/provisioning_configuration
+    secrets: [provisioning_configuration]
+    volumes:
+      - type: bind
+        source:
+          ${CLOUDMARKUP_DATABASE_SECRETS_DIRECTORY:?Supply private
+          five-runtime-password directory}
+        target: /run/cloudmarkup/secrets/database
+        read_only: true
+        bind:
+          create_host_path: false
+    depends_on:
+      postgres:
+        condition: service_healthy
+  owner-initializer:
+    image: ${CLOUDMARKUP_SELF_HOST_IMAGE:-cloudmarkup-self-host:local}
+    profiles: [operator]
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    entrypoint: ["node", "scripts/self-host/initialize-owner.mjs"]
+    command: ["inspect"]
+    environment:
+      CLOUDMARKUP_SELF_HOST_OWNER_CONFIGURATION_FILE: /run/secrets/owner_configuration
+    secrets: [owner_configuration, migrator_password]
+    depends_on:
+      postgres:
+        condition: service_healthy
+  operator:
+    image: ${CLOUDMARKUP_SELF_HOST_IMAGE:-cloudmarkup-self-host:local}
+    profiles: [operator]
+    user: "10001:10001"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    entrypoint: ["node", "scripts/self-host/bootstrap.mjs"]
+    command: ["inspect"]
+    environment:
+      CLOUDMARKUP_SELF_HOST_OPERATOR_CONFIGURATION_FILE: /run/secrets/operator_configuration
+    secrets: [operator_configuration, migrator_password]
+    depends_on:
+      postgres:
+        condition: service_healthy
+secrets:
+  provisioning_configuration:
+    file:
+      ${CLOUDMARKUP_PROVISIONING_CONFIGURATION_SOURCE:?Supply private
+      stage-specific provisioning configuration}
+  owner_configuration:
+    file:
+      ${CLOUDMARKUP_OWNER_CONFIGURATION_SOURCE:?Supply private owner
+      initialization configuration}
+  migrator_password:
+    file:
+      ${CLOUDMARKUP_MIGRATOR_PASSWORD_FILE:?Supply private non-superuser
+      migrator password file}
+  postgres_owner_password:
+    file:
+      ${CLOUDMARKUP_POSTGRES_OWNER_PASSWORD_FILE:?Supply private owner password
+      file}
+  self_host_configuration:
+    file:
+      ${CLOUDMARKUP_SELF_HOST_CONFIGURATION_SOURCE:?Supply D private
+      configuration file}
+  operator_configuration:
+    file:
+      ${CLOUDMARKUP_OPERATOR_CONFIGURATION_SOURCE:?Supply private operator
+      configuration file}
+volumes:
+  objects:
+  postgres-data:

@@ -1,0 +1,41 @@
+{
+  "name": "@cloudmarkup/application-build-runner",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./host-repair-seed": {
+      "types": "./src/host-repair-seed.ts",
+      "import": "./dist/host-repair-seed.js"
+    },
+    "./schema/host-repair-seed-v1": "./json-schema/application-host-repair-seed-v1.schema.json",
+    "./schema/host-repair-seed-manifest-v1": "./json-schema/application-host-repair-seed-manifest-v1.schema.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "json-schema"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@cloudmarkup/application-generator": "workspace:*",
+    "@cloudmarkup/schemas": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudmarkup/config": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

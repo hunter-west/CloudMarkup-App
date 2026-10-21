@@ -1,0 +1,194 @@
+{
+  "kind": "cloudmarkup.architecture-document",
+  "schemaVersion": 1,
+  "documentId": "doc_representative_v1",
+  "architectureId": "architecture_representative",
+  "revision": {
+    "revisionId": "revision_0001",
+    "revisionNumber": 1,
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "createdBy": "actor_fixture",
+    "sourceDraftId": "draft_0001"
+  },
+  "provider": {
+    "id": "example.cloud",
+    "region": "example-region-1"
+  },
+  "catalog": {
+    "id": "example.cloud.catalog",
+    "version": "1.0.0",
+    "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "compilerCompatibility": {
+    "inputContractVersion": 1,
+    "minimumCompilerVersion": "1.0.0",
+    "maximumCompilerVersionExclusive": "2.0.0"
+  },
+  "metadata": {
+    "source": "template",
+    "serialization": {
+      "mediaType": "application/json",
+      "encoding": "utf-8",
+      "canonicalization": "cloudmarkup.canonical-json.v1"
+    }
+  },
+  "nodes": [
+    {
+      "id": "node_network",
+      "semantic": {
+        "deploymentKey": "network",
+        "serviceType": "example.network",
+        "resourceType": "example.network.boundary",
+        "configuration": {
+          "schemaId": "example.network.boundary-config",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "addressRange": {
+              "kind": "string",
+              "value": "10.0.0.0/16"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "template"
+        }
+      },
+      "presentation": {
+        "label": "Application network",
+        "position": {
+          "x": 80,
+          "y": 40
+        }
+      }
+    },
+    {
+      "id": "node_application",
+      "semantic": {
+        "deploymentKey": "application",
+        "serviceType": "example.compute",
+        "resourceType": "example.compute.application",
+        "configuration": {
+          "schemaId": "example.compute.application-config",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "credential": {
+              "kind": "secret-reference",
+              "reference": "secretref_fixture_database"
+            },
+            "instanceCount": {
+              "kind": "integer",
+              "value": 2
+            },
+            "network": {
+              "kind": "node-reference",
+              "nodeId": "node_network",
+              "attribute": "example.network.id"
+            },
+            "stage": {
+              "kind": "variable-reference",
+              "variableId": "variable_stage"
+            }
+          }
+        },
+        "parent": {
+          "nodeId": "node_network",
+          "relationshipType": "example.relationship.contained-by"
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "example.generator.application-network",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture_0001",
+            "dependentNodeIds": ["node_network"],
+            "dependentEdgeIds": ["edge_application_network"]
+          }
+        }
+      },
+      "presentation": {
+        "label": "Application",
+        "position": {
+          "x": 220,
+          "y": 140
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_application_network",
+      "semantic": {
+        "source": {
+          "nodeId": "node_application",
+          "port": "example.port.network-client"
+        },
+        "target": {
+          "nodeId": "node_network",
+          "port": "example.port.network-segment"
+        },
+        "relationshipType": "example.relationship.network-attachment",
+        "configuration": {
+          "schemaId": "example.relationship.network-attachment-config",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "mode": {
+              "kind": "string",
+              "value": "private"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "template"
+        }
+      }
+    }
+  ],
+  "variables": [
+    {
+      "id": "variable_stage",
+      "key": "stage",
+      "valueType": "string",
+      "required": false,
+      "description": "Deployment stage name.",
+      "defaultValue": {
+        "kind": "string",
+        "value": "development"
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "id": "output_application_id",
+      "key": "application_id",
+      "valueType": "string",
+      "description": "Stable provider identifier for the application.",
+      "sensitive": false,
+      "source": {
+        "kind": "node-attribute",
+        "nodeId": "node_application",
+        "attribute": "example.application.id"
+      }
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "assumption_single_region",
+      "statement": "The first revision uses one provider region.",
+      "status": "accepted",
+      "origin": "user"
+    }
+  ],
+  "unresolvedRequirements": [
+    {
+      "id": "requirement_recovery_target",
+      "statement": "The recovery-time target has not been selected.",
+      "category": "availability",
+      "blocking": true,
+      "origin": "user"
+    }
+  ]
+}

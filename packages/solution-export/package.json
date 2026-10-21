@@ -1,0 +1,48 @@
+{
+  "name": "@cloudmarkup/solution-export",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./retained-artifact": {
+      "types": "./src/retained-artifact.ts",
+      "import": "./dist/retained-artifact.js"
+    },
+    "./contracts": {
+      "types": "./src/contracts.ts",
+      "import": "./dist/contracts.js"
+    },
+    "./security": {
+      "types": "./src/security.ts",
+      "import": "./dist/security.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@cloudmarkup/diagram-export": "workspace:*",
+    "@cloudmarkup/application-build-runner": "workspace:*",
+    "@cloudmarkup/domain": "workspace:*",
+    "@cloudmarkup/schemas": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudmarkup/application-generator": "workspace:*",
+    "@cloudmarkup/config": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

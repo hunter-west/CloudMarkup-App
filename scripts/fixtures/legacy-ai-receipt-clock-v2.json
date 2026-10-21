@@ -1,0 +1,10 @@
+{
+  "contractVersion": 2,
+  "sourceCommit": "a979e325b6584642d5d5a9b58631bd3599d85591",
+  "baseBundleSha256": "d16066d5e30fc2ef2100cf794fc524ae75ce042e47140dde6ad970f341168531",
+  "baseManifestSha256": "3ef9b89235d930be3c10c66b08a118210cea8e11aeebf1bf2804296aa342b088",
+  "adapter": "synthetic-configuration-caller-clock-only",
+  "bundleFile": "packages/model-gateway/dist/capture-clock-v2.mjs",
+  "bundleSha256": "bbbb21c42c14a8afe2c0b0a55bca1150d72b5a9b7bd0a2c4ab4e2b801a414f98",
+  "sizeBytes": 5599794
+}

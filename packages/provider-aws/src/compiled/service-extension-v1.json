@@ -1,0 +1,3518 @@
+{
+  "canonicalization": "cloudmarkup.provider-service-extension.canonical-json.v1",
+  "catalog": {
+    "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+    "id": "aws.cloudmarkup.notes-api-catalog",
+    "version": "0.30.0"
+  },
+  "contractVersion": 1,
+  "digest": "sha256:fb4ba434f0dbaaa63543d16a886778109eb69bec730d1b2ca384d2acb32db341",
+  "kind": "cloudmarkup.provider-service-extension",
+  "services": [
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.acm.public-dns-certificate",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native zone/certificate resources; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed canonical domain authority, declared Region/viewer intent, managed DNS validation and protected ownership.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned new public-zone and single-domain certificate identities.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native typed public-zone/certificate/validation resources; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, DNS suffix/most-specific-zone authority, regional/viewer rules and exact ownership; actual delegation and issuance stay external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.apigateway.http-api",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "API Gateway HTTP API has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "API Gateway HTTP API has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "API Gateway HTTP API does not itself require application-code generation.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "API Gateway HTTP API has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "API Gateway HTTP API has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "API Gateway HTTP API participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.aurora.postgresql-cluster",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict private PostgreSQL 16, Serverless v2 nonzero capacity, managed credentials, encrypted Aurora Standard storage, backup/maintenance and cluster TLS intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned root Aurora cluster/member/cluster-parameter identities.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native typed RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, two-AZ/same-VPC topology, managed ownership and bounded windows; actual availability remains external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.aurora.postgresql-cluster-parameter-group",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict private PostgreSQL 16, Serverless v2 nonzero capacity, managed credentials, encrypted Aurora Standard storage, backup/maintenance and cluster TLS intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned root Aurora cluster/member/cluster-parameter identities.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native typed RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, two-AZ/same-VPC topology, managed ownership and bounded windows; actual availability remains external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.aurora.postgresql-instance",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict private PostgreSQL 16, Serverless v2 nonzero capacity, managed credentials, encrypted Aurora Standard storage, backup/maintenance and cluster TLS intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned root Aurora cluster/member/cluster-parameter identities.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native typed RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, two-AZ/same-VPC topology, managed ownership and bounded windows; actual availability remains external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.cloudfront.alias-configuration",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native distribution/cache/OAC, exact bucket policy and owned A/AAAA alias records; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed static-cache/public-content/private-origin and exact certificate/alias/ownership intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned distribution/cache policy and canonical owned alias.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native distribution, static cache policy, always-signed OAC, exact bucket policy and optional protected DNS aliases; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, TTL order, exact origin read policy, alias/certificate/zone ownership; actual content, delegation and serving health stay external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.cloudfront.cache-policy",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native distribution/cache/OAC, exact bucket policy and owned A/AAAA alias records; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed static-cache/public-content/private-origin and exact certificate/alias/ownership intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned distribution/cache policy and canonical owned alias.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native distribution, static cache policy, always-signed OAC, exact bucket policy and optional protected DNS aliases; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, TTL order, exact origin read policy, alias/certificate/zone ownership; actual content, delegation and serving health stay external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.cloudfront.alias",
+          "description": "One explicit user-owned exact-domain alias and protected A/AAAA projections; no live DNS change.",
+          "displayName": "Custom viewer alias",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.cloudfront.alias-configuration",
+            "ownershipRelationshipType": "aws.cloudfront.distribution-owns-alias"
+          },
+          "guidedExplanation": "Add one exact viewer alias with a us-east-1 certificate and its caller-attested public zone.",
+          "id": "aws.cloudfront.distribution.slot.alias",
+          "policyKinds": [],
+          "professionalExplanation": "Canonical parent and owner edge must agree. Native DNS record projections remain owned by this alias; existing/external aliases and cross-region stacks are unsupported.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "Reviewed structured native distribution/cache/OAC, exact bucket policy and owned A/AAAA alias records; no provider execution.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Closed static-cache/public-content/private-origin and exact certificate/alias/ownership intent.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "Exact user-owned distribution/cache policy and canonical owned alias.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "Reviewed native distribution, static cache policy, always-signed OAC, exact bucket policy and optional protected DNS aliases; no provider execution.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Closed schemas, TTL order, exact origin read policy, alias/certificate/zone ownership; actual content, delegation and serving health stay external.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.cloudfront.distribution",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native distribution/cache/OAC, exact bucket policy and owned A/AAAA alias records; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed static-cache/public-content/private-origin and exact certificate/alias/ownership intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned distribution/cache policy and canonical owned alias.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native distribution, static cache policy, always-signed OAC, exact bucket policy and optional protected DNS aliases; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, TTL order, exact origin read policy, alias/certificate/zone ownership; actual content, delegation and serving health stay external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.cloudwatch.log-group",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "CloudWatch log group has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "CloudWatch log group has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "CloudWatch log group does not itself require application-code generation.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "CloudWatch log group has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "CloudWatch log group has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "CloudWatch log group participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.cloudwatch.metric-alarm",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "CloudWatch metric alarm has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "CloudWatch metric alarm has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "CloudWatch metric alarm does not itself require application-code generation.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "CloudWatch metric alarm has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "CloudWatch metric alarm has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "CloudWatch metric alarm participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.cognito.user-pool",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Cognito user pool has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Cognito user pool has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Cognito user pool does not itself require application-code generation.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Cognito user pool has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Cognito user pool has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Cognito user pool participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.cognito.user-pool-client",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Cognito user-pool app client has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Cognito user-pool app client has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Cognito user-pool app client does not itself require application-code generation.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Cognito user-pool app client has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Cognito user-pool app client has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Cognito user-pool app client participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.dynamodb.table",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "DynamoDB table has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "DynamoDB table has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "DynamoDB table does not itself require application-code generation.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "DynamoDB table has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "DynamoDB table has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "DynamoDB table participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ebs.volume",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured EBS volume/attachment and retention; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed encrypted empty gp3 capacity, encryption mode, API device and external guest preparation.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned AZ-placed volume and canonical deployable attachment child.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native EBS volume/attachment and exact key/instance references; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, exact AZ/owner/EC2/KMS bindings, unique devices and attachment bounds; guest state and authority remain external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ebs.volume-attachment",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured EBS volume/attachment and retention; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed encrypted empty gp3 capacity, encryption mode, API device and external guest preparation.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned AZ-placed volume and canonical deployable attachment child.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native EBS volume/attachment and exact key/instance references; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, exact AZ/owner/EC2/KMS bindings, unique devices and attachment bounds; guest state and authority remain external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ec2.availability-zone",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Availability Zone boundary is ambient placement context rather than a CloudFormation-managed resource in this bounded catalog.",
+          "status": "not-applicable"
+        },
+        "configuration": {
+          "reason": "Availability Zone boundary has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Availability Zone boundary is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Availability Zone boundary has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Availability Zone boundary is ambient placement context rather than a Terraform-managed resource in this bounded catalog.",
+          "status": "not-applicable"
+        },
+        "validation": {
+          "reason": "Availability Zone boundary participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.ec2.gateway-vpc-endpoint.resource-policy",
+          "description": "The optional canonical resource policy that narrows use of this S3 or DynamoDB gateway endpoint.",
+          "displayName": "Endpoint policy",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.policy-document",
+            "ownershipRelationshipType": "aws.ec2.gateway-endpoint-owns-policy"
+          },
+          "guidedExplanation": "Add a reviewed endpoint policy only when you need to limit which S3 or DynamoDB actions, principals, or resources may use this endpoint.",
+          "id": "aws.ec2.gateway-vpc-endpoint.slot.resource-policy",
+          "policyKinds": [
+            "resource"
+          ],
+          "professionalExplanation": "At most one user-owned canonical resource-policy document binds to the endpoint independently from its route-table associations; raw policy JSON is excluded.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "Gateway VPC endpoint resource policy has a graph-backed CloudFormation projection through the exact reviewed networking renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Gateway VPC endpoint resource policy uses strict typed node configuration rather than raw provider state or arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "Gateway VPC endpoint resource policy changes infrastructure configuration and never generates application source code.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "Gateway VPC endpoint resource policy is modeled as one exact graph-backed owned configuration kind.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "Gateway VPC endpoint resource policy has a graph-backed Terraform projection through the exact reviewed networking renderer.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Gateway VPC endpoint resource policy is covered by deterministic ownership, cardinality, placement, and policy validation as applicable.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.ec2.gateway-vpc-endpoint",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Gateway VPC endpoint has an exact catalog mapping and deterministic reviewed CloudFormation renderer with semantic, negative, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Gateway VPC endpoint has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Gateway VPC endpoint is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Gateway VPC endpoint has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Gateway VPC endpoint has an exact catalog mapping and deterministic reviewed Terraform renderer with negative, parse, golden, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Gateway VPC endpoint participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ec2.instance",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed native instance/profile renderers, explicit primary interface and root mapping; throughput restricted to gp3 baseline.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict image provenance, private network, IMDSv2 and encrypted gp3 baseline root fields.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "This instance slice generates no application or boot-script artifacts.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Explicit private Linux instance/profile identities and typed launch dependencies.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed exact aws_instance/aws_iam_instance_profile renderers; no secret/bootstrap or inferred grants.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic image/type/root-minimum, VPC, profile/trust, metadata and ownership checks with separate external readiness warnings.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ec2.internet-gateway",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Internet gateway has an exact catalog mapping and deterministic reviewed CloudFormation renderer with semantic, negative, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Internet gateway has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Internet gateway is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Internet gateway has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Internet gateway has an exact catalog mapping and deterministic reviewed Terraform renderer with negative, parse, golden, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Internet gateway participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ec2.nat-gateway",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Zonal public NAT gateway has an exact catalog mapping and deterministic reviewed CloudFormation renderer with semantic, negative, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Zonal public NAT gateway has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Zonal public NAT gateway is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Zonal public NAT gateway has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Zonal public NAT gateway has an exact catalog mapping and deterministic reviewed Terraform renderer with negative, parse, golden, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Zonal public NAT gateway participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ec2.route",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "VPC route has an exact catalog mapping and deterministic reviewed CloudFormation renderer with semantic, negative, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "VPC route has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "VPC route is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "VPC route has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "VPC route has an exact catalog mapping and deterministic reviewed Terraform renderer with negative, parse, golden, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "VPC route participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.ec2.route-table.route",
+          "description": "Typed destination routes owned by this route table, each with one reviewed gateway target.",
+          "displayName": "Routes",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.ec2.route",
+            "ownershipRelationshipType": "aws.ec2.route-table-owns-route"
+          },
+          "guidedExplanation": "Add routes here, then choose the one supported gateway target for each destination. Adopt any generated route before customizing it.",
+          "id": "aws.ec2.route-table.slot.routes",
+          "policyKinds": [],
+          "professionalExplanation": "Zero or more route configuration nodes bind to the owner through exact lifecycle provenance; generated routes require adoption before customization or independent deletion.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "Route-table routes has a graph-backed CloudFormation projection through the exact reviewed networking renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Route-table routes uses strict typed node configuration rather than raw provider state or arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "Route-table routes changes infrastructure configuration and never generates application source code.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "Route-table routes is modeled as one exact graph-backed owned configuration kind.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "Route-table routes has a graph-backed Terraform projection through the exact reviewed networking renderer.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Route-table routes is covered by deterministic ownership, cardinality, placement, and policy validation as applicable.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.ec2.route-table.subnet-association",
+          "description": "Explicit subnet associations owned by this route table, each selecting one subnet in the same VPC.",
+          "displayName": "Subnet associations",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.ec2.route-table-association",
+            "ownershipRelationshipType": "aws.ec2.route-table-owns-subnet-association"
+          },
+          "guidedExplanation": "Associate every supported subnet explicitly so people can see and review its routing instead of relying on an implicit main route table.",
+          "id": "aws.ec2.route-table.slot.subnet-associations",
+          "policyKinds": [],
+          "professionalExplanation": "Zero or more graph-backed association nodes each bind to one owner and one same-VPC subnet; generated provenance remains adoptable before customization.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "Route-table subnet associations has a graph-backed CloudFormation projection through the exact reviewed networking renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Route-table subnet associations uses strict typed node configuration rather than raw provider state or arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "Route-table subnet associations changes infrastructure configuration and never generates application source code.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "Route-table subnet associations is modeled as one exact graph-backed owned configuration kind.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "Route-table subnet associations has a graph-backed Terraform projection through the exact reviewed networking renderer.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Route-table subnet associations is covered by deterministic ownership, cardinality, placement, and policy validation as applicable.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.ec2.route-table",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "VPC route table has an exact catalog mapping and deterministic reviewed CloudFormation renderer with semantic, negative, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "VPC route table has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "VPC route table is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "VPC route table has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "VPC route table has an exact catalog mapping and deterministic reviewed Terraform renderer with negative, parse, golden, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "VPC route table participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ec2.route-table-association",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Route-table subnet association has an exact catalog mapping and deterministic reviewed CloudFormation renderer with semantic, negative, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Route-table subnet association has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Route-table subnet association is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Route-table subnet association has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Route-table subnet association has an exact catalog mapping and deterministic reviewed Terraform renderer with negative, parse, golden, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Route-table subnet association participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.ec2.security-group.egress-rule",
+          "description": "User-reviewed outbound protocol, port-range, and CIDR policy rules owned by this security group.",
+          "displayName": "Egress rules",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.ec2.security-group-egress-rule",
+            "ownershipRelationshipType": "aws.ec2.security-group-owns-egress-rule"
+          },
+          "guidedExplanation": "Add only the outbound protocols, ports, and CIDR ranges the workload needs; this catalog does not infer allow-all egress.",
+          "id": "aws.ec2.security-group.slot.egress-rules",
+          "policyKinds": [],
+          "professionalExplanation": "Zero or more user-owned typed egress configuration nodes remain independently reviewable and retain exact lifecycle provenance.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "Security-group egress configuration explicitly suppresses default allow-all egress before standalone narrow AWS::EC2::SecurityGroupEgress resources are emitted.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Security-group egress rules uses strict typed node configuration rather than raw provider state or arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "Security-group egress rules changes infrastructure configuration and never generates application source code.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "Security-group egress rules is modeled as one exact graph-backed owned configuration kind.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "Security-group egress rules has a graph-backed Terraform projection through the exact reviewed networking renderer.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Security-group egress rules is covered by deterministic ownership, cardinality, placement, and policy validation as applicable.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.ec2.security-group.ingress-rule",
+          "description": "User-reviewed inbound protocol, port-range, and CIDR policy rules owned by this security group.",
+          "displayName": "Ingress rules",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.ec2.security-group-ingress-rule",
+            "ownershipRelationshipType": "aws.ec2.security-group-owns-ingress-rule"
+          },
+          "guidedExplanation": "Add only the inbound protocols, ports, and CIDR ranges the associated workload needs. Security groups are policies, not workload containers.",
+          "id": "aws.ec2.security-group.slot.ingress-rules",
+          "policyKinds": [],
+          "professionalExplanation": "Zero or more user-owned typed ingress configuration nodes retain explicit direction and are validated for bounded protocols, ports, and CIDR scope.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "Security-group ingress rules has a graph-backed CloudFormation projection through the exact reviewed networking renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Security-group ingress rules uses strict typed node configuration rather than raw provider state or arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "Security-group ingress rules changes infrastructure configuration and never generates application source code.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "Security-group ingress rules is modeled as one exact graph-backed owned configuration kind.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "Security-group ingress rules has a graph-backed Terraform projection through the exact reviewed networking renderer.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Security-group ingress rules is covered by deterministic ownership, cardinality, placement, and policy validation as applicable.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.ec2.security-group",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "VPC security group has an exact catalog mapping and deterministic reviewed CloudFormation renderer with semantic, negative, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "VPC security group has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "VPC security group is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "VPC security group has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "VPC security group has an exact catalog mapping and deterministic reviewed Terraform renderer with negative, parse, golden, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "VPC security group participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ec2.security-group-egress-rule",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Security-group CloudFormation rendering explicitly suppresses default allow-all egress before emitting standalone narrow AWS::EC2::SecurityGroupEgress resources.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Security-group egress rule has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Security-group egress rule is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Security-group egress rule has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Security-group egress rule has an exact catalog mapping and deterministic reviewed Terraform renderer with negative, parse, golden, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Security-group egress rule participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ec2.security-group-ingress-rule",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Security-group ingress rule has an exact catalog mapping and deterministic reviewed CloudFormation renderer with semantic, negative, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Security-group ingress rule has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Security-group ingress rule is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Security-group ingress rule has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Security-group ingress rule has an exact catalog mapping and deterministic reviewed Terraform renderer with negative, parse, golden, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Security-group ingress rule participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ec2.subnet",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "VPC subnet CloudFormation rendering deterministically resolves VpcId through the subnet's required Availability Zone and exact VPC ancestor.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "VPC subnet has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "VPC subnet is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "VPC subnet has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "VPC subnet has an exact catalog mapping and deterministic reviewed Terraform renderer with negative, parse, golden, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "VPC subnet participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ec2.vpc",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Amazon VPC has an exact catalog mapping and deterministic reviewed CloudFormation renderer with semantic, negative, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Amazon VPC has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Amazon VPC is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Amazon VPC has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Amazon VPC has an exact catalog mapping and deterministic reviewed Terraform renderer with negative, parse, golden, and reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Amazon VPC participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ecr.image-reference",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native ECR/ECS properties and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict immutable digest, Linux Fargate sizing, distinct roles, private networking, log/health/port and whole-secret intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No application/image generation, build, push or boot behavior is inferred.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned resources and canonical image/container configurations.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native ECR/ECS resources with jsonencode and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic schema, owner, role/trust, network and declared publication/population checks; external evidence remains required.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.ecr.image",
+          "description": "Exact caller-declared owned configuration with no runtime verification or inferred application behavior.",
+          "displayName": "Image identities",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.ecr.image-reference",
+            "ownershipRelationshipType": "aws.ecr.repository-owns-image"
+          },
+          "guidedExplanation": "Create explicit owned configuration and supply externally reviewed image/application facts.",
+          "id": "aws.ecr.repository.slot.image",
+          "policyKinds": [],
+          "professionalExplanation": "Canonical parent and exact owner binding must agree; imports, generated/adopted configurations and runtime verification require separate contracts.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "Reviewed structured native ECR/ECS properties and typed references; no provider execution.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Strict immutable digest, Linux Fargate sizing, distinct roles, private networking, log/health/port and whole-secret intent.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "No application/image generation, build, push or boot behavior is inferred.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "Exact user-owned resources and canonical image/container configurations.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "Reviewed native ECR/ECS resources with jsonencode and typed references; no provider execution.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Deterministic schema, owner, role/trust, network and declared publication/population checks; external evidence remains required.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.ecr.repository",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native ECR/ECS properties and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict immutable digest, Linux Fargate sizing, distinct roles, private networking, log/health/port and whole-secret intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No application/image generation, build, push or boot behavior is inferred.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned resources and canonical image/container configurations.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native ECR/ECS resources with jsonencode and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic schema, owner, role/trust, network and declared publication/population checks; external evidence remains required.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ecs.cluster",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native ECR/ECS properties and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict immutable digest, Linux Fargate sizing, distinct roles, private networking, log/health/port and whole-secret intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No application/image generation, build, push or boot behavior is inferred.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned resources and canonical image/container configurations.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native ECR/ECS resources with jsonencode and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic schema, owner, role/trust, network and declared publication/population checks; external evidence remains required.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ecs.container-definition",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native ECR/ECS properties and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict immutable digest, Linux Fargate sizing, distinct roles, private networking, log/health/port and whole-secret intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No application/image generation, build, push or boot behavior is inferred.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned resources and canonical image/container configurations.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native ECR/ECS resources with jsonencode and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic schema, owner, role/trust, network and declared publication/population checks; external evidence remains required.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.ecs.service",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native ECR/ECS properties and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict immutable digest, Linux Fargate sizing, distinct roles, private networking, log/health/port and whole-secret intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No application/image generation, build, push or boot behavior is inferred.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned resources and canonical image/container configurations.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native ECR/ECS resources with jsonencode and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic schema, owner, role/trust, network and declared publication/population checks; external evidence remains required.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.ecs.container",
+          "description": "Exact caller-declared owned configuration with no runtime verification or inferred application behavior.",
+          "displayName": "Essential container",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.ecs.container-definition",
+            "ownershipRelationshipType": "aws.ecs.task-owns-container"
+          },
+          "guidedExplanation": "Create explicit owned configuration and supply externally reviewed image/application facts.",
+          "id": "aws.ecs.task-definition.slot.container",
+          "policyKinds": [],
+          "professionalExplanation": "Canonical parent and exact owner binding must agree; imports, generated/adopted configurations and runtime verification require separate contracts.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "Reviewed structured native ECR/ECS properties and typed references; no provider execution.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Strict immutable digest, Linux Fargate sizing, distinct roles, private networking, log/health/port and whole-secret intent.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "No application/image generation, build, push or boot behavior is inferred.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "Exact user-owned resources and canonical image/container configurations.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "Reviewed native ECR/ECS resources with jsonencode and typed references; no provider execution.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Deterministic schema, owner, role/trust, network and declared publication/population checks; external evidence remains required.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.ecs.task-definition",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native ECR/ECS properties and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict immutable digest, Linux Fargate sizing, distinct roles, private networking, log/health/port and whole-secret intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No application/image generation, build, push or boot behavior is inferred.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned resources and canonical image/container configurations.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native ECR/ECS resources with jsonencode and typed references; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic schema, owner, role/trust, network and declared publication/population checks; external evidence remains required.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.elb.application-load-balancer",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured ALB/target/listener and exact backend TCP SG peer rules; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed ALB scheme/network, HTTP health/backend and regional HTTPS/ownership intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned ALB/target-group and canonical listener/backend-access children.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native ALB/target/listener, EC2 or native ECS target binding and exact owned TCP SG peer rules; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, exact network/route/SG/backend/health and regional certificate ownership; live health/authority remain external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.elb.backend-access-configuration",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured ALB/target/listener and exact backend TCP SG peer rules; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed ALB scheme/network, HTTP health/backend and regional HTTPS/ownership intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned ALB/target-group and canonical listener/backend-access children.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native ALB/target/listener, EC2 or native ECS target binding and exact owned TCP SG peer rules; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, exact network/route/SG/backend/health and regional certificate ownership; live health/authority remain external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.elb.https-listener",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured ALB/target/listener and exact backend TCP SG peer rules; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed ALB scheme/network, HTTP health/backend and regional HTTPS/ownership intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned ALB/target-group and canonical listener/backend-access children.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native ALB/target/listener, EC2 or native ECS target binding and exact owned TCP SG peer rules; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, exact network/route/SG/backend/health and regional certificate ownership; live health/authority remain external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.elb.backend-access",
+          "description": "One required canonical user-owned exact backend peer access.",
+          "displayName": "Backend access",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.elb.backend-access-configuration",
+            "ownershipRelationshipType": "aws.elb.target-group-owns-backend-access"
+          },
+          "guidedExplanation": "Add the owned backend group access and connect its exact groups explicitly.",
+          "id": "aws.elb.target-group.slot.backend-access",
+          "policyKinds": [],
+          "professionalExplanation": "Canonical parent/edge agree. HTTPS listener is a native resource created with the existing parent-required setup flow; no generic command engine change.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "Reviewed structured ALB/target/listener and exact backend TCP SG peer rules; no provider execution.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Closed ALB scheme/network, HTTP health/backend and regional HTTPS/ownership intent.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "Exact user-owned ALB/target-group and canonical listener/backend-access children.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "Reviewed native ALB/target/listener, EC2 or native ECS target binding and exact owned TCP SG peer rules; no provider execution.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Closed schemas, exact network/route/SG/backend/health and regional certificate ownership; live health/authority remain external.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.elb.target-group",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured ALB/target/listener and exact backend TCP SG peer rules; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed ALB scheme/network, HTTP health/backend and regional HTTPS/ownership intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned ALB/target-group and canonical listener/backend-access children.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native ALB/target/listener, EC2 or native ECS target binding and exact owned TCP SG peer rules; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, exact network/route/SG/backend/health and regional certificate ownership; live health/authority remain external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.iam.policy.eventbridge-resource",
+          "description": "EventBridge bus policy remains an explicit graph-backed child with stable ownership and provenance.",
+          "displayName": "EventBridge bus policy",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.policy-document",
+            "ownershipRelationshipType": "aws.eventbridge.event-bus-owns-resource-policy"
+          },
+          "guidedExplanation": "Review this setting separately from the service, and adopt generated content before customizing it.",
+          "id": "aws.eventbridge.event-bus.slot.resource-policy",
+          "policyKinds": [
+            "resource"
+          ],
+          "professionalExplanation": "Exact owner edges, generated lifecycle metadata, adoption state, and deterministic cleanup prevent silent replacement.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "EventBridge bus policy has a graph-backed CloudFormation projection through the exact reviewed event renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "EventBridge bus policy exposes only bounded reviewed configuration.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "EventBridge bus policy does not itself render application source.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "EventBridge bus policy has a curated typed graph definition and exact semantic ports.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "EventBridge bus policy has an exact-catalog-bound reviewed deterministic Terraform projection.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "EventBridge bus policy participates in deterministic event topology and delivery validation.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.eventbridge.event-bus",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.eventbridge.event-bus has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "EventBridge event bus exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "aws.eventbridge.event-bus participates in an exact AWS catalog 0.13 curated event application contract and deterministic Lambda artifact build.",
+          "status": "supported"
+        },
+        "modeling": {
+          "reason": "EventBridge event bus has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "EventBridge event bus has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "EventBridge event bus participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.eventbridge.target",
+          "description": "EventBridge targets remains an explicit graph-backed child with stable ownership and provenance.",
+          "displayName": "EventBridge targets",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.eventbridge.target",
+            "ownershipRelationshipType": "aws.eventbridge.rule-owns-target"
+          },
+          "guidedExplanation": "Review this setting separately from the service, and adopt generated content before customizing it.",
+          "id": "aws.eventbridge.rule.slot.targets",
+          "policyKinds": [],
+          "professionalExplanation": "Exact owner edges, generated lifecycle metadata, adoption state, and deterministic cleanup prevent silent replacement.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "EventBridge targets has a graph-backed CloudFormation projection through the exact reviewed event renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "EventBridge targets exposes only bounded reviewed configuration.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "EventBridge targets does not itself render application source.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "EventBridge targets has a curated typed graph definition and exact semantic ports.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "EventBridge targets has an exact-catalog-bound reviewed deterministic Terraform projection.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "EventBridge targets participates in deterministic event topology and delivery validation.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.eventbridge.rule",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.eventbridge.rule has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "EventBridge rule exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "aws.eventbridge.rule participates in an exact AWS catalog 0.13 curated event application contract and deterministic Lambda artifact build.",
+          "status": "supported"
+        },
+        "modeling": {
+          "reason": "EventBridge rule has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "EventBridge rule has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "EventBridge rule participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.eventbridge.target",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.eventbridge.target has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "EventBridge target exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "aws.eventbridge.target participates in an exact AWS catalog 0.13 curated event application contract and deterministic Lambda artifact build.",
+          "status": "supported"
+        },
+        "modeling": {
+          "reason": "EventBridge target has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "EventBridge target has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "EventBridge target participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.fsx.lustre-file-system",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Version-bound native FSx resources and properties.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict family-specific configuration; no inline credentials.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "File-system infrastructure is configured independently of workload source.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Typed FSx family and exact network/storage relationships.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Version-bound FSx renderer with exact resource bindings.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic FSx topology, bounds and access-readiness validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.fsx.ontap-file-system",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Version-bound native FSx resources and properties.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict family-specific configuration; no inline credentials.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "File-system infrastructure is configured independently of workload source.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Typed FSx family and exact network/storage relationships.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Version-bound FSx renderer with exact resource bindings.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic FSx topology, bounds and access-readiness validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.fsx.ontap-storage-virtual-machine",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Version-bound native FSx resources and properties.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict family-specific configuration; no inline credentials.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "File-system infrastructure is configured independently of workload source.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Typed FSx family and exact network/storage relationships.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Version-bound FSx renderer with exact resource bindings.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic FSx topology, bounds and access-readiness validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.fsx.ontap-volume",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Version-bound native FSx resources and properties.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict family-specific configuration; no inline credentials.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "File-system infrastructure is configured independently of workload source.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Typed FSx family and exact network/storage relationships.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Version-bound FSx renderer with exact resource bindings.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic FSx topology, bounds and access-readiness validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.fsx.openzfs-file-system",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Version-bound native FSx resources and properties.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict family-specific configuration; no inline credentials.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "File-system infrastructure is configured independently of workload source.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Typed FSx family and exact network/storage relationships.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Version-bound FSx renderer with exact resource bindings.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic FSx topology, bounds and access-readiness validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.fsx.windows-file-system",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Version-bound native FSx resources and properties.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict family-specific configuration; no inline credentials.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "File-system infrastructure is configured independently of workload source.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Typed FSx family and exact network/storage relationships.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Version-bound FSx renderer with exact resource bindings.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic FSx topology, bounds and access-readiness validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.iam.instance-profile",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed native instance/profile renderers, explicit primary interface and root mapping; throughput restricted to gp3 baseline.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict image provenance, private network, IMDSv2 and encrypted gp3 baseline root fields.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "This instance slice generates no application or boot-script artifacts.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Explicit private Linux instance/profile identities and typed launch dependencies.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed exact aws_instance/aws_iam_instance_profile renderers; no secret/bootstrap or inferred grants.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic image/type/root-minimum, VPC, profile/trust, metadata and ownership checks with separate external readiness warnings.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.iam.managed-policy-attachment",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "IAM managed-policy attachment has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "IAM managed-policy attachment has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "IAM managed-policy attachment does not itself require application-code generation.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "IAM managed-policy attachment has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "IAM managed-policy attachment has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "IAM managed-policy attachment participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.iam.policy-condition",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "IAM policy condition has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "IAM policy condition has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "IAM policy condition does not itself require application-code generation.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "IAM policy condition has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "IAM policy condition has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "IAM policy condition participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.iam.policy-document",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "IAM policy document has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "IAM policy document has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "IAM policy document does not itself require application-code generation.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "IAM policy document has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "IAM policy document has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "IAM policy document participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.iam.policy-statement",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "IAM policy statement has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "IAM policy statement has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "IAM policy statement does not itself require application-code generation.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "IAM policy statement has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "IAM policy statement has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "IAM policy statement participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.iam.policy.identity-inline",
+          "description": "User-authored identity policy documents owned by this role.",
+          "displayName": "Custom inline policies",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.policy-document",
+            "ownershipRelationshipType": "aws.iam.role-owns-inline-policy"
+          },
+          "guidedExplanation": "These are permissions you explicitly add and connection cleanup never owns them.",
+          "id": "aws.iam.role.slot.custom-inline-policy",
+          "policyKinds": [
+            "identity-inline"
+          ],
+          "professionalExplanation": "Zero or more user-owned identity-inline documents remain outside every generated connection cleanup closure.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "IAM role custom inline policy is deterministically rendered into native CloudFormation IAM or Lambda-permission properties from exact graph provenance.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "IAM role custom inline policy uses typed policy or attachment configuration rather than arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "IAM role custom inline policy affects infrastructure permissions, not application source generation.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "IAM role custom inline policy is modeled as an exact graph-backed owned configuration.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "IAM role custom inline policy is deterministically rendered from its exact graph-owned configuration and provenance.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "IAM role custom inline policy is covered by deterministic policy-kind, ownership, and cardinality validation.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "generated"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.iam.policy.generated-permission",
+          "description": "Connection-generated identity policy documents owned by this role.",
+          "displayName": "Generated permissions",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.policy-document",
+            "ownershipRelationshipType": "aws.iam.role-owns-generated-permission"
+          },
+          "guidedExplanation": "CloudMarkup creates these because the role or its workload is connected to another service.",
+          "id": "aws.iam.role.slot.generated-permission",
+          "policyKinds": [
+            "generated-permission"
+          ],
+          "professionalExplanation": "Zero or more generated-permission documents retain exact source-edge provenance and require adoption before customization.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "IAM role generated permission is deterministically rendered into native CloudFormation IAM or Lambda-permission properties from exact graph provenance.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "IAM role generated permission uses typed policy or attachment configuration rather than arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "IAM role generated permission affects infrastructure permissions, not application source generation.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "IAM role generated permission is modeled as an exact graph-backed owned configuration.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "IAM role generated permission is deterministically rendered from its exact graph-owned configuration and provenance.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "IAM role generated permission is covered by deterministic policy-kind, ownership, and cardinality validation.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.iam.policy.managed-policy-attachment",
+          "description": "Reviewed managed-policy references attached to this role.",
+          "displayName": "Managed policies",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.managed-policy-attachment",
+            "ownershipRelationshipType": "aws.iam.role-owns-managed-policy-attachment"
+          },
+          "guidedExplanation": "Attach zero or more reviewed managed policies when their full permission sets are appropriate.",
+          "id": "aws.iam.role.slot.managed-policy",
+          "policyKinds": [
+            "managed-policy-attachment"
+          ],
+          "professionalExplanation": "Managed-policy attachment nodes use deliberate reviewed references and remain distinct from inline policy documents.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "IAM role managed policy is deterministically rendered into native CloudFormation IAM or Lambda-permission properties from exact graph provenance.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "IAM role managed policy uses typed policy or attachment configuration rather than arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "IAM role managed policy affects infrastructure permissions, not application source generation.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "IAM role managed policy is modeled as an exact graph-backed owned configuration.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "IAM role managed policy is deterministically rendered from its exact graph-owned configuration and provenance.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "IAM role managed policy is covered by deterministic policy-kind, ownership, and cardinality validation.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.iam.policy.permissions-boundary",
+          "description": "The optional managed-policy reference limiting this role's maximum permissions.",
+          "displayName": "Permissions boundary",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.managed-policy-attachment",
+            "ownershipRelationshipType": "aws.iam.role-owns-permissions-boundary"
+          },
+          "guidedExplanation": "This optional boundary limits the maximum permissions the role can receive.",
+          "id": "aws.iam.role.slot.permissions-boundary",
+          "policyKinds": [
+            "permissions-boundary"
+          ],
+          "professionalExplanation": "At most one user-owned permissions-boundary attachment is permitted and it grants no permissions by itself.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "IAM role permissions boundary is deterministically rendered into native CloudFormation IAM or Lambda-permission properties from exact graph provenance.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "IAM role permissions boundary uses typed policy or attachment configuration rather than arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "IAM role permissions boundary affects infrastructure permissions, not application source generation.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "IAM role permissions boundary is modeled as an exact graph-backed owned configuration.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "IAM role permissions boundary is deterministically rendered from its exact graph-owned configuration and provenance.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "IAM role permissions boundary is covered by deterministic policy-kind, ownership, and cardinality validation.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 1
+          },
+          "configurationKind": "aws.iam.policy.trust",
+          "description": "The one policy document controlling who or what may assume this role.",
+          "displayName": "Trust policy",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.policy-document",
+            "ownershipRelationshipType": "aws.iam.role-owns-trust-policy"
+          },
+          "guidedExplanation": "This required policy controls who or what may use the role.",
+          "id": "aws.iam.role.slot.trust-policy",
+          "policyKinds": [
+            "trust"
+          ],
+          "professionalExplanation": "Exactly one trust-policy document is bound through the role trust slot; generated lifecycle provenance remains adoptable before customization.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "IAM role trust policy is deterministically rendered into native CloudFormation IAM or Lambda-permission properties from exact graph provenance.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "IAM role trust policy uses typed policy or attachment configuration rather than arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "IAM role trust policy affects infrastructure permissions, not application source generation.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "IAM role trust policy is modeled as an exact graph-backed owned configuration.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "IAM role trust policy is deterministically rendered from its exact graph-owned configuration and provenance.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "IAM role trust policy is covered by deterministic policy-kind, ownership, and cardinality validation.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.iam.role",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "IAM role has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "IAM role has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "IAM role does not itself require application-code generation.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "IAM role has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "IAM role has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "IAM role participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 1
+          },
+          "configurationKind": "aws.iam.policy.kms-resource",
+          "description": "One explicit user-owned canonical policy attached inline to its regional key.",
+          "displayName": "Key policy",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.policy-document",
+            "ownershipRelationshipType": "aws.kms.key-owns-resource-policy"
+          },
+          "guidedExplanation": "Choose an explicit key administrator and review separate key-user permissions. No administrator is assumed.",
+          "id": "aws.kms.key.slot.resource-policy",
+          "policyKinds": [
+            "resource"
+          ],
+          "professionalExplanation": "Exactly one user-owned canonical resource document supplies the inline KeyPolicy. Typed self-scope renders KMS owner-local Resource only after exact owner validation; lockout bypass remains false.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "Reviewed native AWS::KMS::Key renderer with inline policy, Retain lifecycle, focused negative, parsed golden, public compile and byte-reproducibility evidence.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Strict key, rotation and retained-lifecycle fields; no secret material or raw policies.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "This key foundation does not generate application cryptographic behavior.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "One typed regional symmetric KMS key with exact user-owned policy bindings.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "Reviewed inline aws_kms_key policy renderer with focused negative, parsed golden, public compile and byte-reproducibility evidence.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Deterministic key bounds, exact policy ownership, self-scope and administrator findings.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.kms.key",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed native AWS::KMS::Key renderer with inline policy, Retain lifecycle, focused negative, parsed golden, public compile and byte-reproducibility evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict key, rotation and retained-lifecycle fields; no secret material or raw policies.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "This key foundation does not generate application cryptographic behavior.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "One typed regional symmetric KMS key with exact user-owned policy bindings.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed inline aws_kms_key policy renderer with focused negative, parsed golden, public compile and byte-reproducibility evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic key bounds, exact policy ownership, self-scope and administrator findings.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "generated"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.lambda.invocation-permission",
+          "description": "Service-specific grants allowing reviewed callers to invoke this function.",
+          "displayName": "Invocation permissions",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.policy-document",
+            "ownershipRelationshipType": "aws.lambda.owns-invocation-permission"
+          },
+          "guidedExplanation": "CloudMarkup creates these grants when a supported service needs permission to call the function.",
+          "id": "aws.lambda.function.slot.invocation-permission",
+          "policyKinds": [
+            "service-grant"
+          ],
+          "professionalExplanation": "Zero or more generated service-grant policy documents retain exact caller, relationship, and source-edge provenance.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "Lambda invocation permission is deterministically rendered into native CloudFormation IAM or Lambda-permission properties from exact graph provenance.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Lambda invocation permission uses typed policy or attachment configuration rather than arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "Lambda invocation permission affects infrastructure permissions, not application source generation.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "Lambda invocation permission is modeled as an exact graph-backed owned configuration.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "Lambda invocation permission is deterministically rendered from its exact graph-owned configuration and provenance.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Lambda invocation permission is covered by deterministic policy-kind, ownership, and cardinality validation.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.lambda.vpc-access-configuration",
+          "description": "The optional subnet and security-group association configuration owned by this Lambda function.",
+          "displayName": "VPC access",
+          "generatedAdoption": "not-applicable",
+          "graphBinding": {
+            "configurationServiceId": "aws.lambda.vpc-access-configuration",
+            "ownershipRelationshipType": "aws.lambda.owns-vpc-access-configuration"
+          },
+          "guidedExplanation": "Select reviewed subnets and security groups here. Lambda remains a managed service outside the VPC rather than becoming contained by it.",
+          "id": "aws.lambda.function.slot.vpc-access-configuration",
+          "policyKinds": [],
+          "professionalExplanation": "At most one user-owned graph configuration binds to the function; subnet and security-group selections remain separate same-VPC association edges.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "The Lambda VPC-access slot projects sorted subnet and security-group references into AWS::Lambda::Function.VpcConfig and deliberately has no standalone resource.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "Lambda VPC-access configuration uses strict typed node configuration rather than raw provider state or arbitrary JSON.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "Lambda VPC-access configuration changes infrastructure configuration and never generates application source code.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "Lambda VPC-access configuration is modeled as one exact graph-backed owned configuration kind.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "The Lambda VPC-access slot projects sorted graph associations into the owning function's nested vpc_config block and never creates a false standalone resource.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "Lambda VPC-access configuration is covered by deterministic ownership, cardinality, placement, and policy validation as applicable.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.lambda.function",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Lambda function has deterministic native CloudFormation generation for the bounded initial serverless/auth/data family.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Lambda function has a strict versioned configuration schema and reviewed field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Lambda function participates in exact reviewed deterministic application generation and Lambda artifact build contracts.",
+          "status": "supported"
+        },
+        "modeling": {
+          "reason": "Lambda function has a reviewed typed graph service and exact semantic ports in this catalog.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Lambda function has deterministic Terraform generation for the bounded notes-API family.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Lambda function participates in deterministic catalog-bound validation for its current bounded behavior.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.lambda.vpc-access-configuration",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Lambda VPC-access configuration projects sorted graph associations into AWS::Lambda::Function.VpcConfig and deliberately has no false standalone resource.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Lambda VPC-access configuration has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "Lambda VPC-access configuration is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Lambda VPC-access configuration has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Lambda VPC-access configuration uses the reviewed owner-nested-block projection to render deterministic subnet and security-group references on the Lambda function; it deliberately has no standalone resource.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Lambda VPC-access configuration participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.rds.db-instance",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict private PostgreSQL 16, managed credentials, encrypted storage, backup/maintenance and TLS intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned root RDS instance/subnet/parameter identities.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native typed RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, two-AZ/same-VPC topology, managed ownership and bounded windows; actual availability remains external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.rds.db-parameter-group",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict private PostgreSQL 16, managed credentials, encrypted storage, backup/maintenance and TLS intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned root RDS instance/subnet/parameter identities.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native typed RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, two-AZ/same-VPC topology, managed ownership and bounded windows; actual availability remains external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.rds.db-subnet-group",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict private PostgreSQL 16, managed credentials, encrypted storage, backup/maintenance and TLS intent.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned root RDS instance/subnet/parameter identities.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native typed RDS resources; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, two-AZ/same-VPC topology, managed ownership and bounded windows; actual availability remains external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.region.boundary",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "AWS Region boundary is ambient placement context rather than a CloudFormation-managed resource in this bounded catalog.",
+          "status": "not-applicable"
+        },
+        "configuration": {
+          "reason": "AWS Region boundary has a strict versioned configuration schema with reviewed defaults and field metadata.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "AWS Region boundary is infrastructure or an infrastructure association and does not itself generate application source code.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "AWS Region boundary has a reviewed typed graph service, exact semantic ports, and stable placement or association meaning.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "AWS Region boundary is ambient placement context rather than a Terraform-managed resource in this bounded catalog.",
+          "status": "not-applicable"
+        },
+        "validation": {
+          "reason": "AWS Region boundary participates in deterministic networking, routing, policy, or Lambda VPC-access validation as applicable.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.route53.public-hosted-zone",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed structured native zone/certificate resources; no provider execution.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Closed canonical domain authority, declared Region/viewer intent, managed DNS validation and protected ownership.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "No clients, queries, schema/data, migrations or business behavior are generated.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Exact user-owned new public-zone and single-domain certificate identities.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed native typed public-zone/certificate/validation resources; no provider execution.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Closed schemas, DNS suffix/most-specific-zone authority, regional/viewer rules and exact ownership; actual delegation and issuance stay external.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.s3.cors",
+          "description": "S3 CORS configuration remains an explicit graph-backed child with stable ownership and provenance.",
+          "displayName": "S3 CORS configuration",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.s3.bucket-cors-configuration",
+            "ownershipRelationshipType": "aws.s3.bucket-owns-cors-configuration"
+          },
+          "guidedExplanation": "Review this setting separately from the service, and adopt generated content before customizing it.",
+          "id": "aws.s3.bucket.slot.cors",
+          "policyKinds": [],
+          "professionalExplanation": "Exact owner edges, generated lifecycle metadata, adoption state, and deterministic cleanup prevent silent replacement.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "S3 CORS configuration has a graph-backed CloudFormation projection through the exact reviewed event renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "S3 CORS configuration exposes only bounded reviewed configuration.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "S3 CORS configuration does not itself render application source.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "S3 CORS configuration has a curated typed graph definition and exact semantic ports.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "S3 CORS configuration has an exact-catalog-bound reviewed deterministic Terraform projection.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "S3 CORS configuration participates in deterministic event topology and delivery validation.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.s3.lifecycle",
+          "description": "S3 lifecycle configuration remains an explicit graph-backed child with stable ownership and provenance.",
+          "displayName": "S3 lifecycle configuration",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.s3.bucket-lifecycle-configuration",
+            "ownershipRelationshipType": "aws.s3.bucket-owns-lifecycle-configuration"
+          },
+          "guidedExplanation": "Review this setting separately from the service, and adopt generated content before customizing it.",
+          "id": "aws.s3.bucket.slot.lifecycle",
+          "policyKinds": [],
+          "professionalExplanation": "Exact owner edges, generated lifecycle metadata, adoption state, and deterministic cleanup prevent silent replacement.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "S3 lifecycle configuration has a graph-backed CloudFormation projection through the exact reviewed event renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "S3 lifecycle configuration exposes only bounded reviewed configuration.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "S3 lifecycle configuration does not itself render application source.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "S3 lifecycle configuration has a curated typed graph definition and exact semantic ports.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "S3 lifecycle configuration has an exact-catalog-bound reviewed deterministic Terraform projection.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "S3 lifecycle configuration participates in deterministic event topology and delivery validation.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.s3.notification",
+          "description": "S3 notification configuration remains an explicit graph-backed child with stable ownership and provenance.",
+          "displayName": "S3 notification configuration",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.s3.bucket-notification-configuration",
+            "ownershipRelationshipType": "aws.s3.bucket-owns-notification-configuration"
+          },
+          "guidedExplanation": "Review this setting separately from the service, and adopt generated content before customizing it.",
+          "id": "aws.s3.bucket.slot.notifications",
+          "policyKinds": [],
+          "professionalExplanation": "Exact owner edges, generated lifecycle metadata, adoption state, and deterministic cleanup prevent silent replacement.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "S3 notification configuration has a graph-backed CloudFormation projection through the exact reviewed event renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "S3 notification configuration exposes only bounded reviewed configuration.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "S3 notification configuration does not itself render application source.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "S3 notification configuration has a curated typed graph definition and exact semantic ports.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "S3 notification configuration has an exact-catalog-bound reviewed deterministic Terraform projection.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "S3 notification configuration participates in deterministic event topology and delivery validation.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.iam.policy.s3-resource",
+          "description": "S3 bucket policy remains an explicit graph-backed child with stable ownership and provenance.",
+          "displayName": "S3 bucket policy",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.policy-document",
+            "ownershipRelationshipType": "aws.s3.bucket-owns-resource-policy"
+          },
+          "guidedExplanation": "Review this setting separately from the service, and adopt generated content before customizing it.",
+          "id": "aws.s3.bucket.slot.resource-policy",
+          "policyKinds": [
+            "resource"
+          ],
+          "professionalExplanation": "Exact owner edges, generated lifecycle metadata, adoption state, and deterministic cleanup prevent silent replacement.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "S3 bucket policy has a graph-backed CloudFormation projection through the exact reviewed event renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "S3 bucket policy exposes only bounded reviewed configuration.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "S3 bucket policy does not itself render application source.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "S3 bucket policy has a curated typed graph definition and exact semantic ports.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "S3 bucket policy has an exact-catalog-bound reviewed deterministic Terraform projection.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "S3 bucket policy participates in deterministic event topology and delivery validation.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.s3.bucket",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.s3.bucket has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "S3 bucket exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "aws.s3.bucket participates in an exact AWS catalog 0.13 curated event application contract and deterministic Lambda artifact build.",
+          "status": "supported"
+        },
+        "modeling": {
+          "reason": "S3 bucket has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "S3 bucket has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "S3 bucket participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.s3.bucket-cors-configuration",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.s3.bucket-cors-configuration has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "S3 CORS configuration exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "S3 CORS configuration does not itself render application source.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "S3 CORS configuration has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "S3 CORS configuration has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "S3 CORS configuration participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.s3.bucket-lifecycle-configuration",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.s3.bucket-lifecycle-configuration has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "S3 lifecycle configuration exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "S3 lifecycle configuration does not itself render application source.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "S3 lifecycle configuration has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "S3 lifecycle configuration has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "S3 lifecycle configuration participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.s3.bucket-notification-configuration",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.s3.bucket-notification-configuration has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "S3 notification configuration exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "aws.s3.bucket-notification-configuration participates in an exact AWS catalog 0.13 curated event application contract and deterministic Lambda artifact build.",
+          "status": "supported"
+        },
+        "modeling": {
+          "reason": "S3 notification configuration has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "S3 notification configuration has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "S3 notification configuration participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.secretsmanager.secret",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "Reviewed native retained AWS::SecretsManager::Secret metadata and exact Ref/KMS references with negative and reproducible golden evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Strict metadata and retention fields; value population remains external.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "This metadata variant does not generate secret retrieval, credential population or application behavior.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "Typed regional secret metadata with explicit KMS and role-policy scope.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Reviewed retained aws_secretsmanager_secret metadata and exact ARN/KMS references with negative and reproducible golden evidence.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Deterministic name, mode, retention, key association and exact role-policy scope findings.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.sns.subscription",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.sns.subscription has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "SNS subscription exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "aws.sns.subscription participates in an exact AWS catalog 0.13 curated event application contract and deterministic Lambda artifact build.",
+          "status": "supported"
+        },
+        "modeling": {
+          "reason": "SNS subscription has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "SNS subscription has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "SNS subscription participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.iam.policy.sns-resource",
+          "description": "SNS topic policy remains an explicit graph-backed child with stable ownership and provenance.",
+          "displayName": "SNS topic policy",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.policy-document",
+            "ownershipRelationshipType": "aws.sns.topic-owns-resource-policy"
+          },
+          "guidedExplanation": "Review this setting separately from the service, and adopt generated content before customizing it.",
+          "id": "aws.sns.topic.slot.resource-policy",
+          "policyKinds": [
+            "resource"
+          ],
+          "professionalExplanation": "Exact owner edges, generated lifecycle metadata, adoption state, and deterministic cleanup prevent silent replacement.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "SNS topic policy has a graph-backed CloudFormation projection through the exact reviewed event renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "SNS topic policy exposes only bounded reviewed configuration.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "SNS topic policy does not itself render application source.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "SNS topic policy has a curated typed graph definition and exact semantic ports.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "SNS topic policy has an exact-catalog-bound reviewed deterministic Terraform projection.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "SNS topic policy participates in deterministic event topology and delivery validation.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": "many",
+            "minimum": 0
+          },
+          "configurationKind": "aws.sns.subscription",
+          "description": "SNS subscriptions remains an explicit graph-backed child with stable ownership and provenance.",
+          "displayName": "SNS subscriptions",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.sns.subscription",
+            "ownershipRelationshipType": "aws.sns.topic-owns-subscription"
+          },
+          "guidedExplanation": "Review this setting separately from the service, and adopt generated content before customizing it.",
+          "id": "aws.sns.topic.slot.subscriptions",
+          "policyKinds": [],
+          "professionalExplanation": "Exact owner edges, generated lifecycle metadata, adoption state, and deterministic cleanup prevent silent replacement.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "SNS subscriptions has a graph-backed CloudFormation projection through the exact reviewed event renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "SNS subscriptions exposes only bounded reviewed configuration.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "SNS subscriptions does not itself render application source.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "SNS subscriptions has a curated typed graph definition and exact semantic ports.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "SNS subscriptions has an exact-catalog-bound reviewed deterministic Terraform projection.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "SNS subscriptions participates in deterministic event topology and delivery validation.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.sns.topic",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.sns.topic has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "SNS topic exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "aws.sns.topic participates in an exact AWS catalog 0.13 curated event application contract and deterministic Lambda artifact build.",
+          "status": "supported"
+        },
+        "modeling": {
+          "reason": "SNS topic has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "SNS topic has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "SNS topic participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.sqs.redrive",
+          "description": "SQS redrive configuration remains an explicit graph-backed child with stable ownership and provenance.",
+          "displayName": "SQS redrive configuration",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.sqs.redrive-configuration",
+            "ownershipRelationshipType": "aws.sqs.queue-owns-redrive-configuration"
+          },
+          "guidedExplanation": "Review this setting separately from the service, and adopt generated content before customizing it.",
+          "id": "aws.sqs.queue.slot.redrive",
+          "policyKinds": [],
+          "professionalExplanation": "Exact owner edges, generated lifecycle metadata, adoption state, and deterministic cleanup prevent silent replacement.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "SQS redrive configuration has a graph-backed CloudFormation projection through the exact reviewed event renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "SQS redrive configuration exposes only bounded reviewed configuration.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "SQS redrive configuration does not itself render application source.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "SQS redrive configuration has a curated typed graph definition and exact semantic ports.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "SQS redrive configuration has an exact-catalog-bound reviewed deterministic Terraform projection.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "SQS redrive configuration participates in deterministic event topology and delivery validation.",
+              "status": "supported"
+            }
+          }
+        },
+        {
+          "allowedOwnership": [
+            "generated",
+            "user"
+          ],
+          "cardinality": {
+            "enforcement": "provider-rule",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "configurationKind": "aws.iam.policy.sqs-resource",
+          "description": "SQS queue policy remains an explicit graph-backed child with stable ownership and provenance.",
+          "displayName": "SQS queue policy",
+          "generatedAdoption": "allowed",
+          "graphBinding": {
+            "configurationServiceId": "aws.iam.policy-document",
+            "ownershipRelationshipType": "aws.sqs.queue-owns-resource-policy"
+          },
+          "guidedExplanation": "Review this setting separately from the service, and adopt generated content before customizing it.",
+          "id": "aws.sqs.queue.slot.resource-policy",
+          "policyKinds": [
+            "resource"
+          ],
+          "professionalExplanation": "Exact owner edges, generated lifecycle metadata, adoption state, and deterministic cleanup prevent silent replacement.",
+          "slotVersion": "1.0.0",
+          "targetReadiness": {
+            "cloudformation": {
+              "reason": "SQS queue policy has a graph-backed CloudFormation projection through the exact reviewed event renderer.",
+              "status": "supported"
+            },
+            "configuration": {
+              "reason": "SQS queue policy exposes only bounded reviewed configuration.",
+              "status": "supported"
+            },
+            "generatedCode": {
+              "reason": "SQS queue policy does not itself render application source.",
+              "status": "not-applicable"
+            },
+            "modeling": {
+              "reason": "SQS queue policy has a curated typed graph definition and exact semantic ports.",
+              "status": "supported"
+            },
+            "terraform": {
+              "reason": "SQS queue policy has an exact-catalog-bound reviewed deterministic Terraform projection.",
+              "status": "supported"
+            },
+            "validation": {
+              "reason": "SQS queue policy participates in deterministic event topology and delivery validation.",
+              "status": "supported"
+            }
+          }
+        }
+      ],
+      "serviceId": "aws.sqs.queue",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.sqs.queue has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "SQS queue exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "aws.sqs.queue participates in an exact AWS catalog 0.13 curated event application contract and deterministic Lambda artifact build.",
+          "status": "supported"
+        },
+        "modeling": {
+          "reason": "SQS queue has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "SQS queue has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "SQS queue participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.sqs.redrive-configuration",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.sqs.redrive-configuration has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "SQS redrive configuration exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "SQS redrive configuration does not itself render application source.",
+          "status": "not-applicable"
+        },
+        "modeling": {
+          "reason": "SQS redrive configuration has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "SQS redrive configuration has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "SQS redrive configuration participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    },
+    {
+      "ownedConfigurationSlots": [],
+      "serviceId": "aws.stepfunctions.state-machine",
+      "targetReadiness": {
+        "cloudformation": {
+          "reason": "aws.stepfunctions.state-machine has an exact AWS catalog 0.15 deterministic CloudFormation projection with semantic and negative evidence.",
+          "status": "supported"
+        },
+        "configuration": {
+          "reason": "Step Functions state machine exposes only bounded reviewed configuration.",
+          "status": "supported"
+        },
+        "generatedCode": {
+          "reason": "aws.stepfunctions.state-machine participates in an exact AWS catalog 0.13 curated event application contract and deterministic Lambda artifact build.",
+          "status": "supported"
+        },
+        "modeling": {
+          "reason": "Step Functions state machine has a curated typed graph definition and exact semantic ports.",
+          "status": "supported"
+        },
+        "terraform": {
+          "reason": "Step Functions state machine has an exact-catalog-bound reviewed deterministic Terraform projection.",
+          "status": "supported"
+        },
+        "validation": {
+          "reason": "Step Functions state machine participates in deterministic event topology and delivery validation.",
+          "status": "supported"
+        }
+      }
+    }
+  ]
+}

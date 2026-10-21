@@ -1,0 +1,72 @@
+{
+  "aws.ebs.volume": {
+    "encrypted": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "encryptionMode": {
+      "enum": ["account-default", "customer-managed"],
+      "type": "string"
+    },
+    "iops": {
+      "default": 3000,
+      "maximum": 3000,
+      "minimum": 3000,
+      "type": "integer"
+    },
+    "multiAttach": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9._-]*$",
+      "type": "string"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "sizeGiB": {
+      "maximum": 16384,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "throughputMiBps": {
+      "default": 125,
+      "maximum": 125,
+      "minimum": 125,
+      "type": "integer"
+    },
+    "volumeType": {
+      "default": "gp3",
+      "enum": ["gp3"],
+      "type": "string"
+    }
+  },
+  "aws.ebs.volume-attachment": {
+    "deviceName": {
+      "enum": ["/dev/sdf", "/dev/sdg", "/dev/sdh", "/dev/sdi"],
+      "type": "string"
+    },
+    "forceDetach": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "guestPreparation": {
+      "default": "external",
+      "enum": ["external"],
+      "type": "string"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    }
+  }
+}

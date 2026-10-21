@@ -1,0 +1,6 @@
+interface:
+  display_name: "Review IaC Mapping"
+  short_description: "Review one generated IaC mapping declaration"
+  default_prompt:
+    "Use $review-iac-mapping to review one CloudMarkup IaC mapping for safety
+    and accuracy."

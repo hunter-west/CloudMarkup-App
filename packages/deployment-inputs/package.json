@@ -1,0 +1,38 @@
+{
+  "name": "@cloudmarkup/deployment-inputs",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "cloudmarkup-beta-setup-inputs": "./dist/beta-setup-cli.js",
+    "cloudmarkup-deployment-inputs": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "merge:beta-setup": "node dist/beta-setup-cli.js merge",
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "validate:beta-setup": "node dist/beta-setup-cli.js validate",
+    "validate:example": "node dist/cli.js ../../config/deployment-inputs/example.development.json"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudmarkup/config": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "extends": "@cloudmarkup/config/tsconfig/node.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": [
+    "../../config/playwright/default.config.ts",
+    "../../config/playwright/desktop-production.config.ts",
+    "../../config/playwright/beta-smoke.config.ts",
+    "../../config/playwright/typed-backend.config.ts",
+    "../../config/playwright/solution-export.config.ts",
+    "../../config/playwright/editor-performance.config.ts",
+    "../../apps/web/e2e/**/*.ts",
+    "../../apps/web/performance/**/*.ts",
+    "../../scripts/beta-smoke/**/*.ts"
+  ]
+}

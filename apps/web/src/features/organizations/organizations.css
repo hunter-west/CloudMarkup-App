@@ -1,0 +1,208 @@
+.organizations-index {
+  display: grid;
+  min-width: 0;
+  gap: var(--cm-space-3);
+}
+
+.organization-selection-shell__account {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--cm-space-2);
+}
+
+.organization-selection-shell__account .button {
+  max-width: min(20rem, 40vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.organization-selection-shell__local-identity {
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-2);
+  font-weight: var(--cm-weight-semibold);
+}
+
+.organizations-index__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cm-space-3);
+  padding-block-end: var(--cm-space-3);
+  border-block-end: 1px solid var(--cm-color-border);
+}
+
+.organizations-index__heading h2,
+.organization-card h3 {
+  margin: 0;
+}
+
+.organizations-index__grid {
+  display: grid;
+  gap: var(--cm-space-3);
+  margin: 0;
+  padding: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  list-style: none;
+}
+
+.organization-card {
+  display: grid;
+  min-width: 0;
+  gap: var(--cm-space-3);
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-lg);
+  background: var(--cm-color-surface);
+  box-shadow: var(--cm-shadow-1);
+}
+
+.organization-card__heading {
+  display: grid;
+  min-width: 0;
+  align-items: start;
+  gap: var(--cm-space-3);
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.organization-card__heading > div {
+  display: grid;
+  min-width: 0;
+  gap: var(--cm-space-1);
+}
+
+.organization-card__heading p,
+.organization-card__summary {
+  margin: 0;
+  color: var(--cm-color-text-muted);
+}
+
+.organization-card__mark {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  background: var(--cm-color-action-subtle);
+  color: var(--cm-color-action-hover);
+  font-size: var(--cm-font-size-4);
+  font-weight: var(--cm-weight-bold);
+  place-items: center;
+}
+
+.organization-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2);
+}
+
+.organization-card__details {
+  padding-block-start: var(--cm-space-3);
+  border-block-start: 1px solid var(--cm-color-border);
+}
+
+.organization-card__details summary {
+  width: fit-content;
+  color: var(--cm-color-action-hover);
+  cursor: pointer;
+  font-size: var(--cm-font-size-2);
+  font-weight: var(--cm-weight-semibold);
+}
+
+.organization-card__details dl {
+  display: grid;
+  gap: var(--cm-space-2);
+  margin: var(--cm-space-3) 0 0;
+}
+
+.organization-card__details dl > div {
+  display: grid;
+  min-width: 0;
+  gap: var(--cm-space-1);
+  grid-template-columns: minmax(7rem, 9rem) minmax(0, 1fr);
+}
+
+.organization-card__details dt {
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-1);
+  font-weight: var(--cm-weight-semibold);
+}
+
+.organization-card__details dd {
+  min-width: 0;
+  margin: 0;
+}
+
+.organization-card__details code {
+  overflow-wrap: anywhere;
+}
+
+.organizations-index__more {
+  justify-self: start;
+}
+
+@media (max-width: 40rem) {
+  .organization-selection-shell__account {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .organization-selection-shell__account .button {
+    max-width: 55vw;
+  }
+
+  .organizations-index__heading,
+  .organization-card__heading {
+    align-items: flex-start;
+  }
+
+  .organizations-index__heading {
+    flex-direction: column;
+  }
+
+  .organization-card {
+    padding: var(--cm-space-3);
+  }
+
+  .organization-card__heading {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .organization-card__heading > :last-child {
+    grid-column: 2;
+  }
+
+  .organization-card__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .organization-card__actions .button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .organization-card__details dl > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.workspace-creation form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cm-space-3);
+  align-items: end;
+}
+.workspace-creation label {
+  grid-column: 1 / -1;
+}
+.workspace-creation input {
+  min-width: 0;
+}
+@media (max-width: 40rem) {
+  .workspace-creation form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

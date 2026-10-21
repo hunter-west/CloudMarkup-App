@@ -1,0 +1,14 @@
+{
+  "contractVersion": 1,
+  "sourceCommit": "a979e325b6584642d5d5a9b58631bd3599d85591",
+  "sourceDirectory": ".cache/legacy-ai-a979e325",
+  "outputDirectory": ".cache/legacy-ai-receipt-closure-v1",
+  "sourceLockSha256": "90175d72e7a150502c8438453d163e6e8837678fbf12a4d75d3aff5c15b24ca1",
+  "captureEntry": "apps/api/src/adapters/persistence/fixtures/legacy-ai-receipt-capture.mjs",
+  "captureEntrySha256": "455a79643f0ebd8fdfb30b09727f9ada46357b15bb61233fdeed56a78d47b183",
+  "bundleSha256": "d16066d5e30fc2ef2100cf794fc524ae75ce042e47140dde6ad970f341168531",
+  "maximumBundleBytes": 33554432,
+  "maximumManifestBytes": 1048576,
+  "manifestSha256": "3ef9b89235d930be3c10c66b08a118210cea8e11aeebf1bf2804296aa342b088",
+  "bundleFile": "packages/model-gateway/dist/capture.mjs"
+}

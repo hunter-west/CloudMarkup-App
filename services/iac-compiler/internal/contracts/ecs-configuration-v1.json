@@ -1,0 +1,208 @@
+{
+  "aws.ecr.image-reference": {
+    "architecture": {
+      "enum": ["x86_64", "arm64"],
+      "type": "string"
+    },
+    "digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "manifestType": {
+      "enum": ["docker-v2-image", "oci-image"],
+      "type": "string"
+    },
+    "publicationStatus": {
+      "default": "external-publication-required",
+      "enum": ["external-publication-required", "externally-confirmed"],
+      "type": "string"
+    }
+  },
+  "aws.ecr.repository": {
+    "encryption": {
+      "default": "AES256",
+      "enum": ["AES256"],
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 256,
+      "minLength": 2,
+      "pattern": "^[a-z0-9]+(?:[._/-][a-z0-9]+)*$",
+      "type": "string"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "scanOnPush": {
+      "default": true,
+      "type": "boolean"
+    },
+    "tagMutability": {
+      "default": "IMMUTABLE",
+      "enum": ["IMMUTABLE"],
+      "type": "string"
+    }
+  },
+  "aws.ecs.cluster": {
+    "containerInsights": {
+      "default": "disabled",
+      "enum": ["disabled"],
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+      "type": "string"
+    }
+  },
+  "aws.ecs.container-definition": {
+    "containerPort": {
+      "maximum": 65535,
+      "minimum": 1024,
+      "type": "integer"
+    },
+    "essential": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "healthExecutable": {
+      "maxLength": 128,
+      "minLength": 2,
+      "pattern": "^/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+$",
+      "type": "string"
+    },
+    "healthIntervalSeconds": {
+      "default": 30,
+      "maximum": 300,
+      "minimum": 5,
+      "type": "integer"
+    },
+    "healthRetries": {
+      "default": 3,
+      "maximum": 10,
+      "minimum": 1,
+      "type": "integer"
+    },
+    "healthStartPeriodSeconds": {
+      "default": 0,
+      "maximum": 300,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "healthTimeoutSeconds": {
+      "default": 5,
+      "maximum": 60,
+      "minimum": 2,
+      "type": "integer"
+    },
+    "logBufferSize": {
+      "default": "10m",
+      "enum": ["10m"],
+      "type": "string"
+    },
+    "logMode": {
+      "default": "non-blocking",
+      "enum": ["non-blocking"],
+      "type": "string"
+    },
+    "logStreamPrefix": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+      "type": "string"
+    },
+    "protocol": {
+      "default": "tcp",
+      "enum": ["tcp"],
+      "type": "string"
+    },
+    "readOnlyRoot": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "user": {
+      "pattern": "^[1-9][0-9]{0,5}:[1-9][0-9]{0,5}$",
+      "type": "string"
+    }
+  },
+  "aws.ecs.service": {
+    "availabilityZoneRebalancing": {
+      "default": "DISABLED",
+      "enum": ["DISABLED"],
+      "type": "string"
+    },
+    "desiredCount": {
+      "default": 0,
+      "maximum": 20,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "executeCommand": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+      "type": "string"
+    },
+    "platformVersion": {
+      "default": "1.4.0",
+      "enum": ["1.4.0"],
+      "type": "string"
+    },
+    "publicIpv4": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    }
+  },
+  "aws.ecs.task-definition": {
+    "architecture": {
+      "enum": ["x86_64", "arm64"],
+      "type": "string"
+    },
+    "capacity": {
+      "default": "FARGATE",
+      "enum": ["FARGATE"],
+      "type": "string"
+    },
+    "cpu": {
+      "enum": [256, 512, 1024],
+      "type": "integer"
+    },
+    "family": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+      "type": "string"
+    },
+    "memoryMiB": {
+      "enum": [512, 1024, 2048, 3072, 4096, 5120, 6144, 7168, 8192],
+      "type": "integer"
+    },
+    "networkMode": {
+      "default": "awsvpc",
+      "enum": ["awsvpc"],
+      "type": "string"
+    },
+    "operatingSystem": {
+      "default": "LINUX",
+      "enum": ["LINUX"],
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,299 @@
+{
+  "kind": "cloudmarkup.architecture-document",
+  "schemaVersion": 3,
+  "documentId": "doc_representative_v2",
+  "architectureId": "architecture_representative_v2",
+  "revision": {
+    "revisionId": "revision_0002",
+    "revisionNumber": 2,
+    "createdAt": "2026-07-31T00:00:00.000Z",
+    "createdBy": "actor_fixture",
+    "sourceDraftId": "draft_0002"
+  },
+  "provider": {
+    "id": "example.cloud",
+    "region": "example-region-1"
+  },
+  "catalog": {
+    "id": "example.cloud.catalog",
+    "version": "2.0.0",
+    "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "compilerCompatibility": {
+    "inputContractVersion": 1,
+    "minimumCompilerVersion": "1.0.0",
+    "maximumCompilerVersionExclusive": "2.0.0"
+  },
+  "metadata": {
+    "source": "user",
+    "serialization": {
+      "mediaType": "application/json",
+      "encoding": "utf-8",
+      "canonicalization": "cloudmarkup.canonical-json.v1"
+    }
+  },
+  "nodes": [
+    {
+      "id": "node_source",
+      "semantic": {
+        "deploymentKey": "source",
+        "serviceType": "example.events",
+        "resourceType": "example.events.source",
+        "configuration": {
+          "schemaId": "example.events.source-config",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      "presentation": {
+        "label": "Event source",
+        "position": {
+          "x": 40,
+          "y": 80
+        }
+      }
+    },
+    {
+      "id": "node_worker",
+      "semantic": {
+        "deploymentKey": "worker",
+        "serviceType": "example.compute",
+        "resourceType": "example.compute.function",
+        "configuration": {
+          "schemaId": "example.compute.function-config",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      "presentation": {
+        "label": "Worker",
+        "position": {
+          "x": 240,
+          "y": 80
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_trigger",
+      "semantic": {
+        "source": {
+          "nodeId": "node_source",
+          "port": "example.port.event"
+        },
+        "target": {
+          "nodeId": "node_worker",
+          "port": "example.port.invocation"
+        },
+        "relationshipType": "example.relationship.invokes",
+        "configuration": {
+          "schemaId": "example.relationship.invokes-config",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      }
+    },
+    {
+      "id": "edge_downstream",
+      "semantic": {
+        "source": {
+          "nodeId": "node_worker",
+          "port": "example.port.data-write"
+        },
+        "target": {
+          "nodeId": "node_source",
+          "port": "example.port.data"
+        },
+        "relationshipType": "example.relationship.writes",
+        "configuration": {
+          "schemaId": "example.relationship.writes-config",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      }
+    }
+  ],
+  "variables": [
+    {
+      "id": "variable_stage",
+      "key": "stage",
+      "valueType": "string",
+      "required": false,
+      "defaultValue": {
+        "kind": "string",
+        "value": "development"
+      }
+    }
+  ],
+  "outputs": [],
+  "assumptions": [],
+  "unresolvedRequirements": [
+    {
+      "id": "requirement_retry_review",
+      "statement": "The production retry limit requires review.",
+      "category": "operational",
+      "blocking": false,
+      "origin": "user"
+    }
+  ],
+  "applicationContracts": {
+    "kind": "cloudmarkup.application-contracts",
+    "schemaVersion": 1,
+    "contractSetId": "architecture_representative_v2",
+    "documentId": "doc_representative_v2",
+    "revision": {
+      "revisionId": "revision_0002",
+      "revisionNumber": 2,
+      "createdAt": "2026-07-31T00:00:00.000Z",
+      "createdBy": "actor_fixture"
+    },
+    "contracts": []
+  },
+  "externalResources": {
+    "kind": "cloudmarkup.external-resource-reference-document",
+    "schemaVersion": 1,
+    "documentId": "doc_representative_v2",
+    "architectureId": "architecture_representative_v2",
+    "revision": {
+      "revisionId": "revision_0002",
+      "revisionNumber": 2,
+      "createdAt": "2026-07-31T00:00:00.000Z",
+      "createdBy": "actor_fixture"
+    },
+    "resources": []
+  },
+  "workloadBehavior": {
+    "contractVersion": 2,
+    "workloads": [
+      {
+        "id": "workload_worker",
+        "owningNodeId": "node_worker",
+        "implementation": {
+          "mode": "user-provided",
+          "runtimeFamily": "example.runtime.nodejs",
+          "handler": "src/handler.main",
+          "sourceOwnership": "user"
+        },
+        "operations": [
+          {
+            "id": "workload_operation_handle",
+            "capability": "example.workload.handle-event",
+            "inputContract": {
+              "kind": "contract-reference",
+              "reference": {
+                "contractId": "example.contract.event",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+              }
+            },
+            "outputContract": {
+              "kind": "none"
+            }
+          }
+        ],
+        "behaviorContracts": [],
+        "triggers": [
+          {
+            "id": "workload_trigger_primary",
+            "edgeId": "edge_trigger",
+            "targetOperationId": "workload_operation_handle"
+          }
+        ],
+        "downstreamActions": [
+          {
+            "id": "workload_action_write",
+            "edgeId": "edge_downstream",
+            "sourceOperationId": "workload_operation_handle"
+          }
+        ],
+        "environment": [
+          {
+            "id": "workload_env_stage",
+            "name": "STAGE",
+            "value": {
+              "kind": "variable-reference",
+              "variableId": "variable_stage"
+            }
+          },
+          {
+            "id": "workload_env_source",
+            "name": "SOURCE_ID",
+            "value": {
+              "kind": "node-attribute-reference",
+              "nodeId": "node_source",
+              "attribute": "example.source.id"
+            }
+          },
+          {
+            "id": "workload_env_secret",
+            "name": "API_SECRET",
+            "value": {
+              "kind": "secret-reference",
+              "reference": "secretref_fixture_api"
+            }
+          }
+        ],
+        "errorBehavior": {
+          "mode": "fail-invocation"
+        },
+        "executionAssumptions": {
+          "timeout": {
+            "kind": "duration",
+            "milliseconds": 30000
+          },
+          "retry": {
+            "kind": "bounded",
+            "maximumAttempts": 3
+          }
+        },
+        "triggerDispatch": {
+          "mode": "single"
+        },
+        "unresolvedRequirementIds": ["requirement_retry_review"],
+        "entrypoints": [],
+        "httpRoutes": [],
+        "eventBindings": [],
+        "schedules": [],
+        "dataBindings": [],
+        "authorization": [],
+        "idempotency": [],
+        "observability": {
+          "signals": [],
+          "healthChecks": [],
+          "smokeTests": []
+        },
+        "tests": [],
+        "sourceOwnership": [],
+        "extensionPoints": [],
+        "extensions": [],
+        "implementationRequirements": [],
+        "compatibility": {
+          "applicationGenerators": [],
+          "modelGateways": []
+        },
+        "provenance": {
+          "source": "deterministic-migration",
+          "migrationId": "cloudmarkup.workload.v1-to-v2",
+          "migrationVersion": "1.0.0"
+        }
+      }
+    ]
+  }
+}

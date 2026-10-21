@@ -1,0 +1,106 @@
+.billing-workspace {
+  display: grid;
+  gap: var(--cm-space-3);
+  min-width: 0;
+}
+.billing-sandbox-note {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2);
+  margin: 0;
+}
+.billing-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--cm-space-3);
+  padding-block: var(--cm-space-2);
+}
+.billing-current h2,
+.billing-current p {
+  margin-block: var(--cm-space-1);
+}
+.billing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2);
+}
+.billing-section {
+  display: grid;
+  gap: var(--cm-space-3);
+  min-width: 0;
+}
+.billing-section > h2 {
+  margin: 0;
+  font-size: var(--cm-font-size-4);
+}
+.billing-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cm-space-3);
+}
+.billing-plan {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--cm-space-2);
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-lg);
+}
+.billing-plan h2,
+.billing-plan h3,
+.billing-plan p {
+  margin: 0;
+}
+.billing-plan .button {
+  margin-top: auto;
+}
+.billing-plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: var(--cm-space-2);
+}
+.billing-plan-price strong {
+  font-size: 1.875rem;
+  line-height: var(--cm-line-tight);
+}
+.billing-plan-description,
+.billing-status-time,
+.billing-availability {
+  font-size: var(--cm-font-size-2);
+}
+.billing-plan-description {
+  color: var(--cm-color-text-muted);
+}
+.billing-status-time {
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .billing-plan-grid {
+    grid-template-columns: 1fr;
+  }
+  .billing-plan {
+    padding: var(--cm-space-3);
+  }
+}
+
+.billing-top-ups {
+  display: grid;
+  gap: var(--cm-space-3);
+  border-top: 1px solid var(--cm-color-border);
+  padding-top: var(--cm-space-3);
+}
+.billing-top-ups h3 {
+  margin: 0;
+}
+.billing-top-up-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 640px) {
+  .billing-top-up-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,450 @@
+.github-export {
+  display: grid;
+  gap: var(--cm-space-3);
+  min-width: 0;
+}
+
+.github-export__assistance {
+  margin: 0;
+  max-width: 82ch;
+  color: var(--cm-color-text-muted);
+}
+
+.github-export .feature-card {
+  min-width: 0;
+}
+
+.github-export__summary-grid,
+.github-export__technical-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--cm-space-3);
+  margin: var(--cm-space-4) 0;
+}
+
+.github-export__summary-grid > div,
+.github-export__technical-grid > div {
+  display: grid;
+  gap: var(--cm-space-1);
+  min-width: 0;
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  background: var(--cm-color-surface-subtle);
+}
+
+.github-export__summary-grid span,
+.github-export__technical-grid dt {
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-2);
+}
+
+.github-export__technical-grid dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.github-export details {
+  margin-top: var(--cm-space-4);
+}
+
+.github-export summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--cm-color-text-muted);
+  font-weight: 650;
+}
+
+.github-export__issues,
+.github-export__evidence-list,
+.github-export__permissions ul,
+.github-export__progress ol {
+  display: grid;
+  gap: var(--cm-space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.github-export__issues li,
+.github-export__evidence-list li,
+.github-export__permissions li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cm-space-2);
+  min-width: 0;
+}
+
+.github-export__issues li > span,
+.github-export__evidence-list li > span {
+  flex: 1;
+}
+
+.github-export__issues code,
+.github-export__evidence-list code {
+  overflow-wrap: anywhere;
+}
+
+.github-export__file-review {
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.36fr) minmax(0, 1fr);
+  gap: var(--cm-space-3);
+  min-height: 24rem;
+}
+
+.github-export__tree {
+  min-width: 0;
+  max-height: 42rem;
+  overflow: auto;
+  border-right: 1px solid var(--cm-color-border);
+  padding-right: var(--cm-space-3);
+}
+
+.github-export__tree ul {
+  display: grid;
+  gap: var(--cm-space-1);
+  padding: 0;
+  list-style: none;
+}
+
+.github-export__tree button {
+  display: grid;
+  gap: 0.15rem;
+  width: 100%;
+  padding: var(--cm-space-2);
+  border: 1px solid transparent;
+  border-radius: var(--cm-radius-sm);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.github-export__tree button:hover,
+.github-export__tree button:focus-visible,
+.github-export__tree button[aria-current="true"] {
+  border-color: var(--cm-color-border-strong);
+  background: var(--cm-color-surface-subtle);
+}
+
+.github-export__tree small,
+.github-export__file-preview > p,
+.github-export__permissions small,
+.github-export__change-table small {
+  color: var(--cm-color-text-muted);
+}
+
+.github-export__file-preview {
+  min-width: 0;
+}
+
+.github-export__diagram {
+  display: grid;
+  gap: var(--cm-space-2);
+  margin: 0;
+}
+
+.github-export__diagram img {
+  width: 100%;
+  max-height: 44rem;
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  background: white;
+  object-fit: contain;
+}
+
+.github-export__installation-row,
+.github-export__connect,
+.github-export__destination {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--cm-space-3);
+  align-items: end;
+}
+
+.github-export__connect {
+  grid-template-columns: minmax(12rem, 1fr) auto;
+}
+
+.github-export__permissions {
+  margin: var(--cm-space-4) 0;
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  background: var(--cm-color-surface-subtle);
+}
+
+.github-export__permissions h3 {
+  margin-top: 0;
+}
+
+.github-export__permissions li small {
+  margin-left: auto;
+}
+
+.github-export__workflow-choice,
+.github-export__final-confirmation,
+.github-export__workflow-confirmation {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cm-space-2);
+}
+
+.github-export__workflow-choice {
+  grid-column: 1 / -1;
+}
+
+.github-export__field-help {
+  grid-column: 1 / -1;
+  margin: calc(-1 * var(--cm-space-2)) 0 0;
+  color: var(--cm-color-text-muted);
+}
+
+.github-export__destination > .button {
+  width: fit-content;
+}
+
+.github-export__preview {
+  margin-top: var(--cm-space-5);
+  padding-top: var(--cm-space-5);
+  border-top: 1px solid var(--cm-color-border);
+}
+
+.github-export__preview-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--cm-space-3);
+}
+
+.github-export__preview-heading h3 {
+  margin-top: 0;
+}
+
+.github-export__diff-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(16rem, 0.8fr);
+  gap: var(--cm-space-3);
+}
+
+.github-export__change-table {
+  display: grid;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+}
+
+.github-export__change-table [role="row"] {
+  display: grid;
+  grid-template-columns: 7rem minmax(14rem, 1fr) 8rem;
+  gap: var(--cm-space-2);
+  align-items: start;
+  padding: var(--cm-space-2) var(--cm-space-3);
+  border-bottom: 1px solid var(--cm-color-border);
+}
+
+.github-export__change-table [role="row"]:last-child {
+  border-bottom: 0;
+}
+
+.github-export__change-header {
+  background: var(--cm-color-surface-subtle);
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-2);
+  font-weight: 650;
+}
+
+.github-export__change-table [role="cell"]:nth-child(2) {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.github-export__change-table code {
+  overflow-wrap: anywhere;
+}
+
+.github-export__workflow-review {
+  margin: var(--cm-space-5) 0;
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border-strong);
+  border-radius: var(--cm-radius-md);
+  background: var(--cm-color-surface-subtle);
+}
+
+.github-export__workflow-review h4 {
+  margin-top: 0;
+}
+
+.github-export__workflow-review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--cm-space-3);
+  margin-top: var(--cm-space-4);
+}
+
+.github-export__workflow-review-grid > section {
+  min-width: 0;
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  background: var(--cm-color-surface);
+}
+
+.github-export__workflow-review-grid h5 {
+  margin-top: 0;
+}
+
+.github-export__workflow-review-grid ul,
+.github-export__technical-list {
+  display: grid;
+  gap: var(--cm-space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.github-export__workflow-review-grid li,
+.github-export__technical-list > li {
+  display: grid;
+  gap: var(--cm-space-1);
+  min-width: 0;
+}
+
+.github-export__workflow-review-grid li p {
+  margin: 0;
+}
+
+.github-export__workflow-review-grid dl {
+  display: grid;
+  gap: var(--cm-space-1);
+  margin: 0;
+}
+
+.github-export__workflow-review-grid dl > div {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: var(--cm-space-2);
+}
+
+.github-export__workflow-review-grid dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.github-export__workflow-review-grid span,
+.github-export__workflow-review-grid dt,
+.github-export__technical-list span {
+  color: var(--cm-color-text-muted);
+}
+
+.github-export__technical-list code {
+  overflow-wrap: anywhere;
+}
+
+.github-export__technical-list ul {
+  display: grid;
+  gap: var(--cm-space-1);
+  padding-left: var(--cm-space-4);
+}
+
+.github-export__workflow-confirmations {
+  display: grid;
+  gap: var(--cm-space-3);
+  margin: var(--cm-space-5) 0;
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border-strong);
+  border-radius: var(--cm-radius-md);
+}
+
+.github-export__workflow-confirmation span {
+  display: grid;
+  gap: var(--cm-space-1);
+  min-width: 0;
+}
+
+.github-export__final-confirmation {
+  margin: var(--cm-space-5) 0;
+  padding: var(--cm-space-3);
+  border-radius: var(--cm-radius-md);
+  background: var(--cm-color-surface-subtle);
+  font-weight: 650;
+}
+
+.github-export__progress {
+  margin-top: var(--cm-space-5);
+}
+
+.github-export__progress li {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: var(--cm-space-3);
+  align-items: start;
+  color: var(--cm-color-text-muted);
+}
+
+.github-export__progress li > span {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--cm-color-border-strong);
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.github-export__progress li div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.github-export__progress li[data-state="complete"] {
+  color: var(--cm-color-text);
+}
+
+.github-export__progress li[data-state="running"] > span {
+  outline: 3px solid color-mix(in srgb, var(--cm-color-action) 30%, transparent);
+}
+
+.github-export__progress li[data-state="failed"] > span {
+  border-color: var(--cm-color-status-error);
+  color: var(--cm-color-status-error);
+}
+
+.github-export__confirm-actions,
+.github-export__receipt {
+  display: grid;
+  gap: var(--cm-space-3);
+  justify-items: start;
+  margin-top: var(--cm-space-5);
+}
+
+.github-export__receipt {
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border-strong);
+  border-radius: var(--cm-radius-md);
+  background: var(--cm-color-surface-subtle);
+}
+
+@media (max-width: 880px) {
+  .github-export__file-review,
+  .github-export__diff-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .github-export__tree {
+    max-height: 18rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--cm-color-border);
+    padding-right: 0;
+    padding-bottom: var(--cm-space-3);
+  }
+
+  .github-export__change-table {
+    overflow-x: auto;
+  }
+
+  .github-export__change-table [role="row"] {
+    min-width: 38rem;
+  }
+}

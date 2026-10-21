@@ -1,0 +1,143 @@
+{
+  "contractVersion": 1,
+  "artifact": {
+    "buildContracts": [],
+    "contractVersion": 1,
+    "coverage": {
+      "contractVersion": 1,
+      "missingRequirements": [
+        "application-build-and-tests",
+        "application-security-checks"
+      ],
+      "solutionRevisionId": "solution_notes_revision_1",
+      "state": "custom-implementation-required",
+      "workloads": [
+        {
+          "implementationMode": "user-provided",
+          "missingRequirements": [
+            "application-build-and-tests",
+            "application-security-checks"
+          ],
+          "representedOperationIds": [],
+          "representedTestIds": [],
+          "sourceFilePaths": [],
+          "state": "custom-implementation-required",
+          "unresolvedBehaviorIds": [],
+          "workloadId": "workload_notes_api"
+        }
+      ]
+    },
+    "coverageDigest": "sha256:58bb1a397fe8bfd7d3d079222bd1ee09d0d13d3979a875558d8e1e526b363c2d",
+    "diagnostics": [
+      {
+        "code": "APPLICATION_USER_PACKAGE_REQUIRED",
+        "message": "User-provided source must satisfy the pinned runtime, handler, package, and artifact contract.",
+        "related": [],
+        "severity": "info",
+        "source": {
+          "document": "workload",
+          "path": "$.implementation",
+          "workloadId": "workload_notes_api"
+        }
+      }
+    ],
+    "diff": {
+      "files": [],
+      "semantic": []
+    },
+    "generator": {
+      "digest": "sha256:a102e772819d1d1657d89c422cd33d73912d62cabe4022b44e0cd3dd756af12e",
+      "id": "cloudmarkup.application-generator",
+      "version": "1.0.0"
+    },
+    "kind": "cloudmarkup.application-source-artifact",
+    "pattern": {
+      "digest": "sha256:cbe772e0adee53da524110278fe908d726a3e8f600588364bef33ba2fa900571",
+      "id": "cloudmarkup.pattern.aws-lambda-authenticated-notes",
+      "version": "1.0.0"
+    },
+    "runtime": {
+      "digest": "sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a",
+      "id": "cloudmarkup.runtime.aws-lambda-nodejs24-typescript",
+      "version": "1.0.0",
+      "handler": "index.handler",
+      "languageFamily": "cloudmarkup.language.typescript",
+      "moduleFormat": "esm",
+      "runtime": "nodejs24.x",
+      "runtimeFamily": "aws.lambda.runtime-family.nodejs24"
+    },
+    "solutionRevisionId": "solution_notes_revision_1",
+    "sourceFiles": [],
+    "sourceManifest": {
+      "architectureRevisionId": "revision_notes_1",
+      "buildContracts": [],
+      "contractVersion": 1,
+      "catalog": {
+        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+        "id": "aws.cloudmarkup.notes-api-catalog",
+        "version": "0.30.0"
+      },
+      "coverageDigest": "sha256:58bb1a397fe8bfd7d3d079222bd1ee09d0d13d3979a875558d8e1e526b363c2d",
+      "files": [],
+      "generator": {
+        "digest": "sha256:a102e772819d1d1657d89c422cd33d73912d62cabe4022b44e0cd3dd756af12e",
+        "id": "cloudmarkup.application-generator",
+        "version": "1.0.0"
+      },
+      "kind": "cloudmarkup.application-source-manifest",
+      "inputDigests": {
+        "applicationContracts": "sha256:7df95bf4b42a5a32bdc2e6d72e9e3050b07bd653845b6ed3d9509f383f0bcd04",
+        "architectureDocument": "sha256:70b9733e8006ce5a3d86d33973239465beed4e0fc97c733d9f76770613eadaf3",
+        "normalizedSolution": "sha256:b06fd56e698691cc798cea97bb04924bc75a54609ac4691c29f4c73b5aa264f6",
+        "solutionRevision": "sha256:86bd8d21b2c245cacdd1527e16cc0289ffa70819105b01edd45b3b4225eb0ffb",
+        "workloadBehavior": "sha256:408e29202608d59fe13bb3f1a7f9352de9d81b841559c1763d0af4f9ab59ba69"
+      },
+      "manifestPath": "application/manifest.json",
+      "pattern": {
+        "digest": "sha256:cbe772e0adee53da524110278fe908d726a3e8f600588364bef33ba2fa900571",
+        "id": "cloudmarkup.pattern.aws-lambda-authenticated-notes",
+        "version": "1.0.0"
+      },
+      "runtime": {
+        "digest": "sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a",
+        "id": "cloudmarkup.runtime.aws-lambda-nodejs24-typescript",
+        "version": "1.0.0",
+        "handler": "index.handler",
+        "languageFamily": "cloudmarkup.language.typescript",
+        "moduleFormat": "esm",
+        "runtime": "nodejs24.x",
+        "runtimeFamily": "aws.lambda.runtime-family.nodejs24"
+      },
+      "solutionRevisionId": "solution_notes_revision_1",
+      "template": {
+        "digest": "sha256:c7721961d935faa1e0c87b7356bc6d90112a02f3c7f716be33a648bf99740604",
+        "id": "cloudmarkup.template.aws-lambda-notes-typescript",
+        "version": "1.0.0"
+      }
+    },
+    "sourceManifestDigest": "sha256:fc8baa2d0c2651e03bad53f9e9380d9642ebf76a5d303913a94da3315785a583",
+    "template": {
+      "digest": "sha256:c7721961d935faa1e0c87b7356bc6d90112a02f3c7f716be33a648bf99740604",
+      "id": "cloudmarkup.template.aws-lambda-notes-typescript",
+      "version": "1.0.0"
+    },
+    "workloadContracts": [
+      {
+        "expectedArtifact": {
+          "kind": "aws-lambda-zip",
+          "mediaType": "application/zip",
+          "path": "application/artifacts/workload_notes_api/function.zip"
+        },
+        "handler": "index.handler",
+        "packageManifestPath": "application/package.json",
+        "packageRoot": "application",
+        "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+        "implementationMode": "user-provided",
+        "ownershipReadiness": "user-source-preserved",
+        "readiness": "user-source-required",
+        "workloadId": "workload_notes_api"
+      }
+    ]
+  },
+  "artifactDigest": "sha256:bb9fd41693378269f20c2432df73e16338144e1167aedf7b42091e6ef520ba10"
+}

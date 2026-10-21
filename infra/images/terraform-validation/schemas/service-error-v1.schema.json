@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudmarkup.com/schemas/terraform-validation-service-error-v1.schema.json",
+  "title": "Cloud Markup Terraform validation service error v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["code", "contractVersion", "kind", "message"],
+  "properties": {
+    "code": {
+      "type": "string",
+      "enum": [
+        "credential-environment-forbidden",
+        "input-content-forbidden",
+        "input-limit-exceeded",
+        "input-path-forbidden",
+        "invocation-forbidden",
+        "lock-mismatch",
+        "runtime-integrity-failed",
+        "runtime-user-forbidden",
+        "tool-unavailable",
+        "workspace-forbidden"
+      ]
+    },
+    "contractVersion": { "const": 1 },
+    "kind": { "const": "cloudmarkup.terraform-validation-service-error" },
+    "message": { "type": "string", "minLength": 1, "maxLength": 200 }
+  }
+}

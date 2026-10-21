@@ -1,0 +1,422 @@
+import { describe, expect, it } from "vitest";
+
+import { activeIssueV1Schema } from "./active-issue-v1.js";
+import { aiAuthoredExtensionV1Schema } from "./ai-authored-extension-v1.js";
+import { evidenceRecordV1Schema } from "./evidence-v1.js";
+import { safeRelativePathSchema } from "./solution-contract-common-v1.js";
+import { solutionRevisionManifestV1Schema } from "./solution-revision-v1.js";
+
+const digest = `sha256:${"a".repeat(64)}`;
+const secondDigest = `sha256:${"b".repeat(64)}`;
+const timestamp = "2026-08-14T12:00:00Z";
+
+function validEvidence() {
+  return {
+    artifacts: [],
+    checks: [
+      {
+        artifactDigests: [],
+        checkId: "cloudmarkup.check",
+        issueIds: [],
+        status: "passed",
+        summary: "The deterministic check passed.",
+      },
+    ],
+    contractVersion: 1,
+    environment: { environmentType: "test" },
+    id: "evidence-1",
+    layer: "designed",
+    level: { kind: "structural-validity", rank: 1 },
+    models: [],
+    provenance: {
+      actor: {
+        kind: "deterministic-tool",
+        tool: {
+          id: "cloudmarkup.validator",
+          version: "1.0.0",
+        },
+      },
+      createdAt: timestamp,
+      inputDigests: [digest],
+    },
+    solutionRevisionId: "solution-1",
+    staleness: { assessedAt: timestamp, state: "current" },
+    tools: [],
+  };
+}
+
+function validExtension() {
+  return {
+    acceptance: {
+      acceptedAt: timestamp,
+      acceptedBy: "actor-1",
+      state: "accepted",
+    },
+    contractVersion: 1,
+    dependencies: [],
+    exportSafety: {
+      evidenceIds: ["evidence-1"],
+      state: "safe-to-export",
+    },
+    id: "extension-1",
+    issueIds: [],
+    model: {
+      modelId: "model.example",
+      modelVersion: "2026-08-01",
+      outputDigest: secondDigest,
+      promptDigest: digest,
+      promptVersion: "1.0.0",
+      providerId: "provider.example",
+      reservationId: "reservation-1",
+      usageEventIds: ["usage-1"],
+    },
+    outputs: [
+      {
+        digest: secondDigest,
+        kind: "patch",
+        path: "application/handler.ts",
+        sizeBytes: 128,
+      },
+    ],
+    ownedPaths: [
+      {
+        conflictPolicy: "fail",
+        path: "application/handler.ts",
+      },
+    ],
+    regenerationPolicy: "propose-patch",
+    request: {
+      acceptanceCriteria: ["The handler satisfies the reviewed contract."],
+      capabilityIds: ["application.handler"],
+      constraints: ["Do not access credentials."],
+      objective: "Propose a bounded handler patch.",
+      prohibitedCapabilities: ["deployment.execute"],
+    },
+    solutionRevisionId: "solution-1",
+    sourceReferences: [{ kind: "workload", workloadId: "workload-1" }],
+    target: {
+      fileType: "source.typescript",
+      kind: "application",
+      language: "runtime.typescript",
+      workloadId: "workload-1",
+    },
+    validation: [
+      {
+        checkId: "extension.parse",
+        kind: "parse",
+        required: true,
+        result: "passed",
+        toolVersion: "1.0.0",
+      },
+    ],
+  };
+}
+
+function validManifest() {
+  return {
+    aiExtensionIds: ["extension-1"],
+    architecture: {
+      contentHash: digest,
+      documentHash: digest,
+      documentKind: "cloudmarkup.architecture-document",
+      revisionId: "revision-1",
+      schemaVersion: 3,
+      visualHash: secondDigest,
+    },
+    assumptions: [],
+    contractVersion: 1,
+    contracts: {
+      contentHash: digest,
+      contractVersion: 1,
+      recordHashes: [],
+    },
+    createdAt: timestamp,
+    createdBy: "actor-1",
+    evidenceIdsAtFreeze: ["evidence-1"],
+    externalResources: { contentHash: digest, contractVersion: 1 },
+    generationCoverage: {
+      contractVersion: 1,
+      evidence: [],
+      missingRequirements: [],
+      solutionRevisionId: "solution-1",
+      state: "infrastructure-only",
+      workloads: [],
+    },
+    intent: {
+      reason: "This project began from a reviewed blank design.",
+      state: "not-applicable",
+    },
+    issueIdsAtFreeze: [],
+    kind: "cloudmarkup.solution-revision-manifest",
+    repositoryObservations: [],
+    solutionRevisionId: "solution-1",
+    sourceOwnership: [
+      {
+        conflictBehavior: "replace-exact-owned-content",
+        ownerId: "generator-1",
+        ownership: "generated",
+        path: "infrastructure/main.tf",
+      },
+    ],
+    unresolvedDecisionIds: [],
+    versions: {
+      applicationGenerator: {
+        reason: "No application source was generated.",
+        state: "not-applicable",
+      },
+      catalog: {
+        digest,
+        id: "catalog.example",
+        version: "1.0.0",
+      },
+      compiler: {
+        reason: "Compilation has not run.",
+        state: "not-applicable",
+      },
+      diagramRenderer: {
+        reason: "Diagram rendering has not run.",
+        state: "not-applicable",
+      },
+      importer: {
+        reason: "No repository snapshot is included.",
+        state: "not-applicable",
+      },
+      modelPrompt: {
+        reason: "No model-authored extension is generated by this fixture.",
+        state: "not-applicable",
+      },
+      policy: [],
+    },
+    workload: { contentHash: digest, contractVersion: 2 },
+  };
+}
+
+describe("solution lifecycle contracts v1", () => {
+  it("accepts independently bound evidence without implying another level", () => {
+    const evidence = evidenceRecordV1Schema.parse(validEvidence());
+
+    expect(evidence.level).toEqual({ kind: "structural-validity", rank: 1 });
+    expect(evidence).not.toHaveProperty("impliedLevels");
+  });
+
+  it("rejects a level presented as the wrong designed/imported/generated/planned/deployed layer", () => {
+    const input = validEvidence();
+    input.layer = "deployed";
+
+    expect(() => evidenceRecordV1Schema.parse(input)).toThrow(
+      /belongs to the designed layer/u,
+    );
+  });
+
+  it("requires unique check IDs and coverage claims compatible with the exact Evidence level", () => {
+    const input = validEvidence();
+    const [check] = input.checks;
+    if (check === undefined) {
+      throw new Error("Valid Evidence must contain one check.");
+    }
+
+    expect(() =>
+      evidenceRecordV1Schema.parse({
+        ...input,
+        checks: [check, { ...check }],
+      }),
+    ).toThrow(/must be unique within one record/u);
+
+    const securityClaim = {
+      ...check,
+      generationCoverageRequirement: "application-security-checks",
+    } as const;
+    expect(() =>
+      evidenceRecordV1Schema.parse({ ...input, checks: [securityClaim] }),
+    ).toThrow(/belongs to exact Evidence level 5/u);
+    expect(
+      evidenceRecordV1Schema.parse({
+        ...input,
+        checks: [securityClaim],
+        layer: "generated",
+        level: { kind: "application-build-and-tests", rank: 5 },
+      }),
+    ).toBeDefined();
+  });
+
+  it("rejects traversal and machine-specific paths", () => {
+    expect(safeRelativePathSchema.safeParse("../secret.txt").success).toBe(
+      false,
+    );
+    expect(safeRelativePathSchema.safeParse("C:/secret.txt").success).toBe(
+      false,
+    );
+    expect(
+      safeRelativePathSchema.safeParse("application/handler.ts").success,
+    ).toBe(true);
+  });
+
+  it("requires accepted extensions, owned paths, and passing required checks before export", () => {
+    expect(aiAuthoredExtensionV1Schema.parse(validExtension())).toBeDefined();
+
+    const unaccepted = validExtension();
+    unaccepted.acceptance = { state: "pending" } as never;
+    expect(() => aiAuthoredExtensionV1Schema.parse(unaccepted)).toThrow(
+      /user-accepted/u,
+    );
+
+    const unowned = validExtension();
+    const [output] = unowned.outputs;
+    if (output === undefined) {
+      throw new Error("Valid extension fixture must contain an output.");
+    }
+    output.path = "application/unowned.ts";
+    expect(() => aiAuthoredExtensionV1Schema.parse(unowned)).toThrow(
+      /owned path/u,
+    );
+  });
+
+  it("adds an optional exact IaC extension slot without breaking v1 records", () => {
+    expect(aiAuthoredExtensionV1Schema.parse(validExtension())).toBeDefined();
+
+    const extension = validExtension();
+    extension.target = {
+      extensionSlotId: "slot-terraform-custom",
+      fileType: "infrastructure.hcl",
+      kind: "iac-extension",
+      language: "language.hcl",
+      targetFormat: "terraform",
+    } as never;
+    extension.outputs = [
+      {
+        digest: secondDigest,
+        kind: "file",
+        path: "infrastructure/extensions/custom.tf",
+        sizeBytes: 128,
+      },
+    ];
+    extension.ownedPaths = [
+      {
+        conflictPolicy: "fail",
+        path: "infrastructure/extensions/custom.tf",
+      },
+    ];
+    const parsedExtension = aiAuthoredExtensionV1Schema.parse(extension);
+    expect(parsedExtension.target).toMatchObject({
+      extensionSlotId: "slot-terraform-custom",
+      kind: "iac-extension",
+    });
+
+    const legacyIac = structuredClone(parsedExtension);
+    if (legacyIac.target.kind === "iac-extension") {
+      delete legacyIac.target.extensionSlotId;
+    }
+    expect(aiAuthoredExtensionV1Schema.parse(legacyIac)).toBeDefined();
+  });
+
+  it("chains issue lifecycle records through immutable digests", () => {
+    const base = {
+      affected: [
+        { kind: "solution-revision", solutionRevisionId: "solution-1" },
+      ],
+      category: "structure",
+      closureRequirements: [
+        {
+          description: "Require exact structural validation evidence.",
+          evidenceCheckId: "cloudmarkup.structural-validation",
+          evidenceLevel: { kind: "structural-validity", rank: 1 },
+        },
+      ],
+      contractVersion: 1,
+      currentRecordDigest: digest,
+      id: "issue-1",
+      lifecycle: { state: "current" },
+      provenance: {
+        actor: {
+          kind: "deterministic-tool",
+          tool: { id: "cloudmarkup.validator", version: "1.0.0" },
+        },
+        createdAt: timestamp,
+        inputDigests: [digest],
+      },
+      recordVersion: 1,
+      severity: "error",
+      solutionRevisionId: "solution-1",
+      source: "schema-graph-validation",
+      sourceRecordId: "finding-1",
+      summary: "A required reference is missing.",
+      technicalDetail: "The exact referenced identifier is not present.",
+    };
+
+    expect(activeIssueV1Schema.parse(base)).toBeDefined();
+    expect(() =>
+      activeIssueV1Schema.parse({
+        ...base,
+        closureRequirements: [
+          {
+            description: "Legacy ordinal evidence requirement.",
+            evidenceKind: "cloudmarkup.structural-validation",
+            minimumEvidenceLevel: 1,
+          },
+        ],
+      }),
+    ).toThrow();
+    expect(() =>
+      activeIssueV1Schema.parse({ ...base, recordVersion: 2 }),
+    ).toThrow(/previous immutable digest/u);
+  });
+
+  it("binds generation coverage to the same immutable Solution Revision", () => {
+    expect(
+      solutionRevisionManifestV1Schema.parse(validManifest()),
+    ).toBeDefined();
+
+    const mismatched = validManifest();
+    mismatched.generationCoverage.solutionRevisionId = "solution-2";
+    expect(() => solutionRevisionManifestV1Schema.parse(mismatched)).toThrow(
+      /must bind this Solution Revision/u,
+    );
+  });
+  it("requires unique, non-overlapping Solution Revision source ownership", () => {
+    const manifest = validManifest();
+    const disjointOwnership = {
+      conflictBehavior: "preserve-user-content",
+      ownerId: "application-owner",
+      ownership: "user-owned",
+      path: "application/handler.ts",
+    } as const;
+    expect(
+      solutionRevisionManifestV1Schema.parse({
+        ...manifest,
+        sourceOwnership: [...manifest.sourceOwnership, disjointOwnership],
+      }),
+    ).toBeDefined();
+
+    const duplicate = {
+      ...manifest.sourceOwnership[0],
+      conflictBehavior: "fail",
+      ownerId: "different-owner",
+    } as const;
+    expect(() =>
+      solutionRevisionManifestV1Schema.parse({
+        ...manifest,
+        sourceOwnership: [manifest.sourceOwnership[0], duplicate],
+      }),
+    ).toThrow(/source-ownership paths must be unique/u);
+
+    const parent = {
+      ...manifest.sourceOwnership[0],
+      path: "application",
+    } as const;
+    const child = {
+      ...manifest.sourceOwnership[0],
+      path: "application/handler.ts",
+    } as const;
+    for (const sourceOwnership of [
+      [parent, child],
+      [child, parent],
+    ] as const) {
+      expect(() =>
+        solutionRevisionManifestV1Schema.parse({
+          ...manifest,
+          sourceOwnership,
+        }),
+      ).toThrow(/overlaps ancestor path/u);
+    }
+  });
+});

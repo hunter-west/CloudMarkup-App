@@ -1,0 +1,214 @@
+{
+  "kind": "cloudmarkup.intent-document",
+  "schemaVersion": 1,
+  "documentId": "intent_doc_ambiguous",
+  "intentId": "intent_ambiguous",
+  "revision": {
+    "revisionId": "intent_rev_ambiguous_001",
+    "revisionNumber": 1,
+    "createdAt": "2026-07-24T15:00:00Z",
+    "createdBy": "actor_example"
+  },
+  "application": {
+    "summary": "A team needs a new customer-facing application, but the workload and operating constraints have not yet been confirmed.",
+    "capabilities": {
+      "state": "unknown",
+      "questionId": "question_capabilities",
+      "details": "The initial description does not distinguish request, storage, or background-processing needs."
+    }
+  },
+  "connectivity": {
+    "ingress": {
+      "state": "unknown",
+      "questionId": "question_ingress"
+    },
+    "egress": {
+      "state": "unknown",
+      "questionId": "question_egress"
+    }
+  },
+  "identity": {
+    "authentication": {
+      "state": "unknown",
+      "questionId": "question_authentication"
+    },
+    "authorization": {
+      "state": "unknown",
+      "questionId": "question_authorization"
+    }
+  },
+  "data": {
+    "state": "unknown",
+    "questionId": "question_data"
+  },
+  "workflows": {
+    "state": "unknown",
+    "questionId": "question_workflows"
+  },
+  "quality": {
+    "availability": {
+      "state": "unknown",
+      "questionId": "question_availability"
+    },
+    "durability": {
+      "state": "unknown",
+      "questionId": "question_durability"
+    },
+    "recovery": {
+      "state": "unknown",
+      "questionId": "question_recovery"
+    },
+    "latency": {
+      "state": "unknown",
+      "questionId": "question_latency"
+    },
+    "scale": {
+      "state": "unknown",
+      "questionId": "question_scale"
+    }
+  },
+  "environment": {
+    "state": "unknown",
+    "questionId": "question_environment"
+  },
+  "preferences": {
+    "operationalOverhead": {
+      "state": "unknown",
+      "questionId": "question_operations"
+    },
+    "cost": {
+      "state": "unknown",
+      "questionId": "question_cost"
+    }
+  },
+  "compliance": {
+    "state": "unknown",
+    "questionId": "question_compliance"
+  },
+  "assumptions": [
+    {
+      "id": "assumption_new_workload",
+      "subject": "application.lifecycle",
+      "statement": "The application is a new workload rather than a migration of an existing deployment.",
+      "status": "active",
+      "origin": "user"
+    }
+  ],
+  "unresolvedQuestions": [
+    {
+      "id": "question_operations",
+      "subject": "preferences.operational-overhead",
+      "question": "How much infrastructure operation does the team want to own?",
+      "classification": "non-blocking"
+    },
+    {
+      "id": "question_capabilities",
+      "subject": "application.capabilities",
+      "question": "Which provider-neutral workload capabilities are required?",
+      "classification": "blocking"
+    },
+    {
+      "id": "question_ingress",
+      "subject": "connectivity.ingress",
+      "question": "Who or what must initiate inbound communication?",
+      "classification": "blocking"
+    },
+    {
+      "id": "question_egress",
+      "subject": "connectivity.egress",
+      "question": "Which external systems must receive outbound communication?",
+      "classification": "non-blocking"
+    },
+    {
+      "id": "question_authentication",
+      "subject": "identity.authentication",
+      "question": "Which principal types must authenticate?",
+      "classification": "blocking"
+    },
+    {
+      "id": "question_authorization",
+      "subject": "identity.authorization",
+      "question": "Which resources and actions require differentiated authorization?",
+      "classification": "blocking"
+    },
+    {
+      "id": "question_data",
+      "subject": "data.categories",
+      "question": "Which data categories will the workload process or retain?",
+      "classification": "blocking"
+    },
+    {
+      "id": "question_workflows",
+      "subject": "workflows.execution",
+      "question": "Which workflows must complete synchronously and which may be asynchronous?",
+      "classification": "blocking"
+    },
+    {
+      "id": "question_availability",
+      "subject": "quality.availability",
+      "question": "What availability target is required?",
+      "classification": "non-blocking"
+    },
+    {
+      "id": "question_durability",
+      "subject": "quality.durability",
+      "question": "What durability target is required for retained data?",
+      "classification": "blocking"
+    },
+    {
+      "id": "question_recovery",
+      "subject": "quality.recovery",
+      "question": "What recovery time and recovery point objectives apply?",
+      "classification": "non-blocking"
+    },
+    {
+      "id": "question_latency",
+      "subject": "quality.latency",
+      "question": "Which response-time percentiles matter to users?",
+      "classification": "non-blocking"
+    },
+    {
+      "id": "question_scale",
+      "subject": "quality.scale",
+      "question": "What steady, peak, storage, and growth expectations apply?",
+      "classification": "blocking"
+    },
+    {
+      "id": "question_environment",
+      "subject": "environment.type",
+      "question": "Which environment or environment set is being planned?",
+      "classification": "blocking"
+    },
+    {
+      "id": "question_cost",
+      "subject": "preferences.cost",
+      "question": "Is the priority minimum cost, predictable cost, or performance?",
+      "classification": "non-blocking"
+    },
+    {
+      "id": "question_compliance",
+      "subject": "compliance.constraints",
+      "question": "Which regulatory or organization policy constraints apply?",
+      "classification": "blocking"
+    }
+  ],
+  "decisions": [],
+  "alternatives": [],
+  "metadata": {
+    "source": "user",
+    "provenance": {
+      "schema": {
+        "contractId": "cloudmarkup.intent-document",
+        "schemaVersion": 1
+      },
+      "prompt": {
+        "kind": "not-applicable"
+      }
+    },
+    "serialization": {
+      "mediaType": "application/json",
+      "encoding": "utf-8",
+      "canonicalization": "cloudmarkup.intent-normalized-json.v1"
+    }
+  }
+}

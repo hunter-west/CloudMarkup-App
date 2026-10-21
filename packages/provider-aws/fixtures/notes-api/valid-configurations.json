@@ -1,0 +1,896 @@
+{
+  "catalogVersion": "0.30.0",
+  "configurations": [
+    {
+      "serviceId": "aws.secretsmanager.secret",
+      "values": {
+        "name": {
+          "kind": "string",
+          "value": "application/credential"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.kms.key",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.apigateway.http-api",
+      "values": {
+        "corsEnabled": {
+          "kind": "boolean",
+          "value": false
+        }
+      }
+    },
+    {
+      "serviceId": "aws.lambda.function",
+      "values": {
+        "memoryMegabytes": {
+          "kind": "integer",
+          "value": 512
+        }
+      }
+    },
+    {
+      "serviceId": "aws.dynamodb.table",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.cognito.user-pool",
+      "values": {
+        "mfaMode": {
+          "kind": "string",
+          "value": "ON"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.cognito.user-pool-client",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.iam.role",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.iam.managed-policy-attachment",
+      "values": {
+        "displayName": {
+          "kind": "string",
+          "value": "Read only boundary"
+        },
+        "attachmentKind": {
+          "kind": "string",
+          "value": "permissions-boundary"
+        },
+        "managedPolicyReference": {
+          "kind": "string",
+          "value": "aws-managed:ReadOnlyAccess"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.iam.policy-condition",
+      "values": {
+        "operator": {
+          "kind": "string",
+          "value": "StringEquals"
+        },
+        "key": {
+          "kind": "string",
+          "value": "aws:RequestedRegion"
+        },
+        "values": {
+          "kind": "string-list",
+          "value": ["us-east-1"]
+        }
+      }
+    },
+    {
+      "serviceId": "aws.iam.policy-document",
+      "values": {
+        "policyName": {
+          "kind": "string",
+          "value": "NotesReadAccess"
+        },
+        "policyKind": {
+          "kind": "string",
+          "value": "identity-inline"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.iam.policy-statement",
+      "values": {
+        "actions": {
+          "kind": "string-list",
+          "value": [
+            "dynamodb:GetItem",
+            "dynamodb:PutItem",
+            "dynamodb:UpdateItem"
+          ]
+        },
+        "resourceNode": {
+          "kind": "node-reference",
+          "nodeId": "node_notes_table",
+          "attribute": "aws.dynamodb.table.arn"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.cloudwatch.log-group",
+      "values": {
+        "retentionDays": {
+          "kind": "integer",
+          "value": 60
+        }
+      }
+    },
+    {
+      "serviceId": "aws.cloudwatch.metric-alarm",
+      "values": {
+        "threshold": {
+          "kind": "number",
+          "value": 2
+        }
+      }
+    },
+    {
+      "serviceId": "aws.region.boundary",
+      "values": {
+        "regionName": {
+          "kind": "string",
+          "value": "us-east-1"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ec2.vpc",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.ec2.availability-zone",
+      "values": {
+        "zoneName": {
+          "kind": "string",
+          "value": "us-east-1a"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ec2.subnet",
+      "values": {
+        "cidrBlock": {
+          "kind": "string",
+          "value": "10.0.1.0/24"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ec2.route-table",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.ec2.route",
+      "values": {
+        "destinationIpv4Cidr": {
+          "kind": "string",
+          "value": "0.0.0.0/0"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ec2.route-table-association",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.ec2.internet-gateway",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.ec2.nat-gateway",
+      "values": {
+        "allocationId": {
+          "kind": "string",
+          "value": "eipalloc-0123456789abcdef0"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ec2.gateway-vpc-endpoint",
+      "values": {
+        "service": {
+          "kind": "string",
+          "value": "s3"
+        },
+        "policyMode": {
+          "kind": "string",
+          "value": "full-access"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ec2.security-group",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.ec2.security-group-ingress-rule",
+      "values": {
+        "protocol": {
+          "kind": "string",
+          "value": "tcp"
+        },
+        "fromPort": {
+          "kind": "integer",
+          "value": 443
+        },
+        "toPort": {
+          "kind": "integer",
+          "value": 443
+        },
+        "sourceIpv4Cidr": {
+          "kind": "string",
+          "value": "10.0.0.0/8"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ec2.security-group-egress-rule",
+      "values": {
+        "protocol": {
+          "kind": "string",
+          "value": "tcp"
+        },
+        "fromPort": {
+          "kind": "integer",
+          "value": 443
+        },
+        "toPort": {
+          "kind": "integer",
+          "value": 443
+        },
+        "destinationIpv4Cidr": {
+          "kind": "string",
+          "value": "10.0.0.0/8"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.lambda.vpc-access-configuration",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.eventbridge.event-bus",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.eventbridge.rule",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.eventbridge.target",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.s3.bucket",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.s3.bucket-cors-configuration",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.s3.bucket-lifecycle-configuration",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.s3.bucket-notification-configuration",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.sns.subscription",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.sns.topic",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.sqs.queue",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.sqs.redrive-configuration",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.stepfunctions.state-machine",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.fsx.lustre-file-system",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.fsx.windows-file-system",
+      "values": {
+        "activeDirectoryId": {
+          "kind": "string",
+          "value": "d-0123456789"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.fsx.openzfs-file-system",
+      "values": {
+        "clientCidr": {
+          "kind": "string",
+          "value": "10.0.1.0/24"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.fsx.ontap-file-system",
+      "values": {
+        "throughputCapacity": {
+          "kind": "integer",
+          "value": 1536
+        }
+      }
+    },
+    {
+      "serviceId": "aws.fsx.ontap-storage-virtual-machine",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.fsx.ontap-volume",
+      "values": {}
+    },
+    {
+      "serviceId": "aws.ec2.instance",
+      "values": {
+        "imageId": {
+          "kind": "string",
+          "value": "ami-0123456789abcdef0"
+        },
+        "imageRegion": {
+          "kind": "string",
+          "value": "us-east-1"
+        },
+        "imageArchitecture": {
+          "kind": "string",
+          "value": "x86_64"
+        },
+        "imageRootDeviceName": {
+          "kind": "string",
+          "value": "/dev/xvda"
+        },
+        "imageRootMinimumGiB": {
+          "kind": "integer",
+          "value": 8
+        },
+        "instanceType": {
+          "kind": "string",
+          "value": "t3.small"
+        },
+        "rootSizeGiB": {
+          "kind": "integer",
+          "value": 30
+        }
+      }
+    },
+    {
+      "serviceId": "aws.iam.instance-profile",
+      "values": {
+        "name": {
+          "kind": "string",
+          "value": "synthetic-instance-profile"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ecr.repository",
+      "values": {
+        "name": {
+          "kind": "string",
+          "value": "synthetic/application"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ecr.image-reference",
+      "values": {
+        "digest": {
+          "kind": "string",
+          "value": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "architecture": {
+          "kind": "string",
+          "value": "x86_64"
+        },
+        "manifestType": {
+          "kind": "string",
+          "value": "oci-image"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ecs.cluster",
+      "values": {
+        "name": {
+          "kind": "string",
+          "value": "SyntheticCluster"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ecs.task-definition",
+      "values": {
+        "family": {
+          "kind": "string",
+          "value": "SyntheticTask"
+        },
+        "cpu": {
+          "kind": "integer",
+          "value": 256
+        },
+        "memoryMiB": {
+          "kind": "integer",
+          "value": 512
+        },
+        "architecture": {
+          "kind": "string",
+          "value": "x86_64"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ecs.container-definition",
+      "values": {
+        "name": {
+          "kind": "string",
+          "value": "Application"
+        },
+        "containerPort": {
+          "kind": "integer",
+          "value": 8080
+        },
+        "user": {
+          "kind": "string",
+          "value": "10001:10001"
+        },
+        "healthExecutable": {
+          "kind": "string",
+          "value": "/app/health"
+        },
+        "logStreamPrefix": {
+          "kind": "string",
+          "value": "Application"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ecs.service",
+      "values": {
+        "name": {
+          "kind": "string",
+          "value": "SyntheticService"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.rds.db-instance",
+      "values": {
+        "identifier": {
+          "kind": "string",
+          "value": "synthetic-postgres"
+        },
+        "engineVersion": {
+          "kind": "string",
+          "value": "16.6"
+        },
+        "instanceClass": {
+          "kind": "string",
+          "value": "db.t4g.small"
+        },
+        "databaseName": {
+          "kind": "string",
+          "value": "SyntheticApp"
+        },
+        "masterUsername": {
+          "kind": "string",
+          "value": "SyntheticAdmin"
+        },
+        "storageGiB": {
+          "kind": "integer",
+          "value": 30
+        },
+        "caIdentifier": {
+          "kind": "string",
+          "value": "rds-ca-rsa2048-g1"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.rds.db-subnet-group",
+      "values": {
+        "name": {
+          "kind": "string",
+          "value": "synthetic-db-subnets"
+        },
+        "description": {
+          "kind": "string",
+          "value": "Explicit synthetic database subnets"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.rds.db-parameter-group",
+      "values": {
+        "name": {
+          "kind": "string",
+          "value": "synthetic-postgres-tls"
+        },
+        "description": {
+          "kind": "string",
+          "value": "Explicit synthetic TLS parameters"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.aurora.postgresql-cluster",
+      "values": {
+        "identifier": {
+          "kind": "string",
+          "value": "synthetic-aurora"
+        },
+        "engineVersion": {
+          "kind": "string",
+          "value": "16.6"
+        },
+        "databaseName": {
+          "kind": "string",
+          "value": "SyntheticApp"
+        },
+        "masterUsername": {
+          "kind": "string",
+          "value": "SyntheticAdmin"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.aurora.postgresql-instance",
+      "values": {
+        "identifier": {
+          "kind": "string",
+          "value": "synthetic-aurora-a"
+        },
+        "availabilityZone": {
+          "kind": "string",
+          "value": "us-east-1a"
+        },
+        "caIdentifier": {
+          "kind": "string",
+          "value": "rds-ca-rsa2048-g1"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.aurora.postgresql-cluster-parameter-group",
+      "values": {
+        "name": {
+          "kind": "string",
+          "value": "synthetic-aurora-tls"
+        },
+        "description": {
+          "kind": "string",
+          "value": "Explicit synthetic Aurora TLS parameters"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.route53.public-hosted-zone",
+      "values": {
+        "domainName": {
+          "kind": "string",
+          "value": "example.test"
+        },
+        "comment": {
+          "kind": "string",
+          "value": "Synthetic public DNS authority"
+        },
+        "domainControlAttested": {
+          "kind": "boolean",
+          "value": true
+        }
+      }
+    },
+    {
+      "serviceId": "aws.acm.public-dns-certificate",
+      "values": {
+        "domainName": {
+          "kind": "string",
+          "value": "app.example.test"
+        },
+        "certificateRegion": {
+          "kind": "string",
+          "value": "us-east-1"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.cloudfront.distribution",
+      "values": {
+        "comment": {
+          "kind": "string",
+          "value": "Synthetic public object distribution"
+        },
+        "enabled": {
+          "kind": "boolean",
+          "value": false
+        },
+        "publicContentAttested": {
+          "kind": "boolean",
+          "value": true
+        },
+        "defaultRootObject": {
+          "kind": "string",
+          "value": "index.html"
+        },
+        "priceClass": {
+          "kind": "string",
+          "value": "PriceClass_100"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.cloudfront.cache-policy",
+      "values": {
+        "name": {
+          "kind": "string",
+          "value": "SyntheticStaticCache"
+        },
+        "comment": {
+          "kind": "string",
+          "value": "Synthetic bounded static cache"
+        },
+        "defaultTtl": {
+          "kind": "integer",
+          "value": 3600
+        },
+        "maxTtl": {
+          "kind": "integer",
+          "value": 86400
+        }
+      }
+    },
+    {
+      "serviceId": "aws.cloudfront.alias-configuration",
+      "values": {
+        "domainName": {
+          "kind": "string",
+          "value": "app.example.test"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.elb.backend-access-configuration",
+      "values": {
+        "description": {
+          "kind": "string",
+          "value": "Exact synthetic ALB health/backend path"
+        },
+        "protocol": {
+          "kind": "string",
+          "value": "tcp"
+        },
+        "retain": {
+          "kind": "boolean",
+          "value": true
+        }
+      }
+    },
+    {
+      "serviceId": "aws.elb.application-load-balancer",
+      "values": {
+        "deletionProtection": {
+          "kind": "boolean",
+          "value": true
+        },
+        "desyncMitigation": {
+          "kind": "string",
+          "value": "defensive"
+        },
+        "dropInvalidHeaders": {
+          "kind": "boolean",
+          "value": true
+        },
+        "http2": {
+          "kind": "boolean",
+          "value": true
+        },
+        "idleTimeoutSeconds": {
+          "kind": "integer",
+          "value": 60
+        },
+        "ipAddressType": {
+          "kind": "string",
+          "value": "ipv4"
+        },
+        "loadBalancerType": {
+          "kind": "string",
+          "value": "application"
+        },
+        "name": {
+          "kind": "string",
+          "value": "synthetic-alb"
+        },
+        "retain": {
+          "kind": "boolean",
+          "value": true
+        },
+        "scheme": {
+          "kind": "string",
+          "value": "internal"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.elb.https-listener",
+      "values": {
+        "defaultAction": {
+          "kind": "string",
+          "value": "forward"
+        },
+        "domainMappingMode": {
+          "kind": "string",
+          "value": "external"
+        },
+        "port": {
+          "kind": "integer",
+          "value": 443
+        },
+        "protocol": {
+          "kind": "string",
+          "value": "HTTPS"
+        },
+        "retain": {
+          "kind": "boolean",
+          "value": true
+        },
+        "securityPolicy": {
+          "kind": "string",
+          "value": "ELBSecurityPolicy-TLS13-1-2-2021-06"
+        },
+        "serverName": {
+          "kind": "string",
+          "value": "app.example.test"
+        }
+      }
+    },
+    {
+      "serviceId": "aws.elb.target-group",
+      "values": {
+        "backendMode": {
+          "kind": "string",
+          "value": "ec2-instance"
+        },
+        "deregistrationDelaySeconds": {
+          "kind": "integer",
+          "value": 60
+        },
+        "healthIntervalSeconds": {
+          "kind": "integer",
+          "value": 30
+        },
+        "healthPath": {
+          "kind": "string",
+          "value": "/health"
+        },
+        "healthStatus": {
+          "kind": "string",
+          "value": "200"
+        },
+        "healthTimeoutSeconds": {
+          "kind": "integer",
+          "value": 5
+        },
+        "healthyThreshold": {
+          "kind": "integer",
+          "value": 2
+        },
+        "name": {
+          "kind": "string",
+          "value": "synthetic-target"
+        },
+        "port": {
+          "kind": "integer",
+          "value": 8080
+        },
+        "protocol": {
+          "kind": "string",
+          "value": "HTTP"
+        },
+        "protocolVersion": {
+          "kind": "string",
+          "value": "HTTP1"
+        },
+        "retain": {
+          "kind": "boolean",
+          "value": true
+        },
+        "startupGraceSeconds": {
+          "kind": "integer",
+          "value": 0
+        },
+        "unhealthyThreshold": {
+          "kind": "integer",
+          "value": 2
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ebs.volume-attachment",
+      "values": {
+        "deviceName": {
+          "kind": "string",
+          "value": "/dev/sdf"
+        },
+        "forceDetach": {
+          "kind": "boolean",
+          "value": false
+        },
+        "guestPreparation": {
+          "kind": "string",
+          "value": "external"
+        },
+        "retain": {
+          "kind": "boolean",
+          "value": true
+        }
+      }
+    },
+    {
+      "serviceId": "aws.ebs.volume",
+      "values": {
+        "encrypted": {
+          "kind": "boolean",
+          "value": true
+        },
+        "encryptionMode": {
+          "kind": "string",
+          "value": "account-default"
+        },
+        "iops": {
+          "kind": "integer",
+          "value": 3000
+        },
+        "multiAttach": {
+          "kind": "boolean",
+          "value": false
+        },
+        "name": {
+          "kind": "string",
+          "value": "synthetic-data"
+        },
+        "retain": {
+          "kind": "boolean",
+          "value": true
+        },
+        "sizeGiB": {
+          "kind": "integer",
+          "value": 100
+        },
+        "throughputMiBps": {
+          "kind": "integer",
+          "value": 125
+        },
+        "volumeType": {
+          "kind": "string",
+          "value": "gp3"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "authentication": {
+    "contractId": "contracts.notes.auth",
+    "contractKind": "auth",
+    "contractVersion": "1.0.0",
+    "digest": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f"
+  },
+  "contractId": "contracts.notes.delete-route",
+  "contractKind": "http-api",
+  "contractVersion": "1.0.0",
+  "displayName": "delete note route",
+  "method": "DELETE",
+  "pathTemplate": "/notes/{noteId}",
+  "provenance": {
+    "recordedAt": "2026-08-17T12:00:00Z",
+    "recordedBy": "actor_fixture",
+    "source": "designed",
+    "sourceReferenceIds": [
+      "requirement_notes_api"
+    ]
+  },
+  "request": {
+    "parameters": [
+      {
+        "location": "path",
+        "name": "noteId",
+        "required": true,
+        "sensitive": false,
+        "valueType": "string"
+      },
+      {
+        "location": "header",
+        "name": "x-correlation-id",
+        "required": false,
+        "sensitive": false,
+        "valueType": "string"
+      }
+    ]
+  },
+  "responses": [
+    {
+      "description": "The operation succeeded.",
+      "headers": [
+        {
+          "name": "x-correlation-id",
+          "required": true,
+          "valueType": "string"
+        }
+      ],
+      "statusCode": 204
+    },
+    {
+      "description": "The request was invalid.",
+      "headers": [
+        {
+          "name": "x-correlation-id",
+          "required": true,
+          "valueType": "string"
+        }
+      ],
+      "mediaType": "application/json",
+      "statusCode": 400
+    },
+    {
+      "description": "The principal is not authorized.",
+      "headers": [
+        {
+          "name": "x-correlation-id",
+          "required": true,
+          "valueType": "string"
+        }
+      ],
+      "mediaType": "application/json",
+      "statusCode": 403
+    },
+    {
+      "description": "The note was not found.",
+      "headers": [
+        {
+          "name": "x-correlation-id",
+          "required": true,
+          "valueType": "string"
+        }
+      ],
+      "mediaType": "application/json",
+      "statusCode": 404
+    }
+  ]
+}

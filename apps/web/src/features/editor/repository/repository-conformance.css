@@ -1,0 +1,195 @@
+.repository-conformance {
+  display: grid;
+  gap: var(--cm-space-3);
+  min-height: 0;
+  min-inline-size: 0;
+}
+
+.repository-conformance > *,
+.repository-conformance .cm-tabs,
+.repository-conformance .cm-tabs__panel {
+  min-inline-size: 0;
+}
+
+.repository-conformance__heading > * {
+  margin-block: 0 var(--cm-space-2);
+}
+
+.repository-conformance__legend,
+.repository-conformance__evidence-grid,
+.repository-conformance__combined {
+  display: grid;
+  gap: var(--cm-space-3);
+}
+
+.repository-conformance__evidence-grid,
+.repository-conformance__combined {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.repository-conformance__legend ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.repository-conformance__evidence-grid ul,
+.repository-conformance__panel ul {
+  display: grid;
+  gap: var(--cm-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.repository-conformance__evidence-grid li,
+.repository-conformance__panel li {
+  background: var(--cm-color-surface-subtle);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  display: grid;
+  gap: var(--cm-space-1);
+  padding: var(--cm-space-3);
+}
+
+.repository-conformance__evidence-grid small,
+.repository-conformance__panel small,
+.repository-conformance__provenance {
+  color: var(--cm-color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.repository-conformance__difference header,
+.repository-conformance__actions,
+.repository-conformance__ignore {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2);
+}
+
+.repository-conformance__difference [data-severity="error"] {
+  color: var(--cm-color-status-error);
+}
+
+.repository-conformance__ignore label {
+  display: grid;
+  gap: var(--cm-space-1);
+}
+
+.repository-conformance [data-conformance-state] {
+  border-inline-start: 0.3rem solid var(--cm-color-border-strong);
+}
+
+.repository-conformance [data-conformance-state="matching"] {
+  border-inline-start-color: var(--cm-color-status-success);
+}
+
+.repository-conformance [data-conformance-state="observed-only"] {
+  border-inline-start-color: var(--cm-color-status-info);
+  border-inline-start-style: dashed;
+}
+
+.repository-conformance [data-conformance-state="designed-only"] {
+  border-inline-start-color: var(--cm-color-status-warning);
+}
+
+.repository-conformance [data-conformance-state="changed"] {
+  border-inline-start-color: var(--cm-color-status-error);
+}
+
+.repository-conformance [data-conformance-state="external"] {
+  border-inline-start-color: var(--cm-color-text-muted);
+  border-inline-start-style: double;
+}
+
+.repository-conformance [data-conformance-state="unresolved"] {
+  border-inline-start-color: var(--cm-color-status-warning);
+  border-inline-start-style: dotted;
+}
+
+.repository-conformance__legend li {
+  align-items: center;
+  display: flex;
+  gap: var(--cm-space-1);
+  padding-inline-start: var(--cm-space-2);
+}
+
+.repository-conformance__legend li span {
+  background: currentColor;
+  block-size: 0.65rem;
+  border-radius: 50%;
+  inline-size: 0.65rem;
+}
+
+.repository-conformance__diagram {
+  display: grid;
+  gap: var(--cm-space-2);
+  margin: 0;
+}
+
+.repository-conformance__diagram svg {
+  background: var(--cm-color-canvas);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  inline-size: 100%;
+  min-block-size: 18rem;
+}
+
+.repository-conformance__diagram rect {
+  fill: var(--cm-color-surface);
+  stroke: var(--cm-color-border-strong);
+  stroke-width: 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.repository-conformance__diagram text {
+  fill: var(--cm-color-text);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.repository-conformance__diagram-service {
+  fill: var(--cm-color-text-muted) !important;
+  font-size: 0.67rem !important;
+  font-weight: 500 !important;
+}
+
+.repository-conformance__diagram-edges line {
+  stroke: var(--cm-color-edge);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.repository-conformance__diagram [data-conformance-state="matching"] rect {
+  stroke: var(--cm-color-status-success);
+}
+
+.repository-conformance__diagram [data-conformance-state="observed-only"] rect {
+  stroke: var(--cm-color-status-info);
+  stroke-dasharray: 8 5;
+}
+
+.repository-conformance__diagram [data-conformance-state="designed-only"] rect,
+.repository-conformance__diagram [data-conformance-state="unresolved"] rect {
+  stroke: var(--cm-color-status-warning);
+  stroke-dasharray: 8 5;
+}
+
+.repository-conformance__diagram [data-conformance-state="changed"] rect {
+  stroke: var(--cm-color-status-error);
+}
+
+.repository-conformance__diagram figcaption {
+  color: var(--cm-color-text-muted);
+}
+
+@media (max-width: 48rem) {
+  .repository-conformance__evidence-grid,
+  .repository-conformance__combined {
+    grid-template-columns: 1fr;
+  }
+}

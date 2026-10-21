@@ -1,0 +1,473 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudMarkup deterministic curated serverless, networking, and event-driven application infrastructure.",
+  "Metadata": {
+    "CloudMarkup": {
+      "ArchitectureRevisionId": "revision_notes_1",
+      "CatalogDigest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+      "CatalogVersion": "0.30.0",
+      "Compiler": "cloudmarkup.iac-compiler@1.2.1",
+      "SolutionRevisionId": "solution_notes_1"
+    }
+  },
+  "Resources": {
+    "Database": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "AllocatedStorage": "30",
+        "AllowMajorVersionUpgrade": false,
+        "ApplyImmediately": false,
+        "AutoMinorVersionUpgrade": false,
+        "BackupRetentionPeriod": 7,
+        "CACertificateIdentifier": "rds-ca-rsa2048-g1",
+        "CopyTagsToSnapshot": true,
+        "DBInstanceClass": "db.t4g.small",
+        "DBInstanceIdentifier": "synthetic-postgres",
+        "DBName": "SyntheticApp",
+        "DBParameterGroupName": {
+          "Ref": "DbParameters"
+        },
+        "DBSubnetGroupName": {
+          "Ref": "DbSubnets"
+        },
+        "DeletionProtection": true,
+        "EnableIAMDatabaseAuthentication": false,
+        "EnablePerformanceInsights": false,
+        "Engine": "postgres",
+        "EngineLifecycleSupport": "open-source-rds-extended-support-disabled",
+        "EngineVersion": "16.6",
+        "ManageMasterUserPassword": true,
+        "MasterUsername": "SyntheticAdmin",
+        "MonitoringInterval": 0,
+        "MultiAZ": false,
+        "Port": "5432",
+        "PreferredBackupWindow": "02:00-02:30",
+        "PreferredMaintenanceWindow": "sun:03:00-sun:03:30",
+        "PubliclyAccessible": false,
+        "StorageEncrypted": true,
+        "StorageType": "gp3",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VPCSecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "Group",
+              "GroupId"
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "database",
+          "GraphId": "database",
+          "Ownership": "user",
+          "TargetKey": "database"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "DbParameters": {
+      "Type": "AWS::RDS::DBParameterGroup",
+      "Properties": {
+        "DBParameterGroupName": "synthetic-postgres-tls",
+        "Description": "Explicit synthetic TLS parameters",
+        "Family": "postgres16",
+        "Parameters": {
+          "rds.force_ssl": "1"
+        },
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "db_parameters",
+          "GraphId": "db_parameters",
+          "Ownership": "user",
+          "TargetKey": "db_parameters"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "DbSubnets": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "Explicit synthetic database subnets",
+        "DBSubnetGroupName": "synthetic-db-subnets",
+        "SubnetIds": [
+          {
+            "Ref": "SubnetBSubnet"
+          },
+          {
+            "Ref": "SubnetSubnet"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "db_subnets",
+          "GraphId": "db_subnets",
+          "Ownership": "user",
+          "TargetKey": "db_subnets"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Group": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Explicit private workload policy",
+        "GroupName": "synthetic-private-instance",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "127.0.0.1/32",
+            "IpProtocol": "-1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "group",
+          "GraphId": "group",
+          "Ownership": "user",
+          "TargetKey": "group"
+        }
+      }
+    },
+    "PrivateAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRoutes"
+        },
+        "SubnetId": {
+          "Ref": "SubnetSubnet"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "private_association",
+          "GraphId": "association_private",
+          "Ownership": "user",
+          "TargetKey": "private_association"
+        }
+      }
+    },
+    "PrivateBAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRoutes"
+        },
+        "SubnetId": {
+          "Ref": "SubnetBSubnet"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "private_b_association",
+          "GraphId": "association_private_b",
+          "Ownership": "user",
+          "TargetKey": "private_b_association"
+        }
+      }
+    },
+    "PrivateRoutes": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          },
+          {
+            "Key": "Name",
+            "Value": "private-routes"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "private_routes",
+          "GraphId": "route_table_private",
+          "Ownership": "user",
+          "TargetKey": "private_routes"
+        }
+      }
+    },
+    "SubnetBSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AssignIpv6AddressOnCreation": false,
+        "AvailabilityZone": "us-east-1b",
+        "CidrBlock": "10.20.2.0/24",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "subnet_b_subnet",
+          "GraphId": "subnet_b",
+          "Ownership": "user",
+          "TargetKey": "subnet_b_subnet"
+        }
+      }
+    },
+    "SubnetSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AssignIpv6AddressOnCreation": false,
+        "AvailabilityZone": "us-east-1a",
+        "CidrBlock": "10.20.1.0/24",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "subnet_subnet",
+          "GraphId": "subnet",
+          "Ownership": "user",
+          "TargetKey": "subnet_subnet"
+        }
+      }
+    },
+    "Vpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.20.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "vpc",
+          "GraphId": "vpc",
+          "Ownership": "user",
+          "TargetKey": "vpc"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "DatabaseAddressOutput": {
+      "Description": "Architecture output database_address.",
+      "Value": {
+        "Fn::GetAtt": [
+          "Database",
+          "Endpoint.Address"
+        ]
+      }
+    },
+    "DatabaseArnOutput": {
+      "Description": "Architecture output database_arn.",
+      "Value": {
+        "Fn::GetAtt": [
+          "Database",
+          "DBInstanceArn"
+        ]
+      }
+    },
+    "DatabaseIdentifierOutput": {
+      "Description": "Architecture output database_identifier.",
+      "Value": {
+        "Ref": "Database"
+      }
+    },
+    "DatabaseMasterUserSecretArnOutput": {
+      "Description": "Architecture output database_masterUserSecretArn.",
+      "Value": {
+        "Fn::GetAtt": [
+          "Database",
+          "MasterUserSecret.SecretArn"
+        ]
+      }
+    },
+    "DatabasePortOutput": {
+      "Description": "Architecture output database_port.",
+      "Value": {
+        "Fn::GetAtt": [
+          "Database",
+          "Endpoint.Port"
+        ]
+      }
+    },
+    "DbParametersArnOutput": {
+      "Description": "Architecture output db_parameters_arn.",
+      "Value": {
+        "Fn::GetAtt": [
+          "DbParameters",
+          "DBParameterGroupArn"
+        ]
+      }
+    },
+    "DbParametersNameOutput": {
+      "Description": "Architecture output db_parameters_name.",
+      "Value": {
+        "Ref": "DbParameters"
+      }
+    },
+    "DbSubnetsArnOutput": {
+      "Description": "Architecture output db_subnets_arn.",
+      "Value": {
+        "Fn::GetAtt": [
+          "DbSubnets",
+          "DBSubnetGroupArn"
+        ]
+      }
+    },
+    "DbSubnetsNameOutput": {
+      "Description": "Architecture output db_subnets_name.",
+      "Value": {
+        "Ref": "DbSubnets"
+      }
+    }
+  }
+}

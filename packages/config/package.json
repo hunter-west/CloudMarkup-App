@@ -1,0 +1,16 @@
+{
+  "name": "@cloudmarkup/config",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "files": [
+    "tsconfig",
+    "README.md"
+  ],
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/library.json": "./tsconfig/library.json",
+    "./tsconfig/node.json": "./tsconfig/node.json",
+    "./tsconfig/react.json": "./tsconfig/react.json"
+  }
+}

@@ -1,0 +1,57 @@
+.gitlab-export,
+.gitlab-export__form,
+.gitlab-export__review {
+  display: grid;
+  gap: var(--cm-space-3);
+  min-width: 0;
+}
+.gitlab-export__form label {
+  display: grid;
+  gap: var(--cm-space-2);
+  min-width: 0;
+}
+.gitlab-export__form select,
+.gitlab-export__form input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.gitlab-export__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cm-space-3);
+}
+.gitlab-export__metadata {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--cm-space-3);
+}
+.gitlab-export__metadata dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.gitlab-export__metadata dt {
+  font-weight: 600;
+}
+.gitlab-export__files {
+  display: grid;
+  gap: var(--cm-space-2);
+  max-height: 20rem;
+  overflow: auto;
+  padding-inline-start: var(--cm-space-5);
+}
+.gitlab-export__files li {
+  overflow-wrap: anywhere;
+}
+.gitlab-export__files span {
+  margin-inline-start: var(--cm-space-3);
+}
+.gitlab-export__acknowledgement {
+  display: flex;
+  gap: var(--cm-space-3);
+  align-items: flex-start;
+}
+.gitlab-export__acknowledgement input {
+  margin-top: 0.3em;
+}

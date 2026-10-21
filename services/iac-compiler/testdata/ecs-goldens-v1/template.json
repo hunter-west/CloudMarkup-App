@@ -1,0 +1,658 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudMarkup deterministic curated serverless, networking, and event-driven application infrastructure.",
+  "Metadata": {
+    "CloudMarkup": {
+      "ArchitectureRevisionId": "revision_notes_1",
+      "CatalogDigest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+      "CatalogVersion": "0.30.0",
+      "Compiler": "cloudmarkup.iac-compiler@1.2.1",
+      "SolutionRevisionId": "solution_notes_1"
+    }
+  },
+  "Resources": {
+    "ApplicationRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Sid": "applicationroletrust"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Description": "CloudMarkup explicit ECS role; execution and task identities remain distinct.",
+        "MaxSessionDuration": 3600,
+        "RoleName": "application_role",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "application_role",
+          "GraphId": "application_role",
+          "Ownership": "user",
+          "TargetKey": "application_role"
+        }
+      }
+    },
+    "ApplicationSecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Externally populated synthetic credential",
+        "Name": "application/credential",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "application_secret",
+          "GraphId": "secret",
+          "Ownership": "user",
+          "TargetKey": "application_secret"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Cluster": {
+      "Type": "AWS::ECS::Cluster",
+      "Properties": {
+        "ClusterName": "SyntheticCluster",
+        "ClusterSettings": [
+          {
+            "Name": "containerInsights",
+            "Value": "disabled"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "cluster",
+          "GraphId": "cluster",
+          "Ownership": "user",
+          "TargetKey": "cluster"
+        }
+      }
+    },
+    "ExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Sid": "executionroletrust"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Description": "CloudMarkup explicit ECS role; execution and task identities remain distinct.",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+          }
+        ],
+        "MaxSessionDuration": 3600,
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Ref": "ApplicationSecret"
+                    }
+                  ],
+                  "Sid": "secretaccess"
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "secret_access"
+          }
+        ],
+        "RoleName": "execution_role",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "execution_role",
+          "GraphId": "execution_role",
+          "Ownership": "user",
+          "TargetKey": "execution_role"
+        }
+      }
+    },
+    "Group": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Explicit private workload policy",
+        "GroupName": "synthetic-private-instance",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "127.0.0.1/32",
+            "IpProtocol": "-1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "group",
+          "GraphId": "group",
+          "Ownership": "user",
+          "TargetKey": "group"
+        }
+      }
+    },
+    "Logs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupClass": "STANDARD",
+        "LogGroupName": "/ecs/synthetic",
+        "RetentionInDays": 30,
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "logs",
+          "GraphId": "logs",
+          "Ownership": "user",
+          "TargetKey": "logs"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "PrivateAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRoutes"
+        },
+        "SubnetId": {
+          "Ref": "SubnetSubnet"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "private_association",
+          "GraphId": "association_private",
+          "Ownership": "user",
+          "TargetKey": "private_association"
+        }
+      }
+    },
+    "PrivateRoutes": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          },
+          {
+            "Key": "Name",
+            "Value": "private-routes"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "private_routes",
+          "GraphId": "route_table_private",
+          "Ownership": "user",
+          "TargetKey": "private_routes"
+        }
+      }
+    },
+    "Repository": {
+      "Type": "AWS::ECR::Repository",
+      "Properties": {
+        "EmptyOnDelete": false,
+        "EncryptionConfiguration": {
+          "EncryptionType": "AES256"
+        },
+        "ImageScanningConfiguration": {
+          "ScanOnPush": true
+        },
+        "ImageTagMutability": "IMMUTABLE",
+        "RepositoryName": "synthetic/application",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "repository",
+          "GraphId": "repository",
+          "Ownership": "user",
+          "TargetKey": "repository"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Service": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "AvailabilityZoneRebalancing": "DISABLED",
+        "Cluster": {
+          "Fn::GetAtt": [
+            "Cluster",
+            "Arn"
+          ]
+        },
+        "DeploymentConfiguration": {
+          "DeploymentCircuitBreaker": {
+            "Enable": true,
+            "Rollback": true
+          },
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 100
+        },
+        "DeploymentController": {
+          "Type": "ECS"
+        },
+        "DesiredCount": 1,
+        "EnableECSManagedTags": false,
+        "EnableExecuteCommand": false,
+        "LaunchType": "FARGATE",
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": [
+              {
+                "Fn::GetAtt": [
+                  "Group",
+                  "GroupId"
+                ]
+              }
+            ],
+            "Subnets": [
+              {
+                "Ref": "SubnetSubnet"
+              }
+            ]
+          }
+        },
+        "PlatformVersion": "1.4.0",
+        "SchedulingStrategy": "REPLICA",
+        "ServiceName": "SyntheticService",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "TaskDefinition": {
+          "Ref": "Task"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "service",
+          "GraphId": "service",
+          "Ownership": "user",
+          "TargetKey": "service"
+        }
+      }
+    },
+    "SubnetSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AssignIpv6AddressOnCreation": false,
+        "AvailabilityZone": "us-east-1a",
+        "CidrBlock": "10.20.1.0/24",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "subnet_subnet",
+          "GraphId": "subnet",
+          "Ownership": "user",
+          "TargetKey": "subnet_subnet"
+        }
+      }
+    },
+    "Task": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Essential": true,
+            "HealthCheck": {
+              "Command": [
+                "CMD",
+                "/app/health"
+              ],
+              "Interval": 30,
+              "Retries": 3,
+              "StartPeriod": 0,
+              "Timeout": 5
+            },
+            "Image": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Fn::GetAtt": [
+                      "Repository",
+                      "RepositoryUri"
+                    ]
+                  },
+                  "@",
+                  "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                ]
+              ]
+            },
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "Logs"
+                },
+                "awslogs-region": "us-east-1",
+                "awslogs-stream-prefix": "Application",
+                "max-buffer-size": "10m",
+                "mode": "non-blocking"
+              }
+            },
+            "Name": "Application",
+            "PortMappings": [
+              {
+                "ContainerPort": 8080,
+                "HostPort": 8080,
+                "Protocol": "tcp"
+              }
+            ],
+            "ReadonlyRootFilesystem": true,
+            "Secrets": [
+              {
+                "Name": "DATABASE_PASSWORD",
+                "ValueFrom": {
+                  "Ref": "ApplicationSecret"
+                }
+              }
+            ],
+            "User": "10001:10001"
+          }
+        ],
+        "Cpu": "256",
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "ExecutionRole",
+            "Arn"
+          ]
+        },
+        "Family": "SyntheticTask",
+        "Memory": "512",
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE"
+        ],
+        "RuntimePlatform": {
+          "CpuArchitecture": "X86_64",
+          "OperatingSystemFamily": "LINUX"
+        },
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "ApplicationRole",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "task",
+          "GraphId": "task",
+          "Ownership": "user",
+          "TargetKey": "task"
+        }
+      }
+    },
+    "Vpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.20.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "vpc",
+          "GraphId": "vpc",
+          "Ownership": "user",
+          "TargetKey": "vpc"
+        }
+      }
+    }
+  }
+}

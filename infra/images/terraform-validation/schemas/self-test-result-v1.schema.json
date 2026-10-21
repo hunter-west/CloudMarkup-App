@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudmarkup.com/schemas/terraform-validation-image-self-test-result-v1.schema.json",
+  "title": "Cloud Markup Terraform validation image self-test result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "kind", "state", "tests"],
+  "properties": {
+    "contractVersion": { "const": 1 },
+    "kind": {
+      "const": "cloudmarkup.terraform-validation-image-self-test-result"
+    },
+    "state": { "enum": ["passed", "failed"] },
+    "tests": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "state"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z0-9-]{1,64}$" },
+          "state": { "enum": ["passed", "failed"] }
+        }
+      }
+    }
+  }
+}

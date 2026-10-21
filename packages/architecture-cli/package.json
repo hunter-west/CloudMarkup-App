@@ -1,0 +1,43 @@
+{
+  "name": "@cloudmarkup/architecture-cli",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "cloudmarkup": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --project=architecture-cli"
+  },
+  "dependencies": {
+    "@cloudmarkup/domain": "workspace:*",
+    "@cloudmarkup/repository-importer": "workspace:*",
+    "@cloudmarkup/schemas": "workspace:*",
+    "@cloudmarkup/solution-export": "workspace:*",
+    "yaml": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudmarkup/config": "workspace:*",
+    "@cloudmarkup/solution-export-workflow": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.0.0 <25"
+  }
+}

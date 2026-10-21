@@ -1,0 +1,135 @@
+{
+  "catalogVersion": "0.30.0",
+  "cases": [
+    {
+      "id": "public-route-development",
+      "ruleId": "aws.cloudmarkup.validation.api-route-authentication",
+      "code": "aws.validation.public-api-route-without-authentication",
+      "environment": "development",
+      "target": "draft",
+      "severity": "warning",
+      "path": "$.edges[0]",
+      "autoFix": false
+    },
+    {
+      "id": "public-route-production",
+      "ruleId": "aws.cloudmarkup.validation.api-route-authentication",
+      "code": "aws.validation.public-api-route-without-authentication",
+      "environment": "production",
+      "target": "revision",
+      "severity": "security-error",
+      "path": "$.edges[0]",
+      "autoFix": false
+    },
+    {
+      "id": "iam-wildcard-action",
+      "ruleId": "aws.cloudmarkup.validation.iam-wildcards",
+      "code": "aws.validation.iam-wildcard-action",
+      "environment": "development",
+      "target": "draft",
+      "severity": "security-error",
+      "path": "$.nodes[0].semantic.configuration.values.actions",
+      "autoFix": false
+    },
+    {
+      "id": "iam-wildcard-resource",
+      "ruleId": "aws.cloudmarkup.validation.iam-wildcards",
+      "code": "aws.validation.iam-wildcard-resource",
+      "environment": "development",
+      "target": "draft",
+      "severity": "security-error",
+      "path": "$.nodes[0].semantic.configuration.values.resourceNode",
+      "autoFix": false
+    },
+    {
+      "id": "lambda-role-missing",
+      "ruleId": "aws.cloudmarkup.validation.lambda-execution-role",
+      "code": "aws.validation.lambda-execution-role-missing",
+      "environment": "development",
+      "target": "draft",
+      "severity": "error",
+      "path": "$.nodes[0].semantic.configuration",
+      "autoFix": false
+    },
+    {
+      "id": "lambda-dynamodb-actions-missing",
+      "ruleId": "aws.cloudmarkup.validation.lambda-dynamodb-actions",
+      "code": "aws.validation.lambda-dynamodb-actions-missing",
+      "environment": "production",
+      "target": "revision",
+      "severity": "security-error",
+      "path": "$.edges[0]",
+      "autoFix": false
+    },
+    {
+      "id": "dynamodb-encryption-missing",
+      "ruleId": "aws.cloudmarkup.validation.dynamodb-protection",
+      "code": "aws.validation.dynamodb-encryption-not-enabled",
+      "environment": "production",
+      "target": "revision",
+      "severity": "security-error",
+      "path": "$.nodes[0].semantic.configuration.values.serverSideEncryptionEnabled",
+      "autoFix": true
+    },
+    {
+      "id": "dynamodb-recovery-production",
+      "ruleId": "aws.cloudmarkup.validation.dynamodb-protection",
+      "code": "aws.validation.dynamodb-recovery-not-enabled",
+      "environment": "production",
+      "target": "revision",
+      "severity": "warning",
+      "path": "$.nodes[0].semantic.configuration.values.pointInTimeRecoveryEnabled",
+      "autoFix": false
+    },
+    {
+      "id": "log-retention-absent",
+      "ruleId": "aws.cloudmarkup.validation.log-retention",
+      "code": "aws.validation.log-retention-unbounded",
+      "environment": "production",
+      "target": "revision",
+      "severity": "warning",
+      "path": "$.nodes[0].semantic.configuration.values.retentionDays",
+      "autoFix": false
+    },
+    {
+      "id": "lambda-timeout-invalid",
+      "ruleId": "aws.cloudmarkup.validation.lambda-runtime-bounds",
+      "code": "aws.validation.lambda-timeout-invalid",
+      "environment": "development",
+      "target": "draft",
+      "severity": "error",
+      "path": "$.nodes[0].semantic.configuration.values.timeoutSeconds",
+      "autoFix": false
+    },
+    {
+      "id": "lambda-memory-invalid",
+      "ruleId": "aws.cloudmarkup.validation.lambda-runtime-bounds",
+      "code": "aws.validation.lambda-memory-invalid",
+      "environment": "development",
+      "target": "draft",
+      "severity": "error",
+      "path": "$.nodes[0].semantic.configuration.values.memoryMegabytes",
+      "autoFix": false
+    },
+    {
+      "id": "connection-question-unresolved",
+      "ruleId": "aws.cloudmarkup.validation.connection-questions",
+      "code": "aws.validation.connection-question-unresolved",
+      "environment": "development",
+      "target": "draft",
+      "severity": "error",
+      "path": "$.edges[0].semantic.configuration.values.routeKey",
+      "autoFix": false
+    },
+    {
+      "id": "region-availability-unknown",
+      "ruleId": "aws.cloudmarkup.validation.region-availability",
+      "code": "aws.validation.region-availability-unknown",
+      "environment": "production",
+      "target": "revision",
+      "severity": "warning",
+      "path": "$.nodes[0].semantic.serviceType",
+      "autoFix": false
+    }
+  ]
+}

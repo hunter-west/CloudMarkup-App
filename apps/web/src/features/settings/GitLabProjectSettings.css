@@ -1,0 +1,16 @@
+.gitlab-project-settings {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.gitlab-project-settings ul {
+  width: 100%;
+  min-width: 0;
+}
+
+.gitlab-project-settings li > a,
+.gitlab-project-settings li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

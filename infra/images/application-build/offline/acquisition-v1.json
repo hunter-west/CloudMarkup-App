@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "kind": "cloudmarkup.offline-acquisition",
+  "contextId": "application-build",
+  "recipes": [
+    {
+      "type": "pnpm-store-v1",
+      "destination": "offline/pnpm-store",
+      "lockPath": "offline/toolchain/pnpm-lock.yaml",
+      "packageManagerVersion": "11.16.0",
+      "target": {
+        "os": "linux",
+        "cpu": "x64",
+        "libc": "musl"
+      },
+      "workspaceConfiguration": {
+        "path": "pnpm-workspace.yaml",
+        "sha256": "603cf53e3e6013c9c84d8529842c35b744519f24f68a445d95a29b6d181d5d3e",
+        "sizeBytes": 94
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "https-file",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libcrypto3-3.5.9-r0.apk",
+      "sha256": "6632d758d8f5e9ea3b650fe966f23bbf9a202f8b8dceecac93da135dec5e3689",
+      "sizeBytes": 1980198,
+      "destination": "offline/apk/libcrypto3-3.5.9-r0.apk",
+      "role": "alpine-runtime-package",
+      "executable": false
+    },
+    {
+      "type": "https-file",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libssl3-3.5.9-r0.apk",
+      "sha256": "05e3393fb95aa5751ca2f9d242f659f6cff82c1cc7767cc2df4a086f7ad01877",
+      "sizeBytes": 381860,
+      "destination": "offline/apk/libssl3-3.5.9-r0.apk",
+      "role": "alpine-runtime-package",
+      "executable": false
+    },
+    {
+      "type": "https-go-source-v1",
+      "tool": "trivy",
+      "url": "https://codeload.github.com/aquasecurity/trivy/tar.gz/e1fd17a0ea4a8cf24bc4b4dd7e2cfbf4bb31b994",
+      "sizeBytes": 56676456,
+      "sha256": "285594b257470eb444fd2836be95a835565ee600382320c977b3993d8efbb767",
+      "members": [
+        {
+          "archivePath": "trivy",
+          "destination": "offline/bin/trivy",
+          "sizeBytes": 168288382,
+          "sha256": "2f78848b474c6f0b27d0df1833ae8fc7d297640344c6d5c7a25f63cc9e22d3dc",
+          "role": "vulnerability-scanner",
+          "executable": true,
+          "mode": "0755"
+        },
+        {
+          "archivePath": "trivy-LICENSE.txt",
+          "destination": "offline/licenses/trivy-LICENSE.txt",
+          "sizeBytes": 11357,
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "role": "trivy-license",
+          "executable": false,
+          "mode": "0644"
+        }
+      ]
+    },
+    {
+      "type": "oci-trivy-db-v1",
+      "registry": "ghcr.io",
+      "repository": "aquasecurity/trivy-db",
+      "manifestDigest": "sha256:98e1c199793bfcbe64fa41538fa3cf2c55650689a7920075bbba6165404a44d0",
+      "artifactType": "application/vnd.aquasec.trivy.config.v1+json",
+      "created": "2026-09-10T14:16:33Z",
+      "layer": {
+        "mediaType": "application/vnd.aquasec.trivy.db.layer.v1.tar+gzip",
+        "digest": "sha256:1edf7a495c6d68e691fb710b63926e4f1a3dbffa392fd8057cd10bdfd8c3eef5",
+        "sizeBytes": 117915639
+      },
+      "members": [
+        {
+          "archivePath": "metadata.json",
+          "destination": "offline/trivy-cache/metadata.json",
+          "role": "trivy-database-metadata",
+          "executable": false
+        },
+        {
+          "archivePath": "trivy.db",
+          "destination": "offline/trivy-cache/trivy.db",
+          "role": "trivy-database",
+          "executable": false
+        }
+      ]
+    }
+  ]
+}

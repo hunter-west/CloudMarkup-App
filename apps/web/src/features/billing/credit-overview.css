@@ -1,0 +1,75 @@
+.credit-source-card h3 {
+  margin: 0;
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-2);
+}
+.metric-card .credit-source-description {
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-2);
+  font-weight: var(--cm-weight-regular);
+}
+
+.usage-overview {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--cm-space-3);
+  padding: var(--cm-space-4);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-lg);
+  background: var(--cm-color-surface-subtle);
+}
+.usage-overview__summary {
+  flex: 1 1 26rem;
+  min-width: 0;
+}
+.usage-overview h2 {
+  margin: var(--cm-space-1) 0;
+  font-size: var(--cm-font-size-5);
+}
+.usage-overview p {
+  margin: var(--cm-space-1) 0;
+}
+.usage-actions {
+  margin: 0;
+  gap: var(--cm-space-2);
+}
+.usage-sources {
+  display: grid;
+  gap: var(--cm-space-3);
+  min-width: 0;
+}
+.usage-sources > h2 {
+  margin: 0;
+  font-size: var(--cm-font-size-4);
+}
+.usage-sources .metric-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+.usage-source-notes {
+  display: grid;
+  gap: var(--cm-space-1);
+}
+.usage-source-notes p,
+.usage-status-time {
+  margin: 0;
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-2);
+}
+.usage-accounting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cm-space-2) var(--cm-space-4);
+  max-width: 40rem;
+}
+.usage-accounting dd {
+  margin: 0;
+  font-weight: var(--cm-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 30rem) {
+  .usage-accounting {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

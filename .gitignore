@@ -1,0 +1,75 @@
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.envrc
+.direnv/
+.aws/
+.azure/
+.kube/
+
+# JavaScript and TypeScript
+node_modules/
+.pnpm-store/
+.turbo/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Go
+/services/iac-compiler/bin/
+*.test
+*.out
+
+# Test and browser artifacts
+playwright-report/
+test-results/
+blob-report/
+storybook-static/
+
+# Generated application workspaces left by interrupted integration tests
+/packages/application-build-runner/.reviewed-event-build-*/
+/packages/application-build-runner/.reviewed-http-no-content-build-*/
+/packages/application-build-runner/.reviewed-notes-build-*/
+
+# Infrastructure and generated artifacts
+cdk.out/
+/infra/platform/cdk.context.json
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+*.tfplan
+*.tfplan.*
+crash.log
+generated/
+!testdata/generation-goldens-v1/goldens/**/application-source/application/src/functions/**/generated/
+!testdata/generation-goldens-v1/goldens/**/application-source/application/src/functions/**/generated/**
+artifacts/
+
+# Logs and temporary files
+*.log
+*.dmp
+*.stackdump
+core.[0-9]*
+tmp/
+temp/
+.cache/

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Add AWS Service"
+  short_description: "Add one bounded AWS catalog service safely"
+  default_prompt:
+    "Use $add-aws-service to add one reviewed AWS service definition to
+    CloudMarkup."

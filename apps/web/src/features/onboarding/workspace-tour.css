@@ -1,0 +1,63 @@
+.workspace-tour {
+  position: fixed;
+  inset-inline-end: 24px;
+  inset-block-end: 24px;
+  z-index: 850;
+  width: min(390px, calc(100vw - 32px));
+  padding: 16px;
+  border: var(--cm-menu-border);
+  border-radius: var(--cm-radius-lg);
+  background: var(--cm-color-surface);
+  box-shadow: var(--cm-shadow-3);
+}
+.workspace-tour > header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-1);
+}
+.workspace-tour > header button {
+  margin-inline-start: auto;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.workspace-tour h2 {
+  font-size: var(--cm-font-size-3);
+  margin: 12px 0 6px;
+}
+.workspace-tour p {
+  font-size: var(--cm-font-size-2);
+  margin: 0 0 14px;
+  color: var(--cm-color-text-muted);
+}
+.workspace-tour footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.workspace-tour footer > span {
+  flex: 1;
+}
+@supports (backdrop-filter: blur(10px)) {
+  .workspace-tour {
+    background: var(--cm-color-canvas-overlay-surface);
+    backdrop-filter: blur(var(--cm-menu-blur)) saturate(115%);
+  }
+}
+@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  .workspace-tour {
+    background: var(--cm-color-surface);
+    backdrop-filter: none;
+  }
+}
+@media (forced-colors: active) {
+  body:has(.workspace-tour) [data-navigation-group],
+  body:has(.workspace-tour) #profile-menu-trigger {
+    outline-color: Highlight;
+  }
+}

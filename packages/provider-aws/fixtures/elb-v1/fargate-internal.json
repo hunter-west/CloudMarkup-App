@@ -1,0 +1,2957 @@
+{
+  "applicationContracts": {
+    "contractSetId": "architecture_representative_v2",
+    "contracts": [],
+    "documentId": "doc_representative_v2",
+    "kind": "cloudmarkup.application-contracts",
+    "revision": {
+      "createdAt": "2026-07-31T00:00:00.000Z",
+      "createdBy": "actor_fixture",
+      "revisionId": "revision_0002",
+      "revisionNumber": 2
+    },
+    "schemaVersion": 1
+  },
+  "architectureId": "architecture_representative_v2",
+  "assumptions": [],
+  "catalog": {
+    "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+    "id": "aws.cloudmarkup.notes-api-catalog",
+    "version": "0.30.0"
+  },
+  "compilerCompatibility": {
+    "inputContractVersion": 1,
+    "maximumCompilerVersionExclusive": "2.0.0",
+    "minimumCompilerVersion": "1.0.0"
+  },
+  "documentId": "doc_representative_v2",
+  "edges": [
+    {
+      "id": "access_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.target-group-owns-backend-access.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.target-group-owns-backend-access",
+        "source": {
+          "nodeId": "access",
+          "port": "aws.elb.backend-access-configuration.target-group"
+        },
+        "target": {
+          "nodeId": "target",
+          "port": "aws.elb.target-group.backend-access"
+        }
+      }
+    },
+    {
+      "id": "access_source",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.backend-access-uses-alb-group.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.backend-access-uses-alb-group",
+        "source": {
+          "nodeId": "access",
+          "port": "aws.elb.backend-access-configuration.alb-group"
+        },
+        "target": {
+          "nodeId": "alb_group",
+          "port": "aws.ec2.security-group.alb-access-source"
+        }
+      }
+    },
+    {
+      "id": "access_target",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.backend-access-uses-target-group.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.backend-access-uses-target-group",
+        "source": {
+          "nodeId": "access",
+          "port": "aws.elb.backend-access-configuration.backend-group"
+        },
+        "target": {
+          "nodeId": "group",
+          "port": "aws.ec2.security-group.alb-access-target"
+        }
+      }
+    },
+    {
+      "id": "alb_a_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.availability-zone-contains-subnet.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.availability-zone-contains-subnet",
+        "source": {
+          "nodeId": "az",
+          "port": "aws.ec2.availability-zone.subnet-placement"
+        },
+        "target": {
+          "nodeId": "alb_subnet_a",
+          "port": "aws.ec2.subnet.availability-zone"
+        }
+      }
+    },
+    {
+      "id": "alb_b_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.availability-zone-contains-subnet.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.availability-zone-contains-subnet",
+        "source": {
+          "nodeId": "az_b",
+          "port": "aws.ec2.availability-zone.subnet-placement"
+        },
+        "target": {
+          "nodeId": "alb_subnet_b",
+          "port": "aws.ec2.subnet.availability-zone"
+        }
+      }
+    },
+    {
+      "id": "alb_group_vpc",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.vpc-associates-security-group.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.vpc-associates-security-group",
+        "source": {
+          "nodeId": "vpc",
+          "port": "aws.ec2.vpc.security-group-association"
+        },
+        "target": {
+          "nodeId": "alb_group",
+          "port": "aws.ec2.security-group.vpc"
+        }
+      }
+    },
+    {
+      "id": "alb_ingress_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.security-group-owns-ingress-rule.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.security-group-owns-ingress-rule",
+        "source": {
+          "nodeId": "alb_client",
+          "port": "aws.ec2.security-group-ingress-rule.security-group"
+        },
+        "target": {
+          "nodeId": "alb_group",
+          "port": "aws.ec2.security-group.ingress-rule"
+        }
+      }
+    },
+    {
+      "id": "alb_sa",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.alb-uses-subnet.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.alb-uses-subnet",
+        "source": {
+          "nodeId": "alb",
+          "port": "aws.elb.application-load-balancer.subnet"
+        },
+        "target": {
+          "nodeId": "alb_subnet_a",
+          "port": "aws.ec2.subnet.alb"
+        }
+      }
+    },
+    {
+      "id": "alb_sb",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.alb-uses-subnet.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.alb-uses-subnet",
+        "source": {
+          "nodeId": "alb",
+          "port": "aws.elb.application-load-balancer.subnet"
+        },
+        "target": {
+          "nodeId": "alb_subnet_b",
+          "port": "aws.ec2.subnet.alb"
+        }
+      }
+    },
+    {
+      "id": "alb_sg",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.alb-uses-security-group.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.alb-uses-security-group",
+        "source": {
+          "nodeId": "alb",
+          "port": "aws.elb.application-load-balancer.security-group"
+        },
+        "target": {
+          "nodeId": "alb_group",
+          "port": "aws.ec2.security-group.alb"
+        }
+      }
+    },
+    {
+      "id": "alb_vpc",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.alb-uses-vpc.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.alb-uses-vpc",
+        "source": {
+          "nodeId": "alb",
+          "port": "aws.elb.application-load-balancer.vpc"
+        },
+        "target": {
+          "nodeId": "vpc",
+          "port": "aws.ec2.vpc.alb"
+        }
+      }
+    },
+    {
+      "id": "application_binding",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.task-uses-application-role.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ecs.task-uses-application-role",
+        "source": {
+          "nodeId": "application_role",
+          "port": "aws.iam.role.assumable-role"
+        },
+        "target": {
+          "nodeId": "task",
+          "port": "aws.ecs.task-definition.application-role"
+        }
+      }
+    },
+    {
+      "id": "application_role_trust_membership",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "source": {
+          "nodeId": "application_role_trust_statement",
+          "port": "aws.iam.policy-statement.policy-document"
+        },
+        "target": {
+          "nodeId": "application_role_trust",
+          "port": "aws.iam.policy-document.statement"
+        }
+      }
+    },
+    {
+      "id": "application_role_trust_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.role-trust-policy.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.iam.role-owns-trust-policy",
+        "source": {
+          "nodeId": "application_role_trust",
+          "port": "aws.iam.policy-document.role-trust-policy"
+        },
+        "target": {
+          "nodeId": "application_role",
+          "port": "aws.iam.role.trust-policy"
+        }
+      }
+    },
+    {
+      "id": "association_alb_subnet_a_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table-owns-subnet-association.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.route-table-owns-subnet-association",
+        "source": {
+          "nodeId": "association_alb_subnet_a",
+          "port": "aws.ec2.route-table-association.route-table"
+        },
+        "target": {
+          "nodeId": "route_table_alb_subnet_a",
+          "port": "aws.ec2.route-table.subnet-association"
+        }
+      }
+    },
+    {
+      "id": "association_alb_subnet_a_subnet",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table-association-targets-subnet.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.route-table-association-targets-subnet",
+        "source": {
+          "nodeId": "association_alb_subnet_a",
+          "port": "aws.ec2.route-table-association.subnet"
+        },
+        "target": {
+          "nodeId": "alb_subnet_a",
+          "port": "aws.ec2.subnet.route-table-association"
+        }
+      }
+    },
+    {
+      "id": "association_alb_subnet_b_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table-owns-subnet-association.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.route-table-owns-subnet-association",
+        "source": {
+          "nodeId": "association_alb_subnet_b",
+          "port": "aws.ec2.route-table-association.route-table"
+        },
+        "target": {
+          "nodeId": "route_table_alb_subnet_b",
+          "port": "aws.ec2.route-table.subnet-association"
+        }
+      }
+    },
+    {
+      "id": "association_alb_subnet_b_subnet",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table-association-targets-subnet.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.route-table-association-targets-subnet",
+        "source": {
+          "nodeId": "association_alb_subnet_b",
+          "port": "aws.ec2.route-table-association.subnet"
+        },
+        "target": {
+          "nodeId": "alb_subnet_b",
+          "port": "aws.ec2.subnet.route-table-association"
+        }
+      }
+    },
+    {
+      "id": "association_subnet",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table-association-targets-subnet.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.route-table-association-targets-subnet",
+        "source": {
+          "nodeId": "association_private",
+          "port": "aws.ec2.route-table-association.subnet"
+        },
+        "target": {
+          "nodeId": "subnet",
+          "port": "aws.ec2.subnet.route-table-association"
+        }
+      }
+    },
+    {
+      "id": "attachment_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.role-managed-policy.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.iam.role-owns-managed-policy-attachment",
+        "source": {
+          "nodeId": "execution_attachment",
+          "port": "aws.iam.managed-policy-attachment.role-managed-policy"
+        },
+        "target": {
+          "nodeId": "execution_role",
+          "port": "aws.iam.role.managed-policy"
+        }
+      }
+    },
+    {
+      "id": "az_b_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.vpc-contains-availability-zone.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.vpc-contains-availability-zone",
+        "source": {
+          "nodeId": "vpc",
+          "port": "aws.ec2.vpc.availability-zone-placement"
+        },
+        "target": {
+          "nodeId": "az_b",
+          "port": "aws.ec2.availability-zone.vpc"
+        }
+      }
+    },
+    {
+      "id": "az_subnet",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.availability-zone-contains-subnet.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.availability-zone-contains-subnet",
+        "source": {
+          "nodeId": "az",
+          "port": "aws.ec2.availability-zone.subnet-placement"
+        },
+        "target": {
+          "nodeId": "subnet",
+          "port": "aws.ec2.subnet.availability-zone"
+        }
+      }
+    },
+    {
+      "id": "backend",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.target-group-targets-ecs.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.target-group-targets-ecs",
+        "source": {
+          "nodeId": "target",
+          "port": "aws.elb.target-group.ecs-backend"
+        },
+        "target": {
+          "nodeId": "service",
+          "port": "aws.ecs.service.alb-target"
+        }
+      }
+    },
+    {
+      "id": "certificate_zone",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.acm.certificate-validates-in-zone.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.acm.certificate-validates-in-zone",
+        "source": {
+          "nodeId": "certificate",
+          "port": "aws.acm.public-dns-certificate.validation-zone"
+        },
+        "target": {
+          "nodeId": "public_zone",
+          "port": "aws.route53.public-hosted-zone.certificate"
+        }
+      }
+    },
+    {
+      "id": "cluster_binding",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.service-uses-cluster.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ecs.service-uses-cluster",
+        "source": {
+          "nodeId": "cluster",
+          "port": "aws.ecs.cluster.service"
+        },
+        "target": {
+          "nodeId": "service",
+          "port": "aws.ecs.service.cluster"
+        }
+      }
+    },
+    {
+      "id": "container_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.task-owns-container.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ecs.task-owns-container",
+        "source": {
+          "nodeId": "container",
+          "port": "aws.ecs.container-definition.task"
+        },
+        "target": {
+          "nodeId": "task",
+          "port": "aws.ecs.task-definition.container"
+        }
+      }
+    },
+    {
+      "id": "execution_binding",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.task-uses-execution-role.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ecs.task-uses-execution-role",
+        "source": {
+          "nodeId": "execution_role",
+          "port": "aws.iam.role.assumable-role"
+        },
+        "target": {
+          "nodeId": "task",
+          "port": "aws.ecs.task-definition.execution-role"
+        }
+      }
+    },
+    {
+      "id": "execution_role_trust_membership",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "source": {
+          "nodeId": "execution_role_trust_statement",
+          "port": "aws.iam.policy-statement.policy-document"
+        },
+        "target": {
+          "nodeId": "execution_role_trust",
+          "port": "aws.iam.policy-document.statement"
+        }
+      }
+    },
+    {
+      "id": "execution_role_trust_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.role-trust-policy.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.iam.role-owns-trust-policy",
+        "source": {
+          "nodeId": "execution_role_trust",
+          "port": "aws.iam.policy-document.role-trust-policy"
+        },
+        "target": {
+          "nodeId": "execution_role",
+          "port": "aws.iam.role.trust-policy"
+        }
+      }
+    },
+    {
+      "id": "forward",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.listener-forwards-to-target-group.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.listener-forwards-to-target-group",
+        "source": {
+          "nodeId": "listener",
+          "port": "aws.elb.https-listener.target-group"
+        },
+        "target": {
+          "nodeId": "target",
+          "port": "aws.elb.target-group.listener"
+        }
+      }
+    },
+    {
+      "id": "group_binding",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.service-uses-security-group.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ecs.service-uses-security-group",
+        "source": {
+          "nodeId": "service",
+          "port": "aws.ecs.service.security-group"
+        },
+        "target": {
+          "nodeId": "group",
+          "port": "aws.ec2.security-group.ecs-service"
+        }
+      }
+    },
+    {
+      "id": "image_binding",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.container-uses-image.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ecs.container-uses-image",
+        "source": {
+          "nodeId": "image",
+          "port": "aws.ecr.image-reference.container"
+        },
+        "target": {
+          "nodeId": "container",
+          "port": "aws.ecs.container-definition.image"
+        }
+      }
+    },
+    {
+      "id": "image_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecr.repository-owns-image.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ecr.repository-owns-image",
+        "source": {
+          "nodeId": "image",
+          "port": "aws.ecr.image-reference.repository"
+        },
+        "target": {
+          "nodeId": "repository",
+          "port": "aws.ecr.repository.image"
+        }
+      }
+    },
+    {
+      "id": "listener_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.alb-owns-listener.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.alb-owns-listener",
+        "source": {
+          "nodeId": "listener",
+          "port": "aws.elb.https-listener.alb"
+        },
+        "target": {
+          "nodeId": "alb",
+          "port": "aws.elb.application-load-balancer.listener"
+        }
+      }
+    },
+    {
+      "id": "logs_binding",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.container-writes-logs.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ecs.container-writes-logs",
+        "source": {
+          "nodeId": "container",
+          "port": "aws.ecs.container-definition.log-group"
+        },
+        "target": {
+          "nodeId": "logs",
+          "port": "aws.cloudwatch.log-group.ecs-container"
+        }
+      }
+    },
+    {
+      "id": "region_vpc",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.region.contains-vpc.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.region.contains-vpc",
+        "source": {
+          "nodeId": "region",
+          "port": "aws.region.boundary.vpc-placement"
+        },
+        "target": {
+          "nodeId": "vpc",
+          "port": "aws.ec2.vpc.region"
+        }
+      }
+    },
+    {
+      "id": "route_table_alb_subnet_a_vpc",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.vpc-contains-route-table.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.vpc-contains-route-table",
+        "source": {
+          "nodeId": "vpc",
+          "port": "aws.ec2.vpc.route-table-placement"
+        },
+        "target": {
+          "nodeId": "route_table_alb_subnet_a",
+          "port": "aws.ec2.route-table.vpc"
+        }
+      }
+    },
+    {
+      "id": "route_table_alb_subnet_b_vpc",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.vpc-contains-route-table.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.vpc-contains-route-table",
+        "source": {
+          "nodeId": "vpc",
+          "port": "aws.ec2.vpc.route-table-placement"
+        },
+        "target": {
+          "nodeId": "route_table_alb_subnet_b",
+          "port": "aws.ec2.route-table.vpc"
+        }
+      }
+    },
+    {
+      "id": "secret_access_membership",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "source": {
+          "nodeId": "secret_access_statement",
+          "port": "aws.iam.policy-statement.policy-document"
+        },
+        "target": {
+          "nodeId": "secret_access",
+          "port": "aws.iam.policy-document.statement"
+        }
+      }
+    },
+    {
+      "id": "secret_access_owner",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.role-inline-policy.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.iam.role-owns-inline-policy",
+        "source": {
+          "nodeId": "secret_access",
+          "port": "aws.iam.policy-document.role-inline-policy"
+        },
+        "target": {
+          "nodeId": "execution_role",
+          "port": "aws.iam.role.custom-inline-policy"
+        }
+      }
+    },
+    {
+      "id": "secret_binding",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.container-uses-secret.connection",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "environmentName": {
+              "kind": "string",
+              "value": "DATABASE_PASSWORD"
+            },
+            "populationStatus": {
+              "kind": "string",
+              "value": "external-population-required"
+            }
+          }
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ecs.container-uses-secret",
+        "source": {
+          "nodeId": "secret",
+          "port": "aws.secretsmanager.secret.ecs-container"
+        },
+        "target": {
+          "nodeId": "container",
+          "port": "aws.ecs.container-definition.secret"
+        }
+      }
+    },
+    {
+      "id": "secret_scope",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement-authorizes-secret.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.iam.authorizes-secret",
+        "source": {
+          "nodeId": "secret_access_statement",
+          "port": "aws.iam.policy-statement.secret-resource"
+        },
+        "target": {
+          "nodeId": "secret",
+          "port": "aws.secretsmanager.secret.policy-resource"
+        }
+      }
+    },
+    {
+      "id": "subnet_binding",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.service-uses-subnet.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ecs.service-uses-subnet",
+        "source": {
+          "nodeId": "service",
+          "port": "aws.ecs.service.subnet"
+        },
+        "target": {
+          "nodeId": "subnet",
+          "port": "aws.ec2.subnet.ecs-service"
+        }
+      }
+    },
+    {
+      "id": "table_association",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table-owns-subnet-association.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.route-table-owns-subnet-association",
+        "source": {
+          "nodeId": "association_private",
+          "port": "aws.ec2.route-table-association.route-table"
+        },
+        "target": {
+          "nodeId": "route_table_private",
+          "port": "aws.ec2.route-table.subnet-association"
+        }
+      }
+    },
+    {
+      "id": "target_vpc",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.target-group-uses-vpc.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.target-group-uses-vpc",
+        "source": {
+          "nodeId": "target",
+          "port": "aws.elb.target-group.vpc"
+        },
+        "target": {
+          "nodeId": "vpc",
+          "port": "aws.ec2.vpc.alb-target-group"
+        }
+      }
+    },
+    {
+      "id": "task_binding",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.service-uses-task.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ecs.service-uses-task",
+        "source": {
+          "nodeId": "task",
+          "port": "aws.ecs.task-definition.service"
+        },
+        "target": {
+          "nodeId": "service",
+          "port": "aws.ecs.service.task"
+        }
+      }
+    },
+    {
+      "id": "tls",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.listener-uses-certificate.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.elb.listener-uses-certificate",
+        "source": {
+          "nodeId": "listener",
+          "port": "aws.elb.https-listener.certificate"
+        },
+        "target": {
+          "nodeId": "certificate",
+          "port": "aws.acm.public-dns-certificate.alb-listener"
+        }
+      }
+    },
+    {
+      "id": "vpc_az",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.vpc-contains-availability-zone.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.vpc-contains-availability-zone",
+        "source": {
+          "nodeId": "vpc",
+          "port": "aws.ec2.vpc.availability-zone-placement"
+        },
+        "target": {
+          "nodeId": "az",
+          "port": "aws.ec2.availability-zone.vpc"
+        }
+      }
+    },
+    {
+      "id": "vpc_group",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.vpc-associates-security-group.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.vpc-associates-security-group",
+        "source": {
+          "nodeId": "vpc",
+          "port": "aws.ec2.vpc.security-group-association"
+        },
+        "target": {
+          "nodeId": "group",
+          "port": "aws.ec2.security-group.vpc"
+        }
+      }
+    },
+    {
+      "id": "vpc_table",
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.vpc-contains-route-table.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "aws.ec2.vpc-contains-route-table",
+        "source": {
+          "nodeId": "vpc",
+          "port": "aws.ec2.vpc.route-table-placement"
+        },
+        "target": {
+          "nodeId": "route_table_private",
+          "port": "aws.ec2.route-table.vpc"
+        }
+      }
+    }
+  ],
+  "externalResources": {
+    "architectureId": "architecture_representative_v2",
+    "documentId": "doc_representative_v2",
+    "kind": "cloudmarkup.external-resource-reference-document",
+    "resources": [],
+    "revision": {
+      "createdAt": "2026-07-31T00:00:00.000Z",
+      "createdBy": "actor_fixture",
+      "revisionId": "revision_0002",
+      "revisionNumber": 2
+    },
+    "schemaVersion": 1
+  },
+  "kind": "cloudmarkup.architecture-document",
+  "metadata": {
+    "serialization": {
+      "canonicalization": "cloudmarkup.canonical-json.v1",
+      "encoding": "utf-8",
+      "mediaType": "application/json"
+    },
+    "source": "user"
+  },
+  "nodes": [
+    {
+      "id": "access",
+      "presentation": {
+        "label": "Fixture access",
+        "position": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.backend-access-configuration.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "description": {
+              "kind": "string",
+              "value": "Exact synthetic ALB health/backend path"
+            },
+            "protocol": {
+              "kind": "string",
+              "value": "tcp"
+            },
+            "retain": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        "deploymentKey": "access",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "target",
+          "relationshipType": "aws.elb.target-group-owns-backend-access"
+        },
+        "resourceType": "aws.elb.backend-access-configuration",
+        "serviceType": "aws.elb.backend-access-configuration"
+      }
+    },
+    {
+      "id": "alb",
+      "presentation": {
+        "label": "Fixture alb",
+        "position": {
+          "x": 20,
+          "y": 10
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.application-load-balancer.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "deletionProtection": {
+              "kind": "boolean",
+              "value": true
+            },
+            "desyncMitigation": {
+              "kind": "string",
+              "value": "defensive"
+            },
+            "dropInvalidHeaders": {
+              "kind": "boolean",
+              "value": true
+            },
+            "http2": {
+              "kind": "boolean",
+              "value": true
+            },
+            "idleTimeoutSeconds": {
+              "kind": "integer",
+              "value": 60
+            },
+            "ipAddressType": {
+              "kind": "string",
+              "value": "ipv4"
+            },
+            "loadBalancerType": {
+              "kind": "string",
+              "value": "application"
+            },
+            "name": {
+              "kind": "string",
+              "value": "synthetic-alb"
+            },
+            "retain": {
+              "kind": "boolean",
+              "value": true
+            },
+            "scheme": {
+              "kind": "string",
+              "value": "internal"
+            }
+          }
+        },
+        "deploymentKey": "alb",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.elb.application-load-balancer",
+        "serviceType": "aws.elb.application-load-balancer"
+      }
+    },
+    {
+      "id": "alb_client",
+      "presentation": {
+        "label": "Fixture alb_client",
+        "position": {
+          "x": 40,
+          "y": 20
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.security-group-ingress-rule.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "description": {
+              "kind": "string",
+              "value": "Synthetic declared client CIDR"
+            },
+            "fromPort": {
+              "kind": "integer",
+              "value": 443
+            },
+            "protocol": {
+              "kind": "string",
+              "value": "tcp"
+            },
+            "sourceIpv4Cidr": {
+              "kind": "string",
+              "value": "10.20.0.0/16"
+            },
+            "toPort": {
+              "kind": "integer",
+              "value": 443
+            }
+          }
+        },
+        "deploymentKey": "alb_client",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "alb_group",
+          "relationshipType": "aws.ec2.security-group-owns-ingress-rule"
+        },
+        "resourceType": "aws.ec2.security-group-ingress-rule",
+        "serviceType": "aws.ec2.security-group-ingress-rule"
+      }
+    },
+    {
+      "id": "alb_group",
+      "presentation": {
+        "label": "Fixture alb_group",
+        "position": {
+          "x": 60,
+          "y": 30
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.security-group.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "description": {
+              "kind": "string",
+              "value": "Explicit HTTPS client ingress and dedicated backend peer egress"
+            },
+            "groupName": {
+              "kind": "string",
+              "value": "synthetic-alb"
+            }
+          }
+        },
+        "deploymentKey": "alb_group",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.ec2.security-group",
+        "serviceType": "aws.ec2.security-group"
+      }
+    },
+    {
+      "id": "association_alb_subnet_a",
+      "presentation": {
+        "label": "Fixture association_alb_subnet_a",
+        "position": {
+          "x": 80,
+          "y": 40
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table-association.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "deploymentKey": "alb_subnet_a_association",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "route_table_alb_subnet_a",
+          "relationshipType": "aws.ec2.route-table-owns-subnet-association"
+        },
+        "resourceType": "aws.ec2.route-table-association",
+        "serviceType": "aws.ec2.route-table-association"
+      }
+    },
+    {
+      "id": "route_table_alb_subnet_a",
+      "presentation": {
+        "label": "Fixture route_table_alb_subnet_a",
+        "position": {
+          "x": 100,
+          "y": 50
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "name": {
+              "kind": "string",
+              "value": "alb_subnet_a-routes"
+            }
+          }
+        },
+        "deploymentKey": "alb_subnet_a_routes",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "vpc",
+          "relationshipType": "aws.ec2.vpc-contains-route-table"
+        },
+        "resourceType": "aws.ec2.route-table",
+        "serviceType": "aws.ec2.route-table"
+      }
+    },
+    {
+      "id": "alb_subnet_a",
+      "presentation": {
+        "label": "Fixture alb_subnet_a",
+        "position": {
+          "x": 120,
+          "y": 60
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.subnet.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "accessTier": {
+              "kind": "string",
+              "value": "private"
+            },
+            "assignIpv6AddressOnCreation": {
+              "kind": "boolean",
+              "value": false
+            },
+            "cidrBlock": {
+              "kind": "string",
+              "value": "10.20.2.0/24"
+            },
+            "mapPublicIpOnLaunch": {
+              "kind": "boolean",
+              "value": false
+            }
+          }
+        },
+        "deploymentKey": "alb_subnet_a_subnet",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "az",
+          "relationshipType": "aws.ec2.availability-zone-contains-subnet"
+        },
+        "resourceType": "aws.ec2.subnet",
+        "serviceType": "aws.ec2.subnet"
+      }
+    },
+    {
+      "id": "association_alb_subnet_b",
+      "presentation": {
+        "label": "Fixture association_alb_subnet_b",
+        "position": {
+          "x": 140,
+          "y": 70
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table-association.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "deploymentKey": "alb_subnet_b_association",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "route_table_alb_subnet_b",
+          "relationshipType": "aws.ec2.route-table-owns-subnet-association"
+        },
+        "resourceType": "aws.ec2.route-table-association",
+        "serviceType": "aws.ec2.route-table-association"
+      }
+    },
+    {
+      "id": "route_table_alb_subnet_b",
+      "presentation": {
+        "label": "Fixture route_table_alb_subnet_b",
+        "position": {
+          "x": 160,
+          "y": 80
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "name": {
+              "kind": "string",
+              "value": "alb_subnet_b-routes"
+            }
+          }
+        },
+        "deploymentKey": "alb_subnet_b_routes",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "vpc",
+          "relationshipType": "aws.ec2.vpc-contains-route-table"
+        },
+        "resourceType": "aws.ec2.route-table",
+        "serviceType": "aws.ec2.route-table"
+      }
+    },
+    {
+      "id": "alb_subnet_b",
+      "presentation": {
+        "label": "Fixture alb_subnet_b",
+        "position": {
+          "x": 180,
+          "y": 90
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.subnet.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "accessTier": {
+              "kind": "string",
+              "value": "private"
+            },
+            "assignIpv6AddressOnCreation": {
+              "kind": "boolean",
+              "value": false
+            },
+            "cidrBlock": {
+              "kind": "string",
+              "value": "10.20.3.0/24"
+            },
+            "mapPublicIpOnLaunch": {
+              "kind": "boolean",
+              "value": false
+            }
+          }
+        },
+        "deploymentKey": "alb_subnet_b_subnet",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "az_b",
+          "relationshipType": "aws.ec2.availability-zone-contains-subnet"
+        },
+        "resourceType": "aws.ec2.subnet",
+        "serviceType": "aws.ec2.subnet"
+      }
+    },
+    {
+      "id": "application_role",
+      "presentation": {
+        "label": "Fixture application_role",
+        "position": {
+          "x": 200,
+          "y": 100
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.role.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "maxSessionDurationSeconds": {
+              "kind": "integer",
+              "value": 3600
+            },
+            "roleName": {
+              "kind": "string",
+              "value": "application_role"
+            }
+          }
+        },
+        "deploymentKey": "application_role",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.iam.role",
+        "serviceType": "aws.iam.role"
+      }
+    },
+    {
+      "id": "application_role_trust",
+      "presentation": {
+        "label": "Fixture application_role_trust",
+        "position": {
+          "x": 220,
+          "y": 110
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "trust"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "application_role_trust"
+            }
+          }
+        },
+        "deploymentKey": "application_role_trust",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "application_role",
+          "relationshipType": "aws.iam.role-owns-trust-policy"
+        },
+        "resourceType": "aws.iam.policy-document",
+        "serviceType": "aws.iam.policy-document"
+      }
+    },
+    {
+      "id": "application_role_trust_statement",
+      "presentation": {
+        "label": "Fixture application_role_trust_statement",
+        "position": {
+          "x": 240,
+          "y": 120
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": ["sts:AssumeRole"]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": ["ecs-tasks.amazonaws.com"]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "applicationroletrust"
+            }
+          }
+        },
+        "deploymentKey": "application_role_trust_statement",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "application_role_trust",
+          "relationshipType": "aws.iam.policy-contains-statement"
+        },
+        "resourceType": "aws.iam.policy-statement",
+        "serviceType": "aws.iam.policy-statement"
+      }
+    },
+    {
+      "id": "secret",
+      "presentation": {
+        "label": "Fixture secret",
+        "position": {
+          "x": 260,
+          "y": 130
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.secretsmanager.secret.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "description": {
+              "kind": "string",
+              "value": "Externally populated synthetic credential"
+            },
+            "encryptionMode": {
+              "kind": "string",
+              "value": "aws-managed"
+            },
+            "name": {
+              "kind": "string",
+              "value": "application/credential"
+            },
+            "preventDestroy": {
+              "kind": "boolean",
+              "value": true
+            },
+            "recoveryWindowDays": {
+              "kind": "integer",
+              "value": 30
+            },
+            "valueMode": {
+              "kind": "string",
+              "value": "external-population"
+            }
+          }
+        },
+        "deploymentKey": "application_secret",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.secretsmanager.secret",
+        "serviceType": "aws.secretsmanager.secret"
+      }
+    },
+    {
+      "id": "az",
+      "presentation": {
+        "label": "Fixture az",
+        "position": {
+          "x": 280,
+          "y": 140
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.availability-zone.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "zoneName": {
+              "kind": "string",
+              "value": "us-east-1a"
+            }
+          }
+        },
+        "deploymentKey": "az",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "vpc",
+          "relationshipType": "aws.ec2.vpc-contains-availability-zone"
+        },
+        "resourceType": "aws.ec2.availability-zone",
+        "serviceType": "aws.ec2.availability-zone"
+      }
+    },
+    {
+      "id": "az_b",
+      "presentation": {
+        "label": "Fixture az_b",
+        "position": {
+          "x": 300,
+          "y": 150
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.availability-zone.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "zoneName": {
+              "kind": "string",
+              "value": "us-east-1b"
+            }
+          }
+        },
+        "deploymentKey": "az_b",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "vpc",
+          "relationshipType": "aws.ec2.vpc-contains-availability-zone"
+        },
+        "resourceType": "aws.ec2.availability-zone",
+        "serviceType": "aws.ec2.availability-zone"
+      }
+    },
+    {
+      "id": "certificate",
+      "presentation": {
+        "label": "Fixture certificate",
+        "position": {
+          "x": 320,
+          "y": 160
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.acm.public-dns-certificate.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "certificateExport": {
+              "kind": "string",
+              "value": "DISABLED"
+            },
+            "certificateRegion": {
+              "kind": "string",
+              "value": "us-east-1"
+            },
+            "certificateType": {
+              "kind": "string",
+              "value": "public"
+            },
+            "domainName": {
+              "kind": "string",
+              "value": "app.example.test"
+            },
+            "intendedUse": {
+              "kind": "string",
+              "value": "regional"
+            },
+            "keyAlgorithm": {
+              "kind": "string",
+              "value": "RSA_2048"
+            },
+            "retain": {
+              "kind": "boolean",
+              "value": true
+            },
+            "transparencyLogging": {
+              "kind": "string",
+              "value": "ENABLED"
+            },
+            "validationMethod": {
+              "kind": "string",
+              "value": "DNS"
+            },
+            "validationRecordsMode": {
+              "kind": "string",
+              "value": "managed-dns"
+            }
+          }
+        },
+        "deploymentKey": "certificate",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.acm.public-dns-certificate",
+        "serviceType": "aws.acm.public-dns-certificate"
+      }
+    },
+    {
+      "id": "cluster",
+      "presentation": {
+        "label": "Fixture cluster",
+        "position": {
+          "x": 340,
+          "y": 170
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.cluster.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "containerInsights": {
+              "kind": "string",
+              "value": "disabled"
+            },
+            "name": {
+              "kind": "string",
+              "value": "SyntheticCluster"
+            }
+          }
+        },
+        "deploymentKey": "cluster",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.ecs.cluster",
+        "serviceType": "aws.ecs.cluster"
+      }
+    },
+    {
+      "id": "container",
+      "presentation": {
+        "label": "Fixture container",
+        "position": {
+          "x": 360,
+          "y": 180
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.container-definition.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "containerPort": {
+              "kind": "integer",
+              "value": 8080
+            },
+            "essential": {
+              "kind": "boolean",
+              "value": true
+            },
+            "healthExecutable": {
+              "kind": "string",
+              "value": "/app/health"
+            },
+            "healthIntervalSeconds": {
+              "kind": "integer",
+              "value": 30
+            },
+            "healthRetries": {
+              "kind": "integer",
+              "value": 3
+            },
+            "healthStartPeriodSeconds": {
+              "kind": "integer",
+              "value": 0
+            },
+            "healthTimeoutSeconds": {
+              "kind": "integer",
+              "value": 5
+            },
+            "logBufferSize": {
+              "kind": "string",
+              "value": "10m"
+            },
+            "logMode": {
+              "kind": "string",
+              "value": "non-blocking"
+            },
+            "logStreamPrefix": {
+              "kind": "string",
+              "value": "Application"
+            },
+            "name": {
+              "kind": "string",
+              "value": "Application"
+            },
+            "protocol": {
+              "kind": "string",
+              "value": "tcp"
+            },
+            "readOnlyRoot": {
+              "kind": "boolean",
+              "value": true
+            },
+            "user": {
+              "kind": "string",
+              "value": "10001:10001"
+            }
+          }
+        },
+        "deploymentKey": "container",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "task",
+          "relationshipType": "aws.ecs.task-owns-container"
+        },
+        "resourceType": "aws.ecs.container-definition",
+        "serviceType": "aws.ecs.container-definition"
+      }
+    },
+    {
+      "id": "execution_attachment",
+      "presentation": {
+        "label": "Fixture execution_attachment",
+        "position": {
+          "x": 380,
+          "y": 190
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.managed-policy-attachment.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "attachmentKind": {
+              "kind": "string",
+              "value": "managed-policy-attachment"
+            },
+            "displayName": {
+              "kind": "string",
+              "value": "Explicit ECS execution managed policy"
+            },
+            "managedPolicyReference": {
+              "kind": "string",
+              "value": "aws-managed:service-role/AmazonECSTaskExecutionRolePolicy"
+            }
+          }
+        },
+        "deploymentKey": "execution_attachment",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "execution_role",
+          "relationshipType": "aws.iam.role-owns-managed-policy-attachment"
+        },
+        "resourceType": "aws.iam.managed-policy-attachment",
+        "serviceType": "aws.iam.managed-policy-attachment"
+      }
+    },
+    {
+      "id": "execution_role",
+      "presentation": {
+        "label": "Fixture execution_role",
+        "position": {
+          "x": 400,
+          "y": 200
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.role.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "maxSessionDurationSeconds": {
+              "kind": "integer",
+              "value": 3600
+            },
+            "roleName": {
+              "kind": "string",
+              "value": "execution_role"
+            }
+          }
+        },
+        "deploymentKey": "execution_role",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.iam.role",
+        "serviceType": "aws.iam.role"
+      }
+    },
+    {
+      "id": "execution_role_trust",
+      "presentation": {
+        "label": "Fixture execution_role_trust",
+        "position": {
+          "x": 420,
+          "y": 210
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "trust"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "execution_role_trust"
+            }
+          }
+        },
+        "deploymentKey": "execution_role_trust",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "execution_role",
+          "relationshipType": "aws.iam.role-owns-trust-policy"
+        },
+        "resourceType": "aws.iam.policy-document",
+        "serviceType": "aws.iam.policy-document"
+      }
+    },
+    {
+      "id": "execution_role_trust_statement",
+      "presentation": {
+        "label": "Fixture execution_role_trust_statement",
+        "position": {
+          "x": 440,
+          "y": 220
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": ["sts:AssumeRole"]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": ["ecs-tasks.amazonaws.com"]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "executionroletrust"
+            }
+          }
+        },
+        "deploymentKey": "execution_role_trust_statement",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "execution_role_trust",
+          "relationshipType": "aws.iam.policy-contains-statement"
+        },
+        "resourceType": "aws.iam.policy-statement",
+        "serviceType": "aws.iam.policy-statement"
+      }
+    },
+    {
+      "id": "group",
+      "presentation": {
+        "label": "Fixture group",
+        "position": {
+          "x": 460,
+          "y": 230
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.security-group.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "description": {
+              "kind": "string",
+              "value": "Explicit private workload policy"
+            },
+            "groupName": {
+              "kind": "string",
+              "value": "synthetic-private-instance"
+            }
+          }
+        },
+        "deploymentKey": "group",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.ec2.security-group",
+        "serviceType": "aws.ec2.security-group"
+      }
+    },
+    {
+      "id": "image",
+      "presentation": {
+        "label": "Fixture image",
+        "position": {
+          "x": 480,
+          "y": 240
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecr.image-reference.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "architecture": {
+              "kind": "string",
+              "value": "x86_64"
+            },
+            "digest": {
+              "kind": "string",
+              "value": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            "manifestType": {
+              "kind": "string",
+              "value": "oci-image"
+            },
+            "publicationStatus": {
+              "kind": "string",
+              "value": "external-publication-required"
+            }
+          }
+        },
+        "deploymentKey": "image",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "repository",
+          "relationshipType": "aws.ecr.repository-owns-image"
+        },
+        "resourceType": "aws.ecr.image-reference",
+        "serviceType": "aws.ecr.image-reference"
+      }
+    },
+    {
+      "id": "listener",
+      "presentation": {
+        "label": "Fixture listener",
+        "position": {
+          "x": 500,
+          "y": 250
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.https-listener.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "defaultAction": {
+              "kind": "string",
+              "value": "forward"
+            },
+            "domainMappingMode": {
+              "kind": "string",
+              "value": "external"
+            },
+            "port": {
+              "kind": "integer",
+              "value": 443
+            },
+            "protocol": {
+              "kind": "string",
+              "value": "HTTPS"
+            },
+            "retain": {
+              "kind": "boolean",
+              "value": true
+            },
+            "securityPolicy": {
+              "kind": "string",
+              "value": "ELBSecurityPolicy-TLS13-1-2-2021-06"
+            },
+            "serverName": {
+              "kind": "string",
+              "value": "app.example.test"
+            }
+          }
+        },
+        "deploymentKey": "listener",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "alb",
+          "relationshipType": "aws.elb.alb-owns-listener"
+        },
+        "resourceType": "aws.elb.https-listener",
+        "serviceType": "aws.elb.https-listener"
+      }
+    },
+    {
+      "id": "logs",
+      "presentation": {
+        "label": "Fixture logs",
+        "position": {
+          "x": 520,
+          "y": 260
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.cloudwatch.log-group.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "logClass": {
+              "kind": "string",
+              "value": "STANDARD"
+            },
+            "logGroupName": {
+              "kind": "string",
+              "value": "/ecs/synthetic"
+            },
+            "preventDestroy": {
+              "kind": "boolean",
+              "value": true
+            },
+            "retentionDays": {
+              "kind": "integer",
+              "value": 30
+            }
+          }
+        },
+        "deploymentKey": "logs",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.cloudwatch.log-group",
+        "serviceType": "aws.cloudwatch.log-group"
+      }
+    },
+    {
+      "id": "association_private",
+      "presentation": {
+        "label": "Fixture association_private",
+        "position": {
+          "x": 540,
+          "y": 270
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table-association.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "deploymentKey": "private_association",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "route_table_private",
+          "relationshipType": "aws.ec2.route-table-owns-subnet-association"
+        },
+        "resourceType": "aws.ec2.route-table-association",
+        "serviceType": "aws.ec2.route-table-association"
+      }
+    },
+    {
+      "id": "route_table_private",
+      "presentation": {
+        "label": "Fixture route_table_private",
+        "position": {
+          "x": 560,
+          "y": 280
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.route-table.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "name": {
+              "kind": "string",
+              "value": "private-routes"
+            }
+          }
+        },
+        "deploymentKey": "private_routes",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "vpc",
+          "relationshipType": "aws.ec2.vpc-contains-route-table"
+        },
+        "resourceType": "aws.ec2.route-table",
+        "serviceType": "aws.ec2.route-table"
+      }
+    },
+    {
+      "id": "public_zone",
+      "presentation": {
+        "label": "Fixture public_zone",
+        "position": {
+          "x": 580,
+          "y": 290
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.route53.public-hosted-zone.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "comment": {
+              "kind": "string",
+              "value": "Synthetic public DNS authority"
+            },
+            "delegationMode": {
+              "kind": "string",
+              "value": "external"
+            },
+            "domainControlAttested": {
+              "kind": "boolean",
+              "value": true
+            },
+            "domainName": {
+              "kind": "string",
+              "value": "example.test"
+            },
+            "forceDestroy": {
+              "kind": "boolean",
+              "value": false
+            },
+            "retain": {
+              "kind": "boolean",
+              "value": true
+            },
+            "zoneType": {
+              "kind": "string",
+              "value": "public"
+            }
+          }
+        },
+        "deploymentKey": "public_zone",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.route53.public-hosted-zone",
+        "serviceType": "aws.route53.public-hosted-zone"
+      }
+    },
+    {
+      "id": "region",
+      "presentation": {
+        "label": "Fixture region",
+        "position": {
+          "x": 600,
+          "y": 300
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.region.boundary.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "regionName": {
+              "kind": "string",
+              "value": "us-east-1"
+            }
+          }
+        },
+        "deploymentKey": "region",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.region.boundary",
+        "serviceType": "aws.region.boundary"
+      }
+    },
+    {
+      "id": "repository",
+      "presentation": {
+        "label": "Fixture repository",
+        "position": {
+          "x": 620,
+          "y": 310
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecr.repository.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "encryption": {
+              "kind": "string",
+              "value": "AES256"
+            },
+            "name": {
+              "kind": "string",
+              "value": "synthetic/application"
+            },
+            "retain": {
+              "kind": "boolean",
+              "value": true
+            },
+            "scanOnPush": {
+              "kind": "boolean",
+              "value": true
+            },
+            "tagMutability": {
+              "kind": "string",
+              "value": "IMMUTABLE"
+            }
+          }
+        },
+        "deploymentKey": "repository",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.ecr.repository",
+        "serviceType": "aws.ecr.repository"
+      }
+    },
+    {
+      "id": "secret_access",
+      "presentation": {
+        "label": "Fixture secret_access",
+        "position": {
+          "x": 640,
+          "y": 320
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "identity-inline"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "secret_access"
+            }
+          }
+        },
+        "deploymentKey": "secret_access",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "execution_role",
+          "relationshipType": "aws.iam.role-owns-inline-policy"
+        },
+        "resourceType": "aws.iam.policy-document",
+        "serviceType": "aws.iam.policy-document"
+      }
+    },
+    {
+      "id": "secret_access_statement",
+      "presentation": {
+        "label": "Fixture secret_access_statement",
+        "position": {
+          "x": 660,
+          "y": 330
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": ["secretsmanager:GetSecretValue"]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceNode": {
+              "attribute": "aws.secretsmanager.secret.arn",
+              "kind": "node-reference",
+              "nodeId": "secret"
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "secretaccess"
+            }
+          }
+        },
+        "deploymentKey": "secret_access_statement",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "secret_access",
+          "relationshipType": "aws.iam.policy-contains-statement"
+        },
+        "resourceType": "aws.iam.policy-statement",
+        "serviceType": "aws.iam.policy-statement"
+      }
+    },
+    {
+      "id": "service",
+      "presentation": {
+        "label": "Fixture service",
+        "position": {
+          "x": 680,
+          "y": 340
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.service.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "availabilityZoneRebalancing": {
+              "kind": "string",
+              "value": "DISABLED"
+            },
+            "desiredCount": {
+              "kind": "integer",
+              "value": 0
+            },
+            "executeCommand": {
+              "kind": "boolean",
+              "value": false
+            },
+            "name": {
+              "kind": "string",
+              "value": "SyntheticService"
+            },
+            "platformVersion": {
+              "kind": "string",
+              "value": "1.4.0"
+            },
+            "publicIpv4": {
+              "kind": "boolean",
+              "value": false
+            }
+          }
+        },
+        "deploymentKey": "service",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.ecs.service",
+        "serviceType": "aws.ecs.service"
+      }
+    },
+    {
+      "id": "subnet",
+      "presentation": {
+        "label": "Fixture subnet",
+        "position": {
+          "x": 700,
+          "y": 350
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.subnet.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "accessTier": {
+              "kind": "string",
+              "value": "private"
+            },
+            "assignIpv6AddressOnCreation": {
+              "kind": "boolean",
+              "value": false
+            },
+            "cidrBlock": {
+              "kind": "string",
+              "value": "10.20.1.0/24"
+            },
+            "mapPublicIpOnLaunch": {
+              "kind": "boolean",
+              "value": false
+            }
+          }
+        },
+        "deploymentKey": "subnet_subnet",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "az",
+          "relationshipType": "aws.ec2.availability-zone-contains-subnet"
+        },
+        "resourceType": "aws.ec2.subnet",
+        "serviceType": "aws.ec2.subnet"
+      }
+    },
+    {
+      "id": "target",
+      "presentation": {
+        "label": "Fixture target",
+        "position": {
+          "x": 720,
+          "y": 360
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.elb.target-group.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "backendMode": {
+              "kind": "string",
+              "value": "ecs-fargate"
+            },
+            "deregistrationDelaySeconds": {
+              "kind": "integer",
+              "value": 60
+            },
+            "healthIntervalSeconds": {
+              "kind": "integer",
+              "value": 30
+            },
+            "healthPath": {
+              "kind": "string",
+              "value": "/health"
+            },
+            "healthStatus": {
+              "kind": "string",
+              "value": "200"
+            },
+            "healthTimeoutSeconds": {
+              "kind": "integer",
+              "value": 5
+            },
+            "healthyThreshold": {
+              "kind": "integer",
+              "value": 2
+            },
+            "name": {
+              "kind": "string",
+              "value": "synthetic-target"
+            },
+            "port": {
+              "kind": "integer",
+              "value": 8080
+            },
+            "protocol": {
+              "kind": "string",
+              "value": "HTTP"
+            },
+            "protocolVersion": {
+              "kind": "string",
+              "value": "HTTP1"
+            },
+            "retain": {
+              "kind": "boolean",
+              "value": true
+            },
+            "startupGraceSeconds": {
+              "kind": "integer",
+              "value": 30
+            },
+            "unhealthyThreshold": {
+              "kind": "integer",
+              "value": 2
+            }
+          }
+        },
+        "deploymentKey": "target",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.elb.target-group",
+        "serviceType": "aws.elb.target-group"
+      }
+    },
+    {
+      "id": "task",
+      "presentation": {
+        "label": "Fixture task",
+        "position": {
+          "x": 740,
+          "y": 370
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ecs.task-definition.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "architecture": {
+              "kind": "string",
+              "value": "x86_64"
+            },
+            "capacity": {
+              "kind": "string",
+              "value": "FARGATE"
+            },
+            "cpu": {
+              "kind": "integer",
+              "value": 256
+            },
+            "family": {
+              "kind": "string",
+              "value": "SyntheticTask"
+            },
+            "memoryMiB": {
+              "kind": "integer",
+              "value": 512
+            },
+            "networkMode": {
+              "kind": "string",
+              "value": "awsvpc"
+            },
+            "operatingSystem": {
+              "kind": "string",
+              "value": "LINUX"
+            }
+          }
+        },
+        "deploymentKey": "task",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "aws.ecs.task-definition",
+        "serviceType": "aws.ecs.task-definition"
+      }
+    },
+    {
+      "id": "vpc",
+      "presentation": {
+        "label": "Fixture vpc",
+        "position": {
+          "x": 760,
+          "y": 380
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "aws.ec2.vpc.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "cidrBlock": {
+              "kind": "string",
+              "value": "10.20.0.0/16"
+            },
+            "enableDnsHostnames": {
+              "kind": "boolean",
+              "value": true
+            },
+            "enableDnsSupport": {
+              "kind": "boolean",
+              "value": true
+            },
+            "instanceTenancy": {
+              "kind": "string",
+              "value": "default"
+            }
+          }
+        },
+        "deploymentKey": "vpc",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "parent": {
+          "nodeId": "region",
+          "relationshipType": "aws.region.contains-vpc"
+        },
+        "resourceType": "aws.ec2.vpc",
+        "serviceType": "aws.ec2.vpc"
+      }
+    }
+  ],
+  "outputs": [],
+  "provider": {
+    "id": "aws.cloudmarkup",
+    "region": "us-east-1"
+  },
+  "revision": {
+    "createdAt": "2026-07-31T00:00:00.000Z",
+    "createdBy": "actor_fixture",
+    "revisionId": "revision_0002",
+    "revisionNumber": 2,
+    "sourceDraftId": "draft_0002"
+  },
+  "schemaVersion": 3,
+  "unresolvedRequirements": [
+    {
+      "blocking": false,
+      "category": "operational",
+      "id": "requirement_retry_review",
+      "origin": "user",
+      "statement": "The production retry limit requires review."
+    }
+  ],
+  "variables": [],
+  "workloadBehavior": {
+    "contractVersion": 2,
+    "workloads": []
+  }
+}

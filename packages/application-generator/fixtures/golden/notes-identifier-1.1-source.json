@@ -1,0 +1,345 @@
+{
+  "artifactDigest": "sha256:1a8fc89da890d576f1d1e61084942e5ec95f768ee1436eae4545c6f643361d26",
+  "coverageDigest": "sha256:efbbd35f3d05f3130e83f2244871a40ad1732a6fe2b7478ccdf362b71a2525ba",
+  "sourceManifestDigest": "sha256:0ce013eab1819d4ad8802699181023f6596aeafd4af7ed1934cc047ca4d493b7",
+  "coverage": {
+    "contractVersion": 1,
+    "missingRequirements": [],
+    "solutionRevisionId": "solution_notes_revision_1",
+    "state": "complete-supported-pattern",
+    "workloads": [
+      {
+        "implementationMode": "complete-supported-pattern",
+        "missingRequirements": [],
+        "representedOperationIds": [
+          "operation_create_note",
+          "operation_delete_note",
+          "operation_read_note",
+          "operation_update_note"
+        ],
+        "representedTestIds": [
+          "test_contract_create_note",
+          "test_contract_delete_note",
+          "test_contract_read_note",
+          "test_contract_update_note",
+          "test_unit_create_note",
+          "test_unit_delete_note",
+          "test_unit_read_note",
+          "test_unit_update_note"
+        ],
+        "sourceFilePaths": [
+          "application/README.md",
+          "application/build-contracts/workload_notes_api.json",
+          "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+          "application/contracts/contracts_notes_create-contract-test-381f80f622eeecbffba1e44ed8f4783c81e9041adf9b101760c765a9cea06a05-53588691432cb97f02b05a38a2b31b40da6178e2346c46bb8f62216ed8af6b2b.json",
+          "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-111f787e33ef507aad634243e418f388b54111250d0b7265b0de8bfbb055a4cd.json",
+          "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-cd7a1bc0b42be9834a37afa0a56fb51126f908d1f4345d00e07bbe48c49668e3.json",
+          "application/contracts/contracts_notes_create-unit-test-7b382cb8f2a7d0ab1f4278e4256203103a2d202b015b632f1a732e042cefbee7-f276ceb30fa7266ceb685671cd1c19b7695211c62e5cd9f0a3a881ed6ac7f4e3.json",
+          "application/contracts/contracts_notes_delete-contract-test-c0bcb74a818eecaddb95c6bffdc130a5078ef7915af0e51f5a186405084f3517-246f8b3403b0241bf12b6757a1aed5045346ead73ad38a7118d60e4542e15ce4.json",
+          "application/contracts/contracts_notes_delete-operation-19c4cb072a3368d6f309fe7cd5ebe80a54751b39f88980c41082645836ebaef5-944211301be2fdc4c5a4562d291951e24b0e9ed4cfcde50a6ce11a72607beb18.json",
+          "application/contracts/contracts_notes_delete-route-f13f7c0b7b38da6aee66b84366a6e9d44d98644d623524a9cf67b261c95b95fc-a846214334f54de6d680d3ebf4c1a228785e13e05ca450136330e303be6270e6.json",
+          "application/contracts/contracts_notes_delete-unit-test-0d26443db4af198655c4aad133240efe165b5899367964266bb39e7455625c48-abfc616a244e3fc57d42eb0abef113887a71f57a82956000a2fc30920111abf1.json",
+          "application/contracts/contracts_notes_read-contract-test-5a9b3969cfd7ea4df2261eb94a7c84dd89ed88c5dbc03eff80e19e0ed8c82a03-b5bfa3fcf07c0138a95683a8005af4fcbe48730b0a5034258bbbe4f85769ba66.json",
+          "application/contracts/contracts_notes_read-operation-6118f9e0b1e886385fe2ec1942ef566513fe31af0653bbbe1b6637cbfff9198c-c34ff18f2d2ee6310e63b859f6705ac43ec57b0f0ca2ffa75882983bbe9411d4.json",
+          "application/contracts/contracts_notes_read-route-58785adbba781c81bc788b4f6dde2d72f870267e33369e45f9d97cfe41800fd4-85ce86b40cc8c98c43f7d0bef3f8bce46d537aebe4beae054473c34df8ddd5fe.json",
+          "application/contracts/contracts_notes_read-unit-test-359d96faf4490e96bc47ef2031fc21ae44d50868ce843b4d898b826f46c353ad-222ca9e282779c2ad7d642a5897615286fb42af9455bf3b04da02f4bf14a4774.json",
+          "application/contracts/contracts_notes_update-contract-test-e13036779e00dc7f7236d7dac4b116073096d9cc264b0e7e674125ef7348ff1f-7029bc8e39dd211df4a9eb2cb3fc9774fd73d0a119c07a265fbb950426e99e3f.json",
+          "application/contracts/contracts_notes_update-operation-b14f7456bbfbabee6680af73446b87c0acc39e03c341f0e7f3c1dfe83fdba9a9-4b7818e0b2ae40a50e9b59657dd63df126d47ea67f37cf16a20354aa7938fd7e.json",
+          "application/contracts/contracts_notes_update-route-82819ea3920b3b3219a47d8a107aacdee2a91ca2471766c0411129d6e773d0a5-b9c21f7d45ebc1c2a43a7a123b15bf15c6ddeffe2a13dc4bf00439e8f60760b7.json",
+          "application/contracts/contracts_notes_update-unit-test-2fec14b60ac3864bb74c09c7a689f0c2ae1ea914a67837e4ece5228925d775bc-7f8f4718cb577007eecfdac6a653d081070d785eeca170cd6111c1965e44ac5a.json",
+          "application/contracts/contracts_repair-seed_entity-504950323b948b289bd8af0fabda0877b970d9f283640e7488f820a51630e49e-385dd62bd783d5ed749931ed234deafe3922388e4a890b75524511b40ba03ca6.json",
+          "application/lockfile.contract.json",
+          "application/package.json",
+          "application/src/functions/notes_handler/extensions/custom.ts",
+          "application/src/functions/notes_handler/generated/bindings.ts",
+          "application/src/functions/notes_handler/generated/operations/operation_create_note.ts",
+          "application/src/functions/notes_handler/generated/operations/operation_delete_note.ts",
+          "application/src/functions/notes_handler/generated/operations/operation_read_note.ts",
+          "application/src/functions/notes_handler/generated/operations/operation_update_note.ts",
+          "application/src/functions/notes_handler/generated/types.ts",
+          "application/src/functions/notes_handler/index.ts",
+          "application/tests/functions/notes_handler/contracts.test.ts",
+          "application/tests/functions/notes_handler/unit.test.ts",
+          "application/tsconfig.json"
+        ],
+        "state": "complete-supported-pattern",
+        "unresolvedBehaviorIds": [],
+        "workloadId": "workload_notes_api"
+      }
+    ]
+  },
+  "buildContracts": [
+    {
+      "workloadId": "workload_notes_api",
+      "contractDigest": "sha256:cbae8b5038ecdd51a44972a011ecb9993abaef1faf84df939cd48a218d6ebffc",
+      "entrypoint": "application/src/functions/notes_handler/index.ts",
+      "artifactPath": "application/artifacts/workload_notes_api/function.zip"
+    }
+  ],
+  "files": [
+    {
+      "path": "application/README.md",
+      "checksum": "sha256:369845acc281a1864a731af8845280318192bc40be87ec8ac2c76308358d0c11",
+      "semanticChecksum": "sha256:369845acc281a1864a731af8845280318192bc40be87ec8ac2c76308358d0c11",
+      "sizeBytes": 1674,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/build-contracts/workload_notes_api.json",
+      "checksum": "sha256:c806236bf8386a98ca0576e81b7191df638568bfbd1ff8dd54613a95f21b6ad3",
+      "semanticChecksum": "sha256:c806236bf8386a98ca0576e81b7191df638568bfbd1ff8dd54613a95f21b6ad3",
+      "sizeBytes": 12307,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+      "checksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+      "semanticChecksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+      "sizeBytes": 735,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_create-contract-test-381f80f622eeecbffba1e44ed8f4783c81e9041adf9b101760c765a9cea06a05-53588691432cb97f02b05a38a2b31b40da6178e2346c46bb8f62216ed8af6b2b.json",
+      "checksum": "sha256:079d6abee5a9cc588da087978c77ec3a011666c67017b3293cd50da33a9cad78",
+      "semanticChecksum": "sha256:079d6abee5a9cc588da087978c77ec3a011666c67017b3293cd50da33a9cad78",
+      "sizeBytes": 1573,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-111f787e33ef507aad634243e418f388b54111250d0b7265b0de8bfbb055a4cd.json",
+      "checksum": "sha256:111f787e33ef507aad634243e418f388b54111250d0b7265b0de8bfbb055a4cd",
+      "semanticChecksum": "sha256:111f787e33ef507aad634243e418f388b54111250d0b7265b0de8bfbb055a4cd",
+      "sizeBytes": 1617,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-cd7a1bc0b42be9834a37afa0a56fb51126f908d1f4345d00e07bbe48c49668e3.json",
+      "checksum": "sha256:cd7a1bc0b42be9834a37afa0a56fb51126f908d1f4345d00e07bbe48c49668e3",
+      "semanticChecksum": "sha256:cd7a1bc0b42be9834a37afa0a56fb51126f908d1f4345d00e07bbe48c49668e3",
+      "sizeBytes": 2238,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_create-unit-test-7b382cb8f2a7d0ab1f4278e4256203103a2d202b015b632f1a732e042cefbee7-f276ceb30fa7266ceb685671cd1c19b7695211c62e5cd9f0a3a881ed6ac7f4e3.json",
+      "checksum": "sha256:f276ceb30fa7266ceb685671cd1c19b7695211c62e5cd9f0a3a881ed6ac7f4e3",
+      "semanticChecksum": "sha256:f276ceb30fa7266ceb685671cd1c19b7695211c62e5cd9f0a3a881ed6ac7f4e3",
+      "sizeBytes": 1120,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_delete-contract-test-c0bcb74a818eecaddb95c6bffdc130a5078ef7915af0e51f5a186405084f3517-246f8b3403b0241bf12b6757a1aed5045346ead73ad38a7118d60e4542e15ce4.json",
+      "checksum": "sha256:7cb5e2bc1263a91d26e0ca7c660478960e2a0a1269c1c957524bea4d7bde93bb",
+      "semanticChecksum": "sha256:7cb5e2bc1263a91d26e0ca7c660478960e2a0a1269c1c957524bea4d7bde93bb",
+      "sizeBytes": 1573,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_delete-operation-19c4cb072a3368d6f309fe7cd5ebe80a54751b39f88980c41082645836ebaef5-944211301be2fdc4c5a4562d291951e24b0e9ed4cfcde50a6ce11a72607beb18.json",
+      "checksum": "sha256:f939fe61c7cc187388ce5232bc53c233328dc6d5c502cbdb8182d6274e4ddf9c",
+      "semanticChecksum": "sha256:f939fe61c7cc187388ce5232bc53c233328dc6d5c502cbdb8182d6274e4ddf9c",
+      "sizeBytes": 1503,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_delete-route-f13f7c0b7b38da6aee66b84366a6e9d44d98644d623524a9cf67b261c95b95fc-a846214334f54de6d680d3ebf4c1a228785e13e05ca450136330e303be6270e6.json",
+      "checksum": "sha256:518a914b9def8ad1feae1bbe1ba007321246656583599c8fcfbc92f23263ba21",
+      "semanticChecksum": "sha256:518a914b9def8ad1feae1bbe1ba007321246656583599c8fcfbc92f23263ba21",
+      "sizeBytes": 2056,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_delete-unit-test-0d26443db4af198655c4aad133240efe165b5899367964266bb39e7455625c48-abfc616a244e3fc57d42eb0abef113887a71f57a82956000a2fc30920111abf1.json",
+      "checksum": "sha256:abfc616a244e3fc57d42eb0abef113887a71f57a82956000a2fc30920111abf1",
+      "semanticChecksum": "sha256:abfc616a244e3fc57d42eb0abef113887a71f57a82956000a2fc30920111abf1",
+      "sizeBytes": 1120,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_read-contract-test-5a9b3969cfd7ea4df2261eb94a7c84dd89ed88c5dbc03eff80e19e0ed8c82a03-b5bfa3fcf07c0138a95683a8005af4fcbe48730b0a5034258bbbe4f85769ba66.json",
+      "checksum": "sha256:d5ef9a9188d2ac1a8f257b2656fd731da7fbeb25a255235242fc3cf474ed3606",
+      "semanticChecksum": "sha256:d5ef9a9188d2ac1a8f257b2656fd731da7fbeb25a255235242fc3cf474ed3606",
+      "sizeBytes": 1561,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_read-operation-6118f9e0b1e886385fe2ec1942ef566513fe31af0653bbbe1b6637cbfff9198c-c34ff18f2d2ee6310e63b859f6705ac43ec57b0f0ca2ffa75882983bbe9411d4.json",
+      "checksum": "sha256:a7d05f8a3c642115fded7adaa3cedae7d625ce89217d8ffe513ae10f1a358d4e",
+      "semanticChecksum": "sha256:a7d05f8a3c642115fded7adaa3cedae7d625ce89217d8ffe513ae10f1a358d4e",
+      "sizeBytes": 1750,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_read-route-58785adbba781c81bc788b4f6dde2d72f870267e33369e45f9d97cfe41800fd4-85ce86b40cc8c98c43f7d0bef3f8bce46d537aebe4beae054473c34df8ddd5fe.json",
+      "checksum": "sha256:933b4936704c9b4ab89f5ab561a28ff75b031079dec4c31c5597a13161e1618e",
+      "semanticChecksum": "sha256:933b4936704c9b4ab89f5ab561a28ff75b031079dec4c31c5597a13161e1618e",
+      "sizeBytes": 2336,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_read-unit-test-359d96faf4490e96bc47ef2031fc21ae44d50868ce843b4d898b826f46c353ad-222ca9e282779c2ad7d642a5897615286fb42af9455bf3b04da02f4bf14a4774.json",
+      "checksum": "sha256:222ca9e282779c2ad7d642a5897615286fb42af9455bf3b04da02f4bf14a4774",
+      "semanticChecksum": "sha256:222ca9e282779c2ad7d642a5897615286fb42af9455bf3b04da02f4bf14a4774",
+      "sizeBytes": 1112,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_update-contract-test-e13036779e00dc7f7236d7dac4b116073096d9cc264b0e7e674125ef7348ff1f-7029bc8e39dd211df4a9eb2cb3fc9774fd73d0a119c07a265fbb950426e99e3f.json",
+      "checksum": "sha256:7b2accf1abb6e3a4e5194aa1750e38956e15834e283582f646a27599b7ab2da8",
+      "semanticChecksum": "sha256:7b2accf1abb6e3a4e5194aa1750e38956e15834e283582f646a27599b7ab2da8",
+      "sizeBytes": 1573,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_update-operation-b14f7456bbfbabee6680af73446b87c0acc39e03c341f0e7f3c1dfe83fdba9a9-4b7818e0b2ae40a50e9b59657dd63df126d47ea67f37cf16a20354aa7938fd7e.json",
+      "checksum": "sha256:30c81a8c5023991dd646dbf5f5e10f0b85845687e003be48ca3096eb1b0ffd1d",
+      "semanticChecksum": "sha256:30c81a8c5023991dd646dbf5f5e10f0b85845687e003be48ca3096eb1b0ffd1d",
+      "sizeBytes": 1756,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_update-route-82819ea3920b3b3219a47d8a107aacdee2a91ca2471766c0411129d6e773d0a5-b9c21f7d45ebc1c2a43a7a123b15bf15c6ddeffe2a13dc4bf00439e8f60760b7.json",
+      "checksum": "sha256:bc87c9b86bc8ed860367f2cd6bac627beeec5935751fe4fd5df95be46a5e1810",
+      "semanticChecksum": "sha256:bc87c9b86bc8ed860367f2cd6bac627beeec5935751fe4fd5df95be46a5e1810",
+      "sizeBytes": 2671,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_update-unit-test-2fec14b60ac3864bb74c09c7a689f0c2ae1ea914a67837e4ece5228925d775bc-7f8f4718cb577007eecfdac6a653d081070d785eeca170cd6111c1965e44ac5a.json",
+      "checksum": "sha256:7f8f4718cb577007eecfdac6a653d081070d785eeca170cd6111c1965e44ac5a",
+      "semanticChecksum": "sha256:7f8f4718cb577007eecfdac6a653d081070d785eeca170cd6111c1965e44ac5a",
+      "sizeBytes": 1120,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_repair-seed_entity-504950323b948b289bd8af0fabda0877b970d9f283640e7488f820a51630e49e-385dd62bd783d5ed749931ed234deafe3922388e4a890b75524511b40ba03ca6.json",
+      "checksum": "sha256:a90a771150717ffe2ba207fedda406359c1019ad5302d165492e4250bfb46cbf",
+      "semanticChecksum": "sha256:a90a771150717ffe2ba207fedda406359c1019ad5302d165492e4250bfb46cbf",
+      "sizeBytes": 1403,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/lockfile.contract.json",
+      "checksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+      "semanticChecksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+      "sizeBytes": 258,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/package.json",
+      "checksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+      "semanticChecksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+      "sizeBytes": 371,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/src/functions/notes_handler/extensions/custom.ts",
+      "checksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+      "semanticChecksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+      "sizeBytes": 361,
+      "ownership": "user-owned",
+      "disposition": "create"
+    },
+    {
+      "path": "application/src/functions/notes_handler/generated/bindings.ts",
+      "checksum": "sha256:bdcf4e60296ee7f76a9d3109e68850b48b264d49bdbe2778652199620fb04c7d",
+      "semanticChecksum": "sha256:bdcf4e60296ee7f76a9d3109e68850b48b264d49bdbe2778652199620fb04c7d",
+      "sizeBytes": 855,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/src/functions/notes_handler/generated/operations/operation_create_note.ts",
+      "checksum": "sha256:cede785a5d47ff4c3f062431a8d4cda11df26ac2a64e97bd8fa993ef3e72a48b",
+      "semanticChecksum": "sha256:cede785a5d47ff4c3f062431a8d4cda11df26ac2a64e97bd8fa993ef3e72a48b",
+      "sizeBytes": 1898,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/src/functions/notes_handler/generated/operations/operation_delete_note.ts",
+      "checksum": "sha256:6975b35687199d6d292b966d2eb24b006fbc594895b40da61be4158d89c894a6",
+      "semanticChecksum": "sha256:6975b35687199d6d292b966d2eb24b006fbc594895b40da61be4158d89c894a6",
+      "sizeBytes": 1920,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/src/functions/notes_handler/generated/operations/operation_read_note.ts",
+      "checksum": "sha256:f028b6f5dc3419edc5007887d22c20ca84fba795f321d81b77bf196a0a33ec67",
+      "semanticChecksum": "sha256:f028b6f5dc3419edc5007887d22c20ca84fba795f321d81b77bf196a0a33ec67",
+      "sizeBytes": 1900,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/src/functions/notes_handler/generated/operations/operation_update_note.ts",
+      "checksum": "sha256:f780ca048107ab9e9e782cc3a3762bae320ec6d08c062ae35b63af93660297e2",
+      "semanticChecksum": "sha256:f780ca048107ab9e9e782cc3a3762bae320ec6d08c062ae35b63af93660297e2",
+      "sizeBytes": 3799,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/src/functions/notes_handler/generated/types.ts",
+      "checksum": "sha256:e34775a4fa663697abcd8cfe33cd18c60876fa05e13b724b2d75895642c22740",
+      "semanticChecksum": "sha256:e34775a4fa663697abcd8cfe33cd18c60876fa05e13b724b2d75895642c22740",
+      "sizeBytes": 4064,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/src/functions/notes_handler/index.ts",
+      "checksum": "sha256:f704b63a714e35273bd799bc21e15a88e8cd4e1a33c6d629dc607e6feb31aa32",
+      "semanticChecksum": "sha256:f704b63a714e35273bd799bc21e15a88e8cd4e1a33c6d629dc607e6feb31aa32",
+      "sizeBytes": 5225,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/tests/functions/notes_handler/contracts.test.ts",
+      "checksum": "sha256:14671d72cf3f20ebfd3018c281a7657af933c7a4ffbb8c01be0ce34547cedd9d",
+      "semanticChecksum": "sha256:14671d72cf3f20ebfd3018c281a7657af933c7a4ffbb8c01be0ce34547cedd9d",
+      "sizeBytes": 12441,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/tests/functions/notes_handler/unit.test.ts",
+      "checksum": "sha256:ab8deaf43d625eaafc5dfd97d4302ccb311bdb2a332632a842b4b97590496635",
+      "semanticChecksum": "sha256:ab8deaf43d625eaafc5dfd97d4302ccb311bdb2a332632a842b4b97590496635",
+      "sizeBytes": 5978,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/tsconfig.json",
+      "checksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+      "semanticChecksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+      "sizeBytes": 385,
+      "ownership": "generated",
+      "disposition": "create"
+    }
+  ]
+}

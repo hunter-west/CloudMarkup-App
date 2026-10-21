@@ -1,0 +1,178 @@
+.editor-header-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: var(--cm-space-1);
+  min-width: 0;
+}
+
+.editor-header-actions > :is(.cm-button, .cm-popover, .cm-tooltip),
+.editor-history-actions {
+  flex: 0 0 auto;
+}
+
+.editor-history-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cm-space-0-5);
+  padding-inline-end: var(--cm-space-1);
+  border-inline-end: 1px solid var(--cm-color-border);
+}
+
+.editor-history-actions .cm-icon-button {
+  background: transparent;
+}
+
+.editor-history-actions .cm-icon-button:disabled {
+  background: transparent;
+  border-color: transparent;
+}
+
+.editor-header-actions__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cm-space-2);
+}
+
+.editor-header-menu {
+  display: grid;
+  gap: var(--cm-space-1);
+  min-width: 16rem;
+}
+
+.editor-header-menu > .cm-tooltip {
+  display: block;
+  width: 100%;
+}
+
+.editor-header-menu__action {
+  display: grid;
+  gap: var(--cm-space-1);
+  width: 100%;
+  min-height: var(--cm-row-height);
+  padding: var(--cm-space-1-5) var(--cm-space-2);
+  border: 1px solid transparent;
+  border-radius: var(--cm-radius-md);
+  background: transparent;
+  color: var(--cm-color-text);
+  cursor: pointer;
+  text-align: start;
+}
+
+.editor-header-menu__action > span {
+  display: flex;
+  align-items: center;
+  gap: var(--cm-space-2);
+}
+
+.editor-header-menu__action svg {
+  flex: none;
+  color: var(--cm-color-text-muted);
+}
+
+.editor-header-menu__action strong {
+  font-weight: var(--cm-weight-semibold);
+}
+
+.editor-header-menu__action small {
+  color: var(--cm-color-text-muted);
+  line-height: var(--cm-line-body);
+}
+
+.editor-header-menu__action:hover,
+.editor-header-menu__action:focus-visible {
+  border-color: var(--cm-color-action);
+  background: var(--cm-color-action-subtle);
+  color: var(--cm-color-action-hover);
+}
+
+.editor-header-menu__action:hover svg,
+.editor-header-menu__action:focus-visible svg {
+  color: currentcolor;
+}
+
+.editor-header-menu__action[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+@media (max-width: 47.999rem) {
+  .editor-header-actions__label {
+    display: none;
+  }
+}
+
+.editor-command-search {
+  display: grid;
+  gap: var(--cm-space-2);
+  font-weight: 700;
+}
+
+.editor-command-search input {
+  width: 100%;
+}
+
+.editor-command-list {
+  display: grid;
+  gap: var(--cm-space-2);
+  max-height: min(28rem, 60vh);
+  margin-top: var(--cm-space-4);
+  overflow: auto;
+}
+
+.editor-command-list__item {
+  display: grid;
+  gap: var(--cm-space-1);
+  width: 100%;
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  background: var(--cm-color-surface);
+  color: var(--cm-color-text);
+  text-align: start;
+  cursor: pointer;
+}
+
+.editor-command-list__item:hover:not(:disabled),
+.editor-command-list__item:focus-visible {
+  border-color: var(--cm-color-action);
+  background: var(--cm-color-action-subtle);
+}
+
+.editor-command-list__item:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.editor-command-list__item > span {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cm-space-3);
+}
+
+.editor-shortcut-list {
+  display: grid;
+  gap: var(--cm-space-2);
+}
+
+.editor-shortcut-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cm-space-4);
+  padding-block: var(--cm-space-2);
+  border-bottom: 1px solid var(--cm-color-border);
+}
+
+.editor-shortcut-list dt {
+  font-weight: 700;
+}
+
+.editor-shortcut-list dd {
+  margin: 0;
+  font-family: var(--cm-font-mono);
+  text-align: end;
+}
+/* Header menus must stay usable over an open modeless Inspector. */
+.cm-popover__content:has(.editor-header-menu) {
+  z-index: calc(var(--cm-z-drawer) + 1);
+}

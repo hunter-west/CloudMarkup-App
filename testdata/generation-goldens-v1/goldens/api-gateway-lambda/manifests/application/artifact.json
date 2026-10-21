@@ -1,0 +1,1709 @@
+{
+  "contractVersion": 1,
+  "artifact": {
+    "buildContracts": [
+      {
+        "contract": {
+          "contractVersion": 1,
+          "compiledEntrypoint": "application/dist/src/functions/notes_handler/index.js",
+          "dependencies": [
+            {
+              "digest": "sha256:596a74c988d447d30d25b48e2dfdde55f755ff37e1bc3e30d632ea41af1c5a7d",
+              "digestKind": "canonical-coordinate",
+              "kind": "runtime",
+              "name": "@aws-sdk/client-dynamodb",
+              "version": "3.1101.0"
+            },
+            {
+              "digest": "sha256:4eef39b2a59c6718c30bc27e150d20d49b997aa641ad1139271daabdce5ff1f0",
+              "digestKind": "canonical-coordinate",
+              "kind": "development",
+              "name": "@types/node",
+              "version": "24.13.3"
+            },
+            {
+              "digest": "sha256:abe2b6ac2534cb6a9682fa43cd1f2d6bffa36fc819ce4bdec6630df821033d0b",
+              "digestKind": "canonical-coordinate",
+              "kind": "development",
+              "name": "typescript",
+              "version": "6.0.3"
+            },
+            {
+              "digest": "sha256:4de876ceefeaa5db7000f7308295acabac3478a78f9dfddd6ca9724dfa3d33af",
+              "digestKind": "canonical-coordinate",
+              "kind": "development",
+              "name": "vitest",
+              "version": "4.1.10"
+            }
+          ],
+          "entrypoint": "application/src/functions/notes_handler/index.ts",
+          "executionPolicy": {
+            "credentials": "deny",
+            "filesystem": "isolated",
+            "network": "deny",
+            "packageScripts": "deny",
+            "reproducible": true
+          },
+          "expectedArtifact": {
+            "artifactId": "artifact_workload_notes_api",
+            "archiveEntrypoint": "index.js",
+            "digestAlgorithm": "sha256",
+            "handler": "index.handler",
+            "kind": "aws-lambda-zip",
+            "mediaType": "application/zip",
+            "path": "application/artifacts/workload_notes_api/function.zip"
+          },
+          "implementationMode": "generated-starter",
+          "lockfilePath": "application/lockfile.contract.json",
+          "packageManifestPath": "application/package.json",
+          "requiredChecks": [
+            "compile",
+            "unit-tests",
+            "contract-tests",
+            "security",
+            "reproducibility"
+          ],
+          "runtime": {
+            "digest": "sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a",
+            "id": "cloudmarkup.runtime.aws-lambda-nodejs24-typescript",
+            "version": "1.0.0",
+            "handler": "index.handler",
+            "languageFamily": "cloudmarkup.language.typescript",
+            "moduleFormat": "esm",
+            "runtime": "nodejs24.x",
+            "runtimeFamily": "aws.lambda.runtime-family.nodejs24"
+          },
+          "sourceInputs": [
+            {
+              "checksum": "sha256:5da2a4e6961919be126550803556990a7b4c80ea6a8ec9baf6cb632c6a6133ed",
+              "path": "application/README.md"
+            },
+            {
+              "checksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+              "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json"
+            },
+            {
+              "checksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+              "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json"
+            },
+            {
+              "checksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+              "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json"
+            },
+            {
+              "checksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+              "path": "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json"
+            },
+            {
+              "checksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+              "path": "application/lockfile.contract.json"
+            },
+            {
+              "checksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+              "path": "application/package.json"
+            },
+            {
+              "checksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+              "path": "application/src/functions/notes_handler/extensions/custom.ts"
+            },
+            {
+              "checksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+              "path": "application/src/functions/notes_handler/generated/bindings.ts"
+            },
+            {
+              "checksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+              "path": "application/src/functions/notes_handler/generated/operations/operation_create_note.ts"
+            },
+            {
+              "checksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+              "path": "application/src/functions/notes_handler/generated/types.ts"
+            },
+            {
+              "checksum": "sha256:36436f6d37d3bf461d625e4a6016f20df68a60da7230817ed84afa7bd0d0ded4",
+              "path": "application/src/functions/notes_handler/index.ts"
+            },
+            {
+              "checksum": "sha256:30a3ef7ddf2a3bd7c02cc2570762f1f61ef43caf39701cbf0bd889450d0bc6b2",
+              "path": "application/tests/functions/notes_handler/contracts.test.ts"
+            },
+            {
+              "checksum": "sha256:7bed64b48f3747424a06442bc841ab74fcc186c871a0e66280983e5340d3abb7",
+              "path": "application/tests/functions/notes_handler/unit.test.ts"
+            },
+            {
+              "checksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+              "path": "application/tsconfig.json"
+            }
+          ],
+          "sourceManifestPath": "application/manifest.json",
+          "toolchain": [
+            {
+              "digest": "sha256:190dc59c4837c79b96523891aa4813d7405781792ccf6d0b57296bcd1f2535a4",
+              "id": "runtime.nodejs",
+              "version": "24.18.0",
+              "digestKind": "canonical-coordinate",
+              "role": "runtime"
+            },
+            {
+              "digest": "sha256:feaa549c6eaf582c5fc70a9c99173bf39f53fcfbbaf6c92a9ccfbf778f9969f7",
+              "id": "package-manager.pnpm",
+              "version": "11.16.0",
+              "digestKind": "canonical-coordinate",
+              "role": "package-manager"
+            },
+            {
+              "digest": "sha256:16e16196923ee425d7a33b4248367b37b0402df8bdf92c33da14a361d9843e63",
+              "id": "compiler.typescript",
+              "version": "6.0.3",
+              "digestKind": "canonical-coordinate",
+              "role": "compiler"
+            },
+            {
+              "digest": "sha256:09708d6ffbdd0dcffdaef02c2eb41a596cf4cfe0b79e5c0b0427972112b6ec02",
+              "id": "test-runner.vitest",
+              "version": "4.1.10",
+              "digestKind": "canonical-coordinate",
+              "role": "test-runner"
+            },
+            {
+              "digest": "sha256:a241cf7ec1beb6f208e0a78af39611ebc7ac1bab9fbe4795481608bcce90b7bb",
+              "id": "packager.cloudmarkup-lambda-zip",
+              "version": "1.0.0",
+              "digestKind": "canonical-coordinate",
+              "role": "packager"
+            }
+          ],
+          "workloadId": "workload_notes_api"
+        },
+        "contractDigest": "sha256:293721ea72b00f3477d91887ce5d620c367b62b9692475dc1083cc8db932502a"
+      }
+    ],
+    "contractVersion": 1,
+    "coverage": {
+      "contractVersion": 1,
+      "missingRequirements": [
+        "application-build-and-tests",
+        "application-security-checks"
+      ],
+      "solutionRevisionId": "solution_notes_revision_1",
+      "state": "starter-application",
+      "workloads": [
+        {
+          "implementationMode": "generated-starter",
+          "missingRequirements": [
+            "application-build-and-tests",
+            "application-security-checks"
+          ],
+          "representedOperationIds": [
+            "operation_create_note"
+          ],
+          "representedTestIds": [
+            "test_contract_create_note",
+            "test_unit_create_note"
+          ],
+          "sourceFilePaths": [
+            "application/README.md",
+            "application/build-contracts/workload_notes_api.json",
+            "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+            "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json",
+            "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json",
+            "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json",
+            "application/lockfile.contract.json",
+            "application/package.json",
+            "application/src/functions/notes_handler/extensions/custom.ts",
+            "application/src/functions/notes_handler/generated/bindings.ts",
+            "application/src/functions/notes_handler/generated/operations/operation_create_note.ts",
+            "application/src/functions/notes_handler/generated/types.ts",
+            "application/src/functions/notes_handler/index.ts",
+            "application/tests/functions/notes_handler/contracts.test.ts",
+            "application/tests/functions/notes_handler/unit.test.ts",
+            "application/tsconfig.json"
+          ],
+          "state": "starter-application",
+          "unresolvedBehaviorIds": [],
+          "workloadId": "workload_notes_api"
+        }
+      ]
+    },
+    "coverageDigest": "sha256:7f8332f19c0af1355d6c2067f1c34619110cf0e6e69f041c3d95295e47d6d8af",
+    "diagnostics": [],
+    "diff": {
+      "files": [
+        {
+          "afterChecksum": "sha256:5da2a4e6961919be126550803556990a7b4c80ea6a8ec9baf6cb632c6a6133ed",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/README.md",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:7a465e9ea5384ca16a25fbe386b5ce02a95de673a3527360d3c406124d49cb1f",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/build-contracts/workload_notes_api.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/lockfile.contract.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/package.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+          "change": "create",
+          "ownership": "user-owned",
+          "path": "application/src/functions/notes_handler/extensions/custom.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/bindings.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/operations/operation_create_note.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/types.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:36436f6d37d3bf461d625e4a6016f20df68a60da7230817ed84afa7bd0d0ded4",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/index.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:30a3ef7ddf2a3bd7c02cc2570762f1f61ef43caf39701cbf0bd889450d0bc6b2",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/tests/functions/notes_handler/contracts.test.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:7bed64b48f3747424a06442bc841ab74fcc186c871a0e66280983e5340d3abb7",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/tests/functions/notes_handler/unit.test.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/tsconfig.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        }
+      ],
+      "semantic": [
+        {
+          "afterDigest": "sha256:05b23b746fcac23e4584e1b1b86f5945d7bf2836accbde77eb7dfcfdfc008d76",
+          "kind": "binding",
+          "semanticId": "binding:workload_notes_api_environment_stage-c5eb5931949136b1606a23ff7354059cfb0a138b2e20c50f4f311927114b5c2a",
+          "sourceReferences": [
+            {
+              "document": "normalized-solution",
+              "path": "$.workloads.environment",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Validated environment binding represented without resolving secret values."
+        },
+        {
+          "afterDigest": "sha256:d40870e3fddd465fee2f3432745eb124e2551f9eb2902b977d02828d75e5cd32",
+          "kind": "binding",
+          "semanticId": "binding:workload_notes_api_environment_table_1-4508d655f631c15d4b94cd4ec34e1bdbc872d90927aae520c717d243a209938b",
+          "sourceReferences": [
+            {
+              "document": "normalized-solution",
+              "path": "$.workloads.environment",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Validated environment binding represented without resolving secret values."
+        },
+        {
+          "afterDigest": "sha256:293721ea72b00f3477d91887ce5d620c367b62b9692475dc1083cc8db932502a",
+          "kind": "build-contract",
+          "semanticId": "build:workload_notes_api",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Prompt 32A build and artifact handoff contract."
+        },
+        {
+          "afterDigest": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_auth_1_0_0_sha256_9738a872a5d2f9-bae346401c24e7b2c9ce551c72f010d7dc028081c6a1572ac324b330200de73f",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_create_note"
+            },
+            {
+              "contractId": "contracts.notes.auth",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_create"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_create-operation_1_0_0_sha256_96-423b9375f793b65415e6e840033ec441b5649e503111b4113c99c37d1d18b895",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_create_note"
+            },
+            {
+              "contractId": "contracts.notes.create-operation",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_create"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_create_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_create-route_1_0_0_sha256_58c405-1f4fd8577a2540a6b234d8d3bdb27c474860f8d959552b6b5f4ac5271086cfe6",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_create_note"
+            },
+            {
+              "contractId": "contracts.notes.create-route",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_create"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_create_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_entity_1_0_0_sha256_32e854e018c1-6616b4d081a24215b34e1dda031e4acc3965a3d7006eb8fcfa10eddfe45a8e06",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_create_note"
+            },
+            {
+              "contractId": "contracts.notes.entity",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_create"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_create_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:23d620979440ba9c77cbb19bdac91e785b2902274d2268ae98145744bcb2e446",
+          "kind": "operation",
+          "semanticId": "operation:workload_notes_api_operation_create_note-87c8cbf1d77457b302d74667a93eb7bd39c8efb673a8f11d0e83d63e45ec1090",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_create_note",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Canonical Workload operation and resolved bindings represented in emitted source."
+        },
+        {
+          "afterDigest": "sha256:30eba622186c7672fb7a71f4b0c52c9e6558129c075d142fd0cc2d189500596e",
+          "kind": "ownership",
+          "semanticId": "ownership:workload_notes_api",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "path": "$.sourceOwnership",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Validated source-ownership and extension boundaries applied during materialization."
+        }
+      ]
+    },
+    "generator": {
+      "digest": "sha256:a102e772819d1d1657d89c422cd33d73912d62cabe4022b44e0cd3dd756af12e",
+      "id": "cloudmarkup.application-generator",
+      "version": "1.0.0"
+    },
+    "kind": "cloudmarkup.application-source-artifact",
+    "pattern": {
+      "digest": "sha256:cbe772e0adee53da524110278fe908d726a3e8f600588364bef33ba2fa900571",
+      "id": "cloudmarkup.pattern.aws-lambda-authenticated-notes",
+      "version": "1.0.0"
+    },
+    "runtime": {
+      "digest": "sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a",
+      "id": "cloudmarkup.runtime.aws-lambda-nodejs24-typescript",
+      "version": "1.0.0",
+      "handler": "index.handler",
+      "languageFamily": "cloudmarkup.language.typescript",
+      "moduleFormat": "esm",
+      "runtime": "nodejs24.x",
+      "runtimeFamily": "aws.lambda.runtime-family.nodejs24"
+    },
+    "solutionRevisionId": "solution_notes_revision_1",
+    "sourceFiles": [
+      {
+        "checksum": "sha256:5da2a4e6961919be126550803556990a7b4c80ea6a8ec9baf6cb632c6a6133ed",
+        "mediaType": "text/markdown",
+        "path": "application/README.md",
+        "provenance": {
+          "contractIds": [],
+          "edgeIds": [],
+          "environmentBindingIds": [],
+          "extensionPointIds": [],
+          "operationIds": [],
+          "resourceTargetKeys": [],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:5da2a4e6961919be126550803556990a7b4c80ea6a8ec9baf6cb632c6a6133ed",
+        "sizeBytes": 1665,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:7a465e9ea5384ca16a25fbe386b5ce02a95de673a3527360d3c406124d49cb1f",
+        "mediaType": "application/json",
+        "path": "application/build-contracts/workload_notes_api.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.create-route",
+            "contracts.notes.entity"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:7a465e9ea5384ca16a25fbe386b5ce02a95de673a3527360d3c406124d49cb1f",
+        "sizeBytes": 7170,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth"
+          ],
+          "edgeIds": [
+            "edge_api_create"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+        "sizeBytes": 735,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.create-operation"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+        "sizeBytes": 1605,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.create-route"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+        "sizeBytes": 2226,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.entity"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+        "sizeBytes": 1397,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+        "mediaType": "application/json",
+        "path": "application/lockfile.contract.json",
+        "provenance": {
+          "contractIds": [],
+          "edgeIds": [],
+          "environmentBindingIds": [],
+          "extensionPointIds": [],
+          "operationIds": [],
+          "resourceTargetKeys": [],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+        "sizeBytes": 258,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+        "mediaType": "application/json",
+        "path": "application/package.json",
+        "provenance": {
+          "contractIds": [],
+          "edgeIds": [],
+          "environmentBindingIds": [],
+          "extensionPointIds": [],
+          "operationIds": [],
+          "resourceTargetKeys": [],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+        "sizeBytes": 371,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/extensions/custom.ts",
+        "provenance": {
+          "contractIds": [],
+          "edgeIds": [],
+          "environmentBindingIds": [],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [],
+          "resourceTargetKeys": [],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+        "sizeBytes": 361,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "user-owned"
+      },
+      {
+        "checksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/generated/bindings.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth",
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.entity"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+        "sizeBytes": 855,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/generated/operations/operation_create_note.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.entity"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+        "sizeBytes": 1646,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/generated/types.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth",
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.entity"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+        "sizeBytes": 3980,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:36436f6d37d3bf461d625e4a6016f20df68a60da7230817ed84afa7bd0d0ded4",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/index.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth",
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.entity"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:36436f6d37d3bf461d625e4a6016f20df68a60da7230817ed84afa7bd0d0ded4",
+        "sizeBytes": 3998,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:30a3ef7ddf2a3bd7c02cc2570762f1f61ef43caf39701cbf0bd889450d0bc6b2",
+        "mediaType": "text/typescript",
+        "path": "application/tests/functions/notes_handler/contracts.test.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth",
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.entity"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:30a3ef7ddf2a3bd7c02cc2570762f1f61ef43caf39701cbf0bd889450d0bc6b2",
+        "sizeBytes": 4936,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:7bed64b48f3747424a06442bc841ab74fcc186c871a0e66280983e5340d3abb7",
+        "mediaType": "text/typescript",
+        "path": "application/tests/functions/notes_handler/unit.test.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth",
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.entity"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:7bed64b48f3747424a06442bc841ab74fcc186c871a0e66280983e5340d3abb7",
+        "sizeBytes": 1788,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+        "mediaType": "application/json",
+        "path": "application/tsconfig.json",
+        "provenance": {
+          "contractIds": [],
+          "edgeIds": [],
+          "environmentBindingIds": [],
+          "extensionPointIds": [],
+          "operationIds": [],
+          "resourceTargetKeys": [],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+        "sizeBytes": 385,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      }
+    ],
+    "sourceManifest": {
+      "architectureRevisionId": "revision_notes_1",
+      "buildContracts": [
+        {
+          "contractDigest": "sha256:293721ea72b00f3477d91887ce5d620c367b62b9692475dc1083cc8db932502a",
+          "workloadId": "workload_notes_api"
+        }
+      ],
+      "contractVersion": 1,
+      "catalog": {
+        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+        "id": "aws.cloudmarkup.notes-api-catalog",
+        "version": "0.30.0"
+      },
+      "coverageDigest": "sha256:7f8332f19c0af1355d6c2067f1c34619110cf0e6e69f041c3d95295e47d6d8af",
+      "files": [
+        {
+          "checksum": "sha256:5da2a4e6961919be126550803556990a7b4c80ea6a8ec9baf6cb632c6a6133ed",
+          "mediaType": "text/markdown",
+          "ownership": "generated",
+          "path": "application/README.md",
+          "semanticChecksum": "sha256:5da2a4e6961919be126550803556990a7b4c80ea6a8ec9baf6cb632c6a6133ed",
+          "sizeBytes": 1665
+        },
+        {
+          "checksum": "sha256:7a465e9ea5384ca16a25fbe386b5ce02a95de673a3527360d3c406124d49cb1f",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/build-contracts/workload_notes_api.json",
+          "semanticChecksum": "sha256:7a465e9ea5384ca16a25fbe386b5ce02a95de673a3527360d3c406124d49cb1f",
+          "sizeBytes": 7170
+        },
+        {
+          "checksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+          "semanticChecksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+          "sizeBytes": 735
+        },
+        {
+          "checksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json",
+          "semanticChecksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+          "sizeBytes": 1605
+        },
+        {
+          "checksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json",
+          "semanticChecksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+          "sizeBytes": 2226
+        },
+        {
+          "checksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json",
+          "semanticChecksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+          "sizeBytes": 1397
+        },
+        {
+          "checksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/lockfile.contract.json",
+          "semanticChecksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+          "sizeBytes": 258
+        },
+        {
+          "checksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/package.json",
+          "semanticChecksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+          "sizeBytes": 371
+        },
+        {
+          "checksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+          "mediaType": "text/typescript",
+          "ownership": "user-owned",
+          "path": "application/src/functions/notes_handler/extensions/custom.ts",
+          "semanticChecksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+          "sizeBytes": 361
+        },
+        {
+          "checksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/bindings.ts",
+          "semanticChecksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+          "sizeBytes": 855
+        },
+        {
+          "checksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/operations/operation_create_note.ts",
+          "semanticChecksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+          "sizeBytes": 1646
+        },
+        {
+          "checksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/types.ts",
+          "semanticChecksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+          "sizeBytes": 3980
+        },
+        {
+          "checksum": "sha256:36436f6d37d3bf461d625e4a6016f20df68a60da7230817ed84afa7bd0d0ded4",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/index.ts",
+          "semanticChecksum": "sha256:36436f6d37d3bf461d625e4a6016f20df68a60da7230817ed84afa7bd0d0ded4",
+          "sizeBytes": 3998
+        },
+        {
+          "checksum": "sha256:30a3ef7ddf2a3bd7c02cc2570762f1f61ef43caf39701cbf0bd889450d0bc6b2",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/tests/functions/notes_handler/contracts.test.ts",
+          "semanticChecksum": "sha256:30a3ef7ddf2a3bd7c02cc2570762f1f61ef43caf39701cbf0bd889450d0bc6b2",
+          "sizeBytes": 4936
+        },
+        {
+          "checksum": "sha256:7bed64b48f3747424a06442bc841ab74fcc186c871a0e66280983e5340d3abb7",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/tests/functions/notes_handler/unit.test.ts",
+          "semanticChecksum": "sha256:7bed64b48f3747424a06442bc841ab74fcc186c871a0e66280983e5340d3abb7",
+          "sizeBytes": 1788
+        },
+        {
+          "checksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/tsconfig.json",
+          "semanticChecksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+          "sizeBytes": 385
+        }
+      ],
+      "generator": {
+        "digest": "sha256:a102e772819d1d1657d89c422cd33d73912d62cabe4022b44e0cd3dd756af12e",
+        "id": "cloudmarkup.application-generator",
+        "version": "1.0.0"
+      },
+      "kind": "cloudmarkup.application-source-manifest",
+      "inputDigests": {
+        "applicationContracts": "sha256:7df95bf4b42a5a32bdc2e6d72e9e3050b07bd653845b6ed3d9509f383f0bcd04",
+        "architectureDocument": "sha256:ec6712a3c6b25387ad140ba5b814e422e58adabe7efc7cbe0b00b40eaa1bb41b",
+        "normalizedSolution": "sha256:61769f27a6139e9bebaaceafd36ec505e6789eb59bf3f6d7a1897c374e2d7cc4",
+        "solutionRevision": "sha256:f907e928d339d4d6636ee0d133cfb197ca2d47a8cc69b1babc669105d24c59bd",
+        "workloadBehavior": "sha256:04d01b902de941ea5237910711000fac4526711aabba9a39440b4cb0607bb429"
+      },
+      "manifestPath": "application/manifest.json",
+      "pattern": {
+        "digest": "sha256:cbe772e0adee53da524110278fe908d726a3e8f600588364bef33ba2fa900571",
+        "id": "cloudmarkup.pattern.aws-lambda-authenticated-notes",
+        "version": "1.0.0"
+      },
+      "runtime": {
+        "digest": "sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a",
+        "id": "cloudmarkup.runtime.aws-lambda-nodejs24-typescript",
+        "version": "1.0.0",
+        "handler": "index.handler",
+        "languageFamily": "cloudmarkup.language.typescript",
+        "moduleFormat": "esm",
+        "runtime": "nodejs24.x",
+        "runtimeFamily": "aws.lambda.runtime-family.nodejs24"
+      },
+      "solutionRevisionId": "solution_notes_revision_1",
+      "template": {
+        "digest": "sha256:c7721961d935faa1e0c87b7356bc6d90112a02f3c7f716be33a648bf99740604",
+        "id": "cloudmarkup.template.aws-lambda-notes-typescript",
+        "version": "1.0.0"
+      }
+    },
+    "sourceManifestDigest": "sha256:63de5ea688f4b12b5436dd5e24bad25cbd2787393b74d4fc4e7e6d877468675d",
+    "template": {
+      "digest": "sha256:c7721961d935faa1e0c87b7356bc6d90112a02f3c7f716be33a648bf99740604",
+      "id": "cloudmarkup.template.aws-lambda-notes-typescript",
+      "version": "1.0.0"
+    },
+    "workloadContracts": [
+      {
+        "expectedArtifact": {
+          "kind": "aws-lambda-zip",
+          "mediaType": "application/zip",
+          "path": "application/artifacts/workload_notes_api/function.zip"
+        },
+        "handler": "index.handler",
+        "packageManifestPath": "application/package.json",
+        "packageRoot": "application",
+        "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+        "implementationMode": "generated-starter",
+        "ownershipReadiness": "safe-to-materialize",
+        "readiness": "starter-source-ready",
+        "sourceFiles": [
+          {
+            "ownership": "generated",
+            "path": "application/README.md"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/build-contracts/workload_notes_api.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/lockfile.contract.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/package.json"
+          },
+          {
+            "ownership": "user-owned",
+            "path": "application/src/functions/notes_handler/extensions/custom.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/src/functions/notes_handler/generated/bindings.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/src/functions/notes_handler/generated/operations/operation_create_note.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/src/functions/notes_handler/generated/types.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/src/functions/notes_handler/index.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/tests/functions/notes_handler/contracts.test.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/tests/functions/notes_handler/unit.test.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/tsconfig.json"
+          }
+        ],
+        "workloadId": "workload_notes_api"
+      }
+    ]
+  },
+  "artifactDigest": "sha256:16b931ffc704c68a55459f916f89e7d64e91ce44ef1286a561ede3948fdec97f"
+}

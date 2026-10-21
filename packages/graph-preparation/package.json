@@ -1,0 +1,37 @@
+{
+  "name": "@cloudmarkup/graph-preparation",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "import": "./dist/*.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@cloudmarkup/domain": "workspace:*",
+    "@cloudmarkup/schemas": "workspace:*",
+    "@cloudmarkup/provider-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudmarkup/config": "workspace:*",
+    "typescript": "catalog:",
+    "@types/node": "catalog:"
+  }
+}

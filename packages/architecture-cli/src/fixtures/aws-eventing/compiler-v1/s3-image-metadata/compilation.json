@@ -1,0 +1,2029 @@
+{
+  "contractVersion": 1,
+  "compiler": {
+    "id": "cloudmarkup.iac-compiler",
+    "version": "1.2.1",
+    "digest": "sha256:2c25a5610c825d171a167a38201c3090aa2278071ddd648bb957e67b7b98f203"
+  },
+  "model": {
+    "contractVersion": 1,
+    "target": {
+      "target": "terraform",
+      "contractVersion": "1.0.0",
+      "state": "ready",
+      "renderingAvailable": true,
+      "reasons": []
+    },
+    "provenance": {
+      "architectureDocumentId": "document_event_s3_image_metadata",
+      "architectureId": "architecture_event_s3_image_metadata",
+      "architectureRevisionId": "revision_event_s3_image_metadata_1",
+      "architectureContentHash": "sha256:cdc672e4c1460aec7afa212cf5b7a3c7f70b39eb548388873ce2f69b60f2c4a8",
+      "architectureDocumentHash": "sha256:60daaeb84bbeba005b92220d1ce2b92fce4e7f3de26cfd70958d26f032199145",
+      "architectureVisualHash": "sha256:6511818c210c1f2d86aa4c8ff3ee35cb8a3b42b08ddc30a241dd8b8f14239fa9",
+      "workloadContentHash": "sha256:71354107ca508d548c687773d7ce6ea20bf0fbcc97bdcf3c40fd0f446cb8c1cf",
+      "solutionRevisionId": "solution_notes_revision_1",
+      "providerId": "aws.cloudmarkup",
+      "region": "us-east-1",
+      "catalog": {
+        "id": "aws.cloudmarkup.notes-api-catalog",
+        "version": "0.30.0",
+        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+      }
+    },
+    "resources": [
+      {
+        "id": "event_logs_policy_s3_image_metadata",
+        "targetKey": "event_logs_policy_s3_image_metadata",
+        "deploymentKey": "event_logs_policy_s3_image_metadata",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "generated-permission"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "event_logs_policy_s3_image_metadata"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_event_logs_s3_image_metadata",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_event_logs_s3_image_metadata"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "event_logs_policy_s3_image_metadata_statement",
+        "targetKey": "event_logs_policy_s3_image_metadata_statement",
+        "deploymentKey": "event_logs_policy_s3_image_metadata_statement",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "eventlogspolicys3imagemetadata"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_event_logs_s3_image_metadata",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_event_logs_s3_image_metadata"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "event_logs_s3_image_metadata",
+        "targetKey": "event_logs_s3_image_metadata",
+        "deploymentKey": "event_logs_s3_image_metadata",
+        "serviceType": "aws.cloudwatch.log-group",
+        "resourceType": "aws.cloudwatch.log-group",
+        "configuration": {
+          "schemaId": "aws.cloudwatch.log-group.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "logClass": {
+              "kind": "string",
+              "value": "STANDARD"
+            },
+            "logGroupName": {
+              "kind": "string",
+              "value": "/aws/lambda/notes_handler"
+            },
+            "preventDestroy": {
+              "kind": "boolean",
+              "value": true
+            },
+            "retentionDays": {
+              "kind": "integer",
+              "value": 30
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "lambda",
+        "targetKey": "event_s3_image_metadata",
+        "deploymentKey": "event_s3_image_metadata",
+        "serviceType": "aws.lambda.function",
+        "resourceType": "aws.lambda.function",
+        "configuration": {
+          "schemaId": "aws.lambda.function.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "architecture": {
+              "kind": "string",
+              "value": "arm64"
+            },
+            "functionName": {
+              "kind": "string",
+              "value": "event_s3_image_metadata"
+            },
+            "handler": {
+              "kind": "string",
+              "value": "index.handler"
+            },
+            "memoryMegabytes": {
+              "kind": "integer",
+              "value": 256
+            },
+            "reservedConcurrency": {
+              "kind": "integer",
+              "value": 10
+            },
+            "runtime": {
+              "kind": "string",
+              "value": "nodejs24.x"
+            },
+            "timeoutSeconds": {
+              "kind": "integer",
+              "value": 30
+            },
+            "tracingEnabled": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": [
+          "workload_event_s3_image_metadata"
+        ]
+      },
+      {
+        "id": "image_metadata",
+        "targetKey": "image_metadata",
+        "deploymentKey": "image_metadata",
+        "serviceType": "aws.dynamodb.table",
+        "resourceType": "aws.dynamodb.table",
+        "configuration": {
+          "schemaId": "aws.dynamodb.table.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "billingMode": {
+              "kind": "string",
+              "value": "PAY_PER_REQUEST"
+            },
+            "deletionProtectionEnabled": {
+              "kind": "boolean",
+              "value": true
+            },
+            "partitionKeyName": {
+              "kind": "string",
+              "value": "key"
+            },
+            "partitionKeyType": {
+              "kind": "string",
+              "value": "S"
+            },
+            "pointInTimeRecoveryEnabled": {
+              "kind": "boolean",
+              "value": true
+            },
+            "serverSideEncryptionEnabled": {
+              "kind": "boolean",
+              "value": true
+            },
+            "tableName": {
+              "kind": "string",
+              "value": "image-metadata"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "metadata_write_policy",
+        "targetKey": "metadata_write_policy",
+        "deploymentKey": "metadata_write_policy",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "generated-permission"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "metadata_write_policy"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_metadata_write"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "metadata_write_policy_statement",
+        "targetKey": "metadata_write_policy_statement",
+        "deploymentKey": "metadata_write_policy_statement",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "dynamodb:DeleteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "metadatawritepolicy"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_metadata_write"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "role",
+        "targetKey": "notes_role",
+        "deploymentKey": "notes_role",
+        "serviceType": "aws.iam.role",
+        "resourceType": "aws.iam.role",
+        "configuration": {
+          "schemaId": "aws.iam.role.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "maxSessionDurationSeconds": {
+              "kind": "integer",
+              "value": 3600
+            },
+            "roleName": {
+              "kind": "string",
+              "value": "notes-api-lambda-role"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "s3_permission",
+        "targetKey": "s3_permission",
+        "deploymentKey": "s3_permission",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "service-grant"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "s3_permission"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_upload_notification"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "s3_permission_statement",
+        "targetKey": "s3_permission_statement",
+        "deploymentKey": "s3_permission_statement",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "lambda:InvokeFunction"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "s3.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "s3permission"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_upload_notification"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "trust_policy",
+        "targetKey": "trust_policy",
+        "deploymentKey": "trust_policy",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "trust"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "trust_policy"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_role_lambda"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "trust_policy_statement",
+        "targetKey": "trust_policy_statement",
+        "deploymentKey": "trust_policy_statement",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "sts:AssumeRole"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "lambda.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "trustpolicy"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_role_lambda"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "upload_bucket",
+        "targetKey": "uploads",
+        "deploymentKey": "uploads",
+        "serviceType": "aws.s3.bucket",
+        "resourceType": "aws.s3.bucket",
+        "configuration": {
+          "schemaId": "aws.s3.bucket.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "blockPublicAccess": {
+              "kind": "boolean",
+              "value": true
+            },
+            "bucketName": {
+              "kind": "string",
+              "value": "cloudmarkup-image-uploads"
+            },
+            "deletionProtectionEnabled": {
+              "kind": "boolean",
+              "value": true
+            },
+            "encryption": {
+              "kind": "string",
+              "value": "SSE-S3"
+            },
+            "objectOwnership": {
+              "kind": "string",
+              "value": "BUCKET_OWNER_ENFORCED"
+            },
+            "versioningEnabled": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      }
+    ],
+    "connections": [
+      {
+        "id": "event_logs_policy_s3_image_metadata_owner",
+        "source": {
+          "nodeId": "event_logs_policy_s3_image_metadata",
+          "targetKey": "event_logs_policy_s3_image_metadata",
+          "port": "aws.iam.policy.owner"
+        },
+        "target": {
+          "nodeId": "role",
+          "targetKey": "notes_role",
+          "port": "aws.iam.role.permission"
+        },
+        "relationshipType": "aws.iam.role-owns-generated-permission",
+        "configuration": {
+          "schemaId": "aws.iam.role-owns-generated-permission.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "event_logs_policy_s3_image_metadata_membership",
+        "source": {
+          "nodeId": "event_logs_policy_s3_image_metadata_statement",
+          "targetKey": "event_logs_policy_s3_image_metadata_statement",
+          "port": "aws.iam.policy-statement.member"
+        },
+        "target": {
+          "nodeId": "event_logs_policy_s3_image_metadata",
+          "targetKey": "event_logs_policy_s3_image_metadata",
+          "port": "aws.iam.policy.statements"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "event_logs_policy_s3_image_metadata_scope",
+        "source": {
+          "nodeId": "event_logs_policy_s3_image_metadata_statement",
+          "targetKey": "event_logs_policy_s3_image_metadata_statement",
+          "port": "aws.iam.policy-statement.scope"
+        },
+        "target": {
+          "nodeId": "event_logs_s3_image_metadata",
+          "targetKey": "event_logs_s3_image_metadata",
+          "port": "aws.cloudwatch.log-group.authorized"
+        },
+        "relationshipType": "aws.iam.authorizes-log-group",
+        "configuration": {
+          "schemaId": "aws.iam.policy-log-group.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_event_logs_s3_image_metadata",
+        "source": {
+          "nodeId": "lambda",
+          "targetKey": "event_s3_image_metadata",
+          "port": "aws.lambda.function.logs"
+        },
+        "target": {
+          "nodeId": "event_logs_s3_image_metadata",
+          "targetKey": "event_logs_s3_image_metadata",
+          "port": "aws.cloudwatch.log-group.logs"
+        },
+        "relationshipType": "aws.lambda.writes-log-group",
+        "configuration": {
+          "schemaId": "aws.lambda.cloudwatch-logs.connection",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "deliveryMode": {
+              "kind": "string",
+              "value": "application-logs"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_metadata_write",
+        "source": {
+          "nodeId": "lambda",
+          "targetKey": "event_s3_image_metadata",
+          "port": "aws.lambda.writes-dynamodb-table.source"
+        },
+        "target": {
+          "nodeId": "image_metadata",
+          "targetKey": "image_metadata",
+          "port": "aws.lambda.writes-dynamodb-table.target"
+        },
+        "relationshipType": "aws.lambda.writes-dynamodb-table",
+        "configuration": {
+          "schemaId": "aws.lambda.dynamodb-write.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "metadata_write_policy_owner",
+        "source": {
+          "nodeId": "metadata_write_policy",
+          "targetKey": "metadata_write_policy",
+          "port": "aws.iam.role-owns-generated-permission.source"
+        },
+        "target": {
+          "nodeId": "role",
+          "targetKey": "notes_role",
+          "port": "aws.iam.role-owns-generated-permission.target"
+        },
+        "relationshipType": "aws.iam.role-owns-generated-permission",
+        "configuration": {
+          "schemaId": "aws.iam.role-owns-generated-permission.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "metadata_write_policy_scope",
+        "source": {
+          "nodeId": "metadata_write_policy_statement",
+          "targetKey": "metadata_write_policy_statement",
+          "port": "aws.iam.authorizes-dynamodb-table.source"
+        },
+        "target": {
+          "nodeId": "image_metadata",
+          "targetKey": "image_metadata",
+          "port": "aws.iam.authorizes-dynamodb-table.target"
+        },
+        "relationshipType": "aws.iam.authorizes-dynamodb-table",
+        "configuration": {
+          "schemaId": "aws.iam.policy-table.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "metadata_write_policy_membership",
+        "source": {
+          "nodeId": "metadata_write_policy_statement",
+          "targetKey": "metadata_write_policy_statement",
+          "port": "aws.iam.policy-contains-statement.source"
+        },
+        "target": {
+          "nodeId": "metadata_write_policy",
+          "targetKey": "metadata_write_policy",
+          "port": "aws.iam.policy-contains-statement.target"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_role_lambda",
+        "source": {
+          "nodeId": "role",
+          "targetKey": "notes_role",
+          "port": "aws.iam.role-assumed-by-lambda.source"
+        },
+        "target": {
+          "nodeId": "lambda",
+          "targetKey": "event_s3_image_metadata",
+          "port": "aws.iam.role-assumed-by-lambda.target"
+        },
+        "relationshipType": "aws.iam.role-assumed-by-lambda",
+        "configuration": {
+          "schemaId": "aws.iam.lambda-role.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "s3_permission_owner",
+        "source": {
+          "nodeId": "s3_permission",
+          "targetKey": "s3_permission",
+          "port": "aws.lambda.owns-invocation-permission.source"
+        },
+        "target": {
+          "nodeId": "lambda",
+          "targetKey": "event_s3_image_metadata",
+          "port": "aws.lambda.owns-invocation-permission.target"
+        },
+        "relationshipType": "aws.lambda.owns-invocation-permission",
+        "configuration": {
+          "schemaId": "aws.lambda.owns-invocation-permission.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "s3_permission_membership",
+        "source": {
+          "nodeId": "s3_permission_statement",
+          "targetKey": "s3_permission_statement",
+          "port": "aws.iam.policy-contains-statement.source"
+        },
+        "target": {
+          "nodeId": "s3_permission",
+          "targetKey": "s3_permission",
+          "port": "aws.iam.policy-contains-statement.target"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "trust_policy_owner",
+        "source": {
+          "nodeId": "trust_policy",
+          "targetKey": "trust_policy",
+          "port": "aws.iam.role-owns-trust-policy.source"
+        },
+        "target": {
+          "nodeId": "role",
+          "targetKey": "notes_role",
+          "port": "aws.iam.role-owns-trust-policy.target"
+        },
+        "relationshipType": "aws.iam.role-owns-trust-policy",
+        "configuration": {
+          "schemaId": "aws.iam.role-owns-trust-policy.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "trust_policy_membership",
+        "source": {
+          "nodeId": "trust_policy_statement",
+          "targetKey": "trust_policy_statement",
+          "port": "aws.iam.policy-contains-statement.source"
+        },
+        "target": {
+          "nodeId": "trust_policy",
+          "targetKey": "trust_policy",
+          "port": "aws.iam.policy-contains-statement.target"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_upload_notification",
+        "source": {
+          "nodeId": "upload_bucket",
+          "targetKey": "uploads",
+          "port": "aws.s3.notifies-lambda.source"
+        },
+        "target": {
+          "nodeId": "lambda",
+          "targetKey": "event_s3_image_metadata",
+          "port": "aws.s3.notifies-lambda.target"
+        },
+        "relationshipType": "aws.s3.notifies-lambda",
+        "configuration": {
+          "schemaId": "aws.s3.notification.connection",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "deliverySemantics": {
+              "kind": "string",
+              "value": "AT_LEAST_ONCE_UNORDERED"
+            },
+            "eventType": {
+              "kind": "string",
+              "value": "OBJECT_CREATED"
+            },
+            "filterPrefix": {
+              "kind": "string",
+              "value": "incoming/"
+            },
+            "filterSuffix": {
+              "kind": "string",
+              "value": ".jpg"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      }
+    ],
+    "policyAttachments": [
+      {
+        "resourceId": "event_logs_policy_s3_image_metadata",
+        "targetKey": "event_logs_policy_s3_image_metadata",
+        "resourceType": "aws.iam.policy-document",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "event_logs_policy_s3_image_metadata_statement",
+            "targetKey": "event_logs_policy_s3_image_metadata_statement",
+            "port": "aws.iam.policy-statement.member"
+          },
+          {
+            "nodeId": "role",
+            "targetKey": "notes_role",
+            "port": "aws.iam.role.permission"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "generated-permission"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "event_logs_policy_s3_image_metadata"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_event_logs_s3_image_metadata",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_event_logs_s3_image_metadata"
+          ]
+        }
+      },
+      {
+        "resourceId": "event_logs_policy_s3_image_metadata_statement",
+        "targetKey": "event_logs_policy_s3_image_metadata_statement",
+        "resourceType": "aws.iam.policy-statement",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "event_logs_policy_s3_image_metadata",
+            "targetKey": "event_logs_policy_s3_image_metadata",
+            "port": "aws.iam.policy.statements"
+          },
+          {
+            "nodeId": "event_logs_s3_image_metadata",
+            "targetKey": "event_logs_s3_image_metadata",
+            "port": "aws.cloudwatch.log-group.authorized"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "eventlogspolicys3imagemetadata"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_event_logs_s3_image_metadata",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_event_logs_s3_image_metadata"
+          ]
+        }
+      },
+      {
+        "resourceId": "metadata_write_policy",
+        "targetKey": "metadata_write_policy",
+        "resourceType": "aws.iam.policy-document",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "metadata_write_policy_statement",
+            "targetKey": "metadata_write_policy_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          },
+          {
+            "nodeId": "role",
+            "targetKey": "notes_role",
+            "port": "aws.iam.role-owns-generated-permission.target"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "generated-permission"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "metadata_write_policy"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_metadata_write"
+          ]
+        }
+      },
+      {
+        "resourceId": "metadata_write_policy_statement",
+        "targetKey": "metadata_write_policy_statement",
+        "resourceType": "aws.iam.policy-statement",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "image_metadata",
+            "targetKey": "image_metadata",
+            "port": "aws.iam.authorizes-dynamodb-table.target"
+          },
+          {
+            "nodeId": "metadata_write_policy",
+            "targetKey": "metadata_write_policy",
+            "port": "aws.iam.policy-contains-statement.target"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "dynamodb:DeleteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "metadatawritepolicy"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_metadata_write"
+          ]
+        }
+      },
+      {
+        "resourceId": "s3_permission",
+        "targetKey": "s3_permission",
+        "resourceType": "aws.iam.policy-document",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "lambda",
+            "targetKey": "event_s3_image_metadata",
+            "port": "aws.lambda.owns-invocation-permission.target"
+          },
+          {
+            "nodeId": "s3_permission_statement",
+            "targetKey": "s3_permission_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "service-grant"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "s3_permission"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_upload_notification"
+          ]
+        }
+      },
+      {
+        "resourceId": "s3_permission_statement",
+        "targetKey": "s3_permission_statement",
+        "resourceType": "aws.iam.policy-statement",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "s3_permission",
+            "targetKey": "s3_permission",
+            "port": "aws.iam.policy-contains-statement.target"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "lambda:InvokeFunction"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "s3.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "s3permission"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_upload_notification"
+          ]
+        }
+      },
+      {
+        "resourceId": "trust_policy",
+        "targetKey": "trust_policy",
+        "resourceType": "aws.iam.policy-document",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "role",
+            "targetKey": "notes_role",
+            "port": "aws.iam.role-owns-trust-policy.target"
+          },
+          {
+            "nodeId": "trust_policy_statement",
+            "targetKey": "trust_policy_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "trust"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "trust_policy"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_role_lambda"
+          ]
+        }
+      },
+      {
+        "resourceId": "trust_policy_statement",
+        "targetKey": "trust_policy_statement",
+        "resourceType": "aws.iam.policy-statement",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "trust_policy",
+            "targetKey": "trust_policy",
+            "port": "aws.iam.policy-contains-statement.target"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "sts:AssumeRole"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "lambda.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "trustpolicy"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_role_lambda"
+          ]
+        }
+      }
+    ],
+    "variables": [
+      {
+        "id": "variable_stage",
+        "key": "stage",
+        "valueType": "string",
+        "required": false,
+        "defaultValue": {
+          "kind": "string",
+          "value": "test"
+        }
+      }
+    ],
+    "outputs": [],
+    "workloads": [
+      {
+        "id": "workload_event_s3_image_metadata",
+        "owningResource": {
+          "nodeId": "lambda",
+          "targetKey": "event_s3_image_metadata"
+        },
+        "implementationMode": "complete-supported-pattern",
+        "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+        "languageFamily": "cloudmarkup.language.typescript",
+        "handler": "index.handler",
+        "sourceOwner": "cloudmarkup",
+        "operations": [
+          {
+            "id": "operation_event_s3_image_metadata",
+            "capability": "cloudmarkup.event.s3-record-metadata",
+            "inputContract": {
+              "contractId": "contracts.s3-image-metadata.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:3e26bf6d9e81d3fd2db1173f9da263db78786ac004123413f6b344ac4e99cdee"
+            }
+          }
+        ],
+        "triggers": [
+          {
+            "id": "trigger_event_s3_image_metadata",
+            "kind": "trigger",
+            "edgeId": "edge_upload_notification",
+            "operationId": "operation_event_s3_image_metadata",
+            "connection": {
+              "id": "edge_upload_notification",
+              "source": {
+                "nodeId": "upload_bucket",
+                "targetKey": "uploads",
+                "port": "aws.s3.notifies-lambda.source"
+              },
+              "target": {
+                "nodeId": "lambda",
+                "targetKey": "event_s3_image_metadata",
+                "port": "aws.s3.notifies-lambda.target"
+              },
+              "relationshipType": "aws.s3.notifies-lambda",
+              "configuration": {
+                "schemaId": "aws.s3.notification.connection",
+                "schemaVersion": "1.0.0",
+                "values": {
+                  "deliverySemantics": {
+                    "kind": "string",
+                    "value": "AT_LEAST_ONCE_UNORDERED"
+                  },
+                  "eventType": {
+                    "kind": "string",
+                    "value": "OBJECT_CREATED"
+                  },
+                  "filterPrefix": {
+                    "kind": "string",
+                    "value": "incoming/"
+                  },
+                  "filterSuffix": {
+                    "kind": "string",
+                    "value": ".jpg"
+                  }
+                }
+              },
+              "lifecycle": {
+                "ownership": "user",
+                "origin": "user"
+              }
+            }
+          }
+        ],
+        "downstreamActions": [
+          {
+            "id": "action_metadata_table",
+            "kind": "downstream-action",
+            "edgeId": "edge_metadata_write",
+            "operationId": "operation_event_s3_image_metadata",
+            "connection": {
+              "id": "edge_metadata_write",
+              "source": {
+                "nodeId": "lambda",
+                "targetKey": "event_s3_image_metadata",
+                "port": "aws.lambda.writes-dynamodb-table.source"
+              },
+              "target": {
+                "nodeId": "image_metadata",
+                "targetKey": "image_metadata",
+                "port": "aws.lambda.writes-dynamodb-table.target"
+              },
+              "relationshipType": "aws.lambda.writes-dynamodb-table",
+              "configuration": {
+                "schemaId": "aws.lambda.dynamodb-write.connection",
+                "schemaVersion": "1.0.0",
+                "values": {}
+              },
+              "lifecycle": {
+                "ownership": "user",
+                "origin": "user"
+              }
+            }
+          }
+        ],
+        "environment": [
+          {
+            "id": "environment_metadata_table",
+            "name": "METADATA_TABLE_NAME",
+            "kind": "node-attribute-reference",
+            "resource": {
+              "nodeId": "image_metadata",
+              "targetKey": "image_metadata",
+              "attribute": "aws.dynamodb.table.name"
+            }
+          },
+          {
+            "id": "environment_stage",
+            "name": "APP_STAGE",
+            "kind": "variable-reference",
+            "variableId": "variable_stage"
+          }
+        ],
+        "artifactInputs": [
+          {
+            "artifactId": "cloudmarkup.pattern.aws-lambda-curated-event-driven:1.0.0",
+            "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686",
+            "kind": "supported-pattern",
+            "ownership": "cloudmarkup",
+            "workloadId": "workload_event_s3_image_metadata"
+          }
+        ],
+        "artifactOutputs": [],
+        "sourceOwnership": [
+          {
+            "declarationId": "ownership_event_s3_image_metadata_extension",
+            "path": "application/src/functions/event_s3_image_metadata/extensions/custom.ts",
+            "pathKind": "file",
+            "ownership": "user-owned",
+            "ownerId": "application.s3-image-metadata.owner",
+            "regeneration": "never",
+            "conflictBehavior": "preserve-user-content",
+            "semanticDiff": "structured-language"
+          }
+        ],
+        "extensionPoints": [
+          {
+            "id": "application.s3-image-metadata.extensions",
+            "path": "application/src/functions/event_s3_image_metadata/extensions/custom.ts",
+            "kind": "module",
+            "permittedOwnership": [
+              "approved-extension",
+              "user-owned"
+            ],
+            "conflictBehavior": "require-reviewed-resolution"
+          }
+        ],
+        "generationCoverage": "custom-implementation-required",
+        "targetReadiness": "application-artifact-evidence-incomplete",
+        "generatorReadiness": {
+          "state": "compatible-interface-only",
+          "generator": {
+            "id": "cloudmarkup.event-application-generator",
+            "version": "1.0.0",
+            "digest": "sha256:7cf9b85f31f427ac5f4dbe095bb227c10435fc86c84d8318ff41c88d5540e391"
+          },
+          "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+          "templateVersion": "1.0.0",
+          "reasons": [
+            "APPLICATION_GENERATION_SEPARATE_BOUNDARY_AVAILABLE"
+          ]
+        },
+        "specification": {
+          "authorization": [],
+          "behaviorContracts": [
+            {
+              "contractId": "contracts.s3-image-metadata.behavior",
+              "contractKind": "behavior-operation",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:ac60091e65bf29783776a14e8a9fc959a187fa2b8e058e8310b7efbcb3e0d6f9"
+            }
+          ],
+          "compatibility": {
+            "applicationGenerators": [
+              {
+                "generatorId": "cloudmarkup.event-application-generator",
+                "minimumVersion": "1.0.0",
+                "supportedModes": [
+                  "complete-supported-pattern",
+                  "generated-starter"
+                ],
+                "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+                "templateVersion": "1.0.0"
+              }
+            ],
+            "modelGateways": []
+          },
+          "dataBindings": [
+            {
+              "bindingId": "data_metadata",
+              "dataOperation": "create",
+              "edgeId": "edge_metadata_write",
+              "entity": {
+                "contractId": "contracts.s3-image-metadata.payload",
+                "contractKind": "data-entity",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:0546becbc1c3c8ec54db832e8009b1eb76d98e36649bfcb154d2a071415d8b23"
+              },
+              "operationId": "operation_event_s3_image_metadata"
+            }
+          ],
+          "downstreamActions": [
+            {
+              "edgeId": "edge_metadata_write",
+              "id": "action_metadata_table",
+              "sourceOperationId": "operation_event_s3_image_metadata"
+            }
+          ],
+          "entrypoints": [
+            {
+              "entrypointId": "entrypoint_event_s3_image_metadata",
+              "handler": "index.handler",
+              "kind": "event-handler",
+              "operationId": "operation_event_s3_image_metadata"
+            }
+          ],
+          "environment": [
+            {
+              "id": "environment_metadata_table",
+              "name": "METADATA_TABLE_NAME",
+              "value": {
+                "attribute": "aws.dynamodb.table.name",
+                "kind": "node-attribute-reference",
+                "nodeId": "image_metadata"
+              }
+            },
+            {
+              "id": "environment_stage",
+              "name": "APP_STAGE",
+              "value": {
+                "kind": "variable-reference",
+                "variableId": "variable_stage"
+              }
+            }
+          ],
+          "errorBehavior": {
+            "mode": "fail-invocation"
+          },
+          "eventBindings": [
+            {
+              "bindingId": "event_event_s3_image_metadata",
+              "contract": {
+                "contractId": "contracts.s3-image-metadata.event",
+                "contractKind": "event-message",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:3e26bf6d9e81d3fd2db1173f9da263db78786ac004123413f6b344ac4e99cdee"
+              },
+              "direction": "inbound",
+              "edgeId": "edge_upload_notification",
+              "operationId": "operation_event_s3_image_metadata",
+              "transportKind": "event"
+            }
+          ],
+          "executionAssumptions": {
+            "retry": {
+              "kind": "bounded",
+              "maximumAttempts": 5
+            },
+            "timeout": {
+              "kind": "duration",
+              "milliseconds": 30000
+            }
+          },
+          "extensionPoints": [
+            {
+              "conflictBehavior": "require-reviewed-resolution",
+              "extensionPointId": "application.s3-image-metadata.extensions",
+              "kind": "module",
+              "path": "application/src/functions/event_s3_image_metadata/extensions/custom.ts",
+              "permittedOwnership": [
+                "approved-extension",
+                "user-owned"
+              ]
+            }
+          ],
+          "extensions": [],
+          "httpRoutes": [],
+          "id": "workload_event_s3_image_metadata",
+          "idempotency": [
+            {
+              "mode": "not-required",
+              "operationIds": [
+                "operation_event_s3_image_metadata"
+              ],
+              "policyId": "idempotency_event_s3_image_metadata"
+            }
+          ],
+          "implementation": {
+            "handler": "index.handler",
+            "mode": "complete-supported-pattern",
+            "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+            "sourceOwnership": "cloudmarkup",
+            "supportedPattern": {
+              "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686",
+              "patternId": "cloudmarkup.pattern.aws-lambda-curated-event-driven",
+              "patternVersion": "1.0.0"
+            }
+          },
+          "implementationRequirements": [],
+          "languageFamily": "cloudmarkup.language.typescript",
+          "observability": {
+            "healthChecks": [],
+            "signals": [
+              "logs"
+            ],
+            "smokeTests": []
+          },
+          "operations": [
+            {
+              "capability": "cloudmarkup.event.s3-record-metadata",
+              "id": "operation_event_s3_image_metadata",
+              "inputContract": {
+                "kind": "contract-reference",
+                "reference": {
+                  "contractId": "contracts.s3-image-metadata.event",
+                  "contractVersion": "1.0.0",
+                  "digest": "sha256:3e26bf6d9e81d3fd2db1173f9da263db78786ac004123413f6b344ac4e99cdee"
+                }
+              },
+              "outputContract": {
+                "kind": "none"
+              }
+            }
+          ],
+          "owningNodeId": "lambda",
+          "provenance": {
+            "generatorId": "cloudmarkup.event-application-generator",
+            "generatorVersion": "1.0.0",
+            "inputDigest": "sha256:83b1b9503dcebbe31a7bcddf8bb4f64563bdbbbd9c6b78c81b2e0a0a5b8a0b44",
+            "source": "deterministic-generator"
+          },
+          "schedules": [],
+          "sourceOwnership": [
+            {
+              "conflictBehavior": "preserve-user-content",
+              "declarationId": "ownership_event_s3_image_metadata_extension",
+              "ownerId": "application.s3-image-metadata.owner",
+              "ownership": "user-owned",
+              "path": "application/src/functions/event_s3_image_metadata/extensions/custom.ts",
+              "pathKind": "file",
+              "regeneration": "never",
+              "semanticDiff": {
+                "strategy": "structured-language"
+              }
+            }
+          ],
+          "tests": [
+            {
+              "bindingId": "test_contract_event_s3_image_metadata",
+              "level": "contract",
+              "requiredForCoverage": true,
+              "testCase": {
+                "contractId": "contracts.s3-image-metadata.test.contract",
+                "contractKind": "test-case",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:93228145b8588b061a241eab74dad529eba8d1d062fb96bce4b137ecf1a93cc9"
+              }
+            },
+            {
+              "bindingId": "test_unit_event_s3_image_metadata",
+              "level": "unit",
+              "requiredForCoverage": true,
+              "testCase": {
+                "contractId": "contracts.s3-image-metadata.test.unit",
+                "contractKind": "test-case",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:0e8ca70b916666ecba4589ba15fef65833a3d68d6ec17db2a6adab75472f7fa5"
+              }
+            }
+          ],
+          "triggerDispatch": {
+            "dispatcherId": "cloudmarkup.event-trigger-dispatcher",
+            "dispatcherOperationId": "operation_event_s3_image_metadata",
+            "dispatcherVersion": "1.0.0",
+            "mode": "generated-supported"
+          },
+          "triggers": [
+            {
+              "edgeId": "edge_upload_notification",
+              "id": "trigger_event_s3_image_metadata",
+              "targetOperationId": "operation_event_s3_image_metadata"
+            }
+          ],
+          "unresolvedRequirementIds": []
+        }
+      }
+    ],
+    "externalResources": []
+  },
+  "artifact": {
+    "contractVersion": 1,
+    "target": "terraform",
+    "formatVersion": "1.0.0",
+    "provenance": {
+      "architectureDocumentId": "document_event_s3_image_metadata",
+      "architectureId": "architecture_event_s3_image_metadata",
+      "architectureRevisionId": "revision_event_s3_image_metadata_1",
+      "architectureContentHash": "sha256:cdc672e4c1460aec7afa212cf5b7a3c7f70b39eb548388873ce2f69b60f2c4a8",
+      "architectureDocumentHash": "sha256:60daaeb84bbeba005b92220d1ce2b92fce4e7f3de26cfd70958d26f032199145",
+      "architectureVisualHash": "sha256:6511818c210c1f2d86aa4c8ff3ee35cb8a3b42b08ddc30a241dd8b8f14239fa9",
+      "workloadContentHash": "sha256:71354107ca508d548c687773d7ce6ea20bf0fbcc97bdcf3c40fd0f446cb8c1cf",
+      "solutionRevisionId": "solution_notes_revision_1",
+      "providerId": "aws.cloudmarkup",
+      "region": "us-east-1",
+      "catalog": {
+        "id": "aws.cloudmarkup.notes-api-catalog",
+        "version": "0.30.0",
+        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+      }
+    },
+    "metadata": {
+      "formatVersion": "1.0.0",
+      "requiredTerraformVersion": "\u003e= 1.5.0, \u003c 2.0.0",
+      "providers": [
+        {
+          "source": "hashicorp/aws",
+          "version": "\u003e= 6.55.0, \u003c 7.0.0"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "infrastructure/versions.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "terraform {\n  required_version = \"\u003e= 1.5.0, \u003c 2.0.0\"\n  required_providers {\n    aws = {\n      source  = \"hashicorp/aws\"\n      version = \"\u003e= 6.63.0, \u003c 7.0.0\"\n    }\n  }\n}\n",
+        "digest": "sha256:503a5ddb4089ae513e443e1a9315051827077e5bc8aabc47dc783829a9fb4321"
+      },
+      {
+        "path": "infrastructure/providers.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "provider \"aws\" {\n  region = var.aws_region\n  default_tags {\n    tags = local.tags\n  }\n}\n",
+        "digest": "sha256:71a7bb3760957dd751f8de9032f57b41224550bf70799f1a425f6c6486d268e9"
+      },
+      {
+        "path": "infrastructure/variables.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "variable \"aws_region\" {\n  type        = string\n  description = \"AWS Region selected by the immutable Architecture Document.\"\n  default     = \"us-east-1\"\n}\n\nvariable \"event_s3_image_metadata_artifact_path\" {\n  type        = string\n  description = \"Stable relative package output produced by the separate Prompt 32A workload builder.\"\n  default     = \"../application/artifacts/workload_event_s3_image_metadata/function.zip\"\n  validation {\n    condition     = can(regex(\"^\\\\.\\\\.?/\", var.event_s3_image_metadata_artifact_path))\n    error_message = \"Package path must be repository-relative and begin with ./ or ../; absolute machine paths are forbidden.\"\n  }\n}\n\nvariable \"stage\" {\n  type        = string\n  description = \"Architecture variable stage.\"\n  default     = \"test\"\n}\n",
+        "digest": "sha256:fc8e829622b5d73f93b816b2c30d181d39a64ee6ac332bd363d4dac36fab4736"
+      },
+      {
+        "path": "infrastructure/locals.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "locals {\n  tags = {\n    CloudMarkupArchitecture     = \"architecture_event_s3_image_metadata\"\n    CloudMarkupRevision         = \"revision_event_s3_image_metadata_1\"\n    CloudMarkupSolutionRevision = \"solution_notes_revision_1\"\n    ManagedBy                   = \"CloudMarkup\"\n  }\n}\n",
+        "digest": "sha256:d8292da293c4554f1bfa20fceab684a3f58d9854e536fa85316eeafe08099557"
+      },
+      {
+        "path": "infrastructure/networking.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "infrastructure/identity.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_iam_role\" \"notes_role\" {\n  name                 = \"notes-api-lambda-role\"\n  description          = \"CloudMarkup notes-API Lambda execution role.\"\n  max_session_duration = 3600\n  assume_role_policy   = data.aws_iam_policy_document.trust_policy.json\n  tags                 = local.tags\n}\n",
+        "digest": "sha256:3838d9b2bb9843c42eef98579e4654331ebbbfece88e81113e72db6edceb0d61"
+      },
+      {
+        "path": "infrastructure/compute.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_lambda_function\" \"event_s3_image_metadata\" {\n  function_name                  = \"event_s3_image_metadata\"\n  description                    = \"CloudMarkup notes-API workload.\"\n  role                           = aws_iam_role.notes_role.arn\n  handler                        = \"index.handler\"\n  runtime                        = \"nodejs24.x\"\n  architectures                  = [\"arm64\"]\n  memory_size                    = 256\n  reserved_concurrent_executions = 10\n  timeout                        = 30\n  filename                       = var.event_s3_image_metadata_artifact_path\n  source_code_hash               = filebase64sha256(var.event_s3_image_metadata_artifact_path)\n  tracing_config {\n    mode = \"Active\"\n  }\n  environment {\n    variables = {\n      \"METADATA_TABLE_NAME\" = aws_dynamodb_table.image_metadata.name\n      \"APP_STAGE\"           = var.stage\n    }\n  }\n  tags = local.tags\n}\n",
+        "digest": "sha256:d774d53f10af3d306028e23ac2da5ab85fc56c5454fb618ab8e5c63a78ce0f07"
+      },
+      {
+        "path": "infrastructure/data.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_dynamodb_table\" \"image_metadata\" {\n  name                        = \"image-metadata\"\n  billing_mode                = \"PAY_PER_REQUEST\"\n  hash_key                    = \"key\"\n  deletion_protection_enabled = true\n  attribute {\n    name = \"key\"\n    type = \"S\"\n  }\n  point_in_time_recovery {\n    enabled = true\n  }\n  server_side_encryption {\n    enabled = true\n  }\n  tags = local.tags\n}\n",
+        "digest": "sha256:98a65d567d3f6837b02023970262253a72a1a3bea9df8d4b8ec999f9a645c483"
+      },
+      {
+        "path": "infrastructure/security.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "data \"aws_iam_policy_document\" \"event_logs_policy_s3_image_metadata\" {\n  statement {\n    sid       = \"eventlogspolicys3imagemetadata\"\n    effect    = \"Allow\"\n    actions   = [\"logs:CreateLogStream\", \"logs:PutLogEvents\"]\n    resources = [format(\"%s:*\", aws_cloudwatch_log_group.event_logs_s3_image_metadata.arn)]\n  }\n}\n\ndata \"aws_iam_policy_document\" \"metadata_write_policy\" {\n  statement {\n    sid       = \"metadatawritepolicy\"\n    effect    = \"Allow\"\n    actions   = [\"dynamodb:DeleteItem\", \"dynamodb:PutItem\", \"dynamodb:UpdateItem\"]\n    resources = [aws_dynamodb_table.image_metadata.arn]\n  }\n}\n\ndata \"aws_iam_policy_document\" \"trust_policy\" {\n  statement {\n    sid     = \"trustpolicy\"\n    effect  = \"Allow\"\n    actions = [\"sts:AssumeRole\"]\n    principals {\n      type        = \"Service\"\n      identifiers = [\"lambda.amazonaws.com\"]\n    }\n  }\n}\n\nresource \"aws_iam_role_policy\" \"event_logs_policy_s3_image_metadata\" {\n  name   = \"event_logs_policy_s3_image_metadata\"\n  role   = aws_iam_role.notes_role.name\n  policy = data.aws_iam_policy_document.event_logs_policy_s3_image_metadata.json\n}\n\nresource \"aws_iam_role_policy\" \"metadata_write_policy\" {\n  name   = \"metadata_write_policy\"\n  role   = aws_iam_role.notes_role.name\n  policy = data.aws_iam_policy_document.metadata_write_policy.json\n}\n\ndata \"aws_caller_identity\" \"s3_permission\" {\n}\n\nresource \"aws_lambda_permission\" \"s3_permission\" {\n  statement_id   = \"s3permission\"\n  action         = \"lambda:InvokeFunction\"\n  function_name  = aws_lambda_function.event_s3_image_metadata.function_name\n  principal      = \"s3.amazonaws.com\"\n  source_arn     = aws_s3_bucket.uploads.arn\n  source_account = data.aws_caller_identity.s3_permission.account_id\n}\n",
+        "digest": "sha256:376c3dbdb52344cf08639b9130a0643dd35ce5db39b5134b6c3a328e24666bf6"
+      },
+      {
+        "path": "infrastructure/eventing.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_s3_bucket\" \"uploads\" {\n  bucket = \"cloudmarkup-image-uploads\"\n  lifecycle {\n    prevent_destroy = true\n  }\n  tags = local.tags\n}\n\nresource \"aws_s3_bucket_ownership_controls\" \"uploads_ownership\" {\n  bucket = aws_s3_bucket.uploads.id\n  rule {\n    object_ownership = \"BucketOwnerEnforced\"\n  }\n}\n\nresource \"aws_s3_bucket_public_access_block\" \"uploads_public\" {\n  bucket                  = aws_s3_bucket.uploads.id\n  block_public_acls       = true\n  block_public_policy     = true\n  ignore_public_acls      = true\n  restrict_public_buckets = true\n}\n\nresource \"aws_s3_bucket_server_side_encryption_configuration\" \"uploads_encryption\" {\n  bucket = aws_s3_bucket.uploads.id\n  rule {\n    apply_server_side_encryption_by_default {\n      sse_algorithm = \"AES256\"\n    }\n  }\n}\n\nresource \"aws_s3_bucket_versioning\" \"uploads_versioning\" {\n  bucket = aws_s3_bucket.uploads.id\n  versioning_configuration {\n    status = \"Enabled\"\n  }\n}\n\nresource \"aws_s3_bucket_notification\" \"uploads\" {\n  bucket = aws_s3_bucket.uploads.id\n  lambda_function {\n    id                  = aws_lambda_permission.s3_permission.statement_id\n    lambda_function_arn = aws_lambda_function.event_s3_image_metadata.arn\n    events              = [\"s3:ObjectCreated:*\"]\n    filter_prefix       = \"incoming/\"\n    filter_suffix       = \".jpg\"\n  }\n}\n",
+        "digest": "sha256:3aef324ee84bd487df16da042396c8635e4adea8133ad1d46bf740b23c7b98be"
+      },
+      {
+        "path": "infrastructure/observability.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_cloudwatch_log_group\" \"event_logs_s3_image_metadata\" {\n  name              = \"/aws/lambda/notes_handler\"\n  log_group_class   = \"STANDARD\"\n  retention_in_days = 30\n  lifecycle {\n    prevent_destroy = true\n  }\n  tags = local.tags\n}\n",
+        "digest": "sha256:caa5418dec930acc170f98e68d295fba5e87df410cabdabc7a0956e6e963c211"
+      },
+      {
+        "path": "infrastructure/outputs.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "infrastructure/terraform.tfvars.example",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "infrastructure/README.md",
+        "mediaType": "text/markdown",
+        "ownership": "generated",
+        "content": "# Cloud Markup deterministic Terraform\n\nThis directory was generated from immutable Architecture and Workload contracts. It does not build application source, run Terraform, or deploy.\n\n## Compatibility\n\n- Compiler: `cloudmarkup.iac-compiler@1.2.1`\n- Catalog: `aws.cloudmarkup.notes-api-catalog@0.30.0` (`sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682`)\n- Target format: `1.0.0`\n- Terraform: `\u003e= 1.5.0, \u003c 2.0.0`\n- AWS provider: `hashicorp/aws` (`\u003e= 6.55.0, \u003c 7.0.0`)\n- Architecture revision: `revision_event_s3_image_metadata_1`\n- Solution Revision: `solution_notes_revision_1`\n\n## Application artifacts\n\n- `workload_event_s3_image_metadata` (complete-supported-pattern): deterministic-relative-package at `../application/artifacts/workload_event_s3_image_metadata/function.zip`.\n\nCopy `terraform.tfvars.example` to a separately protected input file and replace every placeholder. Never put credentials or secret values in committed Terraform files. Review the complete diff, initialize from an approved provider mirror, validate, plan, and deploy only in customer-owned CI/CD with customer approval.\n",
+        "digest": "sha256:141349e4019152133350ce82d9fcbf11ec32a917401fae77877d86f188141433"
+      }
+    ],
+    "applicationArtifacts": [
+      {
+        "contractVersion": 2,
+        "workloadId": "workload_event_s3_image_metadata",
+        "implementationMode": "complete-supported-pattern",
+        "delivery": "deterministic-relative-package",
+        "relativePackagePath": "../application/artifacts/workload_event_s3_image_metadata/function.zip",
+        "variables": [
+          {
+            "name": "event_s3_image_metadata_artifact_path",
+            "valueType": "string",
+            "sensitive": false,
+            "required": false,
+            "description": "Relative built Lambda package path.",
+            "validation": "relative-package-path"
+          }
+        ],
+        "expectedArtifact": {
+          "artifactId": "artifact_workload_event_s3_image_metadata",
+          "kind": "aws-lambda-zip",
+          "mediaType": "application/zip",
+          "path": "application/artifacts/workload_event_s3_image_metadata/function.zip",
+          "archiveEntrypoint": "index.js",
+          "handler": "index.handler",
+          "digestAlgorithm": "sha256",
+          "runtime": {
+            "id": "cloudmarkup.runtime.aws-lambda-nodejs24-typescript",
+            "version": "1.0.0",
+            "digest": "sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a",
+            "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+            "languageFamily": "cloudmarkup.language.typescript",
+            "runtime": "nodejs24.x",
+            "handler": "index.handler",
+            "moduleFormat": "esm"
+          }
+        },
+        "artifactReadiness": "application-artifact-evidence-incomplete",
+        "inputs": [
+          {
+            "artifactId": "cloudmarkup.pattern.aws-lambda-curated-event-driven:1.0.0",
+            "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686",
+            "kind": "supported-pattern",
+            "ownership": "cloudmarkup",
+            "workloadId": "workload_event_s3_image_metadata"
+          }
+        ],
+        "generationCoverage": "custom-implementation-required",
+        "codeRequired": false
+      }
+    ],
+    "policyArtifacts": [
+      {
+        "policyDocumentId": "event_logs_policy_s3_image_metadata",
+        "ownerNodeId": "role",
+        "policyKind": "generated-permission",
+        "ownership": "generated",
+        "renderedAs": "aws_iam_role_policy.event_logs_policy_s3_image_metadata",
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_event_logs_s3_image_metadata",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_event_logs_s3_image_metadata"
+          ]
+        }
+      },
+      {
+        "policyDocumentId": "metadata_write_policy",
+        "ownerNodeId": "role",
+        "policyKind": "generated-permission",
+        "ownership": "generated",
+        "renderedAs": "aws_iam_role_policy.metadata_write_policy",
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_metadata_write"
+          ]
+        }
+      },
+      {
+        "policyDocumentId": "s3_permission",
+        "ownerNodeId": "lambda",
+        "policyKind": "service-grant",
+        "ownership": "generated",
+        "renderedAs": "aws_lambda_permission.s3_permission",
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_upload_notification"
+          ]
+        }
+      },
+      {
+        "policyDocumentId": "trust_policy",
+        "ownerNodeId": "role",
+        "policyKind": "trust",
+        "ownership": "generated",
+        "renderedAs": "data.aws_iam_policy_document.trust_policy",
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_role_lambda"
+          ]
+        }
+      }
+    ],
+    "digest": "sha256:452e2482fd44c7b280daeb605cd1b38d12fe9f752f825144438c59b7f9168dbe"
+  },
+  "diagnostics": [
+    {
+      "code": "APPLICATION_GENERATION_PENDING",
+      "severity": "warning",
+      "message": "Event infrastructure is renderable, but the exact generated, built, tested, and scanned application artifact coverage is incomplete.",
+      "source": {
+        "document": "workload",
+        "workloadId": "workload_event_s3_image_metadata"
+      }
+    }
+  ]
+}

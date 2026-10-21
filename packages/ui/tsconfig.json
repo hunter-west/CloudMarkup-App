@@ -1,0 +1,14 @@
+{
+  "extends": "@cloudmarkup/config/tsconfig/react.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": [
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
+    "*.stories.ts",
+    "*.stories.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
+}

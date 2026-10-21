@@ -1,0 +1,392 @@
+{
+  "alternatives": [
+    {
+      "description": "Prefer the lowest estimated unit cost even when monthly spend varies more.",
+      "id": "alternative_lowest_cost",
+      "rationale": {
+        "considerations": [
+          {
+            "kind": "tradeoff",
+            "source": "user",
+            "statement": "Lower unit cost can introduce more operational tuning."
+          }
+        ],
+        "summary": "Rejected because budget predictability is the stronger preference."
+      },
+      "status": "rejected",
+      "subject": "cost.strategy",
+      "title": "Minimize unit cost"
+    },
+    {
+      "description": "Prefer capability choices with a clear expected monthly operating range.",
+      "id": "alternative_predictable",
+      "rationale": {
+        "considerations": [
+          {
+            "kind": "benefit",
+            "source": "user",
+            "statement": "Planning and review can use a stable monthly range."
+          }
+        ],
+        "summary": "Selected to match the approved cost preference."
+      },
+      "status": "selected",
+      "subject": "cost.strategy",
+      "title": "Prioritize predictable spend"
+    }
+  ],
+  "application": {
+    "capabilities": {
+      "items": [
+        {
+          "capability": "http-api",
+          "description": "Accept authenticated media intake and status requests.",
+          "id": "cap_api",
+          "importance": "required"
+        },
+        {
+          "capability": "key-value-data",
+          "description": "Track upload and processing status by stable job identifier.",
+          "id": "cap_kv",
+          "importance": "required"
+        },
+        {
+          "capability": "object-storage",
+          "description": "Retain uploaded and processed media objects.",
+          "id": "cap_objects",
+          "importance": "required"
+        },
+        {
+          "capability": "event-queue",
+          "description": "Buffer media-processing work independently of request handling.",
+          "id": "cap_queue",
+          "importance": "required"
+        }
+      ],
+      "state": "known"
+    },
+    "summary": "A collaborative media intake application accepts authenticated uploads, records job state, and processes each upload asynchronously."
+  },
+  "assumptions": [
+    {
+      "id": "assumption_partner_events",
+      "origin": "user",
+      "statement": "The partner can receive completion events without direct access to stored media.",
+      "status": "active",
+      "subject": "connectivity.partner-events"
+    }
+  ],
+  "compliance": {
+    "items": [
+      {
+        "framework": "organization-policy",
+        "id": "compliance_privacy",
+        "importance": "mandatory",
+        "jurisdictions": [
+          "country.us"
+        ],
+        "requirement": "Uploaded media and job metadata must remain in the approved United States geography."
+      }
+    ],
+    "state": "known"
+  },
+  "connectivity": {
+    "egress": {
+      "items": [
+        {
+          "capabilityIds": [
+            "cap_queue"
+          ],
+          "channel": "event",
+          "description": "Publish a completion event to an approved partner integration.",
+          "exposure": "partner",
+          "id": "flow_partner_event"
+        }
+      ],
+      "state": "known"
+    },
+    "ingress": {
+      "items": [
+        {
+          "capabilityIds": [
+            "cap_api",
+            "cap_kv"
+          ],
+          "channel": "http",
+          "description": "Authenticated end users submit uploads and read job status.",
+          "exposure": "public",
+          "id": "flow_public_api"
+        }
+      ],
+      "state": "known"
+    }
+  },
+  "data": {
+    "items": [
+      {
+        "capabilityIds": [
+          "cap_kv"
+        ],
+        "category": "business-record",
+        "description": "Processing state and bounded diagnostic metadata for each upload.",
+        "id": "data_jobs",
+        "name": "Job status",
+        "residency": {
+          "locations": [
+            "country.us"
+          ],
+          "state": "known",
+          "strict": true
+        },
+        "retention": {
+          "legalHoldRequired": false,
+          "maximumDays": 365,
+          "minimumDays": 30,
+          "state": "known"
+        },
+        "sensitivity": {
+          "state": "known",
+          "value": "confidential"
+        }
+      },
+      {
+        "capabilityIds": [
+          "cap_objects"
+        ],
+        "category": "content",
+        "description": "User-provided source media and generated derivatives.",
+        "id": "data_media",
+        "name": "Uploaded media",
+        "residency": {
+          "locations": [
+            "country.us"
+          ],
+          "state": "known",
+          "strict": true
+        },
+        "retention": {
+          "legalHoldRequired": false,
+          "maximumDays": 90,
+          "minimumDays": 7,
+          "state": "known"
+        },
+        "sensitivity": {
+          "state": "known",
+          "value": "restricted"
+        }
+      }
+    ],
+    "state": "known"
+  },
+  "decisions": [
+    {
+      "decidedAt": "2026-07-24T13:55:00Z",
+      "decidedBy": "actor_example",
+      "id": "decision_cost_strategy",
+      "rationale": {
+        "considerations": [
+          {
+            "kind": "benefit",
+            "source": "user",
+            "statement": "The team can review expected spend against one monthly range."
+          }
+        ],
+        "summary": "Predictability is more important than minimizing every unit of usage."
+      },
+      "selectedAlternativeId": "alternative_predictable",
+      "statement": "Prefer predictable monthly operating cost.",
+      "status": "active",
+      "subject": "cost.strategy"
+    }
+  ],
+  "documentId": "intent_doc_representative",
+  "environment": {
+    "state": "known",
+    "value": "multi-environment"
+  },
+  "identity": {
+    "authentication": {
+      "methods": [
+        "federated",
+        "machine-identity",
+        "multi-factor"
+      ],
+      "principals": [
+        "human-user",
+        "workload"
+      ],
+      "requirements": [
+        "Administrative users require multi-factor authentication.",
+        "Human users authenticate through the organization identity provider."
+      ],
+      "state": "known"
+    },
+    "authorization": {
+      "models": [
+        "resource-based",
+        "role-based"
+      ],
+      "requirements": [
+        "Users may read only media and jobs owned by their organization.",
+        "Workers may read queued jobs and write processing results."
+      ],
+      "state": "known"
+    }
+  },
+  "intentId": "intent_representative",
+  "kind": "cloudmarkup.intent-document",
+  "metadata": {
+    "provenance": {
+      "prompt": {
+        "capturedAt": "2026-07-24T13:50:00Z",
+        "inputDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "interactionId": "prompt_interaction_example",
+        "kind": "prompt-reference",
+        "outputDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "templateId": "cloudmarkup.intent-capture",
+        "templateVersion": "1.0.0"
+      },
+      "schema": {
+        "contractId": "cloudmarkup.intent-document",
+        "schemaVersion": 1
+      }
+    },
+    "serialization": {
+      "canonicalization": "cloudmarkup.intent-normalized-json.v1",
+      "encoding": "utf-8",
+      "mediaType": "application/json"
+    },
+    "source": "prompt-assisted"
+  },
+  "preferences": {
+    "cost": {
+      "budget": {
+        "amount": 2500,
+        "currency": "USD",
+        "period": "monthly",
+        "state": "known"
+      },
+      "priority": "predictability-prioritized",
+      "rationale": "Prefer a predictable operating range over marginal unit-cost optimization.",
+      "state": "known"
+    },
+    "operationalOverhead": {
+      "preference": "minimize",
+      "rationale": "The initial team has no dedicated infrastructure operations role.",
+      "state": "known"
+    }
+  },
+  "quality": {
+    "availability": {
+      "measurementWindow": "monthly",
+      "scope": "Media intake and job-status requests.",
+      "state": "known",
+      "targetPercent": 99.9
+    },
+    "durability": {
+      "scope": "Accepted source media and completed derivatives.",
+      "state": "known",
+      "targetPercent": 99.999999999
+    },
+    "latency": {
+      "scope": "Synchronous API requests excluding media transfer time.",
+      "state": "known",
+      "targets": [
+        {
+          "milliseconds": 250,
+          "percentile": "p50"
+        },
+        {
+          "milliseconds": 800,
+          "percentile": "p95"
+        },
+        {
+          "milliseconds": 1500,
+          "percentile": "p99"
+        }
+      ]
+    },
+    "recovery": {
+      "recoveryPointObjectiveSeconds": 3600,
+      "recoveryTimeObjectiveSeconds": 14400,
+      "scope": "Job status and retained media.",
+      "state": "known"
+    },
+    "scale": {
+      "metrics": [
+        {
+          "metric": "peak-requests-per-second",
+          "value": 200
+        },
+        {
+          "metric": "steady-requests-per-second",
+          "value": 50
+        },
+        {
+          "metric": "stored-data-gib",
+          "value": 10000
+        }
+      ],
+      "scope": "First production year.",
+      "state": "known"
+    }
+  },
+  "revision": {
+    "createdAt": "2026-07-24T14:00:00Z",
+    "createdBy": "actor_example",
+    "previousRevisionId": "intent_rev_000",
+    "revisionId": "intent_rev_001",
+    "revisionNumber": 1
+  },
+  "schemaVersion": 1,
+  "unresolvedQuestions": [
+    {
+      "classification": "non-blocking",
+      "id": "question_alerting",
+      "question": "Which team receives after-hours processing failure alerts?",
+      "rationale": "The answer affects operational routing but not the initial capability plan.",
+      "subject": "operations.alerting"
+    }
+  ],
+  "workflows": {
+    "items": [
+      {
+        "capabilityIds": [
+          "cap_kv",
+          "cap_objects",
+          "cap_queue"
+        ],
+        "description": "Consume a queued job, transform the source media, persist results, and update job status.",
+        "execution": {
+          "mode": "asynchronous",
+          "state": "known"
+        },
+        "id": "workflow_process_media",
+        "name": "Process uploaded media",
+        "trigger": {
+          "state": "known",
+          "value": "message"
+        }
+      },
+      {
+        "capabilityIds": [
+          "cap_api",
+          "cap_kv",
+          "cap_queue"
+        ],
+        "description": "Authenticate the user, accept upload metadata, allocate a job identifier, and return initial status.",
+        "execution": {
+          "mode": "synchronous",
+          "state": "known"
+        },
+        "id": "workflow_submit_media",
+        "name": "Submit media",
+        "trigger": {
+          "state": "known",
+          "value": "user-request"
+        }
+      }
+    ],
+    "state": "known"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "contractVersion": 1,
+  "packageManager": {
+    "id": "pnpm",
+    "version": "11.16.0"
+  },
+  "packageManifestDigest": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+  "policy": "resolve-only-in-prompt-32a-isolated-builder"
+}

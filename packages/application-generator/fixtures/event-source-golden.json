@@ -1,0 +1,38 @@
+{
+  "s3-image-metadata": {
+    "artifactDigest": "sha256:57c8c7a923db7fdf80bf80dd2b7e203fbea35c8f910ad7e31ab04939e752b015",
+    "buildContractDigest": "sha256:6cf91f25bb483df4d2b40f483a9c248bbd57cd0a909373f2d36e8fb2f0895e72",
+    "fixtureChecksum": "sha256:1486adc820096584d8ecaf07b60360c49640718a928206edc2e3934b560f2ba5",
+    "handlerChecksum": "sha256:3e928f6cc9f6661ea3d1c96a734111653b4c7fa4ace81fa29a3c446da507b4b7"
+  },
+  "sqs-consumer-dlq": {
+    "artifactDigest": "sha256:56e213bb0242f4309c0dc7072a83d488968e8e4cb333113309d0b1c7a15244ad",
+    "buildContractDigest": "sha256:ec4ff009ddbaebebd6aa06d1b29ca44c70b032a30136071f76cbf0cb880b86fc",
+    "fixtureChecksum": "sha256:77b905f9c31e1edf1bb4aa9bcdf3dfab37f140b8e66dee54f1ec803568c19691",
+    "handlerChecksum": "sha256:8db5fceec7c822eb7a909d907eb4ae797ce1aa8e7ae56bfad37529f31b64fe95"
+  },
+  "sns-fanout-consumer": {
+    "artifactDigest": "sha256:0db5f7e9d935b34f33a223aae65ca26f153d4c876b89674010075395a4650788",
+    "buildContractDigest": "sha256:46357d92fee3ea448d875f9af7f3e7277dd8c73690d005482769c16bc67e86a2",
+    "fixtureChecksum": "sha256:4a274a132677b537513f7758ba42e06bc5f6a22a0ee306ba9085fde3552a1eeb",
+    "handlerChecksum": "sha256:b759d7f8aeaef21553232662697f882aa825f8a46880fd89b58bd22ca234627a"
+  },
+  "eventbridge-scheduled": {
+    "artifactDigest": "sha256:25126d9144725ecb6f8f3b304f1d6ef73d3bab015f08921fd31e76feb8d54d69",
+    "buildContractDigest": "sha256:24c597274c2fd3738e9ad39f9caab04666d0d67028cb03ad9b88084a0a4ea285",
+    "fixtureChecksum": "sha256:ac8a497f1dfcb4d8130f53ada4765acc90e6a68b32c768280e2f370b62258ea3",
+    "handlerChecksum": "sha256:0bb09ae919ff20629023161ee5551df103dcdff5da13a4f1032650d29b680e48"
+  },
+  "eventbridge-target": {
+    "artifactDigest": "sha256:50c77a6360b789cb672c452109ad948046612093a7e68ea2fe84dc639a07c5b2",
+    "buildContractDigest": "sha256:4432d7a3e6cd04905dd36f4a32b4828e14ab4cbd3ec738ce19d0fdfaf45571c4",
+    "fixtureChecksum": "sha256:ed11cafd16cb4bb0e13eecd4d86a60405baba3932a429fd4ec54c85820efcc40",
+    "handlerChecksum": "sha256:5de1ed0503a2525fbf80a38fafabefd169651cf50570255b8f3fc909d44b8b8a"
+  },
+  "step-functions-task": {
+    "artifactDigest": "sha256:5be4d8d43f8a4aa838659311b417aed5eba4998c014ebba629ccadf8e1a2c407",
+    "buildContractDigest": "sha256:fce20530eae60bc2204635390ebec6bf912909504be2564a99f0ddc78b2d66a7",
+    "fixtureChecksum": "sha256:f680704b3b8367babe23bda87e3e870e8354023837f6337354acb033e316e842",
+    "handlerChecksum": "sha256:c4014ece2668ebbfd1d0c53ac1c41f46d6ab273396f411d080e61df25f4ec5ad"
+  }
+}

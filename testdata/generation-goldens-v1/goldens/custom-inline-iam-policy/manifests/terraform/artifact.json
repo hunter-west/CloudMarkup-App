@@ -1,0 +1,185 @@
+{
+  "contractVersion": 1,
+  "compiler": {
+    "id": "cloudmarkup.iac-compiler",
+    "version": "1.2.1"
+  },
+  "target": "terraform",
+  "formatVersion": "1.0.0",
+  "provenance": {
+    "architectureDocumentId": "document_notes",
+    "architectureId": "architecture_notes",
+    "architectureRevisionId": "revision_notes_1",
+    "architectureContentHash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "architectureDocumentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "architectureVisualHash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "workloadContentHash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "solutionRevisionId": "solution_notes_1",
+    "providerId": "aws.cloudmarkup",
+    "region": "us-east-1",
+    "catalog": {
+      "id": "aws.cloudmarkup.notes-api-catalog",
+      "version": "0.30.0",
+      "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+    }
+  },
+  "metadata": {
+    "formatVersion": "1.0.0",
+    "requiredTerraformVersion": "\u003e= 1.5.0, \u003c 2.0.0",
+    "providers": [
+      {
+        "source": "hashicorp/aws",
+        "version": "\u003e= 6.55.0, \u003c 7.0.0"
+      }
+    ]
+  },
+  "files": [
+    {
+      "path": "infrastructure/versions.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:503a5ddb4089ae513e443e1a9315051827077e5bc8aabc47dc783829a9fb4321",
+      "sizeBytes": 169
+    },
+    {
+      "path": "infrastructure/providers.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:71a7bb3760957dd751f8de9032f57b41224550bf70799f1a425f6c6486d268e9",
+      "sizeBytes": 88
+    },
+    {
+      "path": "infrastructure/variables.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:8a119a89866a799e5995f73016ceef8f10bfe78cf95c9b4cfd98251e269b50e9",
+      "sizeBytes": 619
+    },
+    {
+      "path": "infrastructure/locals.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:57114380fd6793ec96111eeb2b14245a9cea054cb1cd969c6409b3042b86a0ac",
+      "sizeBytes": 235
+    },
+    {
+      "path": "infrastructure/networking.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sizeBytes": 0
+    },
+    {
+      "path": "infrastructure/identity.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:3838d9b2bb9843c42eef98579e4654331ebbbfece88e81113e72db6edceb0d61",
+      "sizeBytes": 300
+    },
+    {
+      "path": "infrastructure/compute.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:c27caf850ba61ed24cc88401d27078f474af0df9de48b4bbfbdfc7e3f0c423ec",
+      "sizeBytes": 712
+    },
+    {
+      "path": "infrastructure/data.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:50c924104e47593c380d2f0e3fea3049813d7f4c9e4986ad1da1c173f9fea9dc",
+      "sizeBytes": 389
+    },
+    {
+      "path": "infrastructure/security.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:b1cb06e607e8c16f3828872655a0cceefb39d34983068799348d45ab1803e942",
+      "sizeBytes": 642
+    },
+    {
+      "path": "infrastructure/eventing.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sizeBytes": 0
+    },
+    {
+      "path": "infrastructure/observability.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sizeBytes": 0
+    },
+    {
+      "path": "infrastructure/outputs.tf",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sizeBytes": 0
+    },
+    {
+      "path": "infrastructure/terraform.tfvars.example",
+      "mediaType": "application/vnd.hashicorp.terraform",
+      "ownership": "generated",
+      "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sizeBytes": 0
+    },
+    {
+      "path": "infrastructure/README.md",
+      "mediaType": "text/markdown",
+      "ownership": "generated",
+      "digest": "sha256:9dd93b9d21b635bf62ab8569542b15f72a554f55ee26a7ebeb83d4780999a919",
+      "sizeBytes": 1063
+    }
+  ],
+  "applicationArtifacts": [
+    {
+      "contractVersion": 1,
+      "workloadId": "workload_notes",
+      "implementationMode": "complete-supported-pattern",
+      "delivery": "deterministic-relative-package",
+      "relativePackagePath": "../application/artifacts/workload_notes/function.zip",
+      "variables": [
+        {
+          "name": "notes_handler_artifact_path",
+          "valueType": "string",
+          "sensitive": false,
+          "required": false,
+          "description": "Relative built Lambda package path.",
+          "validation": "relative-package-path"
+        }
+      ],
+      "inputs": null,
+      "generationCoverage": "infrastructure-and-application",
+      "codeRequired": false
+    }
+  ],
+  "policyArtifacts": [
+    {
+      "policyDocumentId": "custom_policy",
+      "ownerNodeId": "role",
+      "policyKind": "identity-inline",
+      "ownership": "user",
+      "renderedAs": "aws_iam_role_policy.custom_policy"
+    },
+    {
+      "policyDocumentId": "trust_policy",
+      "ownerNodeId": "role",
+      "policyKind": "trust",
+      "ownership": "generated",
+      "renderedAs": "data.aws_iam_policy_document.trust_policy",
+      "provenance": {
+        "generatorKind": "connection-rule",
+        "generatorId": "aws.cloudmarkup.connection-rule",
+        "generatorVersion": "1.0.0",
+        "operationId": "operation_fixture",
+        "dependentNodeIds": [],
+        "dependentEdgeIds": [
+          "edge_role_lambda"
+        ]
+      }
+    }
+  ],
+  "digest": "sha256:919ae847c836aab292fa3353232c66810e8403fc853308b08187fd7aeab0b3de"
+}

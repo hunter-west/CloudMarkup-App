@@ -1,0 +1,68 @@
+{
+  "contractId": "contracts.notes.entity",
+  "contractKind": "data-entity",
+  "contractVersion": "1.0.0",
+  "displayName": "Note",
+  "fields": [
+    {
+      "classification": "internal",
+      "fieldType": {
+        "kind": "scalar",
+        "scalarType": "string"
+      },
+      "name": "noteId",
+      "nullable": false,
+      "required": true
+    },
+    {
+      "classification": "confidential",
+      "fieldType": {
+        "kind": "scalar",
+        "scalarType": "string"
+      },
+      "name": "body",
+      "nullable": false,
+      "required": true
+    },
+    {
+      "classification": "internal",
+      "fieldType": {
+        "itemType": "string",
+        "kind": "scalar-list",
+        "maximumItems": 3,
+        "minimumItems": 1
+      },
+      "name": "tags",
+      "nullable": false,
+      "required": false
+    }
+  ],
+  "indexes": [
+    {
+      "indexId": "index_notes_primary",
+      "kind": "primary",
+      "name": "primary",
+      "partitionFields": [
+        "noteId"
+      ],
+      "sortFields": []
+    }
+  ],
+  "provenance": {
+    "recordedAt": "2026-08-17T12:00:00Z",
+    "recordedBy": "actor_fixture",
+    "source": "designed",
+    "sourceReferenceIds": [
+      "requirement_notes_api"
+    ]
+  },
+  "semanticName": "application.notes.entity",
+  "storageIntent": "persistent",
+  "supportedOperations": [
+    "create",
+    "read",
+    "update",
+    "delete",
+    "list"
+  ]
+}

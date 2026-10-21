@@ -1,0 +1,3229 @@
+{
+  "applicationContracts": {
+    "kind": "cloudmarkup.application-contracts",
+    "schemaVersion": 1,
+    "contractSetId": "architecture_event_multi",
+    "documentId": "document_event_multi",
+    "revision": {
+      "revisionId": "revision_event_sns_fanout_consumer_primary_1",
+      "revisionNumber": 1,
+      "createdAt": "2026-08-17T12:00:00Z",
+      "createdBy": "actor_fixture"
+    },
+    "contracts": [
+      {
+        "contractId": "contracts.sns-fanout-consumer.primary.behavior",
+        "contractVersion": "1.0.0",
+        "displayName": "Curated event behavior",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "behavior-operation",
+        "capability": "cloudmarkup.event.sns-consume",
+        "input": {
+          "kind": "contract-reference",
+          "reference": {
+            "contractId": "contracts.sns-fanout-consumer.primary.event",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:3c49037b92120dde824dc2c245ef8e02c562548fa90e668a891b434d30cd463b",
+            "contractKind": "event-message"
+          }
+        },
+        "output": {
+          "kind": "none"
+        },
+        "failureOutcomes": [
+          {
+            "category": "application.validation",
+            "retryable": false,
+            "description": "The typed event contract was not satisfied."
+          }
+        ]
+      },
+      {
+        "contractId": "contracts.sns-fanout-consumer.primary.event",
+        "contractVersion": "1.0.0",
+        "displayName": "Curated event envelope",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "event-message",
+        "transportKind": "event",
+        "semanticName": "application.sns-fanout-consumer.primary.event",
+        "payload": {
+          "contractId": "contracts.sns-fanout-consumer.primary.payload",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:ebd93c0eb9e0ff8b530d8db08ed0f4231d6ae713c4915dbb2d8fe93a8b3f32d6",
+          "contractKind": "data-entity"
+        },
+        "headers": [],
+        "delivery": {
+          "ordering": "not-guaranteed",
+          "duplicates": "possible",
+          "delivery": "at-least-once"
+        }
+      },
+      {
+        "contractId": "contracts.sns-fanout-consumer.primary.payload",
+        "contractVersion": "1.0.0",
+        "displayName": "Curated event payload",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "data-entity",
+        "semanticName": "application.sns-fanout-consumer.primary.payload",
+        "storageIntent": "transient",
+        "fields": [
+          {
+            "name": "correlationId",
+            "fieldType": {
+              "kind": "scalar",
+              "scalarType": "string"
+            },
+            "required": false,
+            "nullable": false,
+            "classification": "internal"
+          },
+          {
+            "name": "eventId",
+            "fieldType": {
+              "kind": "scalar",
+              "scalarType": "string"
+            },
+            "required": true,
+            "nullable": false,
+            "classification": "internal"
+          }
+        ],
+        "indexes": [
+          {
+            "indexId": "index_event_sns_fanout_consumer_primary_primary",
+            "name": "primary",
+            "kind": "primary",
+            "partitionFields": ["eventId"],
+            "sortFields": []
+          }
+        ],
+        "supportedOperations": ["consume"]
+      },
+      {
+        "contractId": "contracts.sns-fanout-consumer.primary.test.contract",
+        "contractVersion": "1.0.0",
+        "displayName": "contract event contract test",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "test-case",
+        "level": "contract",
+        "target": {
+          "contractId": "contracts.sns-fanout-consumer.primary.behavior",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:b1a2e3e8848086d09c487b44f97a076bec253125c26449133a467374b72dab4a",
+          "contractKind": "behavior-operation"
+        },
+        "preconditions": [
+          {
+            "kind": "contract-available",
+            "contract": {
+              "contractId": "contracts.sns-fanout-consumer.primary.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:3c49037b92120dde824dc2c245ef8e02c562548fa90e668a891b434d30cd463b",
+              "contractKind": "event-message"
+            }
+          }
+        ],
+        "fixtureReferences": [],
+        "expectations": [
+          {
+            "expectationId": "expect_contract_validation",
+            "kind": "error-category",
+            "category": "application.validation"
+          }
+        ]
+      },
+      {
+        "contractId": "contracts.sns-fanout-consumer.primary.test.unit",
+        "contractVersion": "1.0.0",
+        "displayName": "unit event contract test",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "test-case",
+        "level": "unit",
+        "target": {
+          "contractId": "contracts.sns-fanout-consumer.primary.behavior",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:b1a2e3e8848086d09c487b44f97a076bec253125c26449133a467374b72dab4a",
+          "contractKind": "behavior-operation"
+        },
+        "preconditions": [
+          {
+            "kind": "contract-available",
+            "contract": {
+              "contractId": "contracts.sns-fanout-consumer.primary.payload",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:ebd93c0eb9e0ff8b530d8db08ed0f4231d6ae713c4915dbb2d8fe93a8b3f32d6",
+              "contractKind": "data-entity"
+            }
+          }
+        ],
+        "fixtureReferences": [],
+        "expectations": [
+          {
+            "expectationId": "expect_unit_payload_conformance",
+            "kind": "contract-conformance",
+            "contract": {
+              "contractId": "contracts.sns-fanout-consumer.primary.payload",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:ebd93c0eb9e0ff8b530d8db08ed0f4231d6ae713c4915dbb2d8fe93a8b3f32d6",
+              "contractKind": "data-entity"
+            }
+          }
+        ]
+      },
+      {
+        "contractId": "contracts.sns-fanout-consumer.secondary.behavior",
+        "contractVersion": "1.0.0",
+        "displayName": "Curated event behavior",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "behavior-operation",
+        "capability": "cloudmarkup.event.sns-consume",
+        "input": {
+          "kind": "contract-reference",
+          "reference": {
+            "contractId": "contracts.sns-fanout-consumer.secondary.event",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:3fc70c8112778a6d93cc7e8ff40691fb5c38ce97163a4fb6a196aab17d5e72ae",
+            "contractKind": "event-message"
+          }
+        },
+        "output": {
+          "kind": "none"
+        },
+        "failureOutcomes": [
+          {
+            "category": "application.validation",
+            "retryable": false,
+            "description": "The typed event contract was not satisfied."
+          }
+        ]
+      },
+      {
+        "contractId": "contracts.sns-fanout-consumer.secondary.event",
+        "contractVersion": "1.0.0",
+        "displayName": "Curated event envelope",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "event-message",
+        "transportKind": "event",
+        "semanticName": "application.sns-fanout-consumer.secondary.event",
+        "payload": {
+          "contractId": "contracts.sns-fanout-consumer.secondary.payload",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:48c330cd694521e83cb9b335920312f177c623825644c86152ab8e53c69dfc97",
+          "contractKind": "data-entity"
+        },
+        "headers": [],
+        "delivery": {
+          "ordering": "not-guaranteed",
+          "duplicates": "possible",
+          "delivery": "at-least-once"
+        }
+      },
+      {
+        "contractId": "contracts.sns-fanout-consumer.secondary.payload",
+        "contractVersion": "1.0.0",
+        "displayName": "Curated event payload",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "data-entity",
+        "semanticName": "application.sns-fanout-consumer.secondary.payload",
+        "storageIntent": "transient",
+        "fields": [
+          {
+            "name": "correlationId",
+            "fieldType": {
+              "kind": "scalar",
+              "scalarType": "string"
+            },
+            "required": false,
+            "nullable": false,
+            "classification": "internal"
+          },
+          {
+            "name": "eventId",
+            "fieldType": {
+              "kind": "scalar",
+              "scalarType": "string"
+            },
+            "required": true,
+            "nullable": false,
+            "classification": "internal"
+          }
+        ],
+        "indexes": [
+          {
+            "indexId": "index_event_sns_fanout_consumer_secondary_primary",
+            "name": "primary",
+            "kind": "primary",
+            "partitionFields": ["eventId"],
+            "sortFields": []
+          }
+        ],
+        "supportedOperations": ["consume"]
+      },
+      {
+        "contractId": "contracts.sns-fanout-consumer.secondary.test.contract",
+        "contractVersion": "1.0.0",
+        "displayName": "contract event contract test",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "test-case",
+        "level": "contract",
+        "target": {
+          "contractId": "contracts.sns-fanout-consumer.secondary.behavior",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:fcb198225ce4bd863164af3b79f0e3c9f9d0be5dcdedbdbed7382b1c439af7fa",
+          "contractKind": "behavior-operation"
+        },
+        "preconditions": [
+          {
+            "kind": "contract-available",
+            "contract": {
+              "contractId": "contracts.sns-fanout-consumer.secondary.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:3fc70c8112778a6d93cc7e8ff40691fb5c38ce97163a4fb6a196aab17d5e72ae",
+              "contractKind": "event-message"
+            }
+          }
+        ],
+        "fixtureReferences": [],
+        "expectations": [
+          {
+            "expectationId": "expect_contract_validation",
+            "kind": "error-category",
+            "category": "application.validation"
+          }
+        ]
+      },
+      {
+        "contractId": "contracts.sns-fanout-consumer.secondary.test.unit",
+        "contractVersion": "1.0.0",
+        "displayName": "unit event contract test",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "test-case",
+        "level": "unit",
+        "target": {
+          "contractId": "contracts.sns-fanout-consumer.secondary.behavior",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:fcb198225ce4bd863164af3b79f0e3c9f9d0be5dcdedbdbed7382b1c439af7fa",
+          "contractKind": "behavior-operation"
+        },
+        "preconditions": [
+          {
+            "kind": "contract-available",
+            "contract": {
+              "contractId": "contracts.sns-fanout-consumer.secondary.payload",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:48c330cd694521e83cb9b335920312f177c623825644c86152ab8e53c69dfc97",
+              "contractKind": "data-entity"
+            }
+          }
+        ],
+        "fixtureReferences": [],
+        "expectations": [
+          {
+            "expectationId": "expect_unit_payload_conformance",
+            "kind": "contract-conformance",
+            "contract": {
+              "contractId": "contracts.sns-fanout-consumer.secondary.payload",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:48c330cd694521e83cb9b335920312f177c623825644c86152ab8e53c69dfc97",
+              "contractKind": "data-entity"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "architectureDocument": {
+    "kind": "cloudmarkup.architecture-document",
+    "documentId": "document_event_multi",
+    "architectureId": "architecture_event_multi",
+    "revision": {
+      "revisionId": "revision_event_sns_fanout_consumer_primary_1",
+      "revisionNumber": 1,
+      "createdAt": "2026-08-17T12:00:00Z",
+      "createdBy": "actor_fixture",
+      "sourceDraftId": "draft_event_sns_fanout_consumer_primary_1"
+    },
+    "provider": {
+      "id": "aws.cloudmarkup",
+      "region": "us-east-1"
+    },
+    "catalog": {
+      "id": "aws.cloudmarkup.notes-api-catalog",
+      "version": "0.30.0",
+      "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+    },
+    "compilerCompatibility": {
+      "inputContractVersion": 1,
+      "minimumCompilerVersion": "1.0.0",
+      "maximumCompilerVersionExclusive": "2.0.0"
+    },
+    "metadata": {
+      "source": "template",
+      "serialization": {
+        "mediaType": "application/json",
+        "encoding": "utf-8",
+        "canonicalization": "cloudmarkup.canonical-json.v1"
+      }
+    },
+    "nodes": [
+      {
+        "id": "event_logs_policy_sns_fanout_multi_1",
+        "semantic": {
+          "deploymentKey": "event_logs_policy_sns_fanout_multi_1",
+          "serviceType": "aws.iam.policy-document",
+          "resourceType": "aws.iam.policy-document",
+          "configuration": {
+            "schemaId": "aws.iam.policy-document.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "policyKind": {
+                "kind": "string",
+                "value": "generated-permission"
+              },
+              "policyName": {
+                "kind": "string",
+                "value": "event_logs_policy_sns_fanout_multi_1"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_event_logs_sns_fanout_multi_1",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_event_logs_sns_fanout_multi_1"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "event logs policy sns fanout multi 1",
+          "position": {
+            "x": 80,
+            "y": 120
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sns_fanout_multi_1_statement",
+        "semantic": {
+          "deploymentKey": "event_logs_policy_sns_fanout_multi_1_statement",
+          "serviceType": "aws.iam.policy-statement",
+          "resourceType": "aws.iam.policy-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-statement.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "actions": {
+                "kind": "string-list",
+                "value": ["logs:CreateLogStream", "logs:PutLogEvents"]
+              },
+              "effect": {
+                "kind": "string",
+                "value": "allow"
+              },
+              "principalKind": {
+                "kind": "string",
+                "value": "none"
+              },
+              "principals": {
+                "kind": "string-list",
+                "value": []
+              },
+              "resourceExpressions": {
+                "kind": "string-list",
+                "value": []
+              },
+              "statementId": {
+                "kind": "string",
+                "value": "eventlogspolicysnsfanoutmulti1"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_event_logs_sns_fanout_multi_1",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_event_logs_sns_fanout_multi_1"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "event logs policy sns fanout multi 1 statement",
+          "position": {
+            "x": 400,
+            "y": 120
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sns_fanout_multi_2",
+        "semantic": {
+          "deploymentKey": "event_logs_policy_sns_fanout_multi_2",
+          "serviceType": "aws.iam.policy-document",
+          "resourceType": "aws.iam.policy-document",
+          "configuration": {
+            "schemaId": "aws.iam.policy-document.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "policyKind": {
+                "kind": "string",
+                "value": "generated-permission"
+              },
+              "policyName": {
+                "kind": "string",
+                "value": "event_logs_policy_sns_fanout_multi_2"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_event_logs_sns_fanout_multi_2",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_event_logs_sns_fanout_multi_2"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "event logs policy sns fanout multi 2",
+          "position": {
+            "x": 720,
+            "y": 120
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sns_fanout_multi_2_statement",
+        "semantic": {
+          "deploymentKey": "event_logs_policy_sns_fanout_multi_2_statement",
+          "serviceType": "aws.iam.policy-statement",
+          "resourceType": "aws.iam.policy-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-statement.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "actions": {
+                "kind": "string-list",
+                "value": ["logs:CreateLogStream", "logs:PutLogEvents"]
+              },
+              "effect": {
+                "kind": "string",
+                "value": "allow"
+              },
+              "principalKind": {
+                "kind": "string",
+                "value": "none"
+              },
+              "principals": {
+                "kind": "string-list",
+                "value": []
+              },
+              "resourceExpressions": {
+                "kind": "string-list",
+                "value": []
+              },
+              "statementId": {
+                "kind": "string",
+                "value": "eventlogspolicysnsfanoutmulti2"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_event_logs_sns_fanout_multi_2",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_event_logs_sns_fanout_multi_2"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "event logs policy sns fanout multi 2 statement",
+          "position": {
+            "x": 1040,
+            "y": 120
+          }
+        }
+      },
+      {
+        "id": "event_logs_sns_fanout_multi_1",
+        "semantic": {
+          "deploymentKey": "event_logs_sns_fanout_multi_1",
+          "serviceType": "aws.cloudwatch.log-group",
+          "resourceType": "aws.cloudwatch.log-group",
+          "configuration": {
+            "schemaId": "aws.cloudwatch.log-group.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "logClass": {
+                "kind": "string",
+                "value": "STANDARD"
+              },
+              "logGroupName": {
+                "kind": "string",
+                "value": "/aws/lambda/notes_handler"
+              },
+              "preventDestroy": {
+                "kind": "boolean",
+                "value": true
+              },
+              "retentionDays": {
+                "kind": "integer",
+                "value": 30
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "event logs sns fanout multi 1",
+          "position": {
+            "x": 80,
+            "y": 340
+          }
+        }
+      },
+      {
+        "id": "event_logs_sns_fanout_multi_2",
+        "semantic": {
+          "deploymentKey": "event_logs_sns_fanout_multi_2",
+          "serviceType": "aws.cloudwatch.log-group",
+          "resourceType": "aws.cloudwatch.log-group",
+          "configuration": {
+            "schemaId": "aws.cloudwatch.log-group.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "logClass": {
+                "kind": "string",
+                "value": "STANDARD"
+              },
+              "logGroupName": {
+                "kind": "string",
+                "value": "/aws/lambda/secondary_handler"
+              },
+              "preventDestroy": {
+                "kind": "boolean",
+                "value": true
+              },
+              "retentionDays": {
+                "kind": "integer",
+                "value": 30
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "event logs sns fanout multi 2",
+          "position": {
+            "x": 400,
+            "y": 340
+          }
+        }
+      },
+      {
+        "id": "fanout_topic",
+        "semantic": {
+          "deploymentKey": "fanout",
+          "serviceType": "aws.sns.topic",
+          "resourceType": "aws.sns.topic",
+          "configuration": {
+            "schemaId": "aws.sns.topic.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "contentBasedDeduplication": {
+                "kind": "boolean",
+                "value": false
+              },
+              "deletionProtectionEnabled": {
+                "kind": "boolean",
+                "value": true
+              },
+              "encryption": {
+                "kind": "string",
+                "value": "AWS_MANAGED_KMS"
+              },
+              "topicName": {
+                "kind": "string",
+                "value": "image-events"
+              },
+              "topicType": {
+                "kind": "string",
+                "value": "STANDARD"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "fanout topic",
+          "position": {
+            "x": 720,
+            "y": 340
+          }
+        }
+      },
+      {
+        "id": "lambda",
+        "semantic": {
+          "deploymentKey": "event_sns_fanout_consumer_primary",
+          "serviceType": "aws.lambda.function",
+          "resourceType": "aws.lambda.function",
+          "configuration": {
+            "schemaId": "aws.lambda.function.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "architecture": {
+                "kind": "string",
+                "value": "arm64"
+              },
+              "functionName": {
+                "kind": "string",
+                "value": "event_sns_fanout_consumer_primary"
+              },
+              "handler": {
+                "kind": "string",
+                "value": "index.handler"
+              },
+              "memoryMegabytes": {
+                "kind": "integer",
+                "value": 256
+              },
+              "reservedConcurrency": {
+                "kind": "integer",
+                "value": 10
+              },
+              "runtime": {
+                "kind": "string",
+                "value": "nodejs24.x"
+              },
+              "timeoutSeconds": {
+                "kind": "integer",
+                "value": 30
+              },
+              "tracingEnabled": {
+                "kind": "boolean",
+                "value": true
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "lambda",
+          "position": {
+            "x": 1040,
+            "y": 340
+          }
+        }
+      },
+      {
+        "id": "primary_sns_permission",
+        "semantic": {
+          "deploymentKey": "primary_sns_permission",
+          "serviceType": "aws.iam.policy-document",
+          "resourceType": "aws.iam.policy-document",
+          "configuration": {
+            "schemaId": "aws.iam.policy-document.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "policyKind": {
+                "kind": "string",
+                "value": "service-grant"
+              },
+              "policyName": {
+                "kind": "string",
+                "value": "primary_sns_permission"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_primary_lambda"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "primary sns permission",
+          "position": {
+            "x": 80,
+            "y": 560
+          }
+        }
+      },
+      {
+        "id": "primary_sns_permission_statement",
+        "semantic": {
+          "deploymentKey": "primary_sns_permission_statement",
+          "serviceType": "aws.iam.policy-statement",
+          "resourceType": "aws.iam.policy-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-statement.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "actions": {
+                "kind": "string-list",
+                "value": ["lambda:InvokeFunction"]
+              },
+              "effect": {
+                "kind": "string",
+                "value": "allow"
+              },
+              "principalKind": {
+                "kind": "string",
+                "value": "service"
+              },
+              "principals": {
+                "kind": "string-list",
+                "value": ["sns.amazonaws.com"]
+              },
+              "resourceExpressions": {
+                "kind": "string-list",
+                "value": []
+              },
+              "statementId": {
+                "kind": "string",
+                "value": "primarysnspermission"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_primary_lambda"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "primary sns permission statement",
+          "position": {
+            "x": 400,
+            "y": 560
+          }
+        }
+      },
+      {
+        "id": "primary_subscription",
+        "semantic": {
+          "deploymentKey": "primary_subscription",
+          "serviceType": "aws.sns.subscription",
+          "resourceType": "aws.sns.subscription",
+          "configuration": {
+            "schemaId": "aws.sns.subscription.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "deliverySemantics": {
+                "kind": "string",
+                "value": "AT_LEAST_ONCE"
+              },
+              "filterKeys": {
+                "kind": "string-list",
+                "value": []
+              },
+              "filterScope": {
+                "kind": "string",
+                "value": "NONE"
+              },
+              "protocol": {
+                "kind": "string",
+                "value": "LAMBDA"
+              },
+              "rawMessageDelivery": {
+                "kind": "boolean",
+                "value": false
+              },
+              "retryPolicy": {
+                "kind": "string",
+                "value": "SERVICE_MANAGED"
+              },
+              "subscriptionName": {
+                "kind": "string",
+                "value": "primary-consumer"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "primary subscription",
+          "position": {
+            "x": 720,
+            "y": 560
+          }
+        }
+      },
+      {
+        "id": "role",
+        "semantic": {
+          "deploymentKey": "notes_role",
+          "serviceType": "aws.iam.role",
+          "resourceType": "aws.iam.role",
+          "configuration": {
+            "schemaId": "aws.iam.role.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "maxSessionDurationSeconds": {
+                "kind": "integer",
+                "value": 3600
+              },
+              "roleName": {
+                "kind": "string",
+                "value": "notes-api-lambda-role"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "role",
+          "position": {
+            "x": 1040,
+            "y": 560
+          }
+        }
+      },
+      {
+        "id": "secondary_lambda",
+        "semantic": {
+          "deploymentKey": "event_sns_fanout_consumer_secondary",
+          "serviceType": "aws.lambda.function",
+          "resourceType": "aws.lambda.function",
+          "configuration": {
+            "schemaId": "aws.lambda.function.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "architecture": {
+                "kind": "string",
+                "value": "arm64"
+              },
+              "functionName": {
+                "kind": "string",
+                "value": "event_sns_fanout_consumer_secondary"
+              },
+              "handler": {
+                "kind": "string",
+                "value": "index.handler"
+              },
+              "memoryMegabytes": {
+                "kind": "integer",
+                "value": 256
+              },
+              "reservedConcurrency": {
+                "kind": "integer",
+                "value": 10
+              },
+              "runtime": {
+                "kind": "string",
+                "value": "nodejs24.x"
+              },
+              "timeoutSeconds": {
+                "kind": "integer",
+                "value": 30
+              },
+              "tracingEnabled": {
+                "kind": "boolean",
+                "value": true
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "secondary lambda",
+          "position": {
+            "x": 80,
+            "y": 780
+          }
+        }
+      },
+      {
+        "id": "secondary_role",
+        "semantic": {
+          "deploymentKey": "secondary_role",
+          "serviceType": "aws.iam.role",
+          "resourceType": "aws.iam.role",
+          "configuration": {
+            "schemaId": "aws.iam.role.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "maxSessionDurationSeconds": {
+                "kind": "integer",
+                "value": 3600
+              },
+              "roleName": {
+                "kind": "string",
+                "value": "fanout-secondary-role"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "secondary role",
+          "position": {
+            "x": 400,
+            "y": 780
+          }
+        }
+      },
+      {
+        "id": "secondary_sns_permission",
+        "semantic": {
+          "deploymentKey": "secondary_sns_permission",
+          "serviceType": "aws.iam.policy-document",
+          "resourceType": "aws.iam.policy-document",
+          "configuration": {
+            "schemaId": "aws.iam.policy-document.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "policyKind": {
+                "kind": "string",
+                "value": "service-grant"
+              },
+              "policyName": {
+                "kind": "string",
+                "value": "secondary_sns_permission"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_secondary_lambda"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "secondary sns permission",
+          "position": {
+            "x": 720,
+            "y": 780
+          }
+        }
+      },
+      {
+        "id": "secondary_sns_permission_statement",
+        "semantic": {
+          "deploymentKey": "secondary_sns_permission_statement",
+          "serviceType": "aws.iam.policy-statement",
+          "resourceType": "aws.iam.policy-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-statement.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "actions": {
+                "kind": "string-list",
+                "value": ["lambda:InvokeFunction"]
+              },
+              "effect": {
+                "kind": "string",
+                "value": "allow"
+              },
+              "principalKind": {
+                "kind": "string",
+                "value": "service"
+              },
+              "principals": {
+                "kind": "string-list",
+                "value": ["sns.amazonaws.com"]
+              },
+              "resourceExpressions": {
+                "kind": "string-list",
+                "value": []
+              },
+              "statementId": {
+                "kind": "string",
+                "value": "secondarysnspermission"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_secondary_lambda"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "secondary sns permission statement",
+          "position": {
+            "x": 1040,
+            "y": 780
+          }
+        }
+      },
+      {
+        "id": "secondary_subscription",
+        "semantic": {
+          "deploymentKey": "secondary_subscription",
+          "serviceType": "aws.sns.subscription",
+          "resourceType": "aws.sns.subscription",
+          "configuration": {
+            "schemaId": "aws.sns.subscription.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "deliverySemantics": {
+                "kind": "string",
+                "value": "AT_LEAST_ONCE"
+              },
+              "filterKeys": {
+                "kind": "string-list",
+                "value": []
+              },
+              "filterScope": {
+                "kind": "string",
+                "value": "NONE"
+              },
+              "protocol": {
+                "kind": "string",
+                "value": "LAMBDA"
+              },
+              "rawMessageDelivery": {
+                "kind": "boolean",
+                "value": false
+              },
+              "retryPolicy": {
+                "kind": "string",
+                "value": "SERVICE_MANAGED"
+              },
+              "subscriptionName": {
+                "kind": "string",
+                "value": "secondary-consumer"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "secondary subscription",
+          "position": {
+            "x": 80,
+            "y": 1000
+          }
+        }
+      },
+      {
+        "id": "secondary_trust_policy",
+        "semantic": {
+          "deploymentKey": "secondary_trust_policy",
+          "serviceType": "aws.iam.policy-document",
+          "resourceType": "aws.iam.policy-document",
+          "configuration": {
+            "schemaId": "aws.iam.policy-document.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "policyKind": {
+                "kind": "string",
+                "value": "trust"
+              },
+              "policyName": {
+                "kind": "string",
+                "value": "secondary_trust_policy"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_secondary_role"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "secondary trust policy",
+          "position": {
+            "x": 400,
+            "y": 1000
+          }
+        }
+      },
+      {
+        "id": "secondary_trust_policy_statement",
+        "semantic": {
+          "deploymentKey": "secondary_trust_policy_statement",
+          "serviceType": "aws.iam.policy-statement",
+          "resourceType": "aws.iam.policy-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-statement.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "actions": {
+                "kind": "string-list",
+                "value": ["sts:AssumeRole"]
+              },
+              "effect": {
+                "kind": "string",
+                "value": "allow"
+              },
+              "principalKind": {
+                "kind": "string",
+                "value": "service"
+              },
+              "principals": {
+                "kind": "string-list",
+                "value": ["lambda.amazonaws.com"]
+              },
+              "resourceExpressions": {
+                "kind": "string-list",
+                "value": []
+              },
+              "statementId": {
+                "kind": "string",
+                "value": "secondarytrustpolicy"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_secondary_role"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "secondary trust policy statement",
+          "position": {
+            "x": 720,
+            "y": 1000
+          }
+        }
+      },
+      {
+        "id": "trust_policy",
+        "semantic": {
+          "deploymentKey": "trust_policy",
+          "serviceType": "aws.iam.policy-document",
+          "resourceType": "aws.iam.policy-document",
+          "configuration": {
+            "schemaId": "aws.iam.policy-document.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "policyKind": {
+                "kind": "string",
+                "value": "trust"
+              },
+              "policyName": {
+                "kind": "string",
+                "value": "trust_policy"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_role_lambda"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "trust policy",
+          "position": {
+            "x": 1040,
+            "y": 1000
+          }
+        }
+      },
+      {
+        "id": "trust_policy_statement",
+        "semantic": {
+          "deploymentKey": "trust_policy_statement",
+          "serviceType": "aws.iam.policy-statement",
+          "resourceType": "aws.iam.policy-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-statement.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "actions": {
+                "kind": "string-list",
+                "value": ["sts:AssumeRole"]
+              },
+              "effect": {
+                "kind": "string",
+                "value": "allow"
+              },
+              "principalKind": {
+                "kind": "string",
+                "value": "service"
+              },
+              "principals": {
+                "kind": "string-list",
+                "value": ["lambda.amazonaws.com"]
+              },
+              "resourceExpressions": {
+                "kind": "string-list",
+                "value": []
+              },
+              "statementId": {
+                "kind": "string",
+                "value": "trustpolicy"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_role_lambda"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "trust policy statement",
+          "position": {
+            "x": 80,
+            "y": 1220
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge_event_logs_sns_fanout_multi_1",
+        "semantic": {
+          "source": {
+            "nodeId": "lambda",
+            "port": "aws.lambda.function.logs"
+          },
+          "target": {
+            "nodeId": "event_logs_sns_fanout_multi_1",
+            "port": "aws.cloudwatch.log-group.logs"
+          },
+          "relationshipType": "aws.lambda.writes-log-group",
+          "configuration": {
+            "schemaId": "aws.lambda.cloudwatch-logs.connection",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "deliveryMode": {
+                "kind": "string",
+                "value": "application-logs"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "edge_event_logs_sns_fanout_multi_2",
+        "semantic": {
+          "source": {
+            "nodeId": "secondary_lambda",
+            "port": "aws.lambda.function.logs"
+          },
+          "target": {
+            "nodeId": "event_logs_sns_fanout_multi_2",
+            "port": "aws.cloudwatch.log-group.logs"
+          },
+          "relationshipType": "aws.lambda.writes-log-group",
+          "configuration": {
+            "schemaId": "aws.lambda.cloudwatch-logs.connection",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "deliveryMode": {
+                "kind": "string",
+                "value": "application-logs"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "edge_primary_lambda",
+        "semantic": {
+          "source": {
+            "nodeId": "primary_subscription",
+            "port": "aws.sns.subscription-invokes-lambda.source"
+          },
+          "target": {
+            "nodeId": "lambda",
+            "port": "aws.sns.subscription-invokes-lambda.target"
+          },
+          "relationshipType": "aws.sns.subscription-invokes-lambda",
+          "configuration": {
+            "schemaId": "aws.eventing.delivery.connection",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "deliverySemantics": {
+                "kind": "string",
+                "value": "AT_LEAST_ONCE"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "edge_role_lambda",
+        "semantic": {
+          "source": {
+            "nodeId": "role",
+            "port": "aws.iam.role-assumed-by-lambda.source"
+          },
+          "target": {
+            "nodeId": "lambda",
+            "port": "aws.iam.role-assumed-by-lambda.target"
+          },
+          "relationshipType": "aws.iam.role-assumed-by-lambda",
+          "configuration": {
+            "schemaId": "aws.iam.lambda-role.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "edge_secondary_lambda",
+        "semantic": {
+          "source": {
+            "nodeId": "secondary_subscription",
+            "port": "aws.sns.subscription-invokes-lambda.source"
+          },
+          "target": {
+            "nodeId": "secondary_lambda",
+            "port": "aws.sns.subscription-invokes-lambda.target"
+          },
+          "relationshipType": "aws.sns.subscription-invokes-lambda",
+          "configuration": {
+            "schemaId": "aws.eventing.delivery.connection",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "deliverySemantics": {
+                "kind": "string",
+                "value": "AT_LEAST_ONCE"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "edge_secondary_role",
+        "semantic": {
+          "source": {
+            "nodeId": "secondary_role",
+            "port": "aws.iam.role-assumed-by-lambda.source"
+          },
+          "target": {
+            "nodeId": "secondary_lambda",
+            "port": "aws.iam.role-assumed-by-lambda.target"
+          },
+          "relationshipType": "aws.iam.role-assumed-by-lambda",
+          "configuration": {
+            "schemaId": "aws.iam.lambda-role.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "edge_topic_primary",
+        "semantic": {
+          "source": {
+            "nodeId": "fanout_topic",
+            "port": "aws.sns.topic-owns-subscription.source"
+          },
+          "target": {
+            "nodeId": "primary_subscription",
+            "port": "aws.sns.topic-owns-subscription.target"
+          },
+          "relationshipType": "aws.sns.topic-owns-subscription",
+          "configuration": {
+            "schemaId": "aws.sns.topic-owns-subscription.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "edge_topic_secondary",
+        "semantic": {
+          "source": {
+            "nodeId": "fanout_topic",
+            "port": "aws.sns.topic-owns-subscription.source"
+          },
+          "target": {
+            "nodeId": "secondary_subscription",
+            "port": "aws.sns.topic-owns-subscription.target"
+          },
+          "relationshipType": "aws.sns.topic-owns-subscription",
+          "configuration": {
+            "schemaId": "aws.sns.topic-owns-subscription.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sns_fanout_multi_1_membership",
+        "semantic": {
+          "source": {
+            "nodeId": "event_logs_policy_sns_fanout_multi_1_statement",
+            "port": "aws.iam.policy-statement.member"
+          },
+          "target": {
+            "nodeId": "event_logs_policy_sns_fanout_multi_1",
+            "port": "aws.iam.policy.statements"
+          },
+          "relationshipType": "aws.iam.policy-contains-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-membership.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sns_fanout_multi_1_owner",
+        "semantic": {
+          "source": {
+            "nodeId": "event_logs_policy_sns_fanout_multi_1",
+            "port": "aws.iam.policy.owner"
+          },
+          "target": {
+            "nodeId": "role",
+            "port": "aws.iam.role.permission"
+          },
+          "relationshipType": "aws.iam.role-owns-generated-permission",
+          "configuration": {
+            "schemaId": "aws.iam.role-owns-generated-permission.attachment",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sns_fanout_multi_1_scope",
+        "semantic": {
+          "source": {
+            "nodeId": "event_logs_policy_sns_fanout_multi_1_statement",
+            "port": "aws.iam.policy-statement.scope"
+          },
+          "target": {
+            "nodeId": "event_logs_sns_fanout_multi_1",
+            "port": "aws.cloudwatch.log-group.authorized"
+          },
+          "relationshipType": "aws.iam.authorizes-log-group",
+          "configuration": {
+            "schemaId": "aws.iam.policy-log-group.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sns_fanout_multi_2_membership",
+        "semantic": {
+          "source": {
+            "nodeId": "event_logs_policy_sns_fanout_multi_2_statement",
+            "port": "aws.iam.policy-statement.member"
+          },
+          "target": {
+            "nodeId": "event_logs_policy_sns_fanout_multi_2",
+            "port": "aws.iam.policy.statements"
+          },
+          "relationshipType": "aws.iam.policy-contains-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-membership.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sns_fanout_multi_2_owner",
+        "semantic": {
+          "source": {
+            "nodeId": "event_logs_policy_sns_fanout_multi_2",
+            "port": "aws.iam.policy.owner"
+          },
+          "target": {
+            "nodeId": "secondary_role",
+            "port": "aws.iam.role.permission"
+          },
+          "relationshipType": "aws.iam.role-owns-generated-permission",
+          "configuration": {
+            "schemaId": "aws.iam.role-owns-generated-permission.attachment",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sns_fanout_multi_2_scope",
+        "semantic": {
+          "source": {
+            "nodeId": "event_logs_policy_sns_fanout_multi_2_statement",
+            "port": "aws.iam.policy-statement.scope"
+          },
+          "target": {
+            "nodeId": "event_logs_sns_fanout_multi_2",
+            "port": "aws.cloudwatch.log-group.authorized"
+          },
+          "relationshipType": "aws.iam.authorizes-log-group",
+          "configuration": {
+            "schemaId": "aws.iam.policy-log-group.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "primary_sns_permission_membership",
+        "semantic": {
+          "source": {
+            "nodeId": "primary_sns_permission_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          },
+          "target": {
+            "nodeId": "primary_sns_permission",
+            "port": "aws.iam.policy-contains-statement.target"
+          },
+          "relationshipType": "aws.iam.policy-contains-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-membership.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "primary_sns_permission_owner",
+        "semantic": {
+          "source": {
+            "nodeId": "primary_sns_permission",
+            "port": "aws.lambda.owns-invocation-permission.source"
+          },
+          "target": {
+            "nodeId": "lambda",
+            "port": "aws.lambda.owns-invocation-permission.target"
+          },
+          "relationshipType": "aws.lambda.owns-invocation-permission",
+          "configuration": {
+            "schemaId": "aws.lambda.owns-invocation-permission.attachment",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "secondary_sns_permission_membership",
+        "semantic": {
+          "source": {
+            "nodeId": "secondary_sns_permission_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          },
+          "target": {
+            "nodeId": "secondary_sns_permission",
+            "port": "aws.iam.policy-contains-statement.target"
+          },
+          "relationshipType": "aws.iam.policy-contains-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-membership.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "secondary_sns_permission_owner",
+        "semantic": {
+          "source": {
+            "nodeId": "secondary_sns_permission",
+            "port": "aws.lambda.owns-invocation-permission.source"
+          },
+          "target": {
+            "nodeId": "secondary_lambda",
+            "port": "aws.lambda.owns-invocation-permission.target"
+          },
+          "relationshipType": "aws.lambda.owns-invocation-permission",
+          "configuration": {
+            "schemaId": "aws.lambda.owns-invocation-permission.attachment",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "secondary_trust_policy_membership",
+        "semantic": {
+          "source": {
+            "nodeId": "secondary_trust_policy_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          },
+          "target": {
+            "nodeId": "secondary_trust_policy",
+            "port": "aws.iam.policy-contains-statement.target"
+          },
+          "relationshipType": "aws.iam.policy-contains-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-membership.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "secondary_trust_policy_owner",
+        "semantic": {
+          "source": {
+            "nodeId": "secondary_trust_policy",
+            "port": "aws.iam.role-owns-trust-policy.source"
+          },
+          "target": {
+            "nodeId": "secondary_role",
+            "port": "aws.iam.role-owns-trust-policy.target"
+          },
+          "relationshipType": "aws.iam.role-owns-trust-policy",
+          "configuration": {
+            "schemaId": "aws.iam.role-owns-trust-policy.attachment",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "trust_policy_membership",
+        "semantic": {
+          "source": {
+            "nodeId": "trust_policy_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          },
+          "target": {
+            "nodeId": "trust_policy",
+            "port": "aws.iam.policy-contains-statement.target"
+          },
+          "relationshipType": "aws.iam.policy-contains-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-membership.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "trust_policy_owner",
+        "semantic": {
+          "source": {
+            "nodeId": "trust_policy",
+            "port": "aws.iam.role-owns-trust-policy.source"
+          },
+          "target": {
+            "nodeId": "role",
+            "port": "aws.iam.role-owns-trust-policy.target"
+          },
+          "relationshipType": "aws.iam.role-owns-trust-policy",
+          "configuration": {
+            "schemaId": "aws.iam.role-owns-trust-policy.attachment",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      }
+    ],
+    "variables": [
+      {
+        "id": "variable_stage",
+        "key": "stage",
+        "valueType": "string",
+        "required": false,
+        "defaultValue": {
+          "kind": "string",
+          "value": "test"
+        }
+      }
+    ],
+    "outputs": [],
+    "assumptions": [],
+    "unresolvedRequirements": [],
+    "applicationContracts": {
+      "kind": "cloudmarkup.application-contracts",
+      "schemaVersion": 1,
+      "contractSetId": "architecture_event_multi",
+      "documentId": "document_event_multi",
+      "revision": {
+        "revisionId": "revision_event_sns_fanout_consumer_primary_1",
+        "revisionNumber": 1,
+        "createdAt": "2026-08-17T12:00:00Z",
+        "createdBy": "actor_fixture"
+      },
+      "contracts": [
+        {
+          "contractId": "contracts.sns-fanout-consumer.primary.behavior",
+          "contractVersion": "1.0.0",
+          "displayName": "Curated event behavior",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "behavior-operation",
+          "capability": "cloudmarkup.event.sns-consume",
+          "input": {
+            "kind": "contract-reference",
+            "reference": {
+              "contractId": "contracts.sns-fanout-consumer.primary.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:3c49037b92120dde824dc2c245ef8e02c562548fa90e668a891b434d30cd463b",
+              "contractKind": "event-message"
+            }
+          },
+          "output": {
+            "kind": "none"
+          },
+          "failureOutcomes": [
+            {
+              "category": "application.validation",
+              "retryable": false,
+              "description": "The typed event contract was not satisfied."
+            }
+          ]
+        },
+        {
+          "contractId": "contracts.sns-fanout-consumer.primary.event",
+          "contractVersion": "1.0.0",
+          "displayName": "Curated event envelope",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "event-message",
+          "transportKind": "event",
+          "semanticName": "application.sns-fanout-consumer.primary.event",
+          "payload": {
+            "contractId": "contracts.sns-fanout-consumer.primary.payload",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:ebd93c0eb9e0ff8b530d8db08ed0f4231d6ae713c4915dbb2d8fe93a8b3f32d6",
+            "contractKind": "data-entity"
+          },
+          "headers": [],
+          "delivery": {
+            "ordering": "not-guaranteed",
+            "duplicates": "possible",
+            "delivery": "at-least-once"
+          }
+        },
+        {
+          "contractId": "contracts.sns-fanout-consumer.primary.payload",
+          "contractVersion": "1.0.0",
+          "displayName": "Curated event payload",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "data-entity",
+          "semanticName": "application.sns-fanout-consumer.primary.payload",
+          "storageIntent": "transient",
+          "fields": [
+            {
+              "name": "correlationId",
+              "fieldType": {
+                "kind": "scalar",
+                "scalarType": "string"
+              },
+              "required": false,
+              "nullable": false,
+              "classification": "internal"
+            },
+            {
+              "name": "eventId",
+              "fieldType": {
+                "kind": "scalar",
+                "scalarType": "string"
+              },
+              "required": true,
+              "nullable": false,
+              "classification": "internal"
+            }
+          ],
+          "indexes": [
+            {
+              "indexId": "index_event_sns_fanout_consumer_primary_primary",
+              "name": "primary",
+              "kind": "primary",
+              "partitionFields": ["eventId"],
+              "sortFields": []
+            }
+          ],
+          "supportedOperations": ["consume"]
+        },
+        {
+          "contractId": "contracts.sns-fanout-consumer.primary.test.contract",
+          "contractVersion": "1.0.0",
+          "displayName": "contract event contract test",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "test-case",
+          "level": "contract",
+          "target": {
+            "contractId": "contracts.sns-fanout-consumer.primary.behavior",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:b1a2e3e8848086d09c487b44f97a076bec253125c26449133a467374b72dab4a",
+            "contractKind": "behavior-operation"
+          },
+          "preconditions": [
+            {
+              "kind": "contract-available",
+              "contract": {
+                "contractId": "contracts.sns-fanout-consumer.primary.event",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:3c49037b92120dde824dc2c245ef8e02c562548fa90e668a891b434d30cd463b",
+                "contractKind": "event-message"
+              }
+            }
+          ],
+          "fixtureReferences": [],
+          "expectations": [
+            {
+              "expectationId": "expect_contract_validation",
+              "kind": "error-category",
+              "category": "application.validation"
+            }
+          ]
+        },
+        {
+          "contractId": "contracts.sns-fanout-consumer.primary.test.unit",
+          "contractVersion": "1.0.0",
+          "displayName": "unit event contract test",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "test-case",
+          "level": "unit",
+          "target": {
+            "contractId": "contracts.sns-fanout-consumer.primary.behavior",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:b1a2e3e8848086d09c487b44f97a076bec253125c26449133a467374b72dab4a",
+            "contractKind": "behavior-operation"
+          },
+          "preconditions": [
+            {
+              "kind": "contract-available",
+              "contract": {
+                "contractId": "contracts.sns-fanout-consumer.primary.payload",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:ebd93c0eb9e0ff8b530d8db08ed0f4231d6ae713c4915dbb2d8fe93a8b3f32d6",
+                "contractKind": "data-entity"
+              }
+            }
+          ],
+          "fixtureReferences": [],
+          "expectations": [
+            {
+              "expectationId": "expect_unit_payload_conformance",
+              "kind": "contract-conformance",
+              "contract": {
+                "contractId": "contracts.sns-fanout-consumer.primary.payload",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:ebd93c0eb9e0ff8b530d8db08ed0f4231d6ae713c4915dbb2d8fe93a8b3f32d6",
+                "contractKind": "data-entity"
+              }
+            }
+          ]
+        },
+        {
+          "contractId": "contracts.sns-fanout-consumer.secondary.behavior",
+          "contractVersion": "1.0.0",
+          "displayName": "Curated event behavior",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "behavior-operation",
+          "capability": "cloudmarkup.event.sns-consume",
+          "input": {
+            "kind": "contract-reference",
+            "reference": {
+              "contractId": "contracts.sns-fanout-consumer.secondary.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:3fc70c8112778a6d93cc7e8ff40691fb5c38ce97163a4fb6a196aab17d5e72ae",
+              "contractKind": "event-message"
+            }
+          },
+          "output": {
+            "kind": "none"
+          },
+          "failureOutcomes": [
+            {
+              "category": "application.validation",
+              "retryable": false,
+              "description": "The typed event contract was not satisfied."
+            }
+          ]
+        },
+        {
+          "contractId": "contracts.sns-fanout-consumer.secondary.event",
+          "contractVersion": "1.0.0",
+          "displayName": "Curated event envelope",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "event-message",
+          "transportKind": "event",
+          "semanticName": "application.sns-fanout-consumer.secondary.event",
+          "payload": {
+            "contractId": "contracts.sns-fanout-consumer.secondary.payload",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:48c330cd694521e83cb9b335920312f177c623825644c86152ab8e53c69dfc97",
+            "contractKind": "data-entity"
+          },
+          "headers": [],
+          "delivery": {
+            "ordering": "not-guaranteed",
+            "duplicates": "possible",
+            "delivery": "at-least-once"
+          }
+        },
+        {
+          "contractId": "contracts.sns-fanout-consumer.secondary.payload",
+          "contractVersion": "1.0.0",
+          "displayName": "Curated event payload",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "data-entity",
+          "semanticName": "application.sns-fanout-consumer.secondary.payload",
+          "storageIntent": "transient",
+          "fields": [
+            {
+              "name": "correlationId",
+              "fieldType": {
+                "kind": "scalar",
+                "scalarType": "string"
+              },
+              "required": false,
+              "nullable": false,
+              "classification": "internal"
+            },
+            {
+              "name": "eventId",
+              "fieldType": {
+                "kind": "scalar",
+                "scalarType": "string"
+              },
+              "required": true,
+              "nullable": false,
+              "classification": "internal"
+            }
+          ],
+          "indexes": [
+            {
+              "indexId": "index_event_sns_fanout_consumer_secondary_primary",
+              "name": "primary",
+              "kind": "primary",
+              "partitionFields": ["eventId"],
+              "sortFields": []
+            }
+          ],
+          "supportedOperations": ["consume"]
+        },
+        {
+          "contractId": "contracts.sns-fanout-consumer.secondary.test.contract",
+          "contractVersion": "1.0.0",
+          "displayName": "contract event contract test",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "test-case",
+          "level": "contract",
+          "target": {
+            "contractId": "contracts.sns-fanout-consumer.secondary.behavior",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:fcb198225ce4bd863164af3b79f0e3c9f9d0be5dcdedbdbed7382b1c439af7fa",
+            "contractKind": "behavior-operation"
+          },
+          "preconditions": [
+            {
+              "kind": "contract-available",
+              "contract": {
+                "contractId": "contracts.sns-fanout-consumer.secondary.event",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:3fc70c8112778a6d93cc7e8ff40691fb5c38ce97163a4fb6a196aab17d5e72ae",
+                "contractKind": "event-message"
+              }
+            }
+          ],
+          "fixtureReferences": [],
+          "expectations": [
+            {
+              "expectationId": "expect_contract_validation",
+              "kind": "error-category",
+              "category": "application.validation"
+            }
+          ]
+        },
+        {
+          "contractId": "contracts.sns-fanout-consumer.secondary.test.unit",
+          "contractVersion": "1.0.0",
+          "displayName": "unit event contract test",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "test-case",
+          "level": "unit",
+          "target": {
+            "contractId": "contracts.sns-fanout-consumer.secondary.behavior",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:fcb198225ce4bd863164af3b79f0e3c9f9d0be5dcdedbdbed7382b1c439af7fa",
+            "contractKind": "behavior-operation"
+          },
+          "preconditions": [
+            {
+              "kind": "contract-available",
+              "contract": {
+                "contractId": "contracts.sns-fanout-consumer.secondary.payload",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:48c330cd694521e83cb9b335920312f177c623825644c86152ab8e53c69dfc97",
+                "contractKind": "data-entity"
+              }
+            }
+          ],
+          "fixtureReferences": [],
+          "expectations": [
+            {
+              "expectationId": "expect_unit_payload_conformance",
+              "kind": "contract-conformance",
+              "contract": {
+                "contractId": "contracts.sns-fanout-consumer.secondary.payload",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:48c330cd694521e83cb9b335920312f177c623825644c86152ab8e53c69dfc97",
+                "contractKind": "data-entity"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "externalResources": {
+      "kind": "cloudmarkup.external-resource-reference-document",
+      "schemaVersion": 1,
+      "documentId": "document_event_multi",
+      "architectureId": "architecture_event_multi",
+      "revision": {
+        "revisionId": "revision_event_sns_fanout_consumer_primary_1",
+        "revisionNumber": 1,
+        "createdAt": "2026-08-17T12:00:00Z",
+        "createdBy": "actor_fixture"
+      },
+      "resources": []
+    },
+    "schemaVersion": 3,
+    "workloadBehavior": {
+      "contractVersion": 2,
+      "workloads": [
+        {
+          "id": "workload_event_sns_fanout_consumer_primary",
+          "owningNodeId": "lambda",
+          "implementation": {
+            "mode": "complete-supported-pattern",
+            "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+            "handler": "index.handler",
+            "sourceOwnership": "cloudmarkup",
+            "supportedPattern": {
+              "patternId": "cloudmarkup.pattern.aws-lambda-curated-event-driven",
+              "patternVersion": "1.0.0",
+              "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686"
+            }
+          },
+          "operations": [
+            {
+              "id": "operation_event_sns_fanout_consumer_primary",
+              "capability": "cloudmarkup.event.sns-consume",
+              "inputContract": {
+                "kind": "contract-reference",
+                "reference": {
+                  "contractId": "contracts.sns-fanout-consumer.primary.event",
+                  "contractVersion": "1.0.0",
+                  "digest": "sha256:3c49037b92120dde824dc2c245ef8e02c562548fa90e668a891b434d30cd463b"
+                }
+              },
+              "outputContract": {
+                "kind": "none"
+              }
+            }
+          ],
+          "triggers": [
+            {
+              "id": "trigger_event_sns_fanout_consumer_primary",
+              "edgeId": "edge_primary_lambda",
+              "targetOperationId": "operation_event_sns_fanout_consumer_primary"
+            }
+          ],
+          "downstreamActions": [],
+          "environment": [
+            {
+              "id": "environment_stage",
+              "name": "APP_STAGE",
+              "value": {
+                "kind": "variable-reference",
+                "variableId": "variable_stage"
+              }
+            }
+          ],
+          "errorBehavior": {
+            "mode": "fail-invocation"
+          },
+          "executionAssumptions": {
+            "timeout": {
+              "kind": "duration",
+              "milliseconds": 30000
+            },
+            "retry": {
+              "kind": "bounded",
+              "maximumAttempts": 5
+            }
+          },
+          "triggerDispatch": {
+            "mode": "generated-supported",
+            "dispatcherId": "cloudmarkup.event-trigger-dispatcher",
+            "dispatcherVersion": "1.0.0",
+            "dispatcherOperationId": "operation_event_sns_fanout_consumer_primary"
+          },
+          "unresolvedRequirementIds": [],
+          "behaviorContracts": [
+            {
+              "contractId": "contracts.sns-fanout-consumer.primary.behavior",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:b1a2e3e8848086d09c487b44f97a076bec253125c26449133a467374b72dab4a",
+              "contractKind": "behavior-operation"
+            }
+          ],
+          "languageFamily": "cloudmarkup.language.typescript",
+          "entrypoints": [
+            {
+              "entrypointId": "entrypoint_event_sns_fanout_consumer_primary",
+              "kind": "event-handler",
+              "operationId": "operation_event_sns_fanout_consumer_primary",
+              "handler": "index.handler"
+            }
+          ],
+          "httpRoutes": [],
+          "eventBindings": [
+            {
+              "bindingId": "event_event_sns_fanout_consumer_primary",
+              "direction": "inbound",
+              "transportKind": "event",
+              "operationId": "operation_event_sns_fanout_consumer_primary",
+              "edgeId": "edge_primary_lambda",
+              "contract": {
+                "contractId": "contracts.sns-fanout-consumer.primary.event",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:3c49037b92120dde824dc2c245ef8e02c562548fa90e668a891b434d30cd463b",
+                "contractKind": "event-message"
+              }
+            }
+          ],
+          "schedules": [],
+          "dataBindings": [],
+          "authorization": [],
+          "idempotency": [
+            {
+              "policyId": "idempotency_event_sns_fanout_consumer_primary",
+              "mode": "not-required",
+              "operationIds": ["operation_event_sns_fanout_consumer_primary"]
+            }
+          ],
+          "observability": {
+            "signals": ["logs"],
+            "healthChecks": [],
+            "smokeTests": []
+          },
+          "tests": [
+            {
+              "bindingId": "test_contract_event_sns_fanout_consumer_primary",
+              "level": "contract",
+              "testCase": {
+                "contractId": "contracts.sns-fanout-consumer.primary.test.contract",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:dd65f3a97faecf6326b35ce4c5964208ff5f03a15d00d460ebcc90b139626abc",
+                "contractKind": "test-case"
+              },
+              "requiredForCoverage": true
+            },
+            {
+              "bindingId": "test_unit_event_sns_fanout_consumer_primary",
+              "level": "unit",
+              "testCase": {
+                "contractId": "contracts.sns-fanout-consumer.primary.test.unit",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:266546c99261f796c92803f402325b8f93bae891ce7ac5a90dfb589f645ce3b0",
+                "contractKind": "test-case"
+              },
+              "requiredForCoverage": true
+            }
+          ],
+          "sourceOwnership": [
+            {
+              "declarationId": "ownership_event_sns_fanout_consumer_primary_extension",
+              "path": "application/src/functions/event_sns_fanout_consumer_primary/extensions/custom.ts",
+              "pathKind": "file",
+              "ownership": "user-owned",
+              "ownerId": "application.sns-fanout-consumer.primary.owner",
+              "regeneration": "never",
+              "conflictBehavior": "preserve-user-content",
+              "semanticDiff": {
+                "strategy": "structured-language"
+              }
+            }
+          ],
+          "extensionPoints": [
+            {
+              "extensionPointId": "application.sns-fanout-consumer.primary.extensions",
+              "path": "application/src/functions/event_sns_fanout_consumer_primary/extensions/custom.ts",
+              "kind": "module",
+              "permittedOwnership": ["approved-extension", "user-owned"],
+              "conflictBehavior": "require-reviewed-resolution"
+            }
+          ],
+          "extensions": [],
+          "implementationRequirements": [],
+          "compatibility": {
+            "applicationGenerators": [
+              {
+                "generatorId": "cloudmarkup.event-application-generator",
+                "minimumVersion": "1.0.0",
+                "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+                "templateVersion": "1.0.0",
+                "supportedModes": [
+                  "complete-supported-pattern",
+                  "generated-starter"
+                ]
+              }
+            ],
+            "modelGateways": []
+          },
+          "provenance": {
+            "source": "deterministic-generator",
+            "generatorId": "cloudmarkup.event-application-generator",
+            "generatorVersion": "1.0.0",
+            "inputDigest": "sha256:8372f59cf8f102e1c557063fa8097c367b8a5251224df721a4f268d565c2b6df"
+          }
+        },
+        {
+          "id": "workload_event_sns_fanout_consumer_secondary",
+          "owningNodeId": "secondary_lambda",
+          "implementation": {
+            "mode": "complete-supported-pattern",
+            "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+            "handler": "index.handler",
+            "sourceOwnership": "cloudmarkup",
+            "supportedPattern": {
+              "patternId": "cloudmarkup.pattern.aws-lambda-curated-event-driven",
+              "patternVersion": "1.0.0",
+              "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686"
+            }
+          },
+          "operations": [
+            {
+              "id": "operation_event_sns_fanout_consumer_secondary",
+              "capability": "cloudmarkup.event.sns-consume",
+              "inputContract": {
+                "kind": "contract-reference",
+                "reference": {
+                  "contractId": "contracts.sns-fanout-consumer.secondary.event",
+                  "contractVersion": "1.0.0",
+                  "digest": "sha256:3fc70c8112778a6d93cc7e8ff40691fb5c38ce97163a4fb6a196aab17d5e72ae"
+                }
+              },
+              "outputContract": {
+                "kind": "none"
+              }
+            }
+          ],
+          "triggers": [
+            {
+              "id": "trigger_event_sns_fanout_consumer_secondary",
+              "edgeId": "edge_secondary_lambda",
+              "targetOperationId": "operation_event_sns_fanout_consumer_secondary"
+            }
+          ],
+          "downstreamActions": [],
+          "environment": [
+            {
+              "id": "environment_stage_secondary",
+              "name": "APP_STAGE",
+              "value": {
+                "kind": "variable-reference",
+                "variableId": "variable_stage"
+              }
+            }
+          ],
+          "errorBehavior": {
+            "mode": "fail-invocation"
+          },
+          "executionAssumptions": {
+            "timeout": {
+              "kind": "duration",
+              "milliseconds": 30000
+            },
+            "retry": {
+              "kind": "bounded",
+              "maximumAttempts": 5
+            }
+          },
+          "triggerDispatch": {
+            "mode": "generated-supported",
+            "dispatcherId": "cloudmarkup.event-trigger-dispatcher",
+            "dispatcherVersion": "1.0.0",
+            "dispatcherOperationId": "operation_event_sns_fanout_consumer_secondary"
+          },
+          "unresolvedRequirementIds": [],
+          "behaviorContracts": [
+            {
+              "contractId": "contracts.sns-fanout-consumer.secondary.behavior",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:fcb198225ce4bd863164af3b79f0e3c9f9d0be5dcdedbdbed7382b1c439af7fa",
+              "contractKind": "behavior-operation"
+            }
+          ],
+          "languageFamily": "cloudmarkup.language.typescript",
+          "entrypoints": [
+            {
+              "entrypointId": "entrypoint_event_sns_fanout_consumer_secondary",
+              "kind": "event-handler",
+              "operationId": "operation_event_sns_fanout_consumer_secondary",
+              "handler": "index.handler"
+            }
+          ],
+          "httpRoutes": [],
+          "eventBindings": [
+            {
+              "bindingId": "event_event_sns_fanout_consumer_secondary",
+              "direction": "inbound",
+              "transportKind": "event",
+              "operationId": "operation_event_sns_fanout_consumer_secondary",
+              "edgeId": "edge_secondary_lambda",
+              "contract": {
+                "contractId": "contracts.sns-fanout-consumer.secondary.event",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:3fc70c8112778a6d93cc7e8ff40691fb5c38ce97163a4fb6a196aab17d5e72ae",
+                "contractKind": "event-message"
+              }
+            }
+          ],
+          "schedules": [],
+          "dataBindings": [],
+          "authorization": [],
+          "idempotency": [
+            {
+              "policyId": "idempotency_event_sns_fanout_consumer_secondary",
+              "mode": "not-required",
+              "operationIds": ["operation_event_sns_fanout_consumer_secondary"]
+            }
+          ],
+          "observability": {
+            "signals": ["logs"],
+            "healthChecks": [],
+            "smokeTests": []
+          },
+          "tests": [
+            {
+              "bindingId": "test_contract_event_sns_fanout_consumer_secondary",
+              "level": "contract",
+              "testCase": {
+                "contractId": "contracts.sns-fanout-consumer.secondary.test.contract",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:98f303d09acf9b542dd1ff31e74c7ba2ed4e8287e5df0423bf9dabc75c7e3435",
+                "contractKind": "test-case"
+              },
+              "requiredForCoverage": true
+            },
+            {
+              "bindingId": "test_unit_event_sns_fanout_consumer_secondary",
+              "level": "unit",
+              "testCase": {
+                "contractId": "contracts.sns-fanout-consumer.secondary.test.unit",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:85e3c288e43509542b9158c510e8351e9c12f2cfb1f320d3c3e459302e2e9a41",
+                "contractKind": "test-case"
+              },
+              "requiredForCoverage": true
+            }
+          ],
+          "sourceOwnership": [
+            {
+              "declarationId": "ownership_event_sns_fanout_consumer_secondary_extension",
+              "path": "application/src/functions/event_sns_fanout_consumer_secondary/extensions/custom.ts",
+              "pathKind": "file",
+              "ownership": "user-owned",
+              "ownerId": "application.sns-fanout-consumer.secondary.owner",
+              "regeneration": "never",
+              "conflictBehavior": "preserve-user-content",
+              "semanticDiff": {
+                "strategy": "structured-language"
+              }
+            }
+          ],
+          "extensionPoints": [
+            {
+              "extensionPointId": "application.sns-fanout-consumer.secondary.extensions",
+              "path": "application/src/functions/event_sns_fanout_consumer_secondary/extensions/custom.ts",
+              "kind": "module",
+              "permittedOwnership": ["approved-extension", "user-owned"],
+              "conflictBehavior": "require-reviewed-resolution"
+            }
+          ],
+          "extensions": [],
+          "implementationRequirements": [],
+          "compatibility": {
+            "applicationGenerators": [
+              {
+                "generatorId": "cloudmarkup.event-application-generator",
+                "minimumVersion": "1.0.0",
+                "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+                "templateVersion": "1.0.0",
+                "supportedModes": [
+                  "complete-supported-pattern",
+                  "generated-starter"
+                ]
+              }
+            ],
+            "modelGateways": []
+          },
+          "provenance": {
+            "source": "deterministic-generator",
+            "generatorId": "cloudmarkup.event-application-generator",
+            "generatorVersion": "1.0.0",
+            "inputDigest": "sha256:52e06a1823cc8b3a93f4d66086633046b104d60d420cb5c9eeb5af5ac39a1da6"
+          }
+        }
+      ]
+    }
+  },
+  "case": "sns-fanout-multi",
+  "solutionRevision": {
+    "aiExtensionIds": [],
+    "architecture": {
+      "contentHash": "sha256:8b96cd8dbf916dc4d7d525f4ca55f9e28cd181011dd1fcf4d14e2d44ea615e99",
+      "documentHash": "sha256:745008e7250ecb6a72da9f1eba54fd6af01525efc41b59a425189be33ee02028",
+      "documentKind": "cloudmarkup.architecture-document",
+      "revisionId": "revision_event_sns_fanout_consumer_primary_1",
+      "schemaVersion": 3,
+      "visualHash": "sha256:c139d36ddce7505892967e359fb8f7425af77b2b42033ba57c2a6a81986fd43e"
+    },
+    "assumptions": [],
+    "contractVersion": 1,
+    "contracts": {
+      "contentHash": "sha256:11e31479018fb69bb209dc64b9c1dad20598b71582aeb6d1773233cc073b7a9f",
+      "contractVersion": 1,
+      "recordHashes": [
+        "sha256:266546c99261f796c92803f402325b8f93bae891ce7ac5a90dfb589f645ce3b0",
+        "sha256:3c49037b92120dde824dc2c245ef8e02c562548fa90e668a891b434d30cd463b",
+        "sha256:3fc70c8112778a6d93cc7e8ff40691fb5c38ce97163a4fb6a196aab17d5e72ae",
+        "sha256:48c330cd694521e83cb9b335920312f177c623825644c86152ab8e53c69dfc97",
+        "sha256:85e3c288e43509542b9158c510e8351e9c12f2cfb1f320d3c3e459302e2e9a41",
+        "sha256:98f303d09acf9b542dd1ff31e74c7ba2ed4e8287e5df0423bf9dabc75c7e3435",
+        "sha256:b1a2e3e8848086d09c487b44f97a076bec253125c26449133a467374b72dab4a",
+        "sha256:dd65f3a97faecf6326b35ce4c5964208ff5f03a15d00d460ebcc90b139626abc",
+        "sha256:ebd93c0eb9e0ff8b530d8db08ed0f4231d6ae713c4915dbb2d8fe93a8b3f32d6",
+        "sha256:fcb198225ce4bd863164af3b79f0e3c9f9d0be5dcdedbdbed7382b1c439af7fa"
+      ]
+    },
+    "createdAt": "2026-08-17T12:00:00Z",
+    "createdBy": "actor_fixture",
+    "evidenceIdsAtFreeze": [],
+    "externalResources": {
+      "contentHash": "sha256:2c35662207a73ebead58a1d0c26fc7f16f96ae56ea40aeb2a6a0aeccb5842f4c",
+      "contractVersion": 1
+    },
+    "generationCoverage": {
+      "contractVersion": 1,
+      "evidence": [],
+      "missingRequirements": [
+        "deterministic-application-generation",
+        "application-build-and-tests",
+        "application-security-checks"
+      ],
+      "solutionRevisionId": "solution_event_multi_revision_1",
+      "state": "infrastructure-only",
+      "workloads": []
+    },
+    "intent": {
+      "reason": "This fixture exercises deterministic event application generation.",
+      "state": "not-applicable"
+    },
+    "issueIdsAtFreeze": [],
+    "kind": "cloudmarkup.solution-revision-manifest",
+    "repositoryObservations": [],
+    "solutionRevisionId": "solution_event_multi_revision_1",
+    "sourceOwnership": [],
+    "unresolvedDecisionIds": [],
+    "versions": {
+      "applicationGenerator": {
+        "state": "pinned",
+        "tool": {
+          "digest": "sha256:7cf9b85f31f427ac5f4dbe095bb227c10435fc86c84d8318ff41c88d5540e391",
+          "id": "cloudmarkup.event-application-generator",
+          "version": "1.0.0"
+        }
+      },
+      "catalog": {
+        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+        "id": "aws.cloudmarkup.notes-api-catalog",
+        "version": "0.30.0"
+      },
+      "compiler": {
+        "state": "pinned",
+        "tool": {
+          "digest": "sha256:2c25a5610c825d171a167a38201c3090aa2278071ddd648bb957e67b7b98f203",
+          "id": "cloudmarkup.iac-compiler",
+          "version": "1.2.1"
+        }
+      },
+      "diagramRenderer": {
+        "state": "pinned",
+        "tool": {
+          "digest": "sha256:867c5704a20788af857059792e2427a88004f61ff66ede5c27f7236b7cb7f812",
+          "id": "cloudmarkup.diagram-renderer",
+          "version": "1.0.0"
+        }
+      },
+      "importer": {
+        "reason": "No repository import is used by the synthetic fixture.",
+        "state": "not-applicable"
+      },
+      "modelPrompt": {
+        "reason": "The deterministic generator never calls a model.",
+        "state": "not-applicable"
+      },
+      "policy": []
+    },
+    "workload": {
+      "contentHash": "sha256:9a3486918f64576f540c075c1cb24693c5f65275801ed8dfc277cfa82ba5f69b",
+      "contractVersion": 2
+    }
+  },
+  "workloadBehavior": {
+    "contractVersion": 2,
+    "workloads": [
+      {
+        "id": "workload_event_sns_fanout_consumer_primary",
+        "owningNodeId": "lambda",
+        "implementation": {
+          "mode": "complete-supported-pattern",
+          "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+          "handler": "index.handler",
+          "sourceOwnership": "cloudmarkup",
+          "supportedPattern": {
+            "patternId": "cloudmarkup.pattern.aws-lambda-curated-event-driven",
+            "patternVersion": "1.0.0",
+            "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686"
+          }
+        },
+        "operations": [
+          {
+            "id": "operation_event_sns_fanout_consumer_primary",
+            "capability": "cloudmarkup.event.sns-consume",
+            "inputContract": {
+              "kind": "contract-reference",
+              "reference": {
+                "contractId": "contracts.sns-fanout-consumer.primary.event",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:3c49037b92120dde824dc2c245ef8e02c562548fa90e668a891b434d30cd463b"
+              }
+            },
+            "outputContract": {
+              "kind": "none"
+            }
+          }
+        ],
+        "triggers": [
+          {
+            "id": "trigger_event_sns_fanout_consumer_primary",
+            "edgeId": "edge_primary_lambda",
+            "targetOperationId": "operation_event_sns_fanout_consumer_primary"
+          }
+        ],
+        "downstreamActions": [],
+        "environment": [
+          {
+            "id": "environment_stage",
+            "name": "APP_STAGE",
+            "value": {
+              "kind": "variable-reference",
+              "variableId": "variable_stage"
+            }
+          }
+        ],
+        "errorBehavior": {
+          "mode": "fail-invocation"
+        },
+        "executionAssumptions": {
+          "timeout": {
+            "kind": "duration",
+            "milliseconds": 30000
+          },
+          "retry": {
+            "kind": "bounded",
+            "maximumAttempts": 5
+          }
+        },
+        "triggerDispatch": {
+          "mode": "generated-supported",
+          "dispatcherId": "cloudmarkup.event-trigger-dispatcher",
+          "dispatcherVersion": "1.0.0",
+          "dispatcherOperationId": "operation_event_sns_fanout_consumer_primary"
+        },
+        "unresolvedRequirementIds": [],
+        "behaviorContracts": [
+          {
+            "contractId": "contracts.sns-fanout-consumer.primary.behavior",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:b1a2e3e8848086d09c487b44f97a076bec253125c26449133a467374b72dab4a",
+            "contractKind": "behavior-operation"
+          }
+        ],
+        "languageFamily": "cloudmarkup.language.typescript",
+        "entrypoints": [
+          {
+            "entrypointId": "entrypoint_event_sns_fanout_consumer_primary",
+            "kind": "event-handler",
+            "operationId": "operation_event_sns_fanout_consumer_primary",
+            "handler": "index.handler"
+          }
+        ],
+        "httpRoutes": [],
+        "eventBindings": [
+          {
+            "bindingId": "event_event_sns_fanout_consumer_primary",
+            "direction": "inbound",
+            "transportKind": "event",
+            "operationId": "operation_event_sns_fanout_consumer_primary",
+            "edgeId": "edge_primary_lambda",
+            "contract": {
+              "contractId": "contracts.sns-fanout-consumer.primary.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:3c49037b92120dde824dc2c245ef8e02c562548fa90e668a891b434d30cd463b",
+              "contractKind": "event-message"
+            }
+          }
+        ],
+        "schedules": [],
+        "dataBindings": [],
+        "authorization": [],
+        "idempotency": [
+          {
+            "policyId": "idempotency_event_sns_fanout_consumer_primary",
+            "mode": "not-required",
+            "operationIds": ["operation_event_sns_fanout_consumer_primary"]
+          }
+        ],
+        "observability": {
+          "signals": ["logs"],
+          "healthChecks": [],
+          "smokeTests": []
+        },
+        "tests": [
+          {
+            "bindingId": "test_contract_event_sns_fanout_consumer_primary",
+            "level": "contract",
+            "testCase": {
+              "contractId": "contracts.sns-fanout-consumer.primary.test.contract",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:dd65f3a97faecf6326b35ce4c5964208ff5f03a15d00d460ebcc90b139626abc",
+              "contractKind": "test-case"
+            },
+            "requiredForCoverage": true
+          },
+          {
+            "bindingId": "test_unit_event_sns_fanout_consumer_primary",
+            "level": "unit",
+            "testCase": {
+              "contractId": "contracts.sns-fanout-consumer.primary.test.unit",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:266546c99261f796c92803f402325b8f93bae891ce7ac5a90dfb589f645ce3b0",
+              "contractKind": "test-case"
+            },
+            "requiredForCoverage": true
+          }
+        ],
+        "sourceOwnership": [
+          {
+            "declarationId": "ownership_event_sns_fanout_consumer_primary_extension",
+            "path": "application/src/functions/event_sns_fanout_consumer_primary/extensions/custom.ts",
+            "pathKind": "file",
+            "ownership": "user-owned",
+            "ownerId": "application.sns-fanout-consumer.primary.owner",
+            "regeneration": "never",
+            "conflictBehavior": "preserve-user-content",
+            "semanticDiff": {
+              "strategy": "structured-language"
+            }
+          }
+        ],
+        "extensionPoints": [
+          {
+            "extensionPointId": "application.sns-fanout-consumer.primary.extensions",
+            "path": "application/src/functions/event_sns_fanout_consumer_primary/extensions/custom.ts",
+            "kind": "module",
+            "permittedOwnership": ["approved-extension", "user-owned"],
+            "conflictBehavior": "require-reviewed-resolution"
+          }
+        ],
+        "extensions": [],
+        "implementationRequirements": [],
+        "compatibility": {
+          "applicationGenerators": [
+            {
+              "generatorId": "cloudmarkup.event-application-generator",
+              "minimumVersion": "1.0.0",
+              "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+              "templateVersion": "1.0.0",
+              "supportedModes": [
+                "complete-supported-pattern",
+                "generated-starter"
+              ]
+            }
+          ],
+          "modelGateways": []
+        },
+        "provenance": {
+          "source": "deterministic-generator",
+          "generatorId": "cloudmarkup.event-application-generator",
+          "generatorVersion": "1.0.0",
+          "inputDigest": "sha256:8372f59cf8f102e1c557063fa8097c367b8a5251224df721a4f268d565c2b6df"
+        }
+      },
+      {
+        "id": "workload_event_sns_fanout_consumer_secondary",
+        "owningNodeId": "secondary_lambda",
+        "implementation": {
+          "mode": "complete-supported-pattern",
+          "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+          "handler": "index.handler",
+          "sourceOwnership": "cloudmarkup",
+          "supportedPattern": {
+            "patternId": "cloudmarkup.pattern.aws-lambda-curated-event-driven",
+            "patternVersion": "1.0.0",
+            "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686"
+          }
+        },
+        "operations": [
+          {
+            "id": "operation_event_sns_fanout_consumer_secondary",
+            "capability": "cloudmarkup.event.sns-consume",
+            "inputContract": {
+              "kind": "contract-reference",
+              "reference": {
+                "contractId": "contracts.sns-fanout-consumer.secondary.event",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:3fc70c8112778a6d93cc7e8ff40691fb5c38ce97163a4fb6a196aab17d5e72ae"
+              }
+            },
+            "outputContract": {
+              "kind": "none"
+            }
+          }
+        ],
+        "triggers": [
+          {
+            "id": "trigger_event_sns_fanout_consumer_secondary",
+            "edgeId": "edge_secondary_lambda",
+            "targetOperationId": "operation_event_sns_fanout_consumer_secondary"
+          }
+        ],
+        "downstreamActions": [],
+        "environment": [
+          {
+            "id": "environment_stage_secondary",
+            "name": "APP_STAGE",
+            "value": {
+              "kind": "variable-reference",
+              "variableId": "variable_stage"
+            }
+          }
+        ],
+        "errorBehavior": {
+          "mode": "fail-invocation"
+        },
+        "executionAssumptions": {
+          "timeout": {
+            "kind": "duration",
+            "milliseconds": 30000
+          },
+          "retry": {
+            "kind": "bounded",
+            "maximumAttempts": 5
+          }
+        },
+        "triggerDispatch": {
+          "mode": "generated-supported",
+          "dispatcherId": "cloudmarkup.event-trigger-dispatcher",
+          "dispatcherVersion": "1.0.0",
+          "dispatcherOperationId": "operation_event_sns_fanout_consumer_secondary"
+        },
+        "unresolvedRequirementIds": [],
+        "behaviorContracts": [
+          {
+            "contractId": "contracts.sns-fanout-consumer.secondary.behavior",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:fcb198225ce4bd863164af3b79f0e3c9f9d0be5dcdedbdbed7382b1c439af7fa",
+            "contractKind": "behavior-operation"
+          }
+        ],
+        "languageFamily": "cloudmarkup.language.typescript",
+        "entrypoints": [
+          {
+            "entrypointId": "entrypoint_event_sns_fanout_consumer_secondary",
+            "kind": "event-handler",
+            "operationId": "operation_event_sns_fanout_consumer_secondary",
+            "handler": "index.handler"
+          }
+        ],
+        "httpRoutes": [],
+        "eventBindings": [
+          {
+            "bindingId": "event_event_sns_fanout_consumer_secondary",
+            "direction": "inbound",
+            "transportKind": "event",
+            "operationId": "operation_event_sns_fanout_consumer_secondary",
+            "edgeId": "edge_secondary_lambda",
+            "contract": {
+              "contractId": "contracts.sns-fanout-consumer.secondary.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:3fc70c8112778a6d93cc7e8ff40691fb5c38ce97163a4fb6a196aab17d5e72ae",
+              "contractKind": "event-message"
+            }
+          }
+        ],
+        "schedules": [],
+        "dataBindings": [],
+        "authorization": [],
+        "idempotency": [
+          {
+            "policyId": "idempotency_event_sns_fanout_consumer_secondary",
+            "mode": "not-required",
+            "operationIds": ["operation_event_sns_fanout_consumer_secondary"]
+          }
+        ],
+        "observability": {
+          "signals": ["logs"],
+          "healthChecks": [],
+          "smokeTests": []
+        },
+        "tests": [
+          {
+            "bindingId": "test_contract_event_sns_fanout_consumer_secondary",
+            "level": "contract",
+            "testCase": {
+              "contractId": "contracts.sns-fanout-consumer.secondary.test.contract",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:98f303d09acf9b542dd1ff31e74c7ba2ed4e8287e5df0423bf9dabc75c7e3435",
+              "contractKind": "test-case"
+            },
+            "requiredForCoverage": true
+          },
+          {
+            "bindingId": "test_unit_event_sns_fanout_consumer_secondary",
+            "level": "unit",
+            "testCase": {
+              "contractId": "contracts.sns-fanout-consumer.secondary.test.unit",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:85e3c288e43509542b9158c510e8351e9c12f2cfb1f320d3c3e459302e2e9a41",
+              "contractKind": "test-case"
+            },
+            "requiredForCoverage": true
+          }
+        ],
+        "sourceOwnership": [
+          {
+            "declarationId": "ownership_event_sns_fanout_consumer_secondary_extension",
+            "path": "application/src/functions/event_sns_fanout_consumer_secondary/extensions/custom.ts",
+            "pathKind": "file",
+            "ownership": "user-owned",
+            "ownerId": "application.sns-fanout-consumer.secondary.owner",
+            "regeneration": "never",
+            "conflictBehavior": "preserve-user-content",
+            "semanticDiff": {
+              "strategy": "structured-language"
+            }
+          }
+        ],
+        "extensionPoints": [
+          {
+            "extensionPointId": "application.sns-fanout-consumer.secondary.extensions",
+            "path": "application/src/functions/event_sns_fanout_consumer_secondary/extensions/custom.ts",
+            "kind": "module",
+            "permittedOwnership": ["approved-extension", "user-owned"],
+            "conflictBehavior": "require-reviewed-resolution"
+          }
+        ],
+        "extensions": [],
+        "implementationRequirements": [],
+        "compatibility": {
+          "applicationGenerators": [
+            {
+              "generatorId": "cloudmarkup.event-application-generator",
+              "minimumVersion": "1.0.0",
+              "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+              "templateVersion": "1.0.0",
+              "supportedModes": [
+                "complete-supported-pattern",
+                "generated-starter"
+              ]
+            }
+          ],
+          "modelGateways": []
+        },
+        "provenance": {
+          "source": "deterministic-generator",
+          "generatorId": "cloudmarkup.event-application-generator",
+          "generatorVersion": "1.0.0",
+          "inputDigest": "sha256:52e06a1823cc8b3a93f4d66086633046b104d60d420cb5c9eeb5af5ac39a1da6"
+        }
+      }
+    ]
+  }
+}

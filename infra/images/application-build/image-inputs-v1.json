@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 1,
+  "kind": "cloudmarkup.image-context-inputs",
+  "contextId": "application-build",
+  "platform": "linux/amd64",
+  "toolchain": {
+    "awsSdkClientDynamodb": "3.1101.0",
+    "eslint": "9.39.5",
+    "node": "24.18.0",
+    "pnpm": "11.16.0",
+    "trivy": "0.74.0",
+    "typescript": "6.0.3",
+    "typescriptEslint": "8.65.0",
+    "vite": "8.1.5",
+    "vitest": "4.1.10"
+  },
+  "bindings": {
+    "nodeBaseImage": {
+      "reference": "node:24.18.0-alpine3.24",
+      "indexDigest": "sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e6f1a95432d679c54fbfd",
+      "imageDigest": "sha256:4ba75f835bb8802193e4c114572113d4b26f95f6f094f4b5229d2a77773e0afc"
+    },
+    "offlineStore": {
+      "manifest": "offline/pnpm-store/manifest-v1.json",
+      "network": "deny",
+      "path": "offline/pnpm-store"
+    },
+    "repositoryLockfile": {
+      "path": "../../../pnpm-lock.yaml",
+      "sha256": "d68ad374b180d595b076c203a3a9173714465f108b104af8dbdf7302e89b435e",
+      "sizeBytes": 269648
+    },
+    "toolchainLockfile": {
+      "path": "offline/toolchain/pnpm-lock.yaml",
+      "sha256": "c91be04f804ccb3e4aaafc5c9ce7d756c608fff1c95be482e1bfdf66cd2dba37",
+      "sizeBytes": 67537
+    },
+    "trivyDatabase": {
+      "manifestDigest": "sha256:98e1c199793bfcbe64fa41538fa3cf2c55650689a7920075bbba6165404a44d0",
+      "layerDigest": "sha256:1edf7a495c6d68e691fb710b63926e4f1a3dbffa392fd8057cd10bdfd8c3eef5",
+      "layerSizeBytes": 117915639
+    },
+    "trivyBinary": {
+      "path": "offline/bin/trivy",
+      "sha256": "2f78848b474c6f0b27d0df1833ae8fc7d297640344c6d5c7a25f63cc9e22d3dc",
+      "sizeBytes": 168288382
+    }
+  },
+  "generatedPrefixes": [
+    {
+      "path": "offline/apk",
+      "role": "verified-runtime-package"
+    },
+    {
+      "path": "offline/bin",
+      "role": "verified-tool-binaries"
+    },
+    {
+      "path": "offline/licenses",
+      "role": "verified-tool-licenses"
+    },
+    {
+      "path": "offline/pnpm-store",
+      "role": "offline-package-byte"
+    },
+    {
+      "path": "offline/toolchain",
+      "role": "offline-toolchain"
+    },
+    {
+      "path": "offline/trivy-cache",
+      "role": "trivy-database"
+    }
+  ],
+  "self": {
+    "path": "image-inputs-v1.json",
+    "role": "context-manifest",
+    "executable": false
+  },
+  "members": [
+    {
+      "path": "Dockerfile",
+      "role": "image-build-recipe",
+      "sha256": "467c07121ff9ab586681d58e1e3beb7b132c845ae02e3e746a0bfe97bb80d970",
+      "sizeBytes": 8457,
+      "executable": false
+    },
+    {
+      "path": "README.md",
+      "role": "context-documentation",
+      "sha256": "d6565956f673b9b538e48d92dd22db4cf59b8d5a86f2eeef4d370c33242b3643",
+      "sizeBytes": 14757,
+      "executable": false
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "role": "license-notice",
+      "sha256": "f3dabf855de1b939962df4c4b22a1960805830939047295775edc454c1b1f71d",
+      "sizeBytes": 1505,
+      "executable": false
+    },
+    {
+      "path": "config/eslint.generated.mjs",
+      "role": "lint-configuration",
+      "sha256": "23f478f29a9f0d0cdbd9cbbea23f68d2893168d1aef38e036706ce989b3e2fda",
+      "sizeBytes": 828,
+      "executable": false
+    },
+    {
+      "path": "offline/acquisition-v1.json",
+      "role": "acquisition-descriptor",
+      "sha256": "10576b7b4d81fdaefd45a8e5195766e4f99a5eb61273e8706483d8b386a5f894",
+      "sizeBytes": 3302,
+      "executable": false
+    },
+    {
+      "path": "offline/toolchain/package.json",
+      "role": "toolchain-manifest",
+      "sha256": "de83959fc60f6ce629b1b03a518d8a26072fbeb48c714cbdd56a41af77d52df0",
+      "sizeBytes": 417,
+      "executable": false
+    },
+    {
+      "path": "offline/toolchain/pnpm-lock.yaml",
+      "role": "toolchain-lockfile",
+      "sha256": "c91be04f804ccb3e4aaafc5c9ce7d756c608fff1c95be482e1bfdf66cd2dba37",
+      "sizeBytes": 67537,
+      "executable": false
+    },
+    {
+      "path": "service/application-build-service",
+      "role": "service-entrypoint",
+      "sha256": "1546f1f9790a43ca98a16e59a82e842b81ade9d86b9ca0884f18ef120a5f37a7",
+      "sizeBytes": 394,
+      "executable": true
+    },
+    {
+      "path": "service/application-build-service.mjs",
+      "role": "service-module",
+      "sha256": "74337137e61aa29a3aca02920661b2d2b390678c639af016454c018620678ec6",
+      "sizeBytes": 5277,
+      "executable": false
+    },
+    {
+      "path": "service/archive.mjs",
+      "role": "service-module",
+      "sha256": "eb4a197ce678cdc738393d46b3619828fe84c032e90896a0c98f22f2ea8bcddd",
+      "sizeBytes": 8426,
+      "executable": false
+    },
+    {
+      "path": "service/contract.mjs",
+      "role": "service-module",
+      "sha256": "81950f40efdd9a5586c8df52e593231e1bb50c0842cb0f86110f81c0d3a44bfe",
+      "sizeBytes": 15283,
+      "executable": false
+    },
+    {
+      "path": "service/eslint",
+      "role": "tool-wrapper",
+      "sha256": "4f4afd01a949b4b86983e9f7cbb63081b9e2f82cf5ecaac3f6ace99a519424ba",
+      "sizeBytes": 109,
+      "executable": true
+    },
+    {
+      "path": "service/executor.mjs",
+      "role": "service-module",
+      "sha256": "30cce04e791e50425b2bed687dda8dc2e6ce2d98b6554230b16b3869f823d186",
+      "sizeBytes": 27076,
+      "executable": false
+    },
+    {
+      "path": "service/input-schema-v1.json",
+      "role": "input-schema",
+      "sha256": "9f404b912cc865604477dbedf0f24f9471cadbeabd2c27b2b51c58d0a17fdd3c",
+      "sizeBytes": 4844,
+      "executable": false
+    },
+    {
+      "path": "service/pnpm",
+      "role": "tool-wrapper",
+      "sha256": "611735b0855864f346cd10abe30807649937d6db14ab62e3034af8de042448cd",
+      "sizeBytes": 102,
+      "executable": true
+    },
+    {
+      "path": "service/pnpm-deterministic-clock.cjs",
+      "role": "service-module",
+      "sha256": "9f6e6d36691bb7624b25751c1e3775662d678f734636d580fe9c5dae6bf00442",
+      "sizeBytes": 245,
+      "executable": false
+    },
+    {
+      "path": "service/pnpm-store-index.mjs",
+      "role": "service-module",
+      "sha256": "95bb7a80dfcef2c38ec21161f2d09d3309f1abcc1624cfdd1f3ec77291bd6daa",
+      "sizeBytes": 16234,
+      "executable": false
+    },
+    {
+      "path": "service/process-supervision-self-test.mjs",
+      "role": "process-supervision-self-test",
+      "sha256": "355bb11a7b472a234bbd20a3f60e6137fe021198adcd2598cc81a53ea0f1598c",
+      "sizeBytes": 1752,
+      "executable": false
+    },
+    {
+      "path": "service/result-schema-v1.json",
+      "role": "result-schema",
+      "sha256": "4006517f252eddec84514b2b8ad269dce3a69507364f2a73670a40edb72894b2",
+      "sizeBytes": 2408,
+      "executable": false
+    },
+    {
+      "path": "service/self-test.mjs",
+      "role": "service-self-test",
+      "sha256": "bb569fca8c3b73d85ed9b8f4c7fdbc4fd6bf2462789a96956746295efa7439a5",
+      "sizeBytes": 27530,
+      "executable": false
+    },
+    {
+      "path": "service/tool-self-test.mjs",
+      "role": "toolchain-self-test",
+      "sha256": "3937dfc9f5ec83670c9b79cab65c4cc8212a317d457769180d2c5e9fc93bf92e",
+      "sizeBytes": 8990,
+      "executable": false
+    },
+    {
+      "path": "service/trivy",
+      "role": "tool-wrapper",
+      "sha256": "1a3f7a4ff1b493fbb47960f43efdc6f2bbccff763674517a5fad4cf19de0df29",
+      "sizeBytes": 1502,
+      "executable": true
+    },
+    {
+      "path": "service/tsc",
+      "role": "tool-wrapper",
+      "sha256": "9faa247642780ff46187a744ce4aba524cb0b171116bd31a93ce34eda4e669cb",
+      "sizeBytes": 107,
+      "executable": true
+    },
+    {
+      "path": "service/vitest",
+      "role": "tool-wrapper",
+      "sha256": "75e36ec1aacc2b85757dab591a71138466c73a2554b0db1a25f502c5bfa2e7ae",
+      "sizeBytes": 106,
+      "executable": true
+    }
+  ]
+}

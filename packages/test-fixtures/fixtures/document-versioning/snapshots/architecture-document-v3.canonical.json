@@ -1,0 +1,301 @@
+{
+  "applicationContracts": {
+    "contractSetId": "architecture_representative_v2",
+    "contracts": [],
+    "documentId": "doc_representative_v2",
+    "kind": "cloudmarkup.application-contracts",
+    "revision": {
+      "createdAt": "2026-07-31T00:00:00.000Z",
+      "createdBy": "actor_fixture",
+      "revisionId": "revision_0002",
+      "revisionNumber": 2
+    },
+    "schemaVersion": 1
+  },
+  "architectureId": "architecture_representative_v2",
+  "assumptions": [],
+  "catalog": {
+    "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "id": "example.cloud.catalog",
+    "version": "2.0.0"
+  },
+  "compilerCompatibility": {
+    "inputContractVersion": 1,
+    "maximumCompilerVersionExclusive": "2.0.0",
+    "minimumCompilerVersion": "1.0.0"
+  },
+  "documentId": "doc_representative_v2",
+  "edges": [
+    {
+      "id": "edge_downstream",
+      "semantic": {
+        "configuration": {
+          "schemaId": "example.relationship.writes-config",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "example.relationship.writes",
+        "source": {
+          "nodeId": "node_worker",
+          "port": "example.port.data-write"
+        },
+        "target": {
+          "nodeId": "node_source",
+          "port": "example.port.data"
+        }
+      }
+    },
+    {
+      "id": "edge_trigger",
+      "semantic": {
+        "configuration": {
+          "schemaId": "example.relationship.invokes-config",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "relationshipType": "example.relationship.invokes",
+        "source": {
+          "nodeId": "node_source",
+          "port": "example.port.event"
+        },
+        "target": {
+          "nodeId": "node_worker",
+          "port": "example.port.invocation"
+        }
+      }
+    }
+  ],
+  "externalResources": {
+    "architectureId": "architecture_representative_v2",
+    "documentId": "doc_representative_v2",
+    "kind": "cloudmarkup.external-resource-reference-document",
+    "resources": [],
+    "revision": {
+      "createdAt": "2026-07-31T00:00:00.000Z",
+      "createdBy": "actor_fixture",
+      "revisionId": "revision_0002",
+      "revisionNumber": 2
+    },
+    "schemaVersion": 1
+  },
+  "kind": "cloudmarkup.architecture-document",
+  "metadata": {
+    "serialization": {
+      "canonicalization": "cloudmarkup.canonical-json.v1",
+      "encoding": "utf-8",
+      "mediaType": "application/json"
+    },
+    "source": "user"
+  },
+  "nodes": [
+    {
+      "id": "node_source",
+      "presentation": {
+        "label": "Event source",
+        "position": {
+          "x": 40,
+          "y": 80
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "example.events.source-config",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "deploymentKey": "source",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "example.events.source",
+        "serviceType": "example.events"
+      }
+    },
+    {
+      "id": "node_worker",
+      "presentation": {
+        "label": "Worker",
+        "position": {
+          "x": 240,
+          "y": 80
+        }
+      },
+      "semantic": {
+        "configuration": {
+          "schemaId": "example.compute.function-config",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "deploymentKey": "worker",
+        "lifecycle": {
+          "origin": "user",
+          "ownership": "user"
+        },
+        "resourceType": "example.compute.function",
+        "serviceType": "example.compute"
+      }
+    }
+  ],
+  "outputs": [],
+  "provider": {
+    "id": "example.cloud",
+    "region": "example-region-1"
+  },
+  "revision": {
+    "createdAt": "2026-07-31T00:00:00.000Z",
+    "createdBy": "actor_fixture",
+    "revisionId": "revision_0002",
+    "revisionNumber": 2,
+    "sourceDraftId": "draft_0002"
+  },
+  "schemaVersion": 3,
+  "unresolvedRequirements": [
+    {
+      "blocking": false,
+      "category": "operational",
+      "id": "requirement_retry_review",
+      "origin": "user",
+      "statement": "The production retry limit requires review."
+    }
+  ],
+  "variables": [
+    {
+      "defaultValue": {
+        "kind": "string",
+        "value": "development"
+      },
+      "id": "variable_stage",
+      "key": "stage",
+      "required": false,
+      "valueType": "string"
+    }
+  ],
+  "workloadBehavior": {
+    "contractVersion": 2,
+    "workloads": [
+      {
+        "authorization": [],
+        "behaviorContracts": [],
+        "compatibility": {
+          "applicationGenerators": [],
+          "modelGateways": []
+        },
+        "dataBindings": [],
+        "downstreamActions": [
+          {
+            "edgeId": "edge_downstream",
+            "id": "workload_action_write",
+            "sourceOperationId": "workload_operation_handle"
+          }
+        ],
+        "entrypoints": [],
+        "environment": [
+          {
+            "id": "workload_env_secret",
+            "name": "API_SECRET",
+            "value": {
+              "kind": "secret-reference",
+              "reference": "secretref_fixture_api"
+            }
+          },
+          {
+            "id": "workload_env_source",
+            "name": "SOURCE_ID",
+            "value": {
+              "attribute": "example.source.id",
+              "kind": "node-attribute-reference",
+              "nodeId": "node_source"
+            }
+          },
+          {
+            "id": "workload_env_stage",
+            "name": "STAGE",
+            "value": {
+              "kind": "variable-reference",
+              "variableId": "variable_stage"
+            }
+          }
+        ],
+        "errorBehavior": {
+          "mode": "fail-invocation"
+        },
+        "eventBindings": [],
+        "executionAssumptions": {
+          "retry": {
+            "kind": "bounded",
+            "maximumAttempts": 3
+          },
+          "timeout": {
+            "kind": "duration",
+            "milliseconds": 30000
+          }
+        },
+        "extensionPoints": [],
+        "extensions": [],
+        "httpRoutes": [],
+        "id": "workload_worker",
+        "idempotency": [],
+        "implementation": {
+          "handler": "src/handler.main",
+          "mode": "user-provided",
+          "runtimeFamily": "example.runtime.nodejs",
+          "sourceOwnership": "user"
+        },
+        "implementationRequirements": [],
+        "observability": {
+          "healthChecks": [],
+          "signals": [],
+          "smokeTests": []
+        },
+        "operations": [
+          {
+            "capability": "example.workload.handle-event",
+            "id": "workload_operation_handle",
+            "inputContract": {
+              "kind": "contract-reference",
+              "reference": {
+                "contractId": "example.contract.event",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+              }
+            },
+            "outputContract": {
+              "kind": "none"
+            }
+          }
+        ],
+        "owningNodeId": "node_worker",
+        "provenance": {
+          "migrationId": "cloudmarkup.workload.v1-to-v2",
+          "migrationVersion": "1.0.0",
+          "source": "deterministic-migration"
+        },
+        "schedules": [],
+        "sourceOwnership": [],
+        "tests": [],
+        "triggerDispatch": {
+          "mode": "single"
+        },
+        "triggers": [
+          {
+            "edgeId": "edge_trigger",
+            "id": "workload_trigger_primary",
+            "targetOperationId": "workload_operation_handle"
+          }
+        ],
+        "unresolvedRequirementIds": [
+          "requirement_retry_review"
+        ]
+      }
+    ]
+  }
+}

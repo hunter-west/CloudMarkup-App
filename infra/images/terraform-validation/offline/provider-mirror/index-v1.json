@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "cloudmarkup.terraform-provider-mirror",
+  "contextId": "terraform-validation",
+  "terraformVersion": "1.16.2",
+  "lock": {
+    "path": "offline/.terraform.lock.hcl",
+    "sha256": "01cb33612cba1305153a125d0a8f099b7d1b5a1642d1236c388883f82e7514ea",
+    "sizeBytes": 410
+  },
+  "providers": [
+    {
+      "source": "registry.terraform.io/hashicorp/aws",
+      "version": "6.63.0",
+      "platform": "linux_amd64",
+      "packagePath": "registry.terraform.io/hashicorp/aws/terraform-provider-aws_6.63.0_linux_amd64.zip",
+      "sha256": "4b357dfe4b820e3e4acd2881cff8288b2186491e63416751f0d12692ba478ceb",
+      "sizeBytes": 191509275,
+      "lockHashes": [
+        "h1:9cre7jh1lSs/9igpgAcENMUAUlYW3HCtkav3up4oit0=",
+        "zh:4b357dfe4b820e3e4acd2881cff8288b2186491e63416751f0d12692ba478ceb"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "name": "@cloudmarkup/provider-aws",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./catalog": {
+      "types": "./src/catalog-v1-accessors.ts",
+      "import": "./dist/catalog-v1-accessors.js"
+    },
+    "./connection-presentation": {
+      "types": "./src/connection-presentation-v1-accessors.ts",
+      "import": "./dist/connection-presentation-v1-accessors.js"
+    },
+    "./connection-resolution": {
+      "types": "./src/connection-resolution.ts",
+      "import": "./dist/connection-resolution.js"
+    },
+    "./policy": {
+      "types": "./src/policy/index.ts",
+      "import": "./dist/policy/index.js"
+    },
+    "./service-extension": {
+      "types": "./src/service-extension-v1-accessors.ts",
+      "import": "./dist/service-extension-v1-accessors.js"
+    },
+    "./validation": {
+      "types": "./src/validation/index.ts",
+      "import": "./dist/validation/index.js"
+    },
+    "./testing/diagram-icon-registry": {
+      "types": "./src/diagram-icon-registry.test-support.ts",
+      "import": "./dist/diagram-icon-registry.test-support.js"
+    },
+    "./testing/sqs-event-template-v1.json": "./fixtures/event-templates/sqs-consumer-v1.json",
+    "./assets/provider-icons.manifest.json": "./assets/provider-icons.manifest.json",
+    "./assets/icons/*": "./assets/icons/*",
+    "./catalog-v1.json": "./dist/compiled/catalog-v1.json",
+    "./connection-presentation-v1.json": "./dist/compiled/connection-presentation-v1.json",
+    "./service-extension-v1.json": "./dist/compiled/service-extension-v1.json",
+    "./proposals": {
+      "types": "./src/proposal-preparation/index.ts",
+      "import": "./dist/proposal-preparation/index.js"
+    },
+    "./proposals/*": {
+      "types": "./src/proposal-preparation/*.ts",
+      "import": "./dist/proposal-preparation/*.js"
+    }
+  },
+  "files": [
+    "assets",
+    "fixtures",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "verify:artifacts": "node scripts/generate-catalog.mjs --check",
+    "check:artifacts": "pnpm build && pnpm verify:artifacts",
+    "generate:artifacts": "pnpm --filter @cloudmarkup/provider-sdk build && tsc -p tsconfig.json && node scripts/generate-catalog.mjs --write && tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@cloudmarkup/domain": "workspace:*",
+    "@cloudmarkup/schemas": "workspace:*",
+    "@cloudmarkup/provider-sdk": "workspace:*",
+    "@cloudmarkup/graph-preparation": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudmarkup/config": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "name": "@cloudmarkup/schemas",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./active-issue-v1.schema.json": "./json-schema/active-issue-v1.schema.json",
+    "./assistant-workflow-v1.schema.json": "./json-schema/assistant-workflow-v1.schema.json",
+    "./async-job-v1.schema.json": "./json-schema/async-job-v1.schema.json",
+    "./ai-authored-extension-v1.schema.json": "./json-schema/ai-authored-extension-v1.schema.json",
+    "./application-contracts-v1.schema.json": "./json-schema/application-contracts-v1.schema.json",
+    "./application-generation-request-v1.schema.json": "./json-schema/application-generation-request-v1.schema.json",
+    "./application-generation-result-v1.schema.json": "./json-schema/application-generation-result-v1.schema.json",
+    "./architecture-document-v1.schema.json": "./json-schema/architecture-document-v1.schema.json",
+    "./architecture-document-v2.schema.json": "./json-schema/architecture-document-v2.schema.json",
+    "./architecture-document-v3.schema.json": "./json-schema/architecture-document-v3.schema.json",
+    "./cloudmarkup-repository-lock-v1.schema.json": "./json-schema/cloudmarkup-repository-lock-v1.schema.json",
+    "./cloudmarkup-repository-manifest-v1.schema.json": "./json-schema/cloudmarkup-repository-manifest-v1.schema.json",
+    "./conformance-report-v1.schema.json": "./json-schema/conformance-report-v1.schema.json",
+    "./evidence-record-v1.schema.json": "./json-schema/evidence-record-v1.schema.json",
+    "./external-resource-reference-document-v1.schema.json": "./json-schema/external-resource-reference-document-v1.schema.json",
+    "./graph-command-v1.schema.json": "./json-schema/graph-command-v1.schema.json",
+    "./intent-document-v1.schema.json": "./json-schema/intent-document-v1.schema.json",
+    "./model-evaluation-v1.schema.json": "./json-schema/model-evaluation-v1.schema.json",
+    "./model-live-evaluation-sequence-v3.schema.json": "./json-schema/model-live-evaluation-sequence-v3.schema.json",
+    "./model-live-sequence-attempt-v4.schema.json": "./json-schema/model-live-sequence-attempt-v4.schema.json",
+    "./model-live-sequence-runtime-v4.schema.json": "./json-schema/model-live-sequence-runtime-v4.schema.json",
+    "./model-gateway-request-v1.schema.json": "./json-schema/model-gateway-request-v1.schema.json",
+    "./model-host-seed-patch-response-v2.schema.json": "./json-schema/model-host-seed-patch-response-v2.schema.json",
+    "./model-host-seed-repair-request-v2.schema.json": "./json-schema/model-host-seed-repair-request-v2.schema.json",
+    "./model-gateway-response-v1.schema.json": "./json-schema/model-gateway-response-v1.schema.json",
+    "./model-cache-key-input-v1.schema.json": "./json-schema/model-cache-key-input-v1.schema.json",
+    "./model-capability-registry-v1.schema.json": "./json-schema/model-capability-registry-v1.schema.json",
+    "./model-invocation-descriptor-v1.schema.json": "./json-schema/model-invocation-descriptor-v1.schema.json",
+    "./model-route-estimate-input-v1.schema.json": "./json-schema/model-route-estimate-input-v1.schema.json",
+    "./model-route-registry-v1.schema.json": "./json-schema/model-route-registry-v1.schema.json",
+    "./model-routing-decision-v1.schema.json": "./json-schema/model-routing-decision-v1.schema.json",
+    "./model-routing-request-v1.schema.json": "./json-schema/model-routing-request-v1.schema.json",
+    "./model-routing-ui-state-v1.schema.json": "./json-schema/model-routing-ui-state-v1.schema.json",
+    "./normalized-model-usage-v1.schema.json": "./json-schema/normalized-model-usage-v1.schema.json",
+    "./observed-solution-v1.schema.json": "./json-schema/observed-solution-v1.schema.json",
+    "./reconciliation-proposal-v1.schema.json": "./json-schema/reconciliation-proposal-v1.schema.json",
+    "./repository-snapshot-v1.schema.json": "./json-schema/repository-snapshot-v1.schema.json",
+    "./solution-generation-coverage-v1.schema.json": "./json-schema/solution-generation-coverage-v1.schema.json",
+    "./solution-revision-manifest-v1.schema.json": "./json-schema/solution-revision-manifest-v1.schema.json",
+    "./workload-behavior-v2.schema.json": "./json-schema/workload-behavior-v2.schema.json",
+    "./model-host-repair-successor-request-v3.schema.json": "./json-schema/model-host-repair-successor-request-v3.schema.json"
+  },
+  "files": [
+    "dist",
+    "json-schema",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check:artifacts": "pnpm build && pnpm verify:artifacts",
+    "check:json-schema": "pnpm check:artifacts",
+    "generate:artifacts": "pnpm build && node scripts/generate-json-schema.mjs --write",
+    "generate:json-schema": "pnpm generate:artifacts",
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "verify:artifacts": "node scripts/generate-json-schema.mjs --check"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudmarkup/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

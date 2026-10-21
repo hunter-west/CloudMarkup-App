@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.cloudmarkup.com/application-build-executor-request-v1.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": { "const": 1 },
+    "dependencyLock": {
+      "additionalProperties": false,
+      "properties": {
+        "cacheDigest": { "$ref": "#/$defs/sha256" },
+        "lifecycleScripts": { "const": "deny" },
+        "lockfilePath": { "const": "application/pnpm-lock.yaml" },
+        "lockfileSha256": { "$ref": "#/$defs/sha256" },
+        "network": { "const": "deny" },
+        "packageManifestPath": { "const": "application/package.json" },
+        "packageManifestSha256": { "$ref": "#/$defs/sha256" }
+      },
+      "required": [
+        "cacheDigest",
+        "lifecycleScripts",
+        "lockfilePath",
+        "lockfileSha256",
+        "network",
+        "packageManifestPath",
+        "packageManifestSha256"
+      ],
+      "type": "object"
+    },
+    "kind": { "const": "cloudmarkup.application-build-executor-request" },
+    "limits": {
+      "additionalProperties": false,
+      "properties": {
+        "cpuSeconds": { "maximum": 600, "minimum": 1, "type": "integer" },
+        "maxFileBytes": { "maximum": 4194304, "minimum": 1, "type": "integer" },
+        "maxFiles": { "maximum": 20000, "minimum": 1, "type": "integer" },
+        "maxOutputBytes": {
+          "maximum": 2097152,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "maxProcesses": { "maximum": 128, "minimum": 1, "type": "integer" },
+        "maxTotalFileBytes": {
+          "maximum": 134217728,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "memoryMiB": { "maximum": 8192, "minimum": 128, "type": "integer" },
+        "wallTimeMilliseconds": {
+          "maximum": 900000,
+          "minimum": 1000,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cpuSeconds",
+        "maxFileBytes",
+        "maxFiles",
+        "maxOutputBytes",
+        "maxProcesses",
+        "maxTotalFileBytes",
+        "memoryMiB",
+        "wallTimeMilliseconds"
+      ],
+      "type": "object"
+    },
+    "profileId": {
+      "enum": [
+        "cloudmarkup.application-build.ai-assisted-custom-nodejs24",
+        "cloudmarkup.application-build.generated-nodejs24",
+        "cloudmarkup.application-build.user-source-static-nodejs24"
+      ]
+    },
+    "requestDigest": { "$ref": "#/$defs/sha256" },
+    "runtime": {
+      "additionalProperties": false,
+      "properties": {
+        "eslint": { "const": "9.39.5" },
+        "node": { "const": "24.18.0" },
+        "pnpm": { "const": "11.16.0" },
+        "trivy": { "const": "0.74.0" },
+        "typescript": { "const": "6.0.3" },
+        "vitest": { "const": "4.1.10" }
+      },
+      "required": ["eslint", "node", "pnpm", "trivy", "typescript", "vitest"],
+      "type": "object"
+    },
+    "solutionRevisionDigest": { "$ref": "#/$defs/sha256" },
+    "solutionRevisionId": { "$ref": "#/$defs/identifier" },
+    "sourceArchive": {
+      "additionalProperties": false,
+      "properties": {
+        "path": { "const": "application.tar" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "sizeBytes": { "maximum": 167772160, "minimum": 1, "type": "integer" }
+      },
+      "required": ["path", "sha256", "sizeBytes"],
+      "type": "object"
+    },
+    "sourceFiles": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "mediaType": {
+            "enum": [
+              "application/json",
+              "text/markdown",
+              "text/plain",
+              "text/typescript",
+              "text/yaml"
+            ]
+          },
+          "ownership": {
+            "enum": [
+              "ai-authored",
+              "generated",
+              "user-owned",
+              "user-provided",
+              "user-owned-extension"
+            ]
+          },
+          "path": { "maxLength": 512, "minLength": 1, "type": "string" },
+          "sha256": { "$ref": "#/$defs/sha256" },
+          "sizeBytes": { "maximum": 4194304, "minimum": 0, "type": "integer" }
+        },
+        "required": ["mediaType", "ownership", "path", "sha256", "sizeBytes"],
+        "type": "object"
+      },
+      "maxItems": 20000,
+      "minItems": 1,
+      "type": "array"
+    },
+    "workloadId": { "$ref": "#/$defs/identifier" }
+  },
+  "required": [
+    "contractVersion",
+    "dependencyLock",
+    "kind",
+    "limits",
+    "profileId",
+    "requestDigest",
+    "runtime",
+    "solutionRevisionDigest",
+    "solutionRevisionId",
+    "sourceArchive",
+    "sourceFiles",
+    "workloadId"
+  ],
+  "type": "object",
+  "$defs": {
+    "identifier": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$",
+      "type": "string"
+    },
+    "sha256": { "pattern": "^sha256:[0-9a-f]{64}$", "type": "string" }
+  }
+}

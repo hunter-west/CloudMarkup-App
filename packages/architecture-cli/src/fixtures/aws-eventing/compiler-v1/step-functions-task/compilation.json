@@ -1,0 +1,1947 @@
+{
+  "contractVersion": 1,
+  "compiler": {
+    "id": "cloudmarkup.iac-compiler",
+    "version": "1.2.1",
+    "digest": "sha256:2c25a5610c825d171a167a38201c3090aa2278071ddd648bb957e67b7b98f203"
+  },
+  "model": {
+    "contractVersion": 1,
+    "target": {
+      "target": "terraform",
+      "contractVersion": "1.0.0",
+      "state": "ready",
+      "renderingAvailable": true,
+      "reasons": []
+    },
+    "provenance": {
+      "architectureDocumentId": "document_event_step_functions_task",
+      "architectureId": "architecture_event_step_functions_task",
+      "architectureRevisionId": "revision_event_step_functions_task_1",
+      "architectureContentHash": "sha256:29ae79df80394ed997a7f2f4887e8b578dd9a6e8dc431ba77300170ebbd1e562",
+      "architectureDocumentHash": "sha256:14f014f075bb1a82c1089e43e68d879245dd942402ad314ed690a7dd9ca788bb",
+      "architectureVisualHash": "sha256:e10c2ec1db73fbdc19a1e42ee91ce3085a6c0ab726c7dc0ac4366ef21b9eaf6e",
+      "workloadContentHash": "sha256:2e6a4ead9b0970dfc59eea451b6f6156b765709b3fc5aebb2c20c6269bd0c17a",
+      "solutionRevisionId": "solution_notes_revision_1",
+      "providerId": "aws.cloudmarkup",
+      "region": "us-east-1",
+      "catalog": {
+        "id": "aws.cloudmarkup.notes-api-catalog",
+        "version": "0.30.0",
+        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+      }
+    },
+    "resources": [
+      {
+        "id": "event_logs_policy_step_functions_task",
+        "targetKey": "event_logs_policy_step_functions_task",
+        "deploymentKey": "event_logs_policy_step_functions_task",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "generated-permission"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "event_logs_policy_step_functions_task"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_event_logs_step_functions_task",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_event_logs_step_functions_task"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "event_logs_policy_step_functions_task_statement",
+        "targetKey": "event_logs_policy_step_functions_task_statement",
+        "deploymentKey": "event_logs_policy_step_functions_task_statement",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "eventlogspolicystepfunctionstask"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_event_logs_step_functions_task",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_event_logs_step_functions_task"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "event_logs_step_functions_task",
+        "targetKey": "event_logs_step_functions_task",
+        "deploymentKey": "event_logs_step_functions_task",
+        "serviceType": "aws.cloudwatch.log-group",
+        "resourceType": "aws.cloudwatch.log-group",
+        "configuration": {
+          "schemaId": "aws.cloudwatch.log-group.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "logClass": {
+              "kind": "string",
+              "value": "STANDARD"
+            },
+            "logGroupName": {
+              "kind": "string",
+              "value": "/aws/lambda/notes_handler"
+            },
+            "preventDestroy": {
+              "kind": "boolean",
+              "value": true
+            },
+            "retentionDays": {
+              "kind": "integer",
+              "value": 30
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "lambda",
+        "targetKey": "event_step_functions_task",
+        "deploymentKey": "event_step_functions_task",
+        "serviceType": "aws.lambda.function",
+        "resourceType": "aws.lambda.function",
+        "configuration": {
+          "schemaId": "aws.lambda.function.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "architecture": {
+              "kind": "string",
+              "value": "arm64"
+            },
+            "functionName": {
+              "kind": "string",
+              "value": "event_step_functions_task"
+            },
+            "handler": {
+              "kind": "string",
+              "value": "index.handler"
+            },
+            "memoryMegabytes": {
+              "kind": "integer",
+              "value": 256
+            },
+            "reservedConcurrency": {
+              "kind": "integer",
+              "value": 10
+            },
+            "runtime": {
+              "kind": "string",
+              "value": "nodejs24.x"
+            },
+            "timeoutSeconds": {
+              "kind": "integer",
+              "value": 30
+            },
+            "tracingEnabled": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": [
+          "workload_event_step_functions_task"
+        ]
+      },
+      {
+        "id": "image_workflow",
+        "targetKey": "image_workflow",
+        "deploymentKey": "image_workflow",
+        "serviceType": "aws.stepfunctions.state-machine",
+        "resourceType": "aws.stepfunctions.state-machine",
+        "configuration": {
+          "schemaId": "aws.stepfunctions.state-machine.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "definitionMode": {
+              "kind": "string",
+              "value": "CATALOG_OPERATIONS"
+            },
+            "deletionProtectionEnabled": {
+              "kind": "boolean",
+              "value": true
+            },
+            "encryption": {
+              "kind": "string",
+              "value": "AWS_OWNED_KEY"
+            },
+            "executionTimeoutSeconds": {
+              "kind": "integer",
+              "value": 300
+            },
+            "loggingMode": {
+              "kind": "string",
+              "value": "ERRORS_WITHOUT_EXECUTION_DATA"
+            },
+            "stateMachineName": {
+              "kind": "string",
+              "value": "image-workflow"
+            },
+            "tracingEnabled": {
+              "kind": "boolean",
+              "value": true
+            },
+            "workflowType": {
+              "kind": "string",
+              "value": "STANDARD"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "workflow_role",
+        "targetKey": "image_workflow_role",
+        "deploymentKey": "image_workflow_role",
+        "serviceType": "aws.iam.role",
+        "resourceType": "aws.iam.role",
+        "configuration": {
+          "schemaId": "aws.iam.role.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "maxSessionDurationSeconds": {
+              "kind": "integer",
+              "value": 3600
+            },
+            "roleName": {
+              "kind": "string",
+              "value": "image-workflow-role"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "role",
+        "targetKey": "notes_role",
+        "deploymentKey": "notes_role",
+        "serviceType": "aws.iam.role",
+        "resourceType": "aws.iam.role",
+        "configuration": {
+          "schemaId": "aws.iam.role.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "maxSessionDurationSeconds": {
+              "kind": "integer",
+              "value": 3600
+            },
+            "roleName": {
+              "kind": "string",
+              "value": "notes-api-lambda-role"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "trust_policy",
+        "targetKey": "trust_policy",
+        "deploymentKey": "trust_policy",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "trust"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "trust_policy"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_role_lambda"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "trust_policy_statement",
+        "targetKey": "trust_policy_statement",
+        "deploymentKey": "trust_policy_statement",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "sts:AssumeRole"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "lambda.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "trustpolicy"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_role_lambda"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "workflow_invoke",
+        "targetKey": "workflow_invoke",
+        "deploymentKey": "workflow_invoke",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "generated-permission"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "workflow_invoke"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_workflow_task"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "workflow_invoke_statement",
+        "targetKey": "workflow_invoke_statement",
+        "deploymentKey": "workflow_invoke_statement",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "lambda:InvokeFunction"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "workflowinvoke"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_workflow_task"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "workflow_trust",
+        "targetKey": "workflow_trust",
+        "deploymentKey": "workflow_trust",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "trust"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "workflow_trust"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_workflow_role"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "workflow_trust_statement",
+        "targetKey": "workflow_trust_statement",
+        "deploymentKey": "workflow_trust_statement",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "sts:AssumeRole"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "states.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "workflowtrust"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_workflow_role"
+            ]
+          }
+        },
+        "workloadIds": []
+      }
+    ],
+    "connections": [
+      {
+        "id": "event_logs_policy_step_functions_task_owner",
+        "source": {
+          "nodeId": "event_logs_policy_step_functions_task",
+          "targetKey": "event_logs_policy_step_functions_task",
+          "port": "aws.iam.policy.owner"
+        },
+        "target": {
+          "nodeId": "role",
+          "targetKey": "notes_role",
+          "port": "aws.iam.role.permission"
+        },
+        "relationshipType": "aws.iam.role-owns-generated-permission",
+        "configuration": {
+          "schemaId": "aws.iam.role-owns-generated-permission.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "event_logs_policy_step_functions_task_membership",
+        "source": {
+          "nodeId": "event_logs_policy_step_functions_task_statement",
+          "targetKey": "event_logs_policy_step_functions_task_statement",
+          "port": "aws.iam.policy-statement.member"
+        },
+        "target": {
+          "nodeId": "event_logs_policy_step_functions_task",
+          "targetKey": "event_logs_policy_step_functions_task",
+          "port": "aws.iam.policy.statements"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "event_logs_policy_step_functions_task_scope",
+        "source": {
+          "nodeId": "event_logs_policy_step_functions_task_statement",
+          "targetKey": "event_logs_policy_step_functions_task_statement",
+          "port": "aws.iam.policy-statement.scope"
+        },
+        "target": {
+          "nodeId": "event_logs_step_functions_task",
+          "targetKey": "event_logs_step_functions_task",
+          "port": "aws.cloudwatch.log-group.authorized"
+        },
+        "relationshipType": "aws.iam.authorizes-log-group",
+        "configuration": {
+          "schemaId": "aws.iam.policy-log-group.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_event_logs_step_functions_task",
+        "source": {
+          "nodeId": "lambda",
+          "targetKey": "event_step_functions_task",
+          "port": "aws.lambda.function.logs"
+        },
+        "target": {
+          "nodeId": "event_logs_step_functions_task",
+          "targetKey": "event_logs_step_functions_task",
+          "port": "aws.cloudwatch.log-group.logs"
+        },
+        "relationshipType": "aws.lambda.writes-log-group",
+        "configuration": {
+          "schemaId": "aws.lambda.cloudwatch-logs.connection",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "deliveryMode": {
+              "kind": "string",
+              "value": "application-logs"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_workflow_task",
+        "source": {
+          "nodeId": "image_workflow",
+          "targetKey": "image_workflow",
+          "port": "aws.stepfunctions.state-machine-invokes-lambda.source"
+        },
+        "target": {
+          "nodeId": "lambda",
+          "targetKey": "event_step_functions_task",
+          "port": "aws.stepfunctions.state-machine-invokes-lambda.target"
+        },
+        "relationshipType": "aws.stepfunctions.state-machine-invokes-lambda",
+        "configuration": {
+          "schemaId": "aws.stepfunctions.lambda-task.connection",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "maximumAttempts": {
+              "kind": "integer",
+              "value": 3
+            },
+            "retryMode": {
+              "kind": "string",
+              "value": "BOUNDED_EXPONENTIAL"
+            },
+            "taskTimeoutSeconds": {
+              "kind": "integer",
+              "value": 60
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_workflow_role",
+        "source": {
+          "nodeId": "workflow_role",
+          "targetKey": "image_workflow_role",
+          "port": "aws.iam.role-assumed-by-step-functions.source"
+        },
+        "target": {
+          "nodeId": "image_workflow",
+          "targetKey": "image_workflow",
+          "port": "aws.iam.role-assumed-by-step-functions.target"
+        },
+        "relationshipType": "aws.iam.role-assumed-by-step-functions",
+        "configuration": {
+          "schemaId": "aws.iam.role-assumed-by-step-functions.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_role_lambda",
+        "source": {
+          "nodeId": "role",
+          "targetKey": "notes_role",
+          "port": "aws.iam.role-assumed-by-lambda.source"
+        },
+        "target": {
+          "nodeId": "lambda",
+          "targetKey": "event_step_functions_task",
+          "port": "aws.iam.role-assumed-by-lambda.target"
+        },
+        "relationshipType": "aws.iam.role-assumed-by-lambda",
+        "configuration": {
+          "schemaId": "aws.iam.lambda-role.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "trust_policy_owner",
+        "source": {
+          "nodeId": "trust_policy",
+          "targetKey": "trust_policy",
+          "port": "aws.iam.role-owns-trust-policy.source"
+        },
+        "target": {
+          "nodeId": "role",
+          "targetKey": "notes_role",
+          "port": "aws.iam.role-owns-trust-policy.target"
+        },
+        "relationshipType": "aws.iam.role-owns-trust-policy",
+        "configuration": {
+          "schemaId": "aws.iam.role-owns-trust-policy.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "trust_policy_membership",
+        "source": {
+          "nodeId": "trust_policy_statement",
+          "targetKey": "trust_policy_statement",
+          "port": "aws.iam.policy-contains-statement.source"
+        },
+        "target": {
+          "nodeId": "trust_policy",
+          "targetKey": "trust_policy",
+          "port": "aws.iam.policy-contains-statement.target"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "workflow_invoke_owner",
+        "source": {
+          "nodeId": "workflow_invoke",
+          "targetKey": "workflow_invoke",
+          "port": "aws.iam.role-owns-generated-permission.source"
+        },
+        "target": {
+          "nodeId": "workflow_role",
+          "targetKey": "image_workflow_role",
+          "port": "aws.iam.role-owns-generated-permission.target"
+        },
+        "relationshipType": "aws.iam.role-owns-generated-permission",
+        "configuration": {
+          "schemaId": "aws.iam.role-owns-generated-permission.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "workflow_invoke_scope",
+        "source": {
+          "nodeId": "workflow_invoke_statement",
+          "targetKey": "workflow_invoke_statement",
+          "port": "aws.iam.authorizes-lambda-function.source"
+        },
+        "target": {
+          "nodeId": "lambda",
+          "targetKey": "event_step_functions_task",
+          "port": "aws.iam.authorizes-lambda-function.target"
+        },
+        "relationshipType": "aws.iam.authorizes-lambda-function",
+        "configuration": {
+          "schemaId": "aws.iam.policy-lambda.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "workflow_invoke_membership",
+        "source": {
+          "nodeId": "workflow_invoke_statement",
+          "targetKey": "workflow_invoke_statement",
+          "port": "aws.iam.policy-contains-statement.source"
+        },
+        "target": {
+          "nodeId": "workflow_invoke",
+          "targetKey": "workflow_invoke",
+          "port": "aws.iam.policy-contains-statement.target"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "workflow_trust_owner",
+        "source": {
+          "nodeId": "workflow_trust",
+          "targetKey": "workflow_trust",
+          "port": "aws.iam.role-owns-trust-policy.source"
+        },
+        "target": {
+          "nodeId": "workflow_role",
+          "targetKey": "image_workflow_role",
+          "port": "aws.iam.role-owns-trust-policy.target"
+        },
+        "relationshipType": "aws.iam.role-owns-trust-policy",
+        "configuration": {
+          "schemaId": "aws.iam.role-owns-trust-policy.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "workflow_trust_membership",
+        "source": {
+          "nodeId": "workflow_trust_statement",
+          "targetKey": "workflow_trust_statement",
+          "port": "aws.iam.policy-contains-statement.source"
+        },
+        "target": {
+          "nodeId": "workflow_trust",
+          "targetKey": "workflow_trust",
+          "port": "aws.iam.policy-contains-statement.target"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      }
+    ],
+    "policyAttachments": [
+      {
+        "resourceId": "event_logs_policy_step_functions_task",
+        "targetKey": "event_logs_policy_step_functions_task",
+        "resourceType": "aws.iam.policy-document",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "event_logs_policy_step_functions_task_statement",
+            "targetKey": "event_logs_policy_step_functions_task_statement",
+            "port": "aws.iam.policy-statement.member"
+          },
+          {
+            "nodeId": "role",
+            "targetKey": "notes_role",
+            "port": "aws.iam.role.permission"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "generated-permission"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "event_logs_policy_step_functions_task"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_event_logs_step_functions_task",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_event_logs_step_functions_task"
+          ]
+        }
+      },
+      {
+        "resourceId": "event_logs_policy_step_functions_task_statement",
+        "targetKey": "event_logs_policy_step_functions_task_statement",
+        "resourceType": "aws.iam.policy-statement",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "event_logs_policy_step_functions_task",
+            "targetKey": "event_logs_policy_step_functions_task",
+            "port": "aws.iam.policy.statements"
+          },
+          {
+            "nodeId": "event_logs_step_functions_task",
+            "targetKey": "event_logs_step_functions_task",
+            "port": "aws.cloudwatch.log-group.authorized"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "eventlogspolicystepfunctionstask"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_event_logs_step_functions_task",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_event_logs_step_functions_task"
+          ]
+        }
+      },
+      {
+        "resourceId": "trust_policy",
+        "targetKey": "trust_policy",
+        "resourceType": "aws.iam.policy-document",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "role",
+            "targetKey": "notes_role",
+            "port": "aws.iam.role-owns-trust-policy.target"
+          },
+          {
+            "nodeId": "trust_policy_statement",
+            "targetKey": "trust_policy_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "trust"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "trust_policy"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_role_lambda"
+          ]
+        }
+      },
+      {
+        "resourceId": "trust_policy_statement",
+        "targetKey": "trust_policy_statement",
+        "resourceType": "aws.iam.policy-statement",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "trust_policy",
+            "targetKey": "trust_policy",
+            "port": "aws.iam.policy-contains-statement.target"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "sts:AssumeRole"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "lambda.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "trustpolicy"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_role_lambda"
+          ]
+        }
+      },
+      {
+        "resourceId": "workflow_invoke",
+        "targetKey": "workflow_invoke",
+        "resourceType": "aws.iam.policy-document",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "workflow_role",
+            "targetKey": "image_workflow_role",
+            "port": "aws.iam.role-owns-generated-permission.target"
+          },
+          {
+            "nodeId": "workflow_invoke_statement",
+            "targetKey": "workflow_invoke_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "generated-permission"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "workflow_invoke"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_workflow_task"
+          ]
+        }
+      },
+      {
+        "resourceId": "workflow_invoke_statement",
+        "targetKey": "workflow_invoke_statement",
+        "resourceType": "aws.iam.policy-statement",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "lambda",
+            "targetKey": "event_step_functions_task",
+            "port": "aws.iam.authorizes-lambda-function.target"
+          },
+          {
+            "nodeId": "workflow_invoke",
+            "targetKey": "workflow_invoke",
+            "port": "aws.iam.policy-contains-statement.target"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "lambda:InvokeFunction"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "workflowinvoke"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_workflow_task"
+          ]
+        }
+      },
+      {
+        "resourceId": "workflow_trust",
+        "targetKey": "workflow_trust",
+        "resourceType": "aws.iam.policy-document",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "workflow_role",
+            "targetKey": "image_workflow_role",
+            "port": "aws.iam.role-owns-trust-policy.target"
+          },
+          {
+            "nodeId": "workflow_trust_statement",
+            "targetKey": "workflow_trust_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "trust"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "workflow_trust"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_workflow_role"
+          ]
+        }
+      },
+      {
+        "resourceId": "workflow_trust_statement",
+        "targetKey": "workflow_trust_statement",
+        "resourceType": "aws.iam.policy-statement",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "workflow_trust",
+            "targetKey": "workflow_trust",
+            "port": "aws.iam.policy-contains-statement.target"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "sts:AssumeRole"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "states.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "workflowtrust"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_workflow_role"
+          ]
+        }
+      }
+    ],
+    "variables": [
+      {
+        "id": "variable_stage",
+        "key": "stage",
+        "valueType": "string",
+        "required": false,
+        "defaultValue": {
+          "kind": "string",
+          "value": "test"
+        }
+      }
+    ],
+    "outputs": [],
+    "workloads": [
+      {
+        "id": "workload_event_step_functions_task",
+        "owningResource": {
+          "nodeId": "lambda",
+          "targetKey": "event_step_functions_task"
+        },
+        "implementationMode": "complete-supported-pattern",
+        "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+        "languageFamily": "cloudmarkup.language.typescript",
+        "handler": "index.handler",
+        "sourceOwner": "cloudmarkup",
+        "operations": [
+          {
+            "id": "operation_event_step_functions_task",
+            "capability": "cloudmarkup.event.step-functions-task",
+            "inputContract": {
+              "contractId": "contracts.step-functions-task.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:4f592f25a9bb9254bcd9907e1b0e3c86c882029bcfcc69e22200ebc2f9751ed6"
+            },
+            "outputContract": {
+              "contractId": "contracts.step-functions-task.payload",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:4220653e023a0c13b215fe3a5eb5130aa6def620e31a93604e1d06d78991ae44"
+            }
+          }
+        ],
+        "triggers": [
+          {
+            "id": "trigger_event_step_functions_task",
+            "kind": "trigger",
+            "edgeId": "edge_workflow_task",
+            "operationId": "operation_event_step_functions_task",
+            "connection": {
+              "id": "edge_workflow_task",
+              "source": {
+                "nodeId": "image_workflow",
+                "targetKey": "image_workflow",
+                "port": "aws.stepfunctions.state-machine-invokes-lambda.source"
+              },
+              "target": {
+                "nodeId": "lambda",
+                "targetKey": "event_step_functions_task",
+                "port": "aws.stepfunctions.state-machine-invokes-lambda.target"
+              },
+              "relationshipType": "aws.stepfunctions.state-machine-invokes-lambda",
+              "configuration": {
+                "schemaId": "aws.stepfunctions.lambda-task.connection",
+                "schemaVersion": "1.0.0",
+                "values": {
+                  "maximumAttempts": {
+                    "kind": "integer",
+                    "value": 3
+                  },
+                  "retryMode": {
+                    "kind": "string",
+                    "value": "BOUNDED_EXPONENTIAL"
+                  },
+                  "taskTimeoutSeconds": {
+                    "kind": "integer",
+                    "value": 60
+                  }
+                }
+              },
+              "lifecycle": {
+                "ownership": "user",
+                "origin": "user"
+              }
+            }
+          }
+        ],
+        "downstreamActions": [],
+        "environment": [
+          {
+            "id": "environment_stage",
+            "name": "APP_STAGE",
+            "kind": "variable-reference",
+            "variableId": "variable_stage"
+          }
+        ],
+        "artifactInputs": [
+          {
+            "artifactId": "cloudmarkup.pattern.aws-lambda-curated-event-driven:1.0.0",
+            "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686",
+            "kind": "supported-pattern",
+            "ownership": "cloudmarkup",
+            "workloadId": "workload_event_step_functions_task"
+          }
+        ],
+        "artifactOutputs": [],
+        "sourceOwnership": [
+          {
+            "declarationId": "ownership_event_step_functions_task_extension",
+            "path": "application/src/functions/event_step_functions_task/extensions/custom.ts",
+            "pathKind": "file",
+            "ownership": "user-owned",
+            "ownerId": "application.step-functions-task.owner",
+            "regeneration": "never",
+            "conflictBehavior": "preserve-user-content",
+            "semanticDiff": "structured-language"
+          }
+        ],
+        "extensionPoints": [
+          {
+            "id": "application.step-functions-task.extensions",
+            "path": "application/src/functions/event_step_functions_task/extensions/custom.ts",
+            "kind": "module",
+            "permittedOwnership": [
+              "approved-extension",
+              "user-owned"
+            ],
+            "conflictBehavior": "require-reviewed-resolution"
+          }
+        ],
+        "generationCoverage": "custom-implementation-required",
+        "targetReadiness": "application-artifact-evidence-incomplete",
+        "generatorReadiness": {
+          "state": "compatible-interface-only",
+          "generator": {
+            "id": "cloudmarkup.event-application-generator",
+            "version": "1.0.0",
+            "digest": "sha256:7cf9b85f31f427ac5f4dbe095bb227c10435fc86c84d8318ff41c88d5540e391"
+          },
+          "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+          "templateVersion": "1.0.0",
+          "reasons": [
+            "APPLICATION_GENERATION_SEPARATE_BOUNDARY_AVAILABLE"
+          ]
+        },
+        "specification": {
+          "authorization": [],
+          "behaviorContracts": [
+            {
+              "contractId": "contracts.step-functions-task.behavior",
+              "contractKind": "behavior-operation",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:9ca53415a072d117e93a87d228c9da294d4299134a6c292874c075183f97c496"
+            }
+          ],
+          "compatibility": {
+            "applicationGenerators": [
+              {
+                "generatorId": "cloudmarkup.event-application-generator",
+                "minimumVersion": "1.0.0",
+                "supportedModes": [
+                  "complete-supported-pattern",
+                  "generated-starter"
+                ],
+                "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+                "templateVersion": "1.0.0"
+              }
+            ],
+            "modelGateways": []
+          },
+          "dataBindings": [],
+          "downstreamActions": [],
+          "entrypoints": [
+            {
+              "entrypointId": "entrypoint_event_step_functions_task",
+              "handler": "index.handler",
+              "kind": "background-worker",
+              "operationId": "operation_event_step_functions_task"
+            }
+          ],
+          "environment": [
+            {
+              "id": "environment_stage",
+              "name": "APP_STAGE",
+              "value": {
+                "kind": "variable-reference",
+                "variableId": "variable_stage"
+              }
+            }
+          ],
+          "errorBehavior": {
+            "mode": "fail-invocation"
+          },
+          "eventBindings": [
+            {
+              "bindingId": "event_event_step_functions_task",
+              "contract": {
+                "contractId": "contracts.step-functions-task.event",
+                "contractKind": "event-message",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:4f592f25a9bb9254bcd9907e1b0e3c86c882029bcfcc69e22200ebc2f9751ed6"
+              },
+              "direction": "inbound",
+              "edgeId": "edge_workflow_task",
+              "operationId": "operation_event_step_functions_task",
+              "transportKind": "event"
+            }
+          ],
+          "executionAssumptions": {
+            "retry": {
+              "kind": "bounded",
+              "maximumAttempts": 3
+            },
+            "timeout": {
+              "kind": "duration",
+              "milliseconds": 30000
+            }
+          },
+          "extensionPoints": [
+            {
+              "conflictBehavior": "require-reviewed-resolution",
+              "extensionPointId": "application.step-functions-task.extensions",
+              "kind": "module",
+              "path": "application/src/functions/event_step_functions_task/extensions/custom.ts",
+              "permittedOwnership": [
+                "approved-extension",
+                "user-owned"
+              ]
+            }
+          ],
+          "extensions": [],
+          "httpRoutes": [],
+          "id": "workload_event_step_functions_task",
+          "idempotency": [
+            {
+              "mode": "not-required",
+              "operationIds": [
+                "operation_event_step_functions_task"
+              ],
+              "policyId": "idempotency_event_step_functions_task"
+            }
+          ],
+          "implementation": {
+            "handler": "index.handler",
+            "mode": "complete-supported-pattern",
+            "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+            "sourceOwnership": "cloudmarkup",
+            "supportedPattern": {
+              "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686",
+              "patternId": "cloudmarkup.pattern.aws-lambda-curated-event-driven",
+              "patternVersion": "1.0.0"
+            }
+          },
+          "implementationRequirements": [],
+          "languageFamily": "cloudmarkup.language.typescript",
+          "observability": {
+            "healthChecks": [],
+            "signals": [
+              "logs"
+            ],
+            "smokeTests": []
+          },
+          "operations": [
+            {
+              "capability": "cloudmarkup.event.step-functions-task",
+              "id": "operation_event_step_functions_task",
+              "inputContract": {
+                "kind": "contract-reference",
+                "reference": {
+                  "contractId": "contracts.step-functions-task.event",
+                  "contractVersion": "1.0.0",
+                  "digest": "sha256:4f592f25a9bb9254bcd9907e1b0e3c86c882029bcfcc69e22200ebc2f9751ed6"
+                }
+              },
+              "outputContract": {
+                "kind": "contract-reference",
+                "reference": {
+                  "contractId": "contracts.step-functions-task.payload",
+                  "contractVersion": "1.0.0",
+                  "digest": "sha256:4220653e023a0c13b215fe3a5eb5130aa6def620e31a93604e1d06d78991ae44"
+                }
+              }
+            }
+          ],
+          "owningNodeId": "lambda",
+          "provenance": {
+            "generatorId": "cloudmarkup.event-application-generator",
+            "generatorVersion": "1.0.0",
+            "inputDigest": "sha256:fe387861be62f2484a012a73444bccab75c24bbcd8a1615dba7e42fd76d99f86",
+            "source": "deterministic-generator"
+          },
+          "schedules": [],
+          "sourceOwnership": [
+            {
+              "conflictBehavior": "preserve-user-content",
+              "declarationId": "ownership_event_step_functions_task_extension",
+              "ownerId": "application.step-functions-task.owner",
+              "ownership": "user-owned",
+              "path": "application/src/functions/event_step_functions_task/extensions/custom.ts",
+              "pathKind": "file",
+              "regeneration": "never",
+              "semanticDiff": {
+                "strategy": "structured-language"
+              }
+            }
+          ],
+          "tests": [
+            {
+              "bindingId": "test_contract_event_step_functions_task",
+              "level": "contract",
+              "requiredForCoverage": true,
+              "testCase": {
+                "contractId": "contracts.step-functions-task.test.contract",
+                "contractKind": "test-case",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:018dfb2f7345d58d4fc9a5d7848d8af9b2e8a0259630aa449aa4f5eabec076c1"
+              }
+            },
+            {
+              "bindingId": "test_unit_event_step_functions_task",
+              "level": "unit",
+              "requiredForCoverage": true,
+              "testCase": {
+                "contractId": "contracts.step-functions-task.test.unit",
+                "contractKind": "test-case",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:d1a60a5cc5c283d1f17744669e6fd4a6b0b1e0fa7a484861e74304e930ef1c24"
+              }
+            }
+          ],
+          "triggerDispatch": {
+            "dispatcherId": "cloudmarkup.event-trigger-dispatcher",
+            "dispatcherOperationId": "operation_event_step_functions_task",
+            "dispatcherVersion": "1.0.0",
+            "mode": "generated-supported"
+          },
+          "triggers": [
+            {
+              "edgeId": "edge_workflow_task",
+              "id": "trigger_event_step_functions_task",
+              "targetOperationId": "operation_event_step_functions_task"
+            }
+          ],
+          "unresolvedRequirementIds": []
+        }
+      }
+    ],
+    "externalResources": []
+  },
+  "artifact": {
+    "contractVersion": 1,
+    "target": "terraform",
+    "formatVersion": "1.0.0",
+    "provenance": {
+      "architectureDocumentId": "document_event_step_functions_task",
+      "architectureId": "architecture_event_step_functions_task",
+      "architectureRevisionId": "revision_event_step_functions_task_1",
+      "architectureContentHash": "sha256:29ae79df80394ed997a7f2f4887e8b578dd9a6e8dc431ba77300170ebbd1e562",
+      "architectureDocumentHash": "sha256:14f014f075bb1a82c1089e43e68d879245dd942402ad314ed690a7dd9ca788bb",
+      "architectureVisualHash": "sha256:e10c2ec1db73fbdc19a1e42ee91ce3085a6c0ab726c7dc0ac4366ef21b9eaf6e",
+      "workloadContentHash": "sha256:2e6a4ead9b0970dfc59eea451b6f6156b765709b3fc5aebb2c20c6269bd0c17a",
+      "solutionRevisionId": "solution_notes_revision_1",
+      "providerId": "aws.cloudmarkup",
+      "region": "us-east-1",
+      "catalog": {
+        "id": "aws.cloudmarkup.notes-api-catalog",
+        "version": "0.30.0",
+        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+      }
+    },
+    "metadata": {
+      "formatVersion": "1.0.0",
+      "requiredTerraformVersion": "\u003e= 1.5.0, \u003c 2.0.0",
+      "providers": [
+        {
+          "source": "hashicorp/aws",
+          "version": "\u003e= 6.55.0, \u003c 7.0.0"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "infrastructure/versions.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "terraform {\n  required_version = \"\u003e= 1.5.0, \u003c 2.0.0\"\n  required_providers {\n    aws = {\n      source  = \"hashicorp/aws\"\n      version = \"\u003e= 6.63.0, \u003c 7.0.0\"\n    }\n  }\n}\n",
+        "digest": "sha256:503a5ddb4089ae513e443e1a9315051827077e5bc8aabc47dc783829a9fb4321"
+      },
+      {
+        "path": "infrastructure/providers.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "provider \"aws\" {\n  region = var.aws_region\n  default_tags {\n    tags = local.tags\n  }\n}\n",
+        "digest": "sha256:71a7bb3760957dd751f8de9032f57b41224550bf70799f1a425f6c6486d268e9"
+      },
+      {
+        "path": "infrastructure/variables.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "variable \"aws_region\" {\n  type        = string\n  description = \"AWS Region selected by the immutable Architecture Document.\"\n  default     = \"us-east-1\"\n}\n\nvariable \"event_step_functions_task_artifact_path\" {\n  type        = string\n  description = \"Stable relative package output produced by the separate Prompt 32A workload builder.\"\n  default     = \"../application/artifacts/workload_event_step_functions_task/function.zip\"\n  validation {\n    condition     = can(regex(\"^\\\\.\\\\.?/\", var.event_step_functions_task_artifact_path))\n    error_message = \"Package path must be repository-relative and begin with ./ or ../; absolute machine paths are forbidden.\"\n  }\n}\n\nvariable \"stage\" {\n  type        = string\n  description = \"Architecture variable stage.\"\n  default     = \"test\"\n}\n",
+        "digest": "sha256:9b813aad85d9ab1001dbfd7d6083fed3e774b1f22c84ccaccb33041475aa6b26"
+      },
+      {
+        "path": "infrastructure/locals.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "locals {\n  tags = {\n    CloudMarkupArchitecture     = \"architecture_event_step_functions_task\"\n    CloudMarkupRevision         = \"revision_event_step_functions_task_1\"\n    CloudMarkupSolutionRevision = \"solution_notes_revision_1\"\n    ManagedBy                   = \"CloudMarkup\"\n  }\n}\n",
+        "digest": "sha256:86bf2fd1f9b0bf9bf10821c4591a3a3b7dde4dda13e7289b690124d4da97fc56"
+      },
+      {
+        "path": "infrastructure/networking.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "infrastructure/identity.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_iam_role\" \"image_workflow_role\" {\n  name                 = \"image-workflow-role\"\n  description          = \"CloudMarkup notes-API Lambda execution role.\"\n  max_session_duration = 3600\n  assume_role_policy   = data.aws_iam_policy_document.workflow_trust.json\n  tags                 = local.tags\n}\n\nresource \"aws_iam_role\" \"notes_role\" {\n  name                 = \"notes-api-lambda-role\"\n  description          = \"CloudMarkup notes-API Lambda execution role.\"\n  max_session_duration = 3600\n  assume_role_policy   = data.aws_iam_policy_document.trust_policy.json\n  tags                 = local.tags\n}\n",
+        "digest": "sha256:ccfa6629cc7c9c2c4dd9c58c8dd41c42c663dbc87664ba64f16489fa8e70c444"
+      },
+      {
+        "path": "infrastructure/compute.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_lambda_function\" \"event_step_functions_task\" {\n  function_name                  = \"event_step_functions_task\"\n  description                    = \"CloudMarkup notes-API workload.\"\n  role                           = aws_iam_role.notes_role.arn\n  handler                        = \"index.handler\"\n  runtime                        = \"nodejs24.x\"\n  architectures                  = [\"arm64\"]\n  memory_size                    = 256\n  reserved_concurrent_executions = 10\n  timeout                        = 30\n  filename                       = var.event_step_functions_task_artifact_path\n  source_code_hash               = filebase64sha256(var.event_step_functions_task_artifact_path)\n  tracing_config {\n    mode = \"Active\"\n  }\n  environment {\n    variables = {\n      \"APP_STAGE\" = var.stage\n    }\n  }\n  tags = local.tags\n}\n",
+        "digest": "sha256:5b809353acd1afad7d28a0d0c98591c3c4601d010db3e7f0433b1076a26cfb41"
+      },
+      {
+        "path": "infrastructure/data.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "infrastructure/security.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "data \"aws_iam_policy_document\" \"event_logs_policy_step_functions_task\" {\n  statement {\n    sid       = \"eventlogspolicystepfunctionstask\"\n    effect    = \"Allow\"\n    actions   = [\"logs:CreateLogStream\", \"logs:PutLogEvents\"]\n    resources = [format(\"%s:*\", aws_cloudwatch_log_group.event_logs_step_functions_task.arn)]\n  }\n}\n\ndata \"aws_iam_policy_document\" \"trust_policy\" {\n  statement {\n    sid     = \"trustpolicy\"\n    effect  = \"Allow\"\n    actions = [\"sts:AssumeRole\"]\n    principals {\n      type        = \"Service\"\n      identifiers = [\"lambda.amazonaws.com\"]\n    }\n  }\n}\n\ndata \"aws_iam_policy_document\" \"workflow_invoke\" {\n  statement {\n    sid       = \"workflowinvoke\"\n    effect    = \"Allow\"\n    actions   = [\"lambda:InvokeFunction\"]\n    resources = [aws_lambda_function.event_step_functions_task.arn]\n  }\n}\n\ndata \"aws_iam_policy_document\" \"workflow_trust\" {\n  statement {\n    sid     = \"workflowtrust\"\n    effect  = \"Allow\"\n    actions = [\"sts:AssumeRole\"]\n    principals {\n      type        = \"Service\"\n      identifiers = [\"states.amazonaws.com\"]\n    }\n  }\n}\n\nresource \"aws_iam_role_policy\" \"workflow_invoke\" {\n  name   = \"workflow_invoke\"\n  role   = aws_iam_role.image_workflow_role.name\n  policy = data.aws_iam_policy_document.workflow_invoke.json\n}\n\nresource \"aws_iam_role_policy\" \"event_logs_policy_step_functions_task\" {\n  name   = \"event_logs_policy_step_functions_task\"\n  role   = aws_iam_role.notes_role.name\n  policy = data.aws_iam_policy_document.event_logs_policy_step_functions_task.json\n}\n",
+        "digest": "sha256:555d977d7216509bc6e0b1079fbc90b0779791dafe327c04b7cda684051ca700"
+      },
+      {
+        "path": "infrastructure/eventing.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_cloudwatch_log_group\" \"image_workflow_logs\" {\n  name              = \"/aws/vendedlogs/states/image-workflow\"\n  retention_in_days = 30\n  lifecycle {\n    prevent_destroy = true\n  }\n  tags = local.tags\n}\n\nresource \"aws_sfn_state_machine\" \"image_workflow\" {\n  name     = \"image-workflow\"\n  type     = \"STANDARD\"\n  role_arn = aws_iam_role.image_workflow_role.arn\n  definition = jsonencode({\n    Comment        = \"CloudMarkup catalog-derived workflow\"\n    StartAt        = \"Task_lambda_8f216a886e\"\n    TimeoutSeconds = 300\n    States = {\n      \"Task_lambda_8f216a886e\" = {\n        Type           = \"Task\"\n        Resource       = aws_lambda_function.event_step_functions_task.arn\n        TimeoutSeconds = 60\n        End            = true\n        Retry = [{\n          ErrorEquals     = [\"States.ALL\"]\n          IntervalSeconds = 2\n          MaxAttempts     = 2\n          BackoffRate     = 2\n        }]\n      }\n    }\n  })\n  logging_configuration {\n    include_execution_data = false\n    level                  = \"ERROR\"\n    log_destination        = format(\"%s:*\", aws_cloudwatch_log_group.image_workflow_logs.arn)\n  }\n  tracing_configuration {\n    enabled = true\n  }\n  lifecycle {\n    prevent_destroy = true\n  }\n  tags = local.tags\n}\n",
+        "digest": "sha256:71d625cdc97f707c3603baaecec4e3ee4dd945037cd7f39e9458fca1f39a10dd"
+      },
+      {
+        "path": "infrastructure/observability.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_cloudwatch_log_group\" \"event_logs_step_functions_task\" {\n  name              = \"/aws/lambda/notes_handler\"\n  log_group_class   = \"STANDARD\"\n  retention_in_days = 30\n  lifecycle {\n    prevent_destroy = true\n  }\n  tags = local.tags\n}\n",
+        "digest": "sha256:3cfbd2d9080f092f2ddb0785c187bfbee34cac5f9d2aec077ec1f0787543e04d"
+      },
+      {
+        "path": "infrastructure/outputs.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "infrastructure/terraform.tfvars.example",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "infrastructure/README.md",
+        "mediaType": "text/markdown",
+        "ownership": "generated",
+        "content": "# Cloud Markup deterministic Terraform\n\nThis directory was generated from immutable Architecture and Workload contracts. It does not build application source, run Terraform, or deploy.\n\n## Compatibility\n\n- Compiler: `cloudmarkup.iac-compiler@1.2.1`\n- Catalog: `aws.cloudmarkup.notes-api-catalog@0.30.0` (`sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682`)\n- Target format: `1.0.0`\n- Terraform: `\u003e= 1.5.0, \u003c 2.0.0`\n- AWS provider: `hashicorp/aws` (`\u003e= 6.55.0, \u003c 7.0.0`)\n- Architecture revision: `revision_event_step_functions_task_1`\n- Solution Revision: `solution_notes_revision_1`\n\n## Application artifacts\n\n- `workload_event_step_functions_task` (complete-supported-pattern): deterministic-relative-package at `../application/artifacts/workload_event_step_functions_task/function.zip`.\n\nCopy `terraform.tfvars.example` to a separately protected input file and replace every placeholder. Never put credentials or secret values in committed Terraform files. Review the complete diff, initialize from an approved provider mirror, validate, plan, and deploy only in customer-owned CI/CD with customer approval.\n",
+        "digest": "sha256:fae0ee388d2d1441f0f3f0773c3ccc3550cb85fef8aff8dc05448478a92858d0"
+      }
+    ],
+    "applicationArtifacts": [
+      {
+        "contractVersion": 2,
+        "workloadId": "workload_event_step_functions_task",
+        "implementationMode": "complete-supported-pattern",
+        "delivery": "deterministic-relative-package",
+        "relativePackagePath": "../application/artifacts/workload_event_step_functions_task/function.zip",
+        "variables": [
+          {
+            "name": "event_step_functions_task_artifact_path",
+            "valueType": "string",
+            "sensitive": false,
+            "required": false,
+            "description": "Relative built Lambda package path.",
+            "validation": "relative-package-path"
+          }
+        ],
+        "expectedArtifact": {
+          "artifactId": "artifact_workload_event_step_functions_task",
+          "kind": "aws-lambda-zip",
+          "mediaType": "application/zip",
+          "path": "application/artifacts/workload_event_step_functions_task/function.zip",
+          "archiveEntrypoint": "index.js",
+          "handler": "index.handler",
+          "digestAlgorithm": "sha256",
+          "runtime": {
+            "id": "cloudmarkup.runtime.aws-lambda-nodejs24-typescript",
+            "version": "1.0.0",
+            "digest": "sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a",
+            "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+            "languageFamily": "cloudmarkup.language.typescript",
+            "runtime": "nodejs24.x",
+            "handler": "index.handler",
+            "moduleFormat": "esm"
+          }
+        },
+        "artifactReadiness": "application-artifact-evidence-incomplete",
+        "inputs": [
+          {
+            "artifactId": "cloudmarkup.pattern.aws-lambda-curated-event-driven:1.0.0",
+            "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686",
+            "kind": "supported-pattern",
+            "ownership": "cloudmarkup",
+            "workloadId": "workload_event_step_functions_task"
+          }
+        ],
+        "generationCoverage": "custom-implementation-required",
+        "codeRequired": false
+      }
+    ],
+    "policyArtifacts": [
+      {
+        "policyDocumentId": "event_logs_policy_step_functions_task",
+        "ownerNodeId": "role",
+        "policyKind": "generated-permission",
+        "ownership": "generated",
+        "renderedAs": "aws_iam_role_policy.event_logs_policy_step_functions_task",
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_event_logs_step_functions_task",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_event_logs_step_functions_task"
+          ]
+        }
+      },
+      {
+        "policyDocumentId": "trust_policy",
+        "ownerNodeId": "role",
+        "policyKind": "trust",
+        "ownership": "generated",
+        "renderedAs": "data.aws_iam_policy_document.trust_policy",
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_role_lambda"
+          ]
+        }
+      },
+      {
+        "policyDocumentId": "workflow_invoke",
+        "ownerNodeId": "workflow_role",
+        "policyKind": "generated-permission",
+        "ownership": "generated",
+        "renderedAs": "aws_iam_role_policy.workflow_invoke",
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_workflow_task"
+          ]
+        }
+      },
+      {
+        "policyDocumentId": "workflow_trust",
+        "ownerNodeId": "workflow_role",
+        "policyKind": "trust",
+        "ownership": "generated",
+        "renderedAs": "data.aws_iam_policy_document.workflow_trust",
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_workflow_role"
+          ]
+        }
+      }
+    ],
+    "digest": "sha256:282f2b541c241a15ccf90e3effcd6d2052d79582217aca1bc27297ead00914a5"
+  },
+  "diagnostics": [
+    {
+      "code": "APPLICATION_GENERATION_PENDING",
+      "severity": "warning",
+      "message": "Event infrastructure is renderable, but the exact generated, built, tested, and scanned application artifact coverage is incomplete.",
+      "source": {
+        "document": "workload",
+        "workloadId": "workload_event_step_functions_task"
+      }
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+#!/usr/local/bin/node
+"use strict";
+
+const {
+  chmodSync,
+  chownSync,
+  copyFileSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+} = require("node:fs");
+const { resolve } = require("node:path");
+
+const {
+  GENERATED_LIMITS,
+  ServiceError,
+  canonicalServiceError,
+  inspectTree,
+  inspectWorkspace,
+} = require("./runtime.cjs");
+
+const INPUT_ROOT = "/input/infrastructure";
+const WORKSPACE_ROOT = "/workspace";
+const OUTPUT_ROOT = "/workspace/infrastructure";
+const TERRAFORM_DATA_ROOT = "/workspace/terraform-data";
+const REVIEWED_LOCK = "/opt/cloudmarkup/policy/.terraform.lock.hcl";
+const RUNTIME_UID = 65532;
+const RUNTIME_GID = 65532;
+
+function fail(code, exitCode) {
+  throw new ServiceError(code, exitCode);
+}
+
+function copyRegularTree(sourceRoot, destinationRoot) {
+  const copyDirectory = (source, destination) => {
+    mkdirSync(destination, { mode: 0o700 });
+    for (const entry of readdirSync(source, { withFileTypes: true }).sort(
+      (left, right) =>
+        left.name < right.name ? -1 : left.name > right.name ? 1 : 0,
+    )) {
+      if (entry.name === ".terraform") fail("input-path-forbidden", 65);
+      const sourcePath = resolve(source, entry.name);
+      const destinationPath = resolve(destination, entry.name);
+      const stats = lstatSync(sourcePath);
+      if (stats.isDirectory()) copyDirectory(sourcePath, destinationPath);
+      else if (
+        stats.isFile() &&
+        !stats.isSymbolicLink() &&
+        stats.nlink === 1 &&
+        (stats.mode & 0o6000) === 0
+      ) {
+        copyFileSync(sourcePath, destinationPath, 1);
+        chmodSync(destinationPath, 0o600);
+        chownSync(destinationPath, RUNTIME_UID, RUNTIME_GID);
+      } else fail("input-path-forbidden", 65);
+    }
+    chmodSync(destination, 0o700);
+    chownSync(destination, RUNTIME_UID, RUNTIME_GID);
+  };
+  copyDirectory(sourceRoot, destinationRoot);
+}
+
+function prepare() {
+  if (typeof process.getuid !== "function" || process.getuid() !== 0) {
+    fail("runtime-user-forbidden", 77);
+  }
+  if (readdirSync(WORKSPACE_ROOT).length !== 0) {
+    fail("workspace-forbidden", 65);
+  }
+  inspectWorkspace(INPUT_ROOT, REVIEWED_LOCK);
+  copyRegularTree(INPUT_ROOT, OUTPUT_ROOT);
+  mkdirSync(TERRAFORM_DATA_ROOT, { mode: 0o700 });
+  chownSync(TERRAFORM_DATA_ROOT, RUNTIME_UID, RUNTIME_GID);
+  chmodSync(WORKSPACE_ROOT, 0o700);
+  chownSync(WORKSPACE_ROOT, RUNTIME_UID, RUNTIME_GID);
+}
+
+function inspect() {
+  if (
+    typeof process.getuid !== "function" ||
+    process.getuid() !== RUNTIME_UID
+  ) {
+    fail("runtime-user-forbidden", 77);
+  }
+  inspectWorkspace(OUTPUT_ROOT, REVIEWED_LOCK);
+  inspectTree(TERRAFORM_DATA_ROOT, GENERATED_LIMITS, true);
+}
+
+try {
+  if (process.argv.length !== 3) fail("invocation-forbidden", 64);
+  if (process.argv[2] === "prepare") prepare();
+  else if (process.argv[2] === "inspect") inspect();
+  else fail("invocation-forbidden", 64);
+} catch (error) {
+  const safeError =
+    error instanceof ServiceError
+      ? error
+      : new ServiceError("runtime-integrity-failed", 70);
+  process.stderr.write(canonicalServiceError(safeError));
+  process.exitCode = safeError.exitCode;
+}

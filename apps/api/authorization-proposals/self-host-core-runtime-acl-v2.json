@@ -1,0 +1,28 @@
+{
+  "proposalContractVersion": 2,
+  "profileId": "cloudmarkup-standalone-pg17-v1",
+  "capabilityProfile": "local-editor-core-v1",
+  "installedProfileManifestSha256": "2fb13c3f4a46f3025f1b972254896ac0e50575450680495cdd968ecda6eb9651",
+  "state": "REVIEW_ONLY_UNARMED",
+  "automaticBootstrap": false,
+  "runtimeActivation": false,
+  "inputs": [
+    {
+      "file": "self-host-runtime-acl-v1.sql",
+      "checksumSha256": "e5e4ff947bbf826d047c6176aef1d61d0cebebd07ec37c9733531cf0e04b5f63",
+      "selection": "complete"
+    },
+    {
+      "file": "ordinary-local-business-acl.sql",
+      "checksumSha256": "455e2233dca08f2f42a558b64a89f8989ee734d9cf174d384a8449d6b8008427",
+      "selection": "grants-after-single-local-target-admission"
+    }
+  ],
+  "qualificationRequired": [
+    "New strict closed core policy loader/activation binding; existing fullv1 remains unchanged",
+    "Exact main-derived installed profile and source input hashes; explicit operator acknowledgement",
+    "Reject unknown/mixed policy versions, arbitrary input selection, mismatched/full installation and unexpected effective privileges",
+    "Core configuration requires modelsnull and all unsupported configured servicesnull before admission",
+    "Actual freshPG17 role/schema/RLS/trigger/function and editor mutation/denial/restoration qualification"
+  ]
+}

@@ -1,0 +1,652 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudMarkup deterministic curated serverless, networking, and event-driven application infrastructure.",
+  "Metadata": {
+    "CloudMarkup": {
+      "ArchitectureRevisionId": "revision_notes_1",
+      "CatalogDigest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+      "CatalogVersion": "0.30.0",
+      "Compiler": "cloudmarkup.iac-compiler@1.2.1",
+      "SolutionRevisionId": "solution_notes_1"
+    }
+  },
+  "Parameters": {
+    "NotesHandlerArtifactBucketParameter": {
+      "Type": "String",
+      "Description": "S3 bucket containing the exact reviewed Lambda package.",
+      "AllowedPattern": "^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$",
+      "MinLength": 1
+    },
+    "NotesHandlerArtifactDigestParameter": {
+      "Type": "String",
+      "Description": "Base64-encoded SHA-256 of the exact reviewed Lambda package.",
+      "AllowedPattern": "^[A-Za-z0-9+/]{43}=$"
+    },
+    "NotesHandlerArtifactKeyParameter": {
+      "Type": "String",
+      "Description": "S3 object key containing the exact reviewed Lambda package.",
+      "AllowedPattern": "^.+$",
+      "MinLength": 1
+    },
+    "NotesHandlerArtifactVersionParameter": {
+      "Type": "String",
+      "Description": "Immutable S3 object version for the exact reviewed Lambda package.",
+      "AllowedPattern": "^.+$",
+      "MinLength": 1
+    }
+  },
+  "Resources": {
+    "ApiPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "NotesHandler"
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "NotesApi"
+                    }
+                  ]
+                ]
+              },
+              "/",
+              "$default/ANY/notes/*"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "api_permission",
+          "GraphId": "api_permission",
+          "Ownership": "generated",
+          "TargetKey": "api_permission"
+        }
+      }
+    },
+    "NotesAlarm": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmDescription": "CloudMarkup notes-API Lambda error alarm.",
+        "AlarmName": "notes-api-errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "NotesHandler"
+            }
+          }
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "notes_alarm",
+          "GraphId": "alarm",
+          "Ownership": "user",
+          "TargetKey": "notes_alarm"
+        }
+      }
+    },
+    "NotesApi": {
+      "Type": "AWS::ApiGatewayV2::Api",
+      "Properties": {
+        "Description": "CloudMarkup authenticated notes HTTP API.",
+        "Name": "notes-api",
+        "ProtocolType": "HTTP",
+        "Tags": {
+          "CloudMarkupArchitecture": "architecture_notes",
+          "CloudMarkupRevision": "revision_notes_1",
+          "CloudMarkupSolutionRevision": "solution_notes_1",
+          "ManagedBy": "CloudMarkup"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "notes_api",
+          "GraphId": "api",
+          "Ownership": "user",
+          "TargetKey": "notes_api"
+        }
+      }
+    },
+    "NotesApiDefaultStage": {
+      "Type": "AWS::ApiGatewayV2::Stage",
+      "Properties": {
+        "ApiId": {
+          "Ref": "NotesApi"
+        },
+        "AutoDeploy": true,
+        "StageName": "$default",
+        "Tags": {
+          "CloudMarkupArchitecture": "architecture_notes",
+          "CloudMarkupRevision": "revision_notes_1",
+          "CloudMarkupSolutionRevision": "solution_notes_1",
+          "ManagedBy": "CloudMarkup"
+        }
+      }
+    },
+    "NotesApiJwtAuthorizer": {
+      "Type": "AWS::ApiGatewayV2::Authorizer",
+      "Properties": {
+        "ApiId": {
+          "Ref": "NotesApi"
+        },
+        "AuthorizerType": "JWT",
+        "IdentitySource": [
+          "$request.header.Authorization"
+        ],
+        "JwtConfiguration": {
+          "Audience": [
+            {
+              "Ref": "NotesClient"
+            }
+          ],
+          "Issuer": {
+            "Fn::Join": [
+              "",
+              [
+                "https://cognito-idp.",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ".",
+                {
+                  "Ref": "AWS::URLSuffix"
+                },
+                "/",
+                {
+                  "Ref": "NotesPool"
+                }
+              ]
+            ]
+          }
+        },
+        "Name": "notesJwt"
+      }
+    },
+    "NotesApiNotesHandlerEdgeApiLambdaIntegration": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "NotesApi"
+        },
+        "IntegrationMethod": "POST",
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "NotesHandler",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 10000
+      }
+    },
+    "NotesApiNotesHandlerEdgeApiLambdaRoute": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "NotesApi"
+        },
+        "AuthorizationType": "JWT",
+        "AuthorizerId": {
+          "Ref": "NotesApiJwtAuthorizer"
+        },
+        "RouteKey": "ANY /notes/{proxy+}",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "NotesApiNotesHandlerEdgeApiLambdaIntegration"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    "NotesClient": {
+      "Type": "AWS::Cognito::UserPoolClient",
+      "Properties": {
+        "AccessTokenValidity": 15,
+        "ClientName": "notes-web",
+        "ExplicitAuthFlows": [
+          "ALLOW_REFRESH_TOKEN_AUTH",
+          "ALLOW_USER_SRP_AUTH"
+        ],
+        "GenerateSecret": false,
+        "IdTokenValidity": 15,
+        "PreventUserExistenceErrors": "ENABLED",
+        "RefreshTokenValidity": 30,
+        "TokenValidityUnits": {
+          "AccessToken": "minutes",
+          "IdToken": "minutes",
+          "RefreshToken": "days"
+        },
+        "UserPoolId": {
+          "Ref": "NotesPool"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "notes_client",
+          "GraphId": "client",
+          "Ownership": "user",
+          "TargetKey": "notes_client"
+        }
+      }
+    },
+    "NotesHandler": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "arm64"
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "NotesHandlerArtifactBucketParameter"
+          },
+          "S3Key": {
+            "Ref": "NotesHandlerArtifactKeyParameter"
+          },
+          "S3ObjectVersion": {
+            "Ref": "NotesHandlerArtifactVersionParameter"
+          }
+        },
+        "Description": "CloudMarkup notes-API workload.",
+        "FunctionName": "notes-api-handler",
+        "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogGroup": {
+            "Ref": "NotesLogs"
+          }
+        },
+        "MemorySize": 256,
+        "ReservedConcurrentExecutions": 10,
+        "Role": {
+          "Fn::GetAtt": [
+            "NotesRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs24.x",
+        "Tags": {
+          "CloudMarkupArchitecture": "architecture_notes",
+          "CloudMarkupRevision": "revision_notes_1",
+          "CloudMarkupSolutionRevision": "solution_notes_1",
+          "ManagedBy": "CloudMarkup"
+        },
+        "Timeout": 10,
+        "TracingConfig": {
+          "Mode": "Active"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "ApplicationArtifact": {
+            "Base64Sha256Parameter": {
+              "Ref": "NotesHandlerArtifactDigestParameter"
+            },
+            "ImplementationMode": "complete-supported-pattern",
+            "Path": "application/artifacts/workload_notes/function.zip",
+            "Readiness": "application-artifact-ready",
+            "WorkloadId": "workload_notes"
+          },
+          "DeploymentKey": "notes_handler",
+          "GraphId": "lambda",
+          "Ownership": "user",
+          "TargetKey": "notes_handler"
+        }
+      }
+    },
+    "NotesLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupClass": "STANDARD",
+        "LogGroupName": "/aws/lambda/notes-api-handler",
+        "RetentionInDays": 30,
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "notes_logs",
+          "GraphId": "logs",
+          "Ownership": "user",
+          "TargetKey": "notes_logs"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "NotesPool": {
+      "Type": "AWS::Cognito::UserPool",
+      "Properties": {
+        "AccountRecoverySetting": {
+          "RecoveryMechanisms": [
+            {
+              "Name": "verified_email",
+              "Priority": 1
+            }
+          ]
+        },
+        "AdminCreateUserConfig": {
+          "AllowAdminCreateUserOnly": true
+        },
+        "AutoVerifiedAttributes": [
+          "email"
+        ],
+        "DeletionProtection": "ACTIVE",
+        "EnabledMfas": [
+          "SOFTWARE_TOKEN_MFA"
+        ],
+        "MfaConfiguration": "OPTIONAL",
+        "Policies": {
+          "PasswordPolicy": {
+            "MinimumLength": 12,
+            "RequireLowercase": true,
+            "RequireNumbers": true,
+            "RequireSymbols": true,
+            "RequireUppercase": true
+          }
+        },
+        "UserPoolName": "notes-users",
+        "UserPoolTags": {
+          "CloudMarkupArchitecture": "architecture_notes",
+          "CloudMarkupRevision": "revision_notes_1",
+          "CloudMarkupSolutionRevision": "solution_notes_1",
+          "ManagedBy": "CloudMarkup"
+        },
+        "UsernameAttributes": [
+          "email"
+        ],
+        "UsernameConfiguration": {
+          "CaseSensitive": false
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "notes_pool",
+          "GraphId": "pool",
+          "Ownership": "user",
+          "TargetKey": "notes_pool"
+        }
+      }
+    },
+    "NotesRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Sid": "trustpolicy"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Description": "CloudMarkup notes-API Lambda execution role.",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/AWSXRayDaemonWriteAccess"
+          }
+        ],
+        "MaxSessionDuration": 3600,
+        "PermissionsBoundary": {
+          "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/ReadOnlyAccess"
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "dynamodb:GetItem"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "NotesTable",
+                        "Arn"
+                      ]
+                    }
+                  ],
+                  "Sid": "custompolicy"
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "custom_policy"
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "NotesLogs",
+                        "Arn"
+                      ]
+                    }
+                  ],
+                  "Sid": "generatedlogspolicy"
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "generated_logs_policy"
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:Query"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "NotesTable",
+                        "Arn"
+                      ]
+                    }
+                  ],
+                  "Sid": "generatedreadpolicy"
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "generated_read_policy"
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "dynamodb:DeleteItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "NotesTable",
+                        "Arn"
+                      ]
+                    }
+                  ],
+                  "Sid": "generatedwritepolicy"
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "generated_write_policy"
+          }
+        ],
+        "RoleName": "notes-api-lambda-role",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "notes_role",
+          "GraphId": "role",
+          "Ownership": "user",
+          "TargetKey": "notes_role"
+        }
+      }
+    },
+    "NotesTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "noteId",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "DeletionProtectionEnabled": true,
+        "KeySchema": [
+          {
+            "AttributeName": "noteId",
+            "KeyType": "HASH"
+          }
+        ],
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        },
+        "SSESpecification": {
+          "SSEEnabled": true
+        },
+        "TableName": "notes",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "notes_table",
+          "GraphId": "table",
+          "Ownership": "user",
+          "TargetKey": "notes_table"
+        }
+      }
+    }
+  }
+}

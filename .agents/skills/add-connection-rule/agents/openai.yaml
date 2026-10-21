@@ -1,0 +1,6 @@
+interface:
+  display_name: "Add Connection Rule"
+  short_description: "Add one deterministic catalog connection rule"
+  default_prompt:
+    "Use $add-connection-rule to add one reviewed CloudMarkup connection rule
+    and resolver."

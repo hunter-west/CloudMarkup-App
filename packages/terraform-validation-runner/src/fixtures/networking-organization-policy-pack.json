@@ -1,0 +1,37 @@
+{
+  "policyPack": {
+    "id": "cloudmarkup.organization-policy.networking-baseline",
+    "providerNeutral": true,
+    "version": "1.0.0"
+  },
+  "findings": [
+    {
+      "code": "cloudmarkup.organization-policy.networking.sensitive-ingress",
+      "detail": "Organization policy forbids ingress from every address to sensitive administrative or database ports unless an approved exception is recorded.",
+      "path": "infrastructure/networking.tf",
+      "references": {
+        "edgeIds": ["edge_sensitive_ingress"],
+        "nodeIds": ["node_sensitive_ingress"],
+        "ownedPolicyIds": ["policy_networking_baseline"],
+        "solutionRevisionId": "solution-revision-fixture"
+      },
+      "severity": "error",
+      "source": "organization-policy",
+      "summary": "Broad sensitive ingress violates organization policy."
+    },
+    {
+      "code": "cloudmarkup.organization-policy.networking.multi-zone",
+      "detail": "Production workloads must use at least two independent failure zones unless an approved exception is recorded.",
+      "path": "infrastructure/networking.tf",
+      "references": {
+        "edgeIds": ["edge_zone_placement"],
+        "nodeIds": ["node_production_workload"],
+        "ownedPolicyIds": ["policy_networking_baseline"],
+        "solutionRevisionId": "solution-revision-fixture"
+      },
+      "severity": "warning",
+      "source": "organization-policy",
+      "summary": "Single-zone placement needs organization review."
+    }
+  ]
+}

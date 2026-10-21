@@ -1,0 +1,5 @@
+# Trusted-project instruction discovery only. Security, approvals, sandboxing,
+# models, networking, hooks, MCP, and credentials remain controlled by user,
+# host, and managed policy.
+project_doc_max_bytes = 32768
+project_doc_fallback_filenames = []

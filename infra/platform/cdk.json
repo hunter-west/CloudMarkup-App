@@ -1,0 +1,7 @@
+{
+  "app": "pnpm exec tsx bin/cloudmarkup.ts",
+  "context": {
+    "@aws-cdk/core:defaultCrossStackReferences": "strong"
+  },
+  "output": "cdk.out"
+}

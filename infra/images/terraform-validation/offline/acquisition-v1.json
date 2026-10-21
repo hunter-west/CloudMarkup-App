@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "kind": "cloudmarkup.offline-acquisition",
+  "contextId": "terraform-validation",
+  "recipes": [],
+  "artifacts": [
+    {
+      "type": "https-file",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libcrypto3-3.5.9-r0.apk",
+      "sha256": "6632d758d8f5e9ea3b650fe966f23bbf9a202f8b8dceecac93da135dec5e3689",
+      "sizeBytes": 1980198,
+      "destination": "offline/apk/libcrypto3-3.5.9-r0.apk",
+      "role": "alpine-runtime-package",
+      "executable": false
+    },
+    {
+      "type": "https-file",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/v3.24/main/x86_64/libssl3-3.5.9-r0.apk",
+      "sha256": "05e3393fb95aa5751ca2f9d242f659f6cff82c1cc7767cc2df4a086f7ad01877",
+      "sizeBytes": 381860,
+      "destination": "offline/apk/libssl3-3.5.9-r0.apk",
+      "role": "alpine-runtime-package",
+      "executable": false
+    },
+    {
+      "type": "https-file",
+      "url": "https://releases.hashicorp.com/terraform-provider-aws/6.63.0/terraform-provider-aws_6.63.0_linux_amd64.zip",
+      "sha256": "4b357dfe4b820e3e4acd2881cff8288b2186491e63416751f0d12692ba478ceb",
+      "sizeBytes": 191509275,
+      "destination": "offline/provider-mirror/registry.terraform.io/hashicorp/aws/terraform-provider-aws_6.63.0_linux_amd64.zip",
+      "role": "terraform-provider-package",
+      "executable": false,
+      "zipMembers": [
+        {
+          "archivePath": "LICENSE.txt",
+          "sha256": "588768dc819dc773d6914c22df7de8932cc7899c24188f5b09b013d86457e115",
+          "sizeBytes": 16757,
+          "mode": "0644",
+          "externalAttributes": -2119958528
+        },
+        {
+          "archivePath": "terraform-provider-aws_v6.63.0_x5",
+          "sha256": "4534a5c93f4bc8f9423457e5ff7802237be99f1cd96acc776567cbbc41584170",
+          "sizeBytes": 879186082,
+          "mode": "0755",
+          "externalAttributes": -2115174400
+        }
+      ]
+    },
+    {
+      "type": "https-go-source-v1",
+      "tool": "trivy",
+      "url": "https://codeload.github.com/aquasecurity/trivy/tar.gz/e1fd17a0ea4a8cf24bc4b4dd7e2cfbf4bb31b994",
+      "sizeBytes": 56676456,
+      "sha256": "285594b257470eb444fd2836be95a835565ee600382320c977b3993d8efbb767",
+      "members": [
+        {
+          "archivePath": "trivy",
+          "destination": "offline/bin/trivy",
+          "sizeBytes": 168288382,
+          "sha256": "2f78848b474c6f0b27d0df1833ae8fc7d297640344c6d5c7a25f63cc9e22d3dc",
+          "role": "vulnerability-scanner",
+          "executable": true,
+          "mode": "0755"
+        },
+        {
+          "archivePath": "trivy-LICENSE.txt",
+          "destination": "offline/licenses/trivy-LICENSE.txt",
+          "sizeBytes": 11357,
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "role": "trivy-license",
+          "executable": false,
+          "mode": "0644"
+        }
+      ]
+    },
+    {
+      "type": "https-go-source-v1",
+      "tool": "terraform",
+      "url": "https://codeload.github.com/hashicorp/terraform/tar.gz/82e042fb6372443813f6759056308d6adc642fa1",
+      "sizeBytes": 6002125,
+      "sha256": "4eb4a3e57f70c6aebd4cb52ce6bb6a8f046a769afdff53a4052799dd9e06f7ec",
+      "members": [
+        {
+          "archivePath": "terraform",
+          "destination": "offline/bin/terraform",
+          "sizeBytes": 120361086,
+          "sha256": "7c226d2a50158de8d8567e799f9dcadad9179ca4877202053ce2b1c55c8e0ee4",
+          "role": "terraform-cli",
+          "executable": true,
+          "mode": "0755"
+        },
+        {
+          "archivePath": "terraform-LICENSE.txt",
+          "destination": "offline/licenses/terraform-LICENSE.txt",
+          "sizeBytes": 4950,
+          "sha256": "dc4cb9f6140970b69110d82e8f25545135965ae50f6761ddfd6cd7cf9452bfa9",
+          "role": "terraform-license",
+          "executable": false,
+          "mode": "0644"
+        }
+      ]
+    },
+    {
+      "type": "https-go-source-v1",
+      "tool": "tflint",
+      "url": "https://codeload.github.com/terraform-linters/tflint/tar.gz/15c65a33b322750f6131e286cd9597896299ba32",
+      "sizeBytes": 1399248,
+      "sha256": "cb4565109f6bc49b13d99526c4fd66aecb566549bfbd03256f0bb4c16665f4eb",
+      "members": [
+        {
+          "archivePath": "tflint",
+          "destination": "offline/bin/tflint",
+          "sizeBytes": 54317182,
+          "sha256": "e4bf9780686a7715bcf277fada5659a1ca433bacf24289c23c75388979a34a66",
+          "role": "terraform-linter",
+          "executable": true,
+          "mode": "0755"
+        },
+        {
+          "archivePath": "tflint-LICENSE.txt",
+          "destination": "offline/licenses/tflint-LICENSE.txt",
+          "sizeBytes": 16725,
+          "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5",
+          "role": "tflint-license",
+          "executable": false,
+          "mode": "0644"
+        }
+      ]
+    },
+    {
+      "type": "oci-trivy-db-v1",
+      "registry": "ghcr.io",
+      "repository": "aquasecurity/trivy-db",
+      "manifestDigest": "sha256:98e1c199793bfcbe64fa41538fa3cf2c55650689a7920075bbba6165404a44d0",
+      "artifactType": "application/vnd.aquasec.trivy.config.v1+json",
+      "created": "2026-09-10T14:16:33Z",
+      "layer": {
+        "mediaType": "application/vnd.aquasec.trivy.db.layer.v1.tar+gzip",
+        "digest": "sha256:1edf7a495c6d68e691fb710b63926e4f1a3dbffa392fd8057cd10bdfd8c3eef5",
+        "sizeBytes": 117915639
+      },
+      "members": [
+        {
+          "archivePath": "metadata.json",
+          "destination": "offline/trivy-cache/metadata.json",
+          "role": "trivy-database-metadata",
+          "executable": false
+        },
+        {
+          "archivePath": "trivy.db",
+          "destination": "offline/trivy-cache/trivy.db",
+          "role": "trivy-database",
+          "executable": false
+        }
+      ]
+    }
+  ]
+}

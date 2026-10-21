@@ -1,0 +1,60 @@
+.organization-invitation {
+  display: grid;
+  gap: var(--cm-space-3);
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  min-width: 0;
+}
+
+.organization-invitation h2 {
+  font-size: var(--cm-font-size-4);
+  margin: 0;
+}
+
+.organization-invitation p {
+  margin: 0;
+}
+
+.organization-invitation__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cm-space-2);
+}
+
+.organization-invitation label {
+  display: grid;
+  gap: var(--cm-space-2);
+}
+
+.organization-invitation input {
+  width: 100%;
+  min-width: 0;
+}
+.recipient-invitation-list {
+  display: grid;
+  gap: var(--cm-space-3);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.recipient-invitation-list > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cm-space-3);
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  overflow-wrap: anywhere;
+}
+.recipient-invitation-list h3 {
+  margin: 0;
+}
+.organization-invitation__form {
+  display: grid;
+  gap: var(--cm-space-3);
+  max-width: 38rem;
+}

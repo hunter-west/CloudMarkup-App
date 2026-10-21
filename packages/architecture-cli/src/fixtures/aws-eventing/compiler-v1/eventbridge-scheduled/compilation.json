@@ -1,0 +1,1730 @@
+{
+  "contractVersion": 1,
+  "compiler": {
+    "id": "cloudmarkup.iac-compiler",
+    "version": "1.2.1",
+    "digest": "sha256:2c25a5610c825d171a167a38201c3090aa2278071ddd648bb957e67b7b98f203"
+  },
+  "model": {
+    "contractVersion": 1,
+    "target": {
+      "target": "terraform",
+      "contractVersion": "1.0.0",
+      "state": "ready",
+      "renderingAvailable": true,
+      "reasons": []
+    },
+    "provenance": {
+      "architectureDocumentId": "document_event_eventbridge_scheduled",
+      "architectureId": "architecture_event_eventbridge_scheduled",
+      "architectureRevisionId": "revision_event_eventbridge_scheduled_1",
+      "architectureContentHash": "sha256:a69c1dc1aa9bad27eaf5bedd63028c06297b9c9c6acd1a3d8e498ee63cca0665",
+      "architectureDocumentHash": "sha256:cedfdc801ee693c9a55aaf71a5e8c91d6b8333c9cb7b4036758aac65bb42cb7c",
+      "architectureVisualHash": "sha256:326e24dc73b2d7925fbada77cb36cdff12821c0a0380ae4e0ec73d78a61298c3",
+      "workloadContentHash": "sha256:24dce40638ef9fd36bdfcf09674a3ef79c6f13cc883786b8be5dc0e18895bf16",
+      "solutionRevisionId": "solution_notes_revision_1",
+      "providerId": "aws.cloudmarkup",
+      "region": "us-east-1",
+      "catalog": {
+        "id": "aws.cloudmarkup.notes-api-catalog",
+        "version": "0.30.0",
+        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+      }
+    },
+    "resources": [
+      {
+        "id": "event_bus",
+        "targetKey": "default_bus",
+        "deploymentKey": "default_bus",
+        "serviceType": "aws.eventbridge.event-bus",
+        "resourceType": "aws.eventbridge.event-bus",
+        "configuration": {
+          "schemaId": "aws.eventbridge.event-bus.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "busName": {
+              "kind": "string",
+              "value": "default"
+            },
+            "busType": {
+              "kind": "string",
+              "value": "DEFAULT"
+            },
+            "deletionProtectionEnabled": {
+              "kind": "boolean",
+              "value": true
+            },
+            "encryption": {
+              "kind": "string",
+              "value": "AWS_OWNED"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "lambda",
+        "targetKey": "event_eventbridge_scheduled",
+        "deploymentKey": "event_eventbridge_scheduled",
+        "serviceType": "aws.lambda.function",
+        "resourceType": "aws.lambda.function",
+        "configuration": {
+          "schemaId": "aws.lambda.function.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "architecture": {
+              "kind": "string",
+              "value": "arm64"
+            },
+            "functionName": {
+              "kind": "string",
+              "value": "event_eventbridge_scheduled"
+            },
+            "handler": {
+              "kind": "string",
+              "value": "index.handler"
+            },
+            "memoryMegabytes": {
+              "kind": "integer",
+              "value": 256
+            },
+            "reservedConcurrency": {
+              "kind": "integer",
+              "value": 10
+            },
+            "runtime": {
+              "kind": "string",
+              "value": "nodejs24.x"
+            },
+            "timeoutSeconds": {
+              "kind": "integer",
+              "value": 30
+            },
+            "tracingEnabled": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": [
+          "workload_event_eventbridge_scheduled"
+        ]
+      },
+      {
+        "id": "event_logs_eventbridge_scheduled",
+        "targetKey": "event_logs_eventbridge_scheduled",
+        "deploymentKey": "event_logs_eventbridge_scheduled",
+        "serviceType": "aws.cloudwatch.log-group",
+        "resourceType": "aws.cloudwatch.log-group",
+        "configuration": {
+          "schemaId": "aws.cloudwatch.log-group.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "logClass": {
+              "kind": "string",
+              "value": "STANDARD"
+            },
+            "logGroupName": {
+              "kind": "string",
+              "value": "/aws/lambda/notes_handler"
+            },
+            "preventDestroy": {
+              "kind": "boolean",
+              "value": true
+            },
+            "retentionDays": {
+              "kind": "integer",
+              "value": 30
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "event_logs_policy_eventbridge_scheduled",
+        "targetKey": "event_logs_policy_eventbridge_scheduled",
+        "deploymentKey": "event_logs_policy_eventbridge_scheduled",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "generated-permission"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "event_logs_policy_eventbridge_scheduled"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_event_logs_eventbridge_scheduled",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_event_logs_eventbridge_scheduled"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "event_logs_policy_eventbridge_scheduled_statement",
+        "targetKey": "event_logs_policy_eventbridge_scheduled_statement",
+        "deploymentKey": "event_logs_policy_eventbridge_scheduled_statement",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "eventlogspolicyeventbridgescheduled"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_event_logs_eventbridge_scheduled",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_event_logs_eventbridge_scheduled"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "event_permission",
+        "targetKey": "event_permission",
+        "deploymentKey": "event_permission",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "service-grant"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "event_permission"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_target_lambda"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "event_permission_statement",
+        "targetKey": "event_permission_statement",
+        "deploymentKey": "event_permission_statement",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "lambda:InvokeFunction"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "events.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "eventpermission"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_target_lambda"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "event_rule",
+        "targetKey": "hourly",
+        "deploymentKey": "hourly",
+        "serviceType": "aws.eventbridge.rule",
+        "resourceType": "aws.eventbridge.rule",
+        "configuration": {
+          "schemaId": "aws.eventbridge.rule.configuration",
+          "schemaVersion": "1.1.0",
+          "values": {
+            "detailTypes": {
+              "kind": "string-list",
+              "value": [
+                "Application Event"
+              ]
+            },
+            "enabled": {
+              "kind": "boolean",
+              "value": true
+            },
+            "filterKeys": {
+              "kind": "string-list",
+              "value": []
+            },
+            "ruleName": {
+              "kind": "string",
+              "value": "hourly-processing"
+            },
+            "scheduleExpression": {
+              "kind": "string",
+              "value": "RATE_1_HOUR"
+            },
+            "sourceKinds": {
+              "kind": "string-list",
+              "value": [
+                "cloudmarkup.application"
+              ]
+            },
+            "triggerMode": {
+              "kind": "string",
+              "value": "SCHEDULE"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "role",
+        "targetKey": "notes_role",
+        "deploymentKey": "notes_role",
+        "serviceType": "aws.iam.role",
+        "resourceType": "aws.iam.role",
+        "configuration": {
+          "schemaId": "aws.iam.role.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "maxSessionDurationSeconds": {
+              "kind": "integer",
+              "value": 3600
+            },
+            "roleName": {
+              "kind": "string",
+              "value": "notes-api-lambda-role"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "event_target",
+        "targetKey": "scheduled_target",
+        "deploymentKey": "scheduled_target",
+        "serviceType": "aws.eventbridge.target",
+        "resourceType": "aws.eventbridge.target",
+        "configuration": {
+          "schemaId": "aws.eventbridge.target.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "deadLetterMode": {
+              "kind": "string",
+              "value": "NONE"
+            },
+            "deliverySemantics": {
+              "kind": "string",
+              "value": "AT_LEAST_ONCE"
+            },
+            "inputMode": {
+              "kind": "string",
+              "value": "MATCHED_EVENT"
+            },
+            "maximumEventAgeSeconds": {
+              "kind": "integer",
+              "value": 3600
+            },
+            "maximumRetryAttempts": {
+              "kind": "integer",
+              "value": 10
+            },
+            "targetName": {
+              "kind": "string",
+              "value": "scheduled-handler"
+            },
+            "targetType": {
+              "kind": "string",
+              "value": "LAMBDA"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "trust_policy",
+        "targetKey": "trust_policy",
+        "deploymentKey": "trust_policy",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "trust"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "trust_policy"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_role_lambda"
+            ]
+          }
+        },
+        "workloadIds": []
+      },
+      {
+        "id": "trust_policy_statement",
+        "targetKey": "trust_policy_statement",
+        "deploymentKey": "trust_policy_statement",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "sts:AssumeRole"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "lambda.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "trustpolicy"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cloudmarkup.connection-rule",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_fixture",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": [
+              "edge_role_lambda"
+            ]
+          }
+        },
+        "workloadIds": []
+      }
+    ],
+    "connections": [
+      {
+        "id": "edge_bus_rule",
+        "source": {
+          "nodeId": "event_bus",
+          "targetKey": "default_bus",
+          "port": "aws.eventbridge.event-bus-associates-rule.source"
+        },
+        "target": {
+          "nodeId": "event_rule",
+          "targetKey": "hourly",
+          "port": "aws.eventbridge.event-bus-associates-rule.target"
+        },
+        "relationshipType": "aws.eventbridge.event-bus-associates-rule",
+        "configuration": {
+          "schemaId": "aws.eventbridge.event-bus-associates-rule.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_event_logs_eventbridge_scheduled",
+        "source": {
+          "nodeId": "lambda",
+          "targetKey": "event_eventbridge_scheduled",
+          "port": "aws.lambda.function.logs"
+        },
+        "target": {
+          "nodeId": "event_logs_eventbridge_scheduled",
+          "targetKey": "event_logs_eventbridge_scheduled",
+          "port": "aws.cloudwatch.log-group.logs"
+        },
+        "relationshipType": "aws.lambda.writes-log-group",
+        "configuration": {
+          "schemaId": "aws.lambda.cloudwatch-logs.connection",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "deliveryMode": {
+              "kind": "string",
+              "value": "application-logs"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "event_logs_policy_eventbridge_scheduled_owner",
+        "source": {
+          "nodeId": "event_logs_policy_eventbridge_scheduled",
+          "targetKey": "event_logs_policy_eventbridge_scheduled",
+          "port": "aws.iam.policy.owner"
+        },
+        "target": {
+          "nodeId": "role",
+          "targetKey": "notes_role",
+          "port": "aws.iam.role.permission"
+        },
+        "relationshipType": "aws.iam.role-owns-generated-permission",
+        "configuration": {
+          "schemaId": "aws.iam.role-owns-generated-permission.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "event_logs_policy_eventbridge_scheduled_membership",
+        "source": {
+          "nodeId": "event_logs_policy_eventbridge_scheduled_statement",
+          "targetKey": "event_logs_policy_eventbridge_scheduled_statement",
+          "port": "aws.iam.policy-statement.member"
+        },
+        "target": {
+          "nodeId": "event_logs_policy_eventbridge_scheduled",
+          "targetKey": "event_logs_policy_eventbridge_scheduled",
+          "port": "aws.iam.policy.statements"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "event_logs_policy_eventbridge_scheduled_scope",
+        "source": {
+          "nodeId": "event_logs_policy_eventbridge_scheduled_statement",
+          "targetKey": "event_logs_policy_eventbridge_scheduled_statement",
+          "port": "aws.iam.policy-statement.scope"
+        },
+        "target": {
+          "nodeId": "event_logs_eventbridge_scheduled",
+          "targetKey": "event_logs_eventbridge_scheduled",
+          "port": "aws.cloudwatch.log-group.authorized"
+        },
+        "relationshipType": "aws.iam.authorizes-log-group",
+        "configuration": {
+          "schemaId": "aws.iam.policy-log-group.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "event_permission_owner",
+        "source": {
+          "nodeId": "event_permission",
+          "targetKey": "event_permission",
+          "port": "aws.lambda.owns-invocation-permission.source"
+        },
+        "target": {
+          "nodeId": "lambda",
+          "targetKey": "event_eventbridge_scheduled",
+          "port": "aws.lambda.owns-invocation-permission.target"
+        },
+        "relationshipType": "aws.lambda.owns-invocation-permission",
+        "configuration": {
+          "schemaId": "aws.lambda.owns-invocation-permission.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "event_permission_membership",
+        "source": {
+          "nodeId": "event_permission_statement",
+          "targetKey": "event_permission_statement",
+          "port": "aws.iam.policy-contains-statement.source"
+        },
+        "target": {
+          "nodeId": "event_permission",
+          "targetKey": "event_permission",
+          "port": "aws.iam.policy-contains-statement.target"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_rule_target",
+        "source": {
+          "nodeId": "event_rule",
+          "targetKey": "hourly",
+          "port": "aws.eventbridge.rule-owns-target.source"
+        },
+        "target": {
+          "nodeId": "event_target",
+          "targetKey": "scheduled_target",
+          "port": "aws.eventbridge.rule-owns-target.target"
+        },
+        "relationshipType": "aws.eventbridge.rule-owns-target",
+        "configuration": {
+          "schemaId": "aws.eventbridge.rule-owns-target.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_role_lambda",
+        "source": {
+          "nodeId": "role",
+          "targetKey": "notes_role",
+          "port": "aws.iam.role-assumed-by-lambda.source"
+        },
+        "target": {
+          "nodeId": "lambda",
+          "targetKey": "event_eventbridge_scheduled",
+          "port": "aws.iam.role-assumed-by-lambda.target"
+        },
+        "relationshipType": "aws.iam.role-assumed-by-lambda",
+        "configuration": {
+          "schemaId": "aws.iam.lambda-role.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "edge_target_lambda",
+        "source": {
+          "nodeId": "event_target",
+          "targetKey": "scheduled_target",
+          "port": "aws.eventbridge.target-invokes-lambda.source"
+        },
+        "target": {
+          "nodeId": "lambda",
+          "targetKey": "event_eventbridge_scheduled",
+          "port": "aws.eventbridge.target-invokes-lambda.target"
+        },
+        "relationshipType": "aws.eventbridge.target-invokes-lambda",
+        "configuration": {
+          "schemaId": "aws.eventing.delivery.connection",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "deliverySemantics": {
+              "kind": "string",
+              "value": "AT_LEAST_ONCE"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "trust_policy_owner",
+        "source": {
+          "nodeId": "trust_policy",
+          "targetKey": "trust_policy",
+          "port": "aws.iam.role-owns-trust-policy.source"
+        },
+        "target": {
+          "nodeId": "role",
+          "targetKey": "notes_role",
+          "port": "aws.iam.role-owns-trust-policy.target"
+        },
+        "relationshipType": "aws.iam.role-owns-trust-policy",
+        "configuration": {
+          "schemaId": "aws.iam.role-owns-trust-policy.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      {
+        "id": "trust_policy_membership",
+        "source": {
+          "nodeId": "trust_policy_statement",
+          "targetKey": "trust_policy_statement",
+          "port": "aws.iam.policy-contains-statement.source"
+        },
+        "target": {
+          "nodeId": "trust_policy",
+          "targetKey": "trust_policy",
+          "port": "aws.iam.policy-contains-statement.target"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      }
+    ],
+    "policyAttachments": [
+      {
+        "resourceId": "event_logs_policy_eventbridge_scheduled",
+        "targetKey": "event_logs_policy_eventbridge_scheduled",
+        "resourceType": "aws.iam.policy-document",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "event_logs_policy_eventbridge_scheduled_statement",
+            "targetKey": "event_logs_policy_eventbridge_scheduled_statement",
+            "port": "aws.iam.policy-statement.member"
+          },
+          {
+            "nodeId": "role",
+            "targetKey": "notes_role",
+            "port": "aws.iam.role.permission"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "generated-permission"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "event_logs_policy_eventbridge_scheduled"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_event_logs_eventbridge_scheduled",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_event_logs_eventbridge_scheduled"
+          ]
+        }
+      },
+      {
+        "resourceId": "event_logs_policy_eventbridge_scheduled_statement",
+        "targetKey": "event_logs_policy_eventbridge_scheduled_statement",
+        "resourceType": "aws.iam.policy-statement",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "event_logs_eventbridge_scheduled",
+            "targetKey": "event_logs_eventbridge_scheduled",
+            "port": "aws.cloudwatch.log-group.authorized"
+          },
+          {
+            "nodeId": "event_logs_policy_eventbridge_scheduled",
+            "targetKey": "event_logs_policy_eventbridge_scheduled",
+            "port": "aws.iam.policy.statements"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "eventlogspolicyeventbridgescheduled"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_event_logs_eventbridge_scheduled",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_event_logs_eventbridge_scheduled"
+          ]
+        }
+      },
+      {
+        "resourceId": "event_permission",
+        "targetKey": "event_permission",
+        "resourceType": "aws.iam.policy-document",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "lambda",
+            "targetKey": "event_eventbridge_scheduled",
+            "port": "aws.lambda.owns-invocation-permission.target"
+          },
+          {
+            "nodeId": "event_permission_statement",
+            "targetKey": "event_permission_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "service-grant"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "event_permission"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_target_lambda"
+          ]
+        }
+      },
+      {
+        "resourceId": "event_permission_statement",
+        "targetKey": "event_permission_statement",
+        "resourceType": "aws.iam.policy-statement",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "event_permission",
+            "targetKey": "event_permission",
+            "port": "aws.iam.policy-contains-statement.target"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "lambda:InvokeFunction"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "events.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "eventpermission"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_target_lambda"
+          ]
+        }
+      },
+      {
+        "resourceId": "trust_policy",
+        "targetKey": "trust_policy",
+        "resourceType": "aws.iam.policy-document",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "role",
+            "targetKey": "notes_role",
+            "port": "aws.iam.role-owns-trust-policy.target"
+          },
+          {
+            "nodeId": "trust_policy_statement",
+            "targetKey": "trust_policy_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "trust"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "trust_policy"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_role_lambda"
+          ]
+        }
+      },
+      {
+        "resourceId": "trust_policy_statement",
+        "targetKey": "trust_policy_statement",
+        "resourceType": "aws.iam.policy-statement",
+        "ownership": "generated",
+        "ownerReferences": [
+          {
+            "nodeId": "trust_policy",
+            "targetKey": "trust_policy",
+            "port": "aws.iam.policy-contains-statement.target"
+          }
+        ],
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": [
+                "sts:AssumeRole"
+              ]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": [
+                "lambda.amazonaws.com"
+              ]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "trustpolicy"
+            }
+          }
+        },
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_role_lambda"
+          ]
+        }
+      }
+    ],
+    "variables": [
+      {
+        "id": "variable_stage",
+        "key": "stage",
+        "valueType": "string",
+        "required": false,
+        "defaultValue": {
+          "kind": "string",
+          "value": "test"
+        }
+      }
+    ],
+    "outputs": [],
+    "workloads": [
+      {
+        "id": "workload_event_eventbridge_scheduled",
+        "owningResource": {
+          "nodeId": "lambda",
+          "targetKey": "event_eventbridge_scheduled"
+        },
+        "implementationMode": "complete-supported-pattern",
+        "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+        "languageFamily": "cloudmarkup.language.typescript",
+        "handler": "index.handler",
+        "sourceOwner": "cloudmarkup",
+        "operations": [
+          {
+            "id": "operation_event_eventbridge_scheduled",
+            "capability": "cloudmarkup.event.schedule-run",
+            "inputContract": {
+              "contractId": "contracts.eventbridge-scheduled.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:62707fbb3f47712fbae161bda52d6ad21611861dc1d9675c7ce233af2e267cea"
+            }
+          }
+        ],
+        "triggers": [
+          {
+            "id": "trigger_event_eventbridge_scheduled",
+            "kind": "trigger",
+            "edgeId": "edge_target_lambda",
+            "operationId": "operation_event_eventbridge_scheduled",
+            "connection": {
+              "id": "edge_target_lambda",
+              "source": {
+                "nodeId": "event_target",
+                "targetKey": "scheduled_target",
+                "port": "aws.eventbridge.target-invokes-lambda.source"
+              },
+              "target": {
+                "nodeId": "lambda",
+                "targetKey": "event_eventbridge_scheduled",
+                "port": "aws.eventbridge.target-invokes-lambda.target"
+              },
+              "relationshipType": "aws.eventbridge.target-invokes-lambda",
+              "configuration": {
+                "schemaId": "aws.eventing.delivery.connection",
+                "schemaVersion": "1.0.0",
+                "values": {
+                  "deliverySemantics": {
+                    "kind": "string",
+                    "value": "AT_LEAST_ONCE"
+                  }
+                }
+              },
+              "lifecycle": {
+                "ownership": "user",
+                "origin": "user"
+              }
+            }
+          }
+        ],
+        "downstreamActions": [],
+        "environment": [
+          {
+            "id": "environment_stage",
+            "name": "APP_STAGE",
+            "kind": "variable-reference",
+            "variableId": "variable_stage"
+          }
+        ],
+        "artifactInputs": [
+          {
+            "artifactId": "cloudmarkup.pattern.aws-lambda-curated-event-driven:1.0.0",
+            "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686",
+            "kind": "supported-pattern",
+            "ownership": "cloudmarkup",
+            "workloadId": "workload_event_eventbridge_scheduled"
+          }
+        ],
+        "artifactOutputs": [],
+        "sourceOwnership": [
+          {
+            "declarationId": "ownership_event_eventbridge_scheduled_extension",
+            "path": "application/src/functions/event_eventbridge_scheduled/extensions/custom.ts",
+            "pathKind": "file",
+            "ownership": "user-owned",
+            "ownerId": "application.eventbridge-scheduled.owner",
+            "regeneration": "never",
+            "conflictBehavior": "preserve-user-content",
+            "semanticDiff": "structured-language"
+          }
+        ],
+        "extensionPoints": [
+          {
+            "id": "application.eventbridge-scheduled.extensions",
+            "path": "application/src/functions/event_eventbridge_scheduled/extensions/custom.ts",
+            "kind": "module",
+            "permittedOwnership": [
+              "approved-extension",
+              "user-owned"
+            ],
+            "conflictBehavior": "require-reviewed-resolution"
+          }
+        ],
+        "generationCoverage": "custom-implementation-required",
+        "targetReadiness": "application-artifact-evidence-incomplete",
+        "generatorReadiness": {
+          "state": "compatible-interface-only",
+          "generator": {
+            "id": "cloudmarkup.event-application-generator",
+            "version": "1.0.0",
+            "digest": "sha256:7cf9b85f31f427ac5f4dbe095bb227c10435fc86c84d8318ff41c88d5540e391"
+          },
+          "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+          "templateVersion": "1.0.0",
+          "reasons": [
+            "APPLICATION_GENERATION_SEPARATE_BOUNDARY_AVAILABLE"
+          ]
+        },
+        "specification": {
+          "authorization": [],
+          "behaviorContracts": [
+            {
+              "contractId": "contracts.eventbridge-scheduled.behavior",
+              "contractKind": "behavior-operation",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:59b9b8bb955bb4bf7e8ec5df99751837164c8ec9cbccf9b57772116d2a12290b"
+            }
+          ],
+          "compatibility": {
+            "applicationGenerators": [
+              {
+                "generatorId": "cloudmarkup.event-application-generator",
+                "minimumVersion": "1.0.0",
+                "supportedModes": [
+                  "complete-supported-pattern",
+                  "generated-starter"
+                ],
+                "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+                "templateVersion": "1.0.0"
+              }
+            ],
+            "modelGateways": []
+          },
+          "dataBindings": [],
+          "downstreamActions": [],
+          "entrypoints": [
+            {
+              "entrypointId": "entrypoint_event_eventbridge_scheduled",
+              "handler": "index.handler",
+              "kind": "schedule-handler",
+              "operationId": "operation_event_eventbridge_scheduled"
+            }
+          ],
+          "environment": [
+            {
+              "id": "environment_stage",
+              "name": "APP_STAGE",
+              "value": {
+                "kind": "variable-reference",
+                "variableId": "variable_stage"
+              }
+            }
+          ],
+          "errorBehavior": {
+            "mode": "fail-invocation"
+          },
+          "eventBindings": [
+            {
+              "bindingId": "event_event_eventbridge_scheduled",
+              "contract": {
+                "contractId": "contracts.eventbridge-scheduled.event",
+                "contractKind": "event-message",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:62707fbb3f47712fbae161bda52d6ad21611861dc1d9675c7ce233af2e267cea"
+              },
+              "direction": "inbound",
+              "edgeId": "edge_target_lambda",
+              "operationId": "operation_event_eventbridge_scheduled",
+              "transportKind": "event"
+            }
+          ],
+          "executionAssumptions": {
+            "retry": {
+              "kind": "bounded",
+              "maximumAttempts": 5
+            },
+            "timeout": {
+              "kind": "duration",
+              "milliseconds": 30000
+            }
+          },
+          "extensionPoints": [
+            {
+              "conflictBehavior": "require-reviewed-resolution",
+              "extensionPointId": "application.eventbridge-scheduled.extensions",
+              "kind": "module",
+              "path": "application/src/functions/event_eventbridge_scheduled/extensions/custom.ts",
+              "permittedOwnership": [
+                "approved-extension",
+                "user-owned"
+              ]
+            }
+          ],
+          "extensions": [],
+          "httpRoutes": [],
+          "id": "workload_event_eventbridge_scheduled",
+          "idempotency": [
+            {
+              "mode": "not-required",
+              "operationIds": [
+                "operation_event_eventbridge_scheduled"
+              ],
+              "policyId": "idempotency_event_eventbridge_scheduled"
+            }
+          ],
+          "implementation": {
+            "handler": "index.handler",
+            "mode": "complete-supported-pattern",
+            "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+            "sourceOwnership": "cloudmarkup",
+            "supportedPattern": {
+              "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686",
+              "patternId": "cloudmarkup.pattern.aws-lambda-curated-event-driven",
+              "patternVersion": "1.0.0"
+            }
+          },
+          "implementationRequirements": [],
+          "languageFamily": "cloudmarkup.language.typescript",
+          "observability": {
+            "healthChecks": [],
+            "signals": [
+              "logs"
+            ],
+            "smokeTests": []
+          },
+          "operations": [
+            {
+              "capability": "cloudmarkup.event.schedule-run",
+              "id": "operation_event_eventbridge_scheduled",
+              "inputContract": {
+                "kind": "contract-reference",
+                "reference": {
+                  "contractId": "contracts.eventbridge-scheduled.event",
+                  "contractVersion": "1.0.0",
+                  "digest": "sha256:62707fbb3f47712fbae161bda52d6ad21611861dc1d9675c7ce233af2e267cea"
+                }
+              },
+              "outputContract": {
+                "kind": "none"
+              }
+            }
+          ],
+          "owningNodeId": "lambda",
+          "provenance": {
+            "generatorId": "cloudmarkup.event-application-generator",
+            "generatorVersion": "1.0.0",
+            "inputDigest": "sha256:4852184f7ddc28fcc2aa108e9001331f4cc6143043fb649ca5ae8152e61e032e",
+            "source": "deterministic-generator"
+          },
+          "schedules": [
+            {
+              "bindingId": "schedule_event_eventbridge_scheduled",
+              "operationId": "operation_event_eventbridge_scheduled",
+              "schedule": {
+                "kind": "interval",
+                "seconds": 300
+              },
+              "triggerEdgeId": "edge_target_lambda"
+            }
+          ],
+          "sourceOwnership": [
+            {
+              "conflictBehavior": "preserve-user-content",
+              "declarationId": "ownership_event_eventbridge_scheduled_extension",
+              "ownerId": "application.eventbridge-scheduled.owner",
+              "ownership": "user-owned",
+              "path": "application/src/functions/event_eventbridge_scheduled/extensions/custom.ts",
+              "pathKind": "file",
+              "regeneration": "never",
+              "semanticDiff": {
+                "strategy": "structured-language"
+              }
+            }
+          ],
+          "tests": [
+            {
+              "bindingId": "test_contract_event_eventbridge_scheduled",
+              "level": "contract",
+              "requiredForCoverage": true,
+              "testCase": {
+                "contractId": "contracts.eventbridge-scheduled.test.contract",
+                "contractKind": "test-case",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:00c74f73d9ae89e9c9d2b4f13542ed1f4254b48c8348255ac8ca8c5a4092aa66"
+              }
+            },
+            {
+              "bindingId": "test_unit_event_eventbridge_scheduled",
+              "level": "unit",
+              "requiredForCoverage": true,
+              "testCase": {
+                "contractId": "contracts.eventbridge-scheduled.test.unit",
+                "contractKind": "test-case",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:9e95923b95691a53bef5464c6e0f27bd7c5da0a488d8bfa3dad98d028675d16d"
+              }
+            }
+          ],
+          "triggerDispatch": {
+            "dispatcherId": "cloudmarkup.event-trigger-dispatcher",
+            "dispatcherOperationId": "operation_event_eventbridge_scheduled",
+            "dispatcherVersion": "1.0.0",
+            "mode": "generated-supported"
+          },
+          "triggers": [
+            {
+              "edgeId": "edge_target_lambda",
+              "id": "trigger_event_eventbridge_scheduled",
+              "targetOperationId": "operation_event_eventbridge_scheduled"
+            }
+          ],
+          "unresolvedRequirementIds": []
+        }
+      }
+    ],
+    "externalResources": []
+  },
+  "artifact": {
+    "contractVersion": 1,
+    "target": "terraform",
+    "formatVersion": "1.0.0",
+    "provenance": {
+      "architectureDocumentId": "document_event_eventbridge_scheduled",
+      "architectureId": "architecture_event_eventbridge_scheduled",
+      "architectureRevisionId": "revision_event_eventbridge_scheduled_1",
+      "architectureContentHash": "sha256:a69c1dc1aa9bad27eaf5bedd63028c06297b9c9c6acd1a3d8e498ee63cca0665",
+      "architectureDocumentHash": "sha256:cedfdc801ee693c9a55aaf71a5e8c91d6b8333c9cb7b4036758aac65bb42cb7c",
+      "architectureVisualHash": "sha256:326e24dc73b2d7925fbada77cb36cdff12821c0a0380ae4e0ec73d78a61298c3",
+      "workloadContentHash": "sha256:24dce40638ef9fd36bdfcf09674a3ef79c6f13cc883786b8be5dc0e18895bf16",
+      "solutionRevisionId": "solution_notes_revision_1",
+      "providerId": "aws.cloudmarkup",
+      "region": "us-east-1",
+      "catalog": {
+        "id": "aws.cloudmarkup.notes-api-catalog",
+        "version": "0.30.0",
+        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+      }
+    },
+    "metadata": {
+      "formatVersion": "1.0.0",
+      "requiredTerraformVersion": "\u003e= 1.5.0, \u003c 2.0.0",
+      "providers": [
+        {
+          "source": "hashicorp/aws",
+          "version": "\u003e= 6.55.0, \u003c 7.0.0"
+        }
+      ]
+    },
+    "files": [
+      {
+        "path": "infrastructure/versions.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "terraform {\n  required_version = \"\u003e= 1.5.0, \u003c 2.0.0\"\n  required_providers {\n    aws = {\n      source  = \"hashicorp/aws\"\n      version = \"\u003e= 6.63.0, \u003c 7.0.0\"\n    }\n  }\n}\n",
+        "digest": "sha256:503a5ddb4089ae513e443e1a9315051827077e5bc8aabc47dc783829a9fb4321"
+      },
+      {
+        "path": "infrastructure/providers.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "provider \"aws\" {\n  region = var.aws_region\n  default_tags {\n    tags = local.tags\n  }\n}\n",
+        "digest": "sha256:71a7bb3760957dd751f8de9032f57b41224550bf70799f1a425f6c6486d268e9"
+      },
+      {
+        "path": "infrastructure/variables.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "variable \"aws_region\" {\n  type        = string\n  description = \"AWS Region selected by the immutable Architecture Document.\"\n  default     = \"us-east-1\"\n}\n\nvariable \"event_eventbridge_scheduled_artifact_path\" {\n  type        = string\n  description = \"Stable relative package output produced by the separate Prompt 32A workload builder.\"\n  default     = \"../application/artifacts/workload_event_eventbridge_scheduled/function.zip\"\n  validation {\n    condition     = can(regex(\"^\\\\.\\\\.?/\", var.event_eventbridge_scheduled_artifact_path))\n    error_message = \"Package path must be repository-relative and begin with ./ or ../; absolute machine paths are forbidden.\"\n  }\n}\n\nvariable \"stage\" {\n  type        = string\n  description = \"Architecture variable stage.\"\n  default     = \"test\"\n}\n",
+        "digest": "sha256:96c93597bc701f8e58e6f516996f97d96c81b77b1a2d220f8b657c0c22df8405"
+      },
+      {
+        "path": "infrastructure/locals.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "locals {\n  tags = {\n    CloudMarkupArchitecture     = \"architecture_event_eventbridge_scheduled\"\n    CloudMarkupRevision         = \"revision_event_eventbridge_scheduled_1\"\n    CloudMarkupSolutionRevision = \"solution_notes_revision_1\"\n    ManagedBy                   = \"CloudMarkup\"\n  }\n}\n",
+        "digest": "sha256:743340a59bd68ca6ba5c6c098fa010d2372fb8a794378421be88f7ae89f7d34b"
+      },
+      {
+        "path": "infrastructure/networking.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "infrastructure/identity.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_iam_role\" \"notes_role\" {\n  name                 = \"notes-api-lambda-role\"\n  description          = \"CloudMarkup notes-API Lambda execution role.\"\n  max_session_duration = 3600\n  assume_role_policy   = data.aws_iam_policy_document.trust_policy.json\n  tags                 = local.tags\n}\n",
+        "digest": "sha256:3838d9b2bb9843c42eef98579e4654331ebbbfece88e81113e72db6edceb0d61"
+      },
+      {
+        "path": "infrastructure/compute.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_lambda_function\" \"event_eventbridge_scheduled\" {\n  function_name                  = \"event_eventbridge_scheduled\"\n  description                    = \"CloudMarkup notes-API workload.\"\n  role                           = aws_iam_role.notes_role.arn\n  handler                        = \"index.handler\"\n  runtime                        = \"nodejs24.x\"\n  architectures                  = [\"arm64\"]\n  memory_size                    = 256\n  reserved_concurrent_executions = 10\n  timeout                        = 30\n  filename                       = var.event_eventbridge_scheduled_artifact_path\n  source_code_hash               = filebase64sha256(var.event_eventbridge_scheduled_artifact_path)\n  tracing_config {\n    mode = \"Active\"\n  }\n  environment {\n    variables = {\n      \"APP_STAGE\" = var.stage\n    }\n  }\n  tags = local.tags\n}\n",
+        "digest": "sha256:fa1eb6cf0e6b6b862c5bc26fba5985628521e9a41434bf9bac520423d9d98ef6"
+      },
+      {
+        "path": "infrastructure/data.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "infrastructure/security.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "data \"aws_iam_policy_document\" \"event_logs_policy_eventbridge_scheduled\" {\n  statement {\n    sid       = \"eventlogspolicyeventbridgescheduled\"\n    effect    = \"Allow\"\n    actions   = [\"logs:CreateLogStream\", \"logs:PutLogEvents\"]\n    resources = [format(\"%s:*\", aws_cloudwatch_log_group.event_logs_eventbridge_scheduled.arn)]\n  }\n}\n\ndata \"aws_iam_policy_document\" \"trust_policy\" {\n  statement {\n    sid     = \"trustpolicy\"\n    effect  = \"Allow\"\n    actions = [\"sts:AssumeRole\"]\n    principals {\n      type        = \"Service\"\n      identifiers = [\"lambda.amazonaws.com\"]\n    }\n  }\n}\n\nresource \"aws_iam_role_policy\" \"event_logs_policy_eventbridge_scheduled\" {\n  name   = \"event_logs_policy_eventbridge_scheduled\"\n  role   = aws_iam_role.notes_role.name\n  policy = data.aws_iam_policy_document.event_logs_policy_eventbridge_scheduled.json\n}\n\nresource \"aws_lambda_permission\" \"event_permission\" {\n  statement_id  = \"eventpermission\"\n  action        = \"lambda:InvokeFunction\"\n  function_name = aws_lambda_function.event_eventbridge_scheduled.function_name\n  principal     = \"events.amazonaws.com\"\n  source_arn    = aws_cloudwatch_event_rule.hourly.arn\n}\n",
+        "digest": "sha256:e6c11c61908759606792f201ce8c830d0bc39095908a1b9a2d699c1744111f0e"
+      },
+      {
+        "path": "infrastructure/eventing.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "data \"aws_cloudwatch_event_bus\" \"default_bus\" {\n  name = \"default\"\n}\n\nresource \"aws_cloudwatch_event_rule\" \"hourly\" {\n  name                = \"hourly-processing\"\n  state               = \"ENABLED\"\n  event_bus_name      = data.aws_cloudwatch_event_bus.default_bus.name\n  schedule_expression = \"rate(1 hour)\"\n  tags                = local.tags\n}\n\nresource \"aws_cloudwatch_event_target\" \"scheduled_target\" {\n  rule           = aws_cloudwatch_event_rule.hourly.name\n  event_bus_name = data.aws_cloudwatch_event_bus.default_bus.name\n  target_id      = \"scheduled-handler\"\n  arn            = aws_lambda_function.event_eventbridge_scheduled.arn\n  retry_policy {\n    maximum_event_age_in_seconds = 3600\n    maximum_retry_attempts       = 10\n  }\n}\n",
+        "digest": "sha256:6acbc67b11baee12fafea00c62fc635b70b087f3077ee1414b4cd2897e35e502"
+      },
+      {
+        "path": "infrastructure/observability.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "resource \"aws_cloudwatch_log_group\" \"event_logs_eventbridge_scheduled\" {\n  name              = \"/aws/lambda/notes_handler\"\n  log_group_class   = \"STANDARD\"\n  retention_in_days = 30\n  lifecycle {\n    prevent_destroy = true\n  }\n  tags = local.tags\n}\n",
+        "digest": "sha256:eeea19d9260fcfa55bc280d8a39162efb076becfdf319b28e6948a01a3c9079b"
+      },
+      {
+        "path": "infrastructure/outputs.tf",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "infrastructure/terraform.tfvars.example",
+        "mediaType": "application/vnd.hashicorp.terraform",
+        "ownership": "generated",
+        "content": "",
+        "digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "infrastructure/README.md",
+        "mediaType": "text/markdown",
+        "ownership": "generated",
+        "content": "# Cloud Markup deterministic Terraform\n\nThis directory was generated from immutable Architecture and Workload contracts. It does not build application source, run Terraform, or deploy.\n\n## Compatibility\n\n- Compiler: `cloudmarkup.iac-compiler@1.2.1`\n- Catalog: `aws.cloudmarkup.notes-api-catalog@0.30.0` (`sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682`)\n- Target format: `1.0.0`\n- Terraform: `\u003e= 1.5.0, \u003c 2.0.0`\n- AWS provider: `hashicorp/aws` (`\u003e= 6.55.0, \u003c 7.0.0`)\n- Architecture revision: `revision_event_eventbridge_scheduled_1`\n- Solution Revision: `solution_notes_revision_1`\n\n## Application artifacts\n\n- `workload_event_eventbridge_scheduled` (complete-supported-pattern): deterministic-relative-package at `../application/artifacts/workload_event_eventbridge_scheduled/function.zip`.\n\nCopy `terraform.tfvars.example` to a separately protected input file and replace every placeholder. Never put credentials or secret values in committed Terraform files. Review the complete diff, initialize from an approved provider mirror, validate, plan, and deploy only in customer-owned CI/CD with customer approval.\n",
+        "digest": "sha256:24f1c35dbf12b684f94abb1cc1740110a2443aee89e80ac69313485b2aaefe83"
+      }
+    ],
+    "applicationArtifacts": [
+      {
+        "contractVersion": 2,
+        "workloadId": "workload_event_eventbridge_scheduled",
+        "implementationMode": "complete-supported-pattern",
+        "delivery": "deterministic-relative-package",
+        "relativePackagePath": "../application/artifacts/workload_event_eventbridge_scheduled/function.zip",
+        "variables": [
+          {
+            "name": "event_eventbridge_scheduled_artifact_path",
+            "valueType": "string",
+            "sensitive": false,
+            "required": false,
+            "description": "Relative built Lambda package path.",
+            "validation": "relative-package-path"
+          }
+        ],
+        "expectedArtifact": {
+          "artifactId": "artifact_workload_event_eventbridge_scheduled",
+          "kind": "aws-lambda-zip",
+          "mediaType": "application/zip",
+          "path": "application/artifacts/workload_event_eventbridge_scheduled/function.zip",
+          "archiveEntrypoint": "index.js",
+          "handler": "index.handler",
+          "digestAlgorithm": "sha256",
+          "runtime": {
+            "id": "cloudmarkup.runtime.aws-lambda-nodejs24-typescript",
+            "version": "1.0.0",
+            "digest": "sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a",
+            "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+            "languageFamily": "cloudmarkup.language.typescript",
+            "runtime": "nodejs24.x",
+            "handler": "index.handler",
+            "moduleFormat": "esm"
+          }
+        },
+        "artifactReadiness": "application-artifact-evidence-incomplete",
+        "inputs": [
+          {
+            "artifactId": "cloudmarkup.pattern.aws-lambda-curated-event-driven:1.0.0",
+            "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686",
+            "kind": "supported-pattern",
+            "ownership": "cloudmarkup",
+            "workloadId": "workload_event_eventbridge_scheduled"
+          }
+        ],
+        "generationCoverage": "custom-implementation-required",
+        "codeRequired": false
+      }
+    ],
+    "policyArtifacts": [
+      {
+        "policyDocumentId": "event_logs_policy_eventbridge_scheduled",
+        "ownerNodeId": "role",
+        "policyKind": "generated-permission",
+        "ownership": "generated",
+        "renderedAs": "aws_iam_role_policy.event_logs_policy_eventbridge_scheduled",
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_event_logs_eventbridge_scheduled",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_event_logs_eventbridge_scheduled"
+          ]
+        }
+      },
+      {
+        "policyDocumentId": "event_permission",
+        "ownerNodeId": "lambda",
+        "policyKind": "service-grant",
+        "ownership": "generated",
+        "renderedAs": "aws_lambda_permission.event_permission",
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_target_lambda"
+          ]
+        }
+      },
+      {
+        "policyDocumentId": "trust_policy",
+        "ownerNodeId": "role",
+        "policyKind": "trust",
+        "ownership": "generated",
+        "renderedAs": "data.aws_iam_policy_document.trust_policy",
+        "provenance": {
+          "generatorKind": "connection-rule",
+          "generatorId": "aws.cloudmarkup.connection-rule",
+          "generatorVersion": "1.0.0",
+          "operationId": "operation_fixture",
+          "dependentNodeIds": [],
+          "dependentEdgeIds": [
+            "edge_role_lambda"
+          ]
+        }
+      }
+    ],
+    "digest": "sha256:34fd567a6812a7d8aea2b5d2b1b69baff47a881871a16fad22254048d28e6a57"
+  },
+  "diagnostics": [
+    {
+      "code": "APPLICATION_GENERATION_PENDING",
+      "severity": "warning",
+      "message": "Event infrastructure is renderable, but the exact generated, built, tested, and scanned application artifact coverage is incomplete.",
+      "source": {
+        "document": "workload",
+        "workloadId": "workload_event_eventbridge_scheduled"
+      }
+    }
+  ]
+}

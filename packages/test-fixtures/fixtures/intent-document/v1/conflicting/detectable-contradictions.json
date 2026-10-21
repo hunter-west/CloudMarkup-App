@@ -1,0 +1,251 @@
+{
+  "kind": "cloudmarkup.intent-document",
+  "schemaVersion": 1,
+  "documentId": "intent_doc_conflicting",
+  "intentId": "intent_conflicting",
+  "revision": {
+    "revisionId": "intent_rev_conflicting_001",
+    "revisionNumber": 1,
+    "createdAt": "2026-07-24T16:00:00Z",
+    "createdBy": "actor_example"
+  },
+  "application": {
+    "summary": "A synchronous request application with internally contradictory retention, latency, scale, and decision statements.",
+    "capabilities": {
+      "state": "known",
+      "items": [
+        {
+          "id": "cap_api",
+          "capability": "http-api",
+          "importance": "required",
+          "description": "Serve request-response interactions."
+        }
+      ]
+    }
+  },
+  "connectivity": {
+    "ingress": {
+      "state": "known",
+      "items": [
+        {
+          "id": "flow_api",
+          "channel": "http",
+          "exposure": "public",
+          "description": "Receive public user requests.",
+          "capabilityIds": ["cap_api"]
+        }
+      ]
+    },
+    "egress": {
+      "state": "none",
+      "rationale": "No outbound integration is currently required."
+    }
+  },
+  "identity": {
+    "authentication": {
+      "state": "not-required",
+      "rationale": "The example models a public read-only endpoint."
+    },
+    "authorization": {
+      "state": "not-required",
+      "rationale": "The example exposes no differentiated actions."
+    }
+  },
+  "data": {
+    "state": "known",
+    "items": [
+      {
+        "id": "data_responses",
+        "name": "Response records",
+        "category": "business-record",
+        "description": "Synthetic response records used to demonstrate retention validation.",
+        "sensitivity": {
+          "state": "known",
+          "value": "internal"
+        },
+        "retention": {
+          "state": "known",
+          "minimumDays": 365,
+          "maximumDays": 30,
+          "legalHoldRequired": false
+        },
+        "residency": {
+          "state": "not-required",
+          "rationale": "The synthetic records have no residency constraint."
+        },
+        "capabilityIds": ["cap_api"]
+      }
+    ]
+  },
+  "workflows": {
+    "state": "known",
+    "items": [
+      {
+        "id": "workflow_request",
+        "name": "Handle request",
+        "description": "Receive a request and return a response synchronously.",
+        "execution": {
+          "state": "known",
+          "mode": "synchronous"
+        },
+        "trigger": {
+          "state": "known",
+          "value": "user-request"
+        },
+        "capabilityIds": ["cap_api"]
+      }
+    ]
+  },
+  "quality": {
+    "availability": {
+      "state": "known",
+      "targetPercent": 99.9,
+      "measurementWindow": "monthly",
+      "scope": "Public request handling."
+    },
+    "durability": {
+      "state": "known",
+      "targetPercent": 99.9,
+      "scope": "Synthetic response records."
+    },
+    "recovery": {
+      "state": "not-required",
+      "rationale": "The example does not require recovery targets."
+    },
+    "latency": {
+      "state": "known",
+      "scope": "Public request handling.",
+      "targets": [
+        {
+          "percentile": "p50",
+          "milliseconds": 500
+        },
+        {
+          "percentile": "p95",
+          "milliseconds": 200
+        }
+      ]
+    },
+    "scale": {
+      "state": "known",
+      "metrics": [
+        {
+          "metric": "steady-requests-per-second",
+          "value": 100
+        },
+        {
+          "metric": "peak-requests-per-second",
+          "value": 50
+        }
+      ],
+      "scope": "Synthetic first-year traffic."
+    }
+  },
+  "environment": {
+    "state": "known",
+    "value": "production"
+  },
+  "preferences": {
+    "operationalOverhead": {
+      "state": "known",
+      "preference": "balanced",
+      "rationale": "Balance operational control and managed behavior."
+    },
+    "cost": {
+      "state": "known",
+      "priority": "predictability-prioritized",
+      "budget": {
+        "state": "not-required",
+        "rationale": "No numeric budget has been approved."
+      },
+      "rationale": "Prefer predictable spend."
+    }
+  },
+  "compliance": {
+    "state": "none",
+    "rationale": "No compliance constraint is asserted by this synthetic fixture."
+  },
+  "assumptions": [],
+  "unresolvedQuestions": [
+    {
+      "id": "question_cost_strategy",
+      "subject": "cost.strategy",
+      "question": "Which cost strategy should be selected?",
+      "classification": "non-blocking"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "decision_cost_predictable",
+      "subject": "cost.strategy",
+      "statement": "Prioritize predictable spend.",
+      "status": "active",
+      "selectedAlternativeId": "alternative_predictable",
+      "rationale": {
+        "summary": "Predictability was selected.",
+        "considerations": []
+      },
+      "decidedBy": "actor_example",
+      "decidedAt": "2026-07-24T15:55:00Z"
+    },
+    {
+      "id": "decision_cost_minimum",
+      "subject": "cost.strategy",
+      "statement": "Prioritize minimum unit cost.",
+      "status": "active",
+      "selectedAlternativeId": "alternative_minimum",
+      "rationale": {
+        "summary": "Minimum cost was also selected.",
+        "considerations": []
+      },
+      "decidedBy": "actor_example",
+      "decidedAt": "2026-07-24T15:56:00Z"
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "alternative_predictable",
+      "subject": "cost.strategy",
+      "title": "Predictable spend",
+      "description": "Prefer a clear expected monthly range.",
+      "status": "selected",
+      "rationale": {
+        "summary": "Matches the stated predictability preference.",
+        "considerations": []
+      }
+    },
+    {
+      "id": "alternative_minimum",
+      "subject": "cost.strategy",
+      "title": "Minimum unit cost",
+      "description": "Prefer the lowest estimated unit cost.",
+      "status": "candidate",
+      "rationale": {
+        "summary": "Remains a candidate and is not selected.",
+        "considerations": []
+      }
+    }
+  ],
+  "metadata": {
+    "source": "user",
+    "provenance": {
+      "schema": {
+        "contractId": "cloudmarkup.intent-document",
+        "schemaVersion": 1
+      },
+      "prompt": {
+        "kind": "prompt-reference",
+        "interactionId": "prompt_interaction_conflicting",
+        "templateId": "cloudmarkup.intent-capture",
+        "templateVersion": "1.0.0",
+        "inputDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "capturedAt": "2026-07-24T15:50:00Z"
+      }
+    },
+    "serialization": {
+      "mediaType": "application/json",
+      "encoding": "utf-8",
+      "canonicalization": "cloudmarkup.intent-normalized-json.v1"
+    }
+  }
+}

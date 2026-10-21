@@ -1,0 +1,35 @@
+{
+  "name": "@cloudmarkup/api-contract",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./openapi/v1.json": "./openapi/cloudmarkup-v1.openapi.json"
+  },
+  "files": [
+    "dist",
+    "openapi",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "generate:openapi": "pnpm build && node scripts/generate-openapi.mjs --write",
+    "verify:openapi": "node scripts/generate-openapi.mjs --check",
+    "type-check": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@cloudmarkup/schemas": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudmarkup/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

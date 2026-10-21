@@ -1,0 +1,43 @@
+{
+  "name": "@cloudmarkup/model-gateway",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./src/fakes.ts",
+      "import": "./dist/fakes.js"
+    },
+    "./server-byok": {
+      "types": "./src/server-byok-entry.ts",
+      "import": "./dist/server-byok-entry.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "catalog:",
+    "@cloudmarkup/domain": "workspace:*",
+    "@cloudmarkup/job-framework": "workspace:*",
+    "@cloudmarkup/schemas": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudmarkup/config": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

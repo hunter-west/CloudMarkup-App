@@ -1,0 +1,68 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.15.8",
+  "resource_changes": [
+    {
+      "address": "aws_sqs_queue.work",
+      "mode": "managed",
+      "type": "aws_sqs_queue",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name": "work-queue",
+          "redrive_policy": "fixture-redacted",
+          "sqs_managed_sse_enabled": true
+        },
+        "after_sensitive": { "redrive_policy": true }
+      }
+    },
+    {
+      "address": "aws_sqs_queue.work_dlq",
+      "mode": "managed",
+      "type": "aws_sqs_queue",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name": "work-dlq",
+          "message_retention_seconds": 1209600,
+          "sqs_managed_sse_enabled": true
+        }
+      }
+    },
+    {
+      "address": "aws_iam_role_policy.consumer_queue",
+      "mode": "managed",
+      "type": "aws_iam_role_policy",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "name": "queue-consumer-access",
+          "policy": "fixture-redacted"
+        },
+        "after_sensitive": { "policy": true }
+      }
+    },
+    {
+      "address": "aws_lambda_event_source_mapping.work",
+      "mode": "managed",
+      "type": "aws_lambda_event_source_mapping",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "batch_size": 10,
+          "function_response_types": ["ReportBatchItemFailures"],
+          "maximum_batching_window_in_seconds": 5,
+          "scaling_config": [{ "maximum_concurrency": 10 }]
+        }
+      }
+    }
+  ]
+}

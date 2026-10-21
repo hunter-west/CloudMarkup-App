@@ -1,0 +1,48 @@
+{
+  "name": "@cloudmarkup/web",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare:workspace": "pnpm --dir ../.. exec turbo run build --filter=@cloudmarkup/web... --filter=!@cloudmarkup/web",
+    "predev": "pnpm run prepare:workspace",
+    "dev": "vite",
+    "build": "vite build",
+    "type-check": "tsc -p tsconfig.json",
+    "test": "pnpm --dir ../.. exec vitest run --project web"
+  },
+  "dependencies": {
+    "@cloudmarkup/ai-extension-generation": "workspace:*",
+    "@cloudmarkup/api-contract": "workspace:*",
+    "@cloudmarkup/domain": "workspace:*",
+    "@cloudmarkup/provider-aws": "workspace:*",
+    "@cloudmarkup/provider-sdk": "workspace:*",
+    "@cloudmarkup/repository-importer": "workspace:*",
+    "@cloudmarkup/schemas": "workspace:*",
+    "@cloudmarkup/ui": "workspace:*",
+    "@tanstack/react-query": "catalog:",
+    "@xyflow/react": "catalog:",
+    "elkjs": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-hook-form": "catalog:",
+    "zustand": "catalog:",
+    "@cloudmarkup/graph-preparation": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudmarkup/config": "workspace:*",
+    "@playwright/test": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "axe-core": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "jsdom": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  }
+}

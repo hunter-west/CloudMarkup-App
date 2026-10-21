@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+# Literal unified-diff context prefixes precede Go tabs and blank lines.
+infra/images/go-tools/patches/*.patch whitespace=-blank-at-eol,-space-before-tab
+
+# Review typed producers for these checked machine-readable contracts.
+packages/schemas/json-schema/*.json linguist-generated=true
+packages/api-contract/openapi/*.json linguist-generated=true
+services/iac-compiler/internal/contracts/schemas/*.json linguist-generated=true

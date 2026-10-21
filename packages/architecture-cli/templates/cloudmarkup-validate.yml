@@ -1,0 +1,88 @@
+name: CloudMarkup repository verification
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudmarkup-verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify immutable generated repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out without persisted credentials
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install pinned pnpm
+        uses: pnpm/action-setup@d15e628ca66d93ee5f352c71671a7bc6a97af5c9 # v6.0.8
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Set up pinned Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version-file: services/iac-compiler/go.mod
+          cache: true
+          cache-dependency-path: services/iac-compiler/go.sum
+
+      - name: Install reviewed dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build pinned local command boundaries
+        run:
+          mkdir -p .cloudmarkup-tools && pnpm --filter
+          @cloudmarkup/architecture-cli build && go build -trimpath -o
+          .cloudmarkup-tools/cloudmarkup-iac
+          ./services/iac-compiler/cmd/cloudmarkup-iac
+
+      - name: Validate immutable sources and target readiness
+        run: pnpm exec cloudmarkup validate --format json
+
+      - name:
+          Verify generated IaC, application, diagram, manifest, and Evidence
+          drift
+        run: pnpm exec cloudmarkup verify --format json
+
+      - name: Run bounded application and Terraform static checks
+        run: pnpm exec cloudmarkup test --format json
+
+      - name: Re-render both approved diagram profiles
+        run: pnpm exec cloudmarkup render --format json
+
+      - name: Write semantic pull-request summary
+        run:
+          mkdir -p evidence/repository-verification && pnpm exec cloudmarkup
+          diff --format json >
+          evidence/repository-verification/semantic-diff.json
+
+      - name: Write local Evidence summary
+        if: always()
+        run:
+          pnpm exec cloudmarkup evidence --format json >
+          evidence/repository-verification/evidence-summary.json
+
+      - name: Upload bounded non-sensitive Evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cloudmarkup-repository-evidence
+          path: evidence/repository-verification/
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 7

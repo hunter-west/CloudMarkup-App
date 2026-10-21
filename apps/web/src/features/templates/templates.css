@@ -1,0 +1,58 @@
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cm-space-3);
+}
+.template-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--cm-space-2);
+  padding: var(--cm-space-3);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  background: var(--cm-color-surface);
+}
+.template-card h3,
+.template-card p {
+  margin: 0;
+}
+.template-card p {
+  font-size: var(--cm-font-size-2);
+  color: var(--cm-color-text-muted);
+}
+.template-card > a {
+  margin-top: auto;
+}
+.template-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2);
+  margin: var(--cm-space-2) 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--cm-font-size-1);
+}
+.template-flow li {
+  display: flex;
+  align-items: center;
+  gap: var(--cm-space-2);
+}
+
+.template-card h3 {
+  font-size: var(--cm-font-size-4);
+}
+.template-flow__service {
+  display: flex;
+  align-items: center;
+  gap: var(--cm-space-2);
+}
+.template-flow__service .cm-service-icon {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+}
+@media (max-width: 900px) {
+  .template-grid {
+    grid-template-columns: 1fr;
+  }
+}

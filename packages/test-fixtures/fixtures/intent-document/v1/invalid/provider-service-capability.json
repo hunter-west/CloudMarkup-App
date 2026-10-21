@@ -1,0 +1,130 @@
+{
+  "kind": "cloudmarkup.intent-document",
+  "schemaVersion": 1,
+  "documentId": "intent_doc_invalid_provider_service",
+  "intentId": "intent_invalid_provider_service",
+  "revision": {
+    "revisionId": "intent_rev_invalid_001",
+    "revisionNumber": 1,
+    "createdAt": "2026-07-24T17:00:00Z",
+    "createdBy": "actor_example"
+  },
+  "application": {
+    "summary": "A structurally invalid fixture places a provider service identifier in the provider-neutral capability field.",
+    "capabilities": {
+      "state": "known",
+      "items": [
+        {
+          "id": "cap_invalid",
+          "capability": "aws.lambda",
+          "importance": "required",
+          "description": "This value must be rejected because it names a provider service."
+        }
+      ]
+    }
+  },
+  "connectivity": {
+    "ingress": {
+      "state": "none",
+      "rationale": "No ingress is needed for this structural fixture."
+    },
+    "egress": {
+      "state": "none",
+      "rationale": "No egress is needed for this structural fixture."
+    }
+  },
+  "identity": {
+    "authentication": {
+      "state": "not-required",
+      "rationale": "No principal authenticates to this structural fixture."
+    },
+    "authorization": {
+      "state": "not-required",
+      "rationale": "No differentiated action exists in this structural fixture."
+    }
+  },
+  "data": {
+    "state": "none",
+    "rationale": "No data category is needed for this structural fixture."
+  },
+  "workflows": {
+    "state": "none",
+    "rationale": "No workflow is needed for this structural fixture."
+  },
+  "quality": {
+    "availability": {
+      "state": "known",
+      "targetPercent": 0,
+      "measurementWindow": "monthly",
+      "scope": "Structural fixture only."
+    },
+    "durability": {
+      "state": "known",
+      "targetPercent": 0,
+      "scope": "Structural fixture only."
+    },
+    "recovery": {
+      "state": "not-required",
+      "rationale": "No recovery expectation applies."
+    },
+    "latency": {
+      "state": "not-required",
+      "rationale": "No latency expectation applies."
+    },
+    "scale": {
+      "state": "known",
+      "metrics": [
+        {
+          "metric": "concurrent-users",
+          "value": 0
+        }
+      ],
+      "scope": "Structural fixture only."
+    }
+  },
+  "environment": {
+    "state": "known",
+    "value": "test"
+  },
+  "preferences": {
+    "operationalOverhead": {
+      "state": "known",
+      "preference": "balanced",
+      "rationale": "Structural fixture only."
+    },
+    "cost": {
+      "state": "known",
+      "priority": "balanced",
+      "budget": {
+        "state": "not-required",
+        "rationale": "No budget applies to a structural fixture."
+      },
+      "rationale": "Structural fixture only."
+    }
+  },
+  "compliance": {
+    "state": "none",
+    "rationale": "No compliance constraint applies to this structural fixture."
+  },
+  "assumptions": [],
+  "unresolvedQuestions": [],
+  "decisions": [],
+  "alternatives": [],
+  "metadata": {
+    "source": "user",
+    "provenance": {
+      "schema": {
+        "contractId": "cloudmarkup.intent-document",
+        "schemaVersion": 1
+      },
+      "prompt": {
+        "kind": "not-applicable"
+      }
+    },
+    "serialization": {
+      "mediaType": "application/json",
+      "encoding": "utf-8",
+      "canonicalization": "cloudmarkup.intent-normalized-json.v1"
+    }
+  }
+}

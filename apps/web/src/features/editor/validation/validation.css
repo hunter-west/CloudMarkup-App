@@ -1,0 +1,292 @@
+.validation-issues {
+  align-content: start;
+  background: transparent;
+  display: grid;
+  gap: var(--cm-space-3);
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  padding: var(--cm-space-3);
+}
+.validation-issues__controls {
+  align-items: center;
+  background: var(--cm-color-surface);
+  border-block-end: 1px solid var(--cm-color-border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2) var(--cm-space-3);
+  min-width: 0;
+  inset-block-start: 0;
+  margin-inline: calc(var(--cm-space-3) * -1);
+  padding: var(--cm-space-2) var(--cm-space-3);
+  position: sticky;
+  box-shadow: var(--cm-shadow-1);
+  z-index: var(--cm-z-base);
+}
+
+.validation-issues__header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-3);
+  justify-content: space-between;
+}
+
+.validation-issues__header h2,
+.validation-finding-detail h3,
+.validation-finding-detail h4,
+.validation-findings-tree h3,
+.validation-findings-tree h4 {
+  margin: 0;
+}
+
+.validation-readiness {
+  background: var(--cm-color-surface-subtle);
+}
+
+.validation-readiness > .cm-disclosure__summary {
+  padding: var(--cm-space-2) var(--cm-space-3);
+}
+
+.validation-readiness > .cm-disclosure__content {
+  display: grid;
+  gap: var(--cm-space-2);
+  padding: var(--cm-space-3);
+}
+
+.validation-readiness__summary {
+  align-items: center;
+  display: flex;
+  gap: var(--cm-space-3);
+  justify-content: space-between;
+  width: 100%;
+}
+
+.validation-readiness__summary > span:first-child {
+  display: grid;
+  gap: 0;
+}
+
+.validation-readiness dl,
+.validation-finding-detail__technical {
+  display: grid;
+  gap: var(--cm-space-2);
+  margin: 0;
+}
+
+.validation-readiness dl > div,
+.validation-finding-detail__technical > div {
+  display: grid;
+  gap: var(--cm-space-1);
+  grid-template-columns: minmax(9rem, 0.35fr) minmax(0, 1fr);
+}
+
+.validation-readiness dt,
+.validation-finding-detail__technical dt {
+  font-weight: 700;
+}
+
+.validation-readiness dd,
+.validation-finding-detail__technical dd {
+  margin: 0;
+}
+
+.validation-readiness__binding {
+  overflow-wrap: anywhere;
+}
+.validation-finding-detail__values {
+  display: grid;
+  gap: var(--cm-space-1);
+  margin: 0;
+  padding-inline-start: var(--cm-space-4);
+}
+
+.validation-target-selector {
+  align-items: center;
+  display: flex;
+  flex: 0 1 auto;
+  font-weight: 700;
+  gap: var(--cm-space-2);
+  min-width: 0;
+}
+
+.validation-target-selector select {
+  min-width: min(14rem, 100%);
+}
+
+.validation-target-description {
+  margin: 0;
+}
+.validation-filters {
+  align-items: center;
+  border: 0;
+  display: flex;
+  flex: 1 1 28rem;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2) var(--cm-space-3);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.validation-filters label {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--cm-space-1);
+  white-space: nowrap;
+}
+
+.validation-issues__layout {
+  display: grid;
+  gap: var(--cm-space-4);
+  grid-template-columns: minmax(16rem, 0.42fr) minmax(20rem, 1fr);
+  min-height: 18rem;
+}
+
+.validation-findings-tree {
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  padding: var(--cm-space-3);
+}
+
+.validation-findings-tree ul {
+  display: grid;
+  gap: var(--cm-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.validation-findings-tree ul ul {
+  margin-inline-start: var(--cm-space-3);
+}
+
+.validation-findings-tree button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--cm-radius-sm);
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  gap: var(--cm-space-1);
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: var(--cm-space-2);
+  text-align: start;
+  width: 100%;
+}
+
+.validation-findings-tree button > span:last-child {
+  color: var(--cm-color-text-muted);
+  font-family: var(--cm-font-sans);
+  font-size: var(--cm-font-size-2);
+  grid-column: 2;
+  overflow-wrap: anywhere;
+}
+
+.validation-findings-tree button[aria-current="true"] {
+  background: var(--cm-color-selection-fill);
+  border-color: currentColor;
+}
+
+.validation-finding-detail {
+  align-content: start;
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  display: grid;
+  gap: var(--cm-space-3);
+  padding: var(--cm-space-3);
+}
+
+.validation-finding-detail header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2);
+}
+
+.validation-finding-detail__location {
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-2);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.validation-finding-detail__ai-action {
+  display: grid;
+  gap: var(--cm-space-1);
+  justify-items: start;
+}
+
+.validation-finding-detail__ai-action p {
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-2);
+  margin: 0;
+}
+
+.validation-finding-detail__actions,
+.validation-fix-dialog__footer,
+.validation-fix-dialog__mode,
+.validation-learning > div {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2);
+}
+
+.validation-learning {
+  border-block-start: 1px solid var(--cm-color-border);
+  padding-block-start: var(--cm-space-3);
+}
+
+.validation-fix-dialog pre {
+  max-height: 18rem;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+[data-validation-highlight="true"] {
+  outline: 3px double currentColor;
+  outline-offset: 3px;
+}
+
+.architecture-canvas
+  .react-flow__edge
+  .architecture-edge__path--validation-target[data-validation-highlight="true"] {
+  stroke-dasharray: 0.45rem 0.2rem;
+  stroke-width: calc(var(--cm-edge-width-strong) + 2px);
+}
+
+.architecture-validation-target-marker {
+  font-size: var(--cm-font-size-1);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+@media (max-width: 62rem) {
+  .validation-issues__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 47.999rem) {
+  .validation-filters {
+    flex-basis: 100%;
+  }
+
+  .validation-target-selector {
+    align-items: stretch;
+    flex-basis: 100%;
+    flex-direction: column;
+  }
+
+  .validation-target-selector select {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+.validation-finding-detail section p {
+  margin: var(--cm-space-1) 0 0;
+}
+.validation-finding-detail h4 {
+  font-weight: var(--cm-weight-semibold);
+}

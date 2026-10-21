@@ -1,0 +1,1382 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudMarkup deterministic curated serverless, networking, and event-driven application infrastructure.",
+  "Metadata": {
+    "CloudMarkup": {
+      "ArchitectureRevisionId": "revision_notes_1",
+      "CatalogDigest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+      "CatalogVersion": "0.30.0",
+      "Compiler": "cloudmarkup.iac-compiler@1.2.1",
+      "SolutionRevisionId": "solution_notes_1"
+    }
+  },
+  "Resources": {
+    "AccessIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": "Exact synthetic ALB health/backend path",
+        "FromPort": 8080,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "Group",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "AlbGroup",
+            "GroupId"
+          ]
+        },
+        "ToPort": 8080
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "access",
+          "GraphId": "access",
+          "Ownership": "user",
+          "TargetKey": "access"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Alb": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "IpAddressType": "ipv4",
+        "LoadBalancerAttributes": [
+          {
+            "Key": "deletion_protection.enabled",
+            "Value": "true"
+          },
+          {
+            "Key": "routing.http2.enabled",
+            "Value": "true"
+          },
+          {
+            "Key": "routing.http.drop_invalid_header_fields.enabled",
+            "Value": "true"
+          },
+          {
+            "Key": "routing.http.desync_mitigation_mode",
+            "Value": "defensive"
+          },
+          {
+            "Key": "idle_timeout.timeout_seconds",
+            "Value": "60"
+          }
+        ],
+        "Name": "synthetic-alb",
+        "Scheme": "internet-facing",
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "AlbGroup",
+              "GroupId"
+            ]
+          }
+        ],
+        "Subnets": [
+          {
+            "Ref": "AlbSubnetASubnet"
+          },
+          {
+            "Ref": "AlbSubnetBSubnet"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "Type": "application"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb",
+          "GraphId": "alb",
+          "Ownership": "user",
+          "TargetKey": "alb"
+        }
+      },
+      "DependsOn": [
+        "AlbIgwVpcAttachment",
+        "AlbSubnetA",
+        "AlbSubnetB"
+      ],
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "AlbClient": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "CidrIp": "10.20.0.0/16",
+        "Description": "Synthetic declared client CIDR",
+        "FromPort": 443,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "AlbGroup",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 443
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb_client",
+          "GraphId": "alb_client",
+          "Ownership": "user",
+          "TargetKey": "alb_client"
+        }
+      }
+    },
+    "AlbGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Explicit HTTPS client ingress and dedicated backend peer egress",
+        "GroupName": "synthetic-alb",
+        "SecurityGroupEgress": [
+          {
+            "Description": "Exact synthetic ALB health/backend path",
+            "DestinationSecurityGroupId": {
+              "Fn::GetAtt": [
+                "Group",
+                "GroupId"
+              ]
+            },
+            "FromPort": 8080,
+            "IpProtocol": "tcp",
+            "ToPort": 8080
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb_group",
+          "GraphId": "alb_group",
+          "Ownership": "user",
+          "TargetKey": "alb_group"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "AlbIgw": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          },
+          {
+            "Key": "Name",
+            "Value": "synthetic-alb-igw"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb_igw",
+          "GraphId": "alb_igw",
+          "Ownership": "user",
+          "TargetKey": "alb_igw"
+        }
+      }
+    },
+    "AlbIgwVpcAttachment": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "AlbIgw"
+        },
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DerivedFromGraphId": "alb_igw",
+          "Relationship": "aws.ec2.vpc-attaches-internet-gateway"
+        }
+      }
+    },
+    "AlbSubnetA": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "AlbIgw"
+        },
+        "RouteTableId": {
+          "Ref": "AlbSubnetARoutes"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb_subnet_a",
+          "GraphId": "route_alb_subnet_a",
+          "Ownership": "user",
+          "TargetKey": "alb_subnet_a"
+        }
+      },
+      "DependsOn": [
+        "AlbIgwVpcAttachment"
+      ]
+    },
+    "AlbSubnetAAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AlbSubnetARoutes"
+        },
+        "SubnetId": {
+          "Ref": "AlbSubnetASubnet"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb_subnet_a_association",
+          "GraphId": "association_alb_subnet_a",
+          "Ownership": "user",
+          "TargetKey": "alb_subnet_a_association"
+        }
+      }
+    },
+    "AlbSubnetARoutes": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          },
+          {
+            "Key": "Name",
+            "Value": "alb_subnet_a-routes"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb_subnet_a_routes",
+          "GraphId": "route_table_alb_subnet_a",
+          "Ownership": "user",
+          "TargetKey": "alb_subnet_a_routes"
+        }
+      }
+    },
+    "AlbSubnetASubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AssignIpv6AddressOnCreation": false,
+        "AvailabilityZone": "us-east-1a",
+        "CidrBlock": "10.20.2.0/24",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb_subnet_a_subnet",
+          "GraphId": "alb_subnet_a",
+          "Ownership": "user",
+          "TargetKey": "alb_subnet_a_subnet"
+        }
+      }
+    },
+    "AlbSubnetB": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "AlbIgw"
+        },
+        "RouteTableId": {
+          "Ref": "AlbSubnetBRoutes"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb_subnet_b",
+          "GraphId": "route_alb_subnet_b",
+          "Ownership": "user",
+          "TargetKey": "alb_subnet_b"
+        }
+      },
+      "DependsOn": [
+        "AlbIgwVpcAttachment"
+      ]
+    },
+    "AlbSubnetBAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "AlbSubnetBRoutes"
+        },
+        "SubnetId": {
+          "Ref": "AlbSubnetBSubnet"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb_subnet_b_association",
+          "GraphId": "association_alb_subnet_b",
+          "Ownership": "user",
+          "TargetKey": "alb_subnet_b_association"
+        }
+      }
+    },
+    "AlbSubnetBRoutes": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          },
+          {
+            "Key": "Name",
+            "Value": "alb_subnet_b-routes"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb_subnet_b_routes",
+          "GraphId": "route_table_alb_subnet_b",
+          "Ownership": "user",
+          "TargetKey": "alb_subnet_b_routes"
+        }
+      }
+    },
+    "AlbSubnetBSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AssignIpv6AddressOnCreation": false,
+        "AvailabilityZone": "us-east-1b",
+        "CidrBlock": "10.20.3.0/24",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "alb_subnet_b_subnet",
+          "GraphId": "alb_subnet_b",
+          "Ownership": "user",
+          "TargetKey": "alb_subnet_b_subnet"
+        }
+      }
+    },
+    "ApplicationRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Sid": "applicationroletrust"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Description": "CloudMarkup explicit ECS role; execution and task identities remain distinct.",
+        "MaxSessionDuration": 3600,
+        "RoleName": "application_role",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "application_role",
+          "GraphId": "application_role",
+          "Ownership": "user",
+          "TargetKey": "application_role"
+        }
+      }
+    },
+    "ApplicationSecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Externally populated synthetic credential",
+        "Name": "application/credential",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "application_secret",
+          "GraphId": "secret",
+          "Ownership": "user",
+          "TargetKey": "application_secret"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Certificate": {
+      "Type": "AWS::CertificateManager::Certificate",
+      "Properties": {
+        "CertificateExport": "DISABLED",
+        "CertificateTransparencyLoggingPreference": "ENABLED",
+        "DomainName": "app.example.test",
+        "DomainValidationOptions": [
+          {
+            "DomainName": "app.example.test",
+            "HostedZoneId": {
+              "Ref": "PublicZone"
+            }
+          }
+        ],
+        "KeyAlgorithm": "RSA_2048",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "ValidationMethod": "DNS"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "certificate",
+          "GraphId": "certificate",
+          "Ownership": "user",
+          "TargetKey": "certificate"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Cluster": {
+      "Type": "AWS::ECS::Cluster",
+      "Properties": {
+        "ClusterName": "SyntheticCluster",
+        "ClusterSettings": [
+          {
+            "Name": "containerInsights",
+            "Value": "disabled"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "cluster",
+          "GraphId": "cluster",
+          "Ownership": "user",
+          "TargetKey": "cluster"
+        }
+      }
+    },
+    "ExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ecs-tasks.amazonaws.com"
+                ]
+              },
+              "Sid": "executionroletrust"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Description": "CloudMarkup explicit ECS role; execution and task identities remain distinct.",
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+          }
+        ],
+        "MaxSessionDuration": 3600,
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Ref": "ApplicationSecret"
+                    }
+                  ],
+                  "Sid": "secretaccess"
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "secret_access"
+          }
+        ],
+        "RoleName": "execution_role",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "execution_role",
+          "GraphId": "execution_role",
+          "Ownership": "user",
+          "TargetKey": "execution_role"
+        }
+      }
+    },
+    "Group": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Explicit private workload policy",
+        "GroupName": "synthetic-private-instance",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "127.0.0.1/32",
+            "IpProtocol": "-1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "group",
+          "GraphId": "group",
+          "Ownership": "user",
+          "TargetKey": "group"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Listener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "Certificates": [
+          {
+            "CertificateArn": {
+              "Ref": "Certificate"
+            }
+          }
+        ],
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "Target"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Alb"
+        },
+        "Port": 443,
+        "Protocol": "HTTPS",
+        "SslPolicy": "ELBSecurityPolicy-TLS13-1-2-2021-06",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "listener",
+          "GraphId": "listener",
+          "Ownership": "user",
+          "TargetKey": "listener"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Logs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupClass": "STANDARD",
+        "LogGroupName": "/ecs/synthetic",
+        "RetentionInDays": 30,
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "logs",
+          "GraphId": "logs",
+          "Ownership": "user",
+          "TargetKey": "logs"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "PrivateAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRoutes"
+        },
+        "SubnetId": {
+          "Ref": "SubnetSubnet"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "private_association",
+          "GraphId": "association_private",
+          "Ownership": "user",
+          "TargetKey": "private_association"
+        }
+      }
+    },
+    "PrivateRoutes": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          },
+          {
+            "Key": "Name",
+            "Value": "private-routes"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "private_routes",
+          "GraphId": "route_table_private",
+          "Ownership": "user",
+          "TargetKey": "private_routes"
+        }
+      }
+    },
+    "PublicZone": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "HostedZoneConfig": {
+          "Comment": "Synthetic public DNS authority"
+        },
+        "HostedZoneTags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "Name": "example.test"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "public_zone",
+          "GraphId": "public_zone",
+          "Ownership": "user",
+          "TargetKey": "public_zone"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Repository": {
+      "Type": "AWS::ECR::Repository",
+      "Properties": {
+        "EmptyOnDelete": false,
+        "EncryptionConfiguration": {
+          "EncryptionType": "AES256"
+        },
+        "ImageScanningConfiguration": {
+          "ScanOnPush": true
+        },
+        "ImageTagMutability": "IMMUTABLE",
+        "RepositoryName": "synthetic/application",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "repository",
+          "GraphId": "repository",
+          "Ownership": "user",
+          "TargetKey": "repository"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Service": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "AvailabilityZoneRebalancing": "DISABLED",
+        "Cluster": {
+          "Fn::GetAtt": [
+            "Cluster",
+            "Arn"
+          ]
+        },
+        "DeploymentConfiguration": {
+          "DeploymentCircuitBreaker": {
+            "Enable": true,
+            "Rollback": true
+          },
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 100
+        },
+        "DeploymentController": {
+          "Type": "ECS"
+        },
+        "DesiredCount": 0,
+        "EnableECSManagedTags": false,
+        "EnableExecuteCommand": false,
+        "HealthCheckGracePeriodSeconds": 30,
+        "LaunchType": "FARGATE",
+        "LoadBalancers": [
+          {
+            "ContainerName": "Application",
+            "ContainerPort": 8080,
+            "TargetGroupArn": {
+              "Ref": "Target"
+            }
+          }
+        ],
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": [
+              {
+                "Fn::GetAtt": [
+                  "Group",
+                  "GroupId"
+                ]
+              }
+            ],
+            "Subnets": [
+              {
+                "Ref": "SubnetSubnet"
+              }
+            ]
+          }
+        },
+        "PlatformVersion": "1.4.0",
+        "SchedulingStrategy": "REPLICA",
+        "ServiceName": "SyntheticService",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "TaskDefinition": {
+          "Ref": "Task"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "service",
+          "GraphId": "service",
+          "Ownership": "user",
+          "TargetKey": "service"
+        }
+      },
+      "DependsOn": [
+        "Listener",
+        "AccessIngress"
+      ]
+    },
+    "SubnetSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AssignIpv6AddressOnCreation": false,
+        "AvailabilityZone": "us-east-1a",
+        "CidrBlock": "10.20.1.0/24",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "subnet_subnet",
+          "GraphId": "subnet",
+          "Ownership": "user",
+          "TargetKey": "subnet_subnet"
+        }
+      }
+    },
+    "Target": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckEnabled": true,
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/health",
+        "HealthCheckPort": "traffic-port",
+        "HealthCheckProtocol": "HTTP",
+        "HealthCheckTimeoutSeconds": 5,
+        "HealthyThresholdCount": 2,
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Name": "synthetic-target",
+        "Port": 8080,
+        "Protocol": "HTTP",
+        "ProtocolVersion": "HTTP1",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "60"
+          }
+        ],
+        "TargetType": "ip",
+        "UnhealthyThresholdCount": 2,
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "target",
+          "GraphId": "target",
+          "Ownership": "user",
+          "TargetKey": "target"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Task": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Essential": true,
+            "HealthCheck": {
+              "Command": [
+                "CMD",
+                "/app/health"
+              ],
+              "Interval": 30,
+              "Retries": 3,
+              "StartPeriod": 0,
+              "Timeout": 5
+            },
+            "Image": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Fn::GetAtt": [
+                      "Repository",
+                      "RepositoryUri"
+                    ]
+                  },
+                  "@",
+                  "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                ]
+              ]
+            },
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "Logs"
+                },
+                "awslogs-region": "us-east-1",
+                "awslogs-stream-prefix": "Application",
+                "max-buffer-size": "10m",
+                "mode": "non-blocking"
+              }
+            },
+            "Name": "Application",
+            "PortMappings": [
+              {
+                "ContainerPort": 8080,
+                "HostPort": 8080,
+                "Protocol": "tcp"
+              }
+            ],
+            "ReadonlyRootFilesystem": true,
+            "Secrets": [
+              {
+                "Name": "DATABASE_PASSWORD",
+                "ValueFrom": {
+                  "Ref": "ApplicationSecret"
+                }
+              }
+            ],
+            "User": "10001:10001"
+          }
+        ],
+        "Cpu": "256",
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "ExecutionRole",
+            "Arn"
+          ]
+        },
+        "Family": "SyntheticTask",
+        "Memory": "512",
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE"
+        ],
+        "RuntimePlatform": {
+          "CpuArchitecture": "X86_64",
+          "OperatingSystemFamily": "LINUX"
+        },
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "ApplicationRole",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "task",
+          "GraphId": "task",
+          "Ownership": "user",
+          "TargetKey": "task"
+        }
+      }
+    },
+    "Vpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.20.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "vpc",
+          "GraphId": "vpc",
+          "Ownership": "user",
+          "TargetKey": "vpc"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "AlbArnOutput": {
+      "Description": "Architecture output alb_arn.",
+      "Value": {
+        "Ref": "Alb"
+      }
+    },
+    "AlbDnsNameOutput": {
+      "Description": "Architecture output alb_dnsName.",
+      "Value": {
+        "Fn::GetAtt": [
+          "Alb",
+          "DNSName"
+        ]
+      }
+    },
+    "AlbHostedZoneIdOutput": {
+      "Description": "Architecture output alb_hostedZoneId.",
+      "Value": {
+        "Fn::GetAtt": [
+          "Alb",
+          "CanonicalHostedZoneID"
+        ]
+      }
+    },
+    "ListenerArnOutput": {
+      "Description": "Architecture output listener_arn.",
+      "Value": {
+        "Ref": "Listener"
+      }
+    },
+    "TargetArnOutput": {
+      "Description": "Architecture output target_arn.",
+      "Value": {
+        "Ref": "Target"
+      }
+    }
+  }
+}

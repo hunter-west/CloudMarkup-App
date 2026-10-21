@@ -1,0 +1,10 @@
+{
+  "extends": "@cloudmarkup/config/tsconfig/node.json",
+  "compilerOptions": {
+    "exactOptionalPropertyTypes": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["bin/**/*.ts", "lib/**/*.ts", "runtime/**/*.ts", "test/**/*.ts"]
+}

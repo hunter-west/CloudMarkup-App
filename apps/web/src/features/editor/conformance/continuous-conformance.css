@@ -1,0 +1,216 @@
+.continuous-conformance {
+  display: grid;
+  gap: var(--cm-space-3);
+  padding: var(--cm-space-3);
+}
+
+.continuous-conformance__heading,
+.continuous-conformance__quality,
+.continuous-conformance__legend,
+.continuous-conformance__unavailable,
+.continuous-conformance__empty-diagram,
+.continuous-conformance__active-issues {
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-lg);
+  background: var(--cm-color-surface);
+  padding: var(--cm-space-3);
+}
+
+.continuous-conformance__heading h2,
+.continuous-conformance__quality h3,
+.continuous-conformance__active-issues h3 {
+  margin-block: var(--cm-space-1) var(--cm-space-2);
+}
+
+.continuous-conformance__state-controls,
+.continuous-conformance__review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2);
+}
+
+.continuous-conformance__difference-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cm-space-2);
+  width: fit-content;
+  font-weight: 600;
+}
+
+.continuous-conformance__legend ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cm-space-2) var(--cm-space-4);
+  margin-block-end: 0;
+  padding-inline-start: var(--cm-space-5);
+}
+
+.continuous-conformance__legend li::marker {
+  color: var(--cm-color-text-muted);
+}
+
+.continuous-conformance__legend li[data-conformance-status="different"],
+.continuous-conformance__legend
+  li[data-conformance-presence="comparison-only-missing"] {
+  text-decoration: underline dashed;
+  text-underline-offset: 0.25rem;
+}
+
+.continuous-conformance__legend li[data-conformance-status="external"],
+.continuous-conformance__legend li[data-conformance-presence="unknown"] {
+  font-style: italic;
+}
+
+.continuous-conformance__quality > div,
+.continuous-conformance__difference-list header,
+.continuous-conformance__active-issues header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cm-space-3);
+}
+
+.continuous-conformance__quality dl,
+.continuous-conformance__technical {
+  display: grid;
+  gap: var(--cm-space-2);
+  margin-block-end: 0;
+}
+
+.continuous-conformance__quality dl > div,
+.continuous-conformance__technical > div {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.28fr) 1fr;
+  gap: var(--cm-space-3);
+}
+
+.continuous-conformance__quality dt,
+.continuous-conformance__technical dt {
+  font-weight: 600;
+}
+
+.continuous-conformance__quality dd,
+.continuous-conformance__technical dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.continuous-conformance__diagram {
+  margin: 0;
+  overflow: auto;
+}
+
+.continuous-conformance__diagram svg {
+  display: block;
+  min-width: 42rem;
+  width: 100%;
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-lg);
+  background: var(--cm-color-surface);
+}
+
+.continuous-conformance__diagram line {
+  stroke: var(--cm-color-text-muted);
+  stroke-width: 2;
+}
+
+.continuous-conformance__diagram rect {
+  fill: var(--cm-color-surface);
+  stroke: var(--cm-color-text-muted);
+  stroke-width: 2;
+}
+
+.continuous-conformance__diagram [data-conformance-status="different"] rect,
+.continuous-conformance__diagram [data-conformance-status="different"] line {
+  stroke: var(--cm-color-status-error);
+  stroke-dasharray: 8 5;
+}
+
+.continuous-conformance__diagram [data-conformance-status="external"] rect,
+.continuous-conformance__diagram [data-conformance-status="external"] line,
+.continuous-conformance__diagram [data-conformance-status="unmanaged"] rect,
+.continuous-conformance__diagram [data-conformance-status="unmanaged"] line,
+.continuous-conformance__diagram [data-conformance-status="unknown"] rect,
+.continuous-conformance__diagram [data-conformance-status="unknown"] line {
+  stroke-dasharray: 3 5;
+}
+
+.continuous-conformance__diagram
+  [data-conformance-presence="comparison-only-missing"]
+  rect,
+.continuous-conformance__diagram
+  [data-conformance-presence="comparison-only-missing"]
+  line {
+  stroke-dasharray: 9 6;
+}
+
+.continuous-conformance__diagram text {
+  fill: var(--cm-color-text);
+  font-family: inherit;
+  font-size: 0.75rem;
+}
+
+.continuous-conformance__diagram .continuous-conformance__node-label {
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.continuous-conformance__diagram .continuous-conformance__service-label {
+  fill: var(--cm-color-text-muted);
+}
+
+.continuous-conformance__diagram figcaption {
+  color: var(--cm-color-text-muted);
+  margin-block-start: var(--cm-space-2);
+}
+
+.continuous-conformance__details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cm-space-3);
+}
+
+.continuous-conformance__details-grid section,
+.continuous-conformance
+  > section[aria-labelledby="continuous-conformance-differences-title"] {
+  border-top: 1px solid var(--cm-color-border);
+  padding-block-start: var(--cm-space-3);
+}
+
+.continuous-conformance__details-grid ul,
+.continuous-conformance__difference-list,
+.continuous-conformance__active-issues ul {
+  display: grid;
+  gap: var(--cm-space-2);
+  margin-block-end: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.continuous-conformance__details-grid li,
+.continuous-conformance__difference-list > li,
+.continuous-conformance__active-issues li {
+  display: grid;
+  gap: var(--cm-space-1);
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-md);
+  padding: var(--cm-space-3);
+}
+
+.continuous-conformance__details-grid small,
+.continuous-conformance__difference-list small,
+.continuous-conformance__active-issues small {
+  color: var(--cm-color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 48rem) {
+  .continuous-conformance__details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .continuous-conformance__quality dl > div,
+  .continuous-conformance__technical > div {
+    grid-template-columns: 1fr;
+  }
+}

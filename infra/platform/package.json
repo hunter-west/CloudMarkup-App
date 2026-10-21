@@ -1,0 +1,32 @@
+{
+  "name": "@cloudmarkup/platform",
+  "version": "0.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "render:deployment-handoff": "tsx bin/render-deployment-handoff.ts",
+    "test": "pnpm --dir ../.. exec vitest run --project platform",
+    "type-check": "tsc -p tsconfig.json",
+    "synth": "cdk synth --quiet -c environment=dev"
+  },
+  "dependencies": {
+    "@aws-sdk/client-rds-data": "catalog:",
+    "@aws-sdk/client-secrets-manager": "catalog:",
+    "@aws-sdk/client-sqs": "catalog:",
+    "@cloudmarkup/api": "workspace:*",
+    "aws-cdk-lib": "catalog:",
+    "constructs": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudmarkup/config": "workspace:*",
+    "@types/aws-lambda": "catalog:",
+    "@types/node": "catalog:",
+    "aws-cdk": "catalog:",
+    "esbuild": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

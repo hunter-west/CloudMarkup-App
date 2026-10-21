@@ -1,0 +1,157 @@
+{
+  "artifactDigest": "sha256:27a9f42495d7fc6e1c8e00d77019159c9d5303f13631620279a3a80396fbc643",
+  "coverageDigest": "sha256:e3fb64f938da984649345d684c8f8dcc79e2419156e6ca016f8650378b87b693",
+  "sourceManifestDigest": "sha256:b618cb04edf85bbaf6a4036b701a3e976ea9e7e1c2b58d1f7088808a30fe349d",
+  "coverage": {
+    "contractVersion": 1,
+    "missingRequirements": [
+      "application-build-and-tests",
+      "application-security-checks"
+    ],
+    "solutionRevisionId": "solution_notes_revision_1",
+    "state": "starter-application",
+    "workloads": [
+      {
+        "implementationMode": "complete-supported-pattern",
+        "missingRequirements": [
+          "application-build-and-tests",
+          "application-security-checks"
+        ],
+        "representedOperationIds": ["operation_create_note"],
+        "representedTestIds": ["test_no_content_0", "test_no_content_1"],
+        "sourceFilePaths": [
+          "application/README.md",
+          "application/build-contracts/workload_notes_api.json",
+          "application/contracts/contracts_http_no-content-contract-d15f93e5c53cae6b50f99476e50a770afea43282e242a8f3ef6260991f47eda8-16df0b7ccd797044d9f0367093d2f0dccacd74deb59fc93628a391abb18cd7e9.json",
+          "application/contracts/contracts_http_no-content-unit-ebeae291a12aaf24aadb97dda11b5d36094cb1e995497c21c0e9fee649e5165e-9b63bea4d950ebe5c444bac2a09e4b8c4656e45fb7f4f03d649639f8ce3bd7f6.json",
+          "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+          "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-094166000ba9423463c66d684531f339fdfce83f1346cf563d45bdeab2cfafba.json",
+          "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-714cdebe8fc7b5d5e5b879b115f0e947ddae4cce1f73ec65916aee6eb2bcbf01.json",
+          "application/lockfile.contract.json",
+          "application/package.json",
+          "application/src/functions/notes_handler/index.ts",
+          "application/tests/functions/notes_handler/contracts.test.ts",
+          "application/tests/functions/notes_handler/unit.test.ts",
+          "application/tsconfig.json"
+        ],
+        "state": "starter-application",
+        "unresolvedBehaviorIds": [],
+        "workloadId": "workload_notes_api"
+      }
+    ]
+  },
+  "buildContracts": [
+    {
+      "workloadId": "workload_notes_api",
+      "contractDigest": "sha256:bfeecaa3ebc66ee879e22e663fda360fdeedcc3ff86013f26294408dc09b654e",
+      "entrypoint": "application/src/functions/notes_handler/index.ts",
+      "artifactPath": "application/artifacts/workload_notes_api/function.zip"
+    }
+  ],
+  "files": [
+    {
+      "path": "application/README.md",
+      "checksum": "sha256:8e5aadb5d8cc3e2636ffeafc0fffce0dea9222ee9122aee93ad2c33f69dc89f3",
+      "semanticChecksum": "sha256:8e5aadb5d8cc3e2636ffeafc0fffce0dea9222ee9122aee93ad2c33f69dc89f3",
+      "sizeBytes": 695,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/build-contracts/workload_notes_api.json",
+      "checksum": "sha256:994334a8d807898487b24ed80f8d28ed54e8eaa0b34f832e39cd147317703615",
+      "semanticChecksum": "sha256:994334a8d807898487b24ed80f8d28ed54e8eaa0b34f832e39cd147317703615",
+      "sizeBytes": 6464,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_http_no-content-contract-d15f93e5c53cae6b50f99476e50a770afea43282e242a8f3ef6260991f47eda8-16df0b7ccd797044d9f0367093d2f0dccacd74deb59fc93628a391abb18cd7e9.json",
+      "checksum": "sha256:80b15d9d6cbb32fdb81d96c8ce2d86d75c29dcd285341552e4a7742a2de96805",
+      "semanticChecksum": "sha256:80b15d9d6cbb32fdb81d96c8ce2d86d75c29dcd285341552e4a7742a2de96805",
+      "sizeBytes": 1407,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_http_no-content-unit-ebeae291a12aaf24aadb97dda11b5d36094cb1e995497c21c0e9fee649e5165e-9b63bea4d950ebe5c444bac2a09e4b8c4656e45fb7f4f03d649639f8ce3bd7f6.json",
+      "checksum": "sha256:9b63bea4d950ebe5c444bac2a09e4b8c4656e45fb7f4f03d649639f8ce3bd7f6",
+      "semanticChecksum": "sha256:9b63bea4d950ebe5c444bac2a09e4b8c4656e45fb7f4f03d649639f8ce3bd7f6",
+      "sizeBytes": 812,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+      "checksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+      "semanticChecksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+      "sizeBytes": 735,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-094166000ba9423463c66d684531f339fdfce83f1346cf563d45bdeab2cfafba.json",
+      "checksum": "sha256:094166000ba9423463c66d684531f339fdfce83f1346cf563d45bdeab2cfafba",
+      "semanticChecksum": "sha256:094166000ba9423463c66d684531f339fdfce83f1346cf563d45bdeab2cfafba",
+      "sizeBytes": 1198,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-714cdebe8fc7b5d5e5b879b115f0e947ddae4cce1f73ec65916aee6eb2bcbf01.json",
+      "checksum": "sha256:714cdebe8fc7b5d5e5b879b115f0e947ddae4cce1f73ec65916aee6eb2bcbf01",
+      "semanticChecksum": "sha256:714cdebe8fc7b5d5e5b879b115f0e947ddae4cce1f73ec65916aee6eb2bcbf01",
+      "sizeBytes": 1156,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/lockfile.contract.json",
+      "checksum": "sha256:8662341bfce5a59892770e75a6225c44de5311c386ed47c1d58ae9ae5bad14d1",
+      "semanticChecksum": "sha256:8662341bfce5a59892770e75a6225c44de5311c386ed47c1d58ae9ae5bad14d1",
+      "sizeBytes": 258,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/package.json",
+      "checksum": "sha256:ee3b7f6eb878dbc423b11a5ef645d000bf98ce6511a54cdf0ba6902ec54e3566",
+      "semanticChecksum": "sha256:ee3b7f6eb878dbc423b11a5ef645d000bf98ce6511a54cdf0ba6902ec54e3566",
+      "sizeBytes": 325,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/src/functions/notes_handler/index.ts",
+      "checksum": "sha256:ca643c8728949d8a6a60e697d2288bce0f8607ef7b99eba0d06c509543459fe3",
+      "semanticChecksum": "sha256:ca643c8728949d8a6a60e697d2288bce0f8607ef7b99eba0d06c509543459fe3",
+      "sizeBytes": 1671,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/tests/functions/notes_handler/contracts.test.ts",
+      "checksum": "sha256:720a4fc2c7e195653c51c8217f91785443b509aaa25d3a3ffb9840491647fe7b",
+      "semanticChecksum": "sha256:720a4fc2c7e195653c51c8217f91785443b509aaa25d3a3ffb9840491647fe7b",
+      "sizeBytes": 675,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/tests/functions/notes_handler/unit.test.ts",
+      "checksum": "sha256:7098a4c3b2def7310c76c72c74d52680222a9973b0e552391c57c03e1775391a",
+      "semanticChecksum": "sha256:7098a4c3b2def7310c76c72c74d52680222a9973b0e552391c57c03e1775391a",
+      "sizeBytes": 1055,
+      "ownership": "generated",
+      "disposition": "create"
+    },
+    {
+      "path": "application/tsconfig.json",
+      "checksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+      "semanticChecksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+      "sizeBytes": 385,
+      "ownership": "generated",
+      "disposition": "create"
+    }
+  ]
+}

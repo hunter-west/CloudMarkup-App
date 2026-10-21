@@ -1,0 +1,121 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudMarkup deterministic curated serverless, networking, and event-driven application infrastructure.",
+  "Metadata": {
+    "CloudMarkup": {
+      "ArchitectureRevisionId": "revision_notes_1",
+      "CatalogDigest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+      "CatalogVersion": "0.30.0",
+      "Compiler": "cloudmarkup.iac-compiler@1.2.1",
+      "SolutionRevisionId": "solution_notes_1"
+    }
+  },
+  "Resources": {
+    "Certificate": {
+      "Type": "AWS::CertificateManager::Certificate",
+      "Properties": {
+        "CertificateExport": "DISABLED",
+        "CertificateTransparencyLoggingPreference": "ENABLED",
+        "DomainName": "app.example.test",
+        "DomainValidationOptions": [
+          {
+            "DomainName": "app.example.test",
+            "HostedZoneId": {
+              "Ref": "PublicZone"
+            }
+          }
+        ],
+        "KeyAlgorithm": "RSA_2048",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "ValidationMethod": "DNS"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "certificate",
+          "GraphId": "certificate",
+          "Ownership": "user",
+          "TargetKey": "certificate"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "PublicZone": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "HostedZoneConfig": {
+          "Comment": "Synthetic public DNS authority"
+        },
+        "HostedZoneTags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "Name": "example.test"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "public_zone",
+          "GraphId": "public_zone",
+          "Ownership": "user",
+          "TargetKey": "public_zone"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    }
+  },
+  "Outputs": {
+    "CertificateArnOutput": {
+      "Description": "Architecture output certificate_arn.",
+      "Value": {
+        "Ref": "Certificate"
+      }
+    },
+    "PublicZoneNameServersOutput": {
+      "Description": "Architecture output public_zone_nameServers.",
+      "Value": {
+        "Fn::GetAtt": [
+          "PublicZone",
+          "NameServers"
+        ]
+      }
+    },
+    "PublicZoneZoneIdOutput": {
+      "Description": "Architecture output public_zone_zoneId.",
+      "Value": {
+        "Ref": "PublicZone"
+      }
+    }
+  }
+}

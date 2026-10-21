@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "cloudmarkup.terraform-validation-tools",
+  "contextId": "terraform-validation",
+  "tools": [
+    {
+      "path": "terraform",
+      "sha256": "7c226d2a50158de8d8567e799f9dcadad9179ca4877202053ce2b1c55c8e0ee4",
+      "sizeBytes": 120361086,
+      "executable": true,
+      "role": "terraform-cli"
+    },
+    {
+      "path": "tflint",
+      "sha256": "e4bf9780686a7715bcf277fada5659a1ca433bacf24289c23c75388979a34a66",
+      "sizeBytes": 54317182,
+      "executable": true,
+      "role": "terraform-linter"
+    },
+    {
+      "path": "trivy",
+      "sha256": "2f78848b474c6f0b27d0df1833ae8fc7d297640344c6d5c7a25f63cc9e22d3dc",
+      "sizeBytes": 168288382,
+      "executable": true,
+      "role": "vulnerability-scanner"
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+.route-page:has(> .route-page__content > .revision-detail) {
+  min-inline-size: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.route-page:has(> .route-page__content > .revision-detail) .route-page__header {
+  min-inline-size: 0;
+  flex-wrap: wrap;
+}
+
+.route-page:has(> .route-page__content > .revision-detail)
+  .route-page__header
+  > div {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+}
+
+.route-page:has(> .route-page__content > .revision-detail)
+  .route-page__header
+  .button {
+  max-inline-size: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+.revision-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--page-gap);
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.revision-detail > *,
+.revision-detail :is(form, label, fieldset, details, section, dl, dd) {
+  min-inline-size: 0;
+}
+
+.revision-detail :is(input, select, textarea, .button) {
+  max-inline-size: 100%;
+}
+
+.revision-detail .button {
+  white-space: normal;
+  text-align: center;
+}
+
+.revision-detail .metric-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.revision-detail .solution-export-create__diagram {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+.revision-detail .solution-export__metadata {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+
+.revision-detail code {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.revision-detail__technical {
+  border: 1px solid var(--cm-color-border);
+  border-radius: var(--cm-radius-lg);
+  background: var(--cm-color-surface);
+}
+
+.revision-detail__technical > summary {
+  min-block-size: 44px;
+  padding: var(--cm-space-3);
+  color: var(--cm-color-text);
+  font-weight: var(--cm-weight-semibold);
+  cursor: pointer;
+}
+
+.revision-detail__technical > summary::marker {
+  color: var(--cm-color-action);
+}
+
+.revision-detail__technical > summary:focus-visible {
+  outline: 2px solid var(--cm-color-focus);
+  outline-offset: 3px;
+  border-radius: var(--cm-radius-lg);
+}
+
+.revision-detail__technical[open] > summary {
+  border-block-end: 1px solid var(--cm-color-border);
+}
+
+.revision-detail__technical-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cm-space-3);
+  padding: var(--cm-space-3);
+}
+
+.revision-detail__metadata-section h2 {
+  margin: 0 0 var(--cm-space-3);
+  font-size: var(--cm-font-size-4);
+}
+
+.revision-detail__metadata-section dl {
+  margin: 0;
+}
+
+.revision-detail__metadata-section dt {
+  color: var(--cm-color-text-muted);
+  font-size: var(--cm-font-size-2);
+}
+
+.revision-detail__metadata-section dd {
+  margin: var(--cm-space-1) 0 var(--cm-space-3);
+}
+
+.revision-detail__metadata-section dd:last-child {
+  margin-block-end: 0;
+}
+
+@media (max-width: 47.999rem) {
+  .revision-detail .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .route-page:has(> .route-page__content > .revision-detail)
+    .route-page__actions,
+  .route-page:has(> .route-page__content > .revision-detail)
+    .route-page__actions
+    .button {
+    inline-size: 100%;
+  }
+}
+
+.revision-detail > .state-card {
+  padding: var(--cm-space-3);
+  max-width: none;
+}
+.revision-detail > .state-card .status-label {
+  display: none;
+}
+.revision-detail > .state-card h2 {
+  font-size: var(--cm-font-size-3);
+  margin: 0;
+}
+.revision-detail > .state-card p {
+  margin: var(--cm-space-1) 0 0;
+}

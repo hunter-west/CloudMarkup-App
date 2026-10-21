@@ -1,0 +1,138 @@
+{
+  "aws.cloudfront.alias-configuration": {
+    "dnsRecords": {
+      "default": "A_AND_AAAA",
+      "enum": ["A_AND_AAAA"],
+      "type": "string"
+    },
+    "domainName": {
+      "maxLength": 253,
+      "minLength": 3,
+      "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+      "type": "string"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    }
+  },
+  "aws.cloudfront.cache-policy": {
+    "brotli": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "comment": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "defaultTtl": {
+      "maximum": 86400,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "forwardViewerCookies": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "gzip": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "headers": {
+      "default": "none",
+      "enum": ["none"],
+      "type": "string"
+    },
+    "maxTtl": {
+      "maximum": 86400,
+      "minimum": 60,
+      "type": "integer"
+    },
+    "minTtl": {
+      "default": 0,
+      "maximum": 0,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+      "type": "string"
+    },
+    "queryStrings": {
+      "default": "none",
+      "enum": ["none"],
+      "type": "string"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    }
+  },
+  "aws.cloudfront.distribution": {
+    "comment": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
+    "compress": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "defaultRootObject": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "httpVersion": {
+      "default": "http2",
+      "enum": ["http2"],
+      "type": "string"
+    },
+    "ipv6Enabled": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "originAccessMode": {
+      "default": "oac-signed-readonly",
+      "enum": ["oac-signed-readonly"],
+      "type": "string"
+    },
+    "priceClass": {
+      "enum": ["PriceClass_100", "PriceClass_200", "PriceClass_All"],
+      "type": "string"
+    },
+    "publicContentAttested": {
+      "const": true,
+      "type": "boolean"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "viewerCertificateMode": {
+      "default": "default",
+      "enum": ["default", "acm-alias"],
+      "type": "string"
+    },
+    "viewerProtocolPolicy": {
+      "default": "redirect-to-https",
+      "enum": ["redirect-to-https"],
+      "type": "string"
+    }
+  }
+}

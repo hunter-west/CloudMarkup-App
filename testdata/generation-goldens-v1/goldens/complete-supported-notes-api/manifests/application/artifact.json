@@ -1,0 +1,4563 @@
+{
+  "contractVersion": 1,
+  "artifact": {
+    "buildContracts": [
+      {
+        "contract": {
+          "contractVersion": 1,
+          "compiledEntrypoint": "application/dist/src/functions/notes_handler/index.js",
+          "dependencies": [
+            {
+              "digest": "sha256:596a74c988d447d30d25b48e2dfdde55f755ff37e1bc3e30d632ea41af1c5a7d",
+              "digestKind": "canonical-coordinate",
+              "kind": "runtime",
+              "name": "@aws-sdk/client-dynamodb",
+              "version": "3.1101.0"
+            },
+            {
+              "digest": "sha256:4eef39b2a59c6718c30bc27e150d20d49b997aa641ad1139271daabdce5ff1f0",
+              "digestKind": "canonical-coordinate",
+              "kind": "development",
+              "name": "@types/node",
+              "version": "24.13.3"
+            },
+            {
+              "digest": "sha256:abe2b6ac2534cb6a9682fa43cd1f2d6bffa36fc819ce4bdec6630df821033d0b",
+              "digestKind": "canonical-coordinate",
+              "kind": "development",
+              "name": "typescript",
+              "version": "6.0.3"
+            },
+            {
+              "digest": "sha256:4de876ceefeaa5db7000f7308295acabac3478a78f9dfddd6ca9724dfa3d33af",
+              "digestKind": "canonical-coordinate",
+              "kind": "development",
+              "name": "vitest",
+              "version": "4.1.10"
+            }
+          ],
+          "entrypoint": "application/src/functions/notes_handler/index.ts",
+          "executionPolicy": {
+            "credentials": "deny",
+            "filesystem": "isolated",
+            "network": "deny",
+            "packageScripts": "deny",
+            "reproducible": true
+          },
+          "expectedArtifact": {
+            "artifactId": "artifact_workload_notes_api",
+            "archiveEntrypoint": "index.js",
+            "digestAlgorithm": "sha256",
+            "handler": "index.handler",
+            "kind": "aws-lambda-zip",
+            "mediaType": "application/zip",
+            "path": "application/artifacts/workload_notes_api/function.zip"
+          },
+          "implementationMode": "complete-supported-pattern",
+          "lockfilePath": "application/lockfile.contract.json",
+          "packageManifestPath": "application/package.json",
+          "requiredChecks": [
+            "compile",
+            "unit-tests",
+            "contract-tests",
+            "security",
+            "reproducibility"
+          ],
+          "runtime": {
+            "digest": "sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a",
+            "id": "cloudmarkup.runtime.aws-lambda-nodejs24-typescript",
+            "version": "1.0.0",
+            "handler": "index.handler",
+            "languageFamily": "cloudmarkup.language.typescript",
+            "moduleFormat": "esm",
+            "runtime": "nodejs24.x",
+            "runtimeFamily": "aws.lambda.runtime-family.nodejs24"
+          },
+          "sourceInputs": [
+            {
+              "checksum": "sha256:841181aaa53f221280360bac91f468671244168dc5e5b42501f90ea9c525b7b2",
+              "path": "application/README.md"
+            },
+            {
+              "checksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+              "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json"
+            },
+            {
+              "checksum": "sha256:e95ecf0f059e78e5a27d7a8841e21ac3a8529c51c1c8b1eec6416c544941e709",
+              "path": "application/contracts/contracts_notes_create-contract-test-381f80f622eeecbffba1e44ed8f4783c81e9041adf9b101760c765a9cea06a05-b8286262036184a64255bb79059ad034bad3f6be4dd88fd7bf310af24c5a4658.json"
+            },
+            {
+              "checksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+              "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json"
+            },
+            {
+              "checksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+              "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json"
+            },
+            {
+              "checksum": "sha256:978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f",
+              "path": "application/contracts/contracts_notes_create-unit-test-7b382cb8f2a7d0ab1f4278e4256203103a2d202b015b632f1a732e042cefbee7-978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f.json"
+            },
+            {
+              "checksum": "sha256:df2cec4026f180f995b3d93bd915122cdc369c727afc404df0b55e08d2fe2b7e",
+              "path": "application/contracts/contracts_notes_delete-contract-test-c0bcb74a818eecaddb95c6bffdc130a5078ef7915af0e51f5a186405084f3517-648e1989f712567c042454621405cf2db369978693d8580c66f70e0f382b7192.json"
+            },
+            {
+              "checksum": "sha256:c113ceed2f34a74205aae5d06a8ceb8634f92ff0565a2b22fe9e273cdfb5b95d",
+              "path": "application/contracts/contracts_notes_delete-operation-19c4cb072a3368d6f309fe7cd5ebe80a54751b39f88980c41082645836ebaef5-7959bb884a2dbebb14b61dee7772a5e5259aaea1f81a5f21bad639c50db344c1.json"
+            },
+            {
+              "checksum": "sha256:518a914b9def8ad1feae1bbe1ba007321246656583599c8fcfbc92f23263ba21",
+              "path": "application/contracts/contracts_notes_delete-route-f13f7c0b7b38da6aee66b84366a6e9d44d98644d623524a9cf67b261c95b95fc-a846214334f54de6d680d3ebf4c1a228785e13e05ca450136330e303be6270e6.json"
+            },
+            {
+              "checksum": "sha256:5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae",
+              "path": "application/contracts/contracts_notes_delete-unit-test-0d26443db4af198655c4aad133240efe165b5899367964266bb39e7455625c48-5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae.json"
+            },
+            {
+              "checksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+              "path": "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json"
+            },
+            {
+              "checksum": "sha256:008edb436cd1fd1613d7dbf14eb7e7fc9c0bf2591a9b9986e5befad0599b9db9",
+              "path": "application/contracts/contracts_notes_read-contract-test-5a9b3969cfd7ea4df2261eb94a7c84dd89ed88c5dbc03eff80e19e0ed8c82a03-a7635d78f5919cd03fa031ac3e618998f1a5ac0147cb226ec1c47d34f461d918.json"
+            },
+            {
+              "checksum": "sha256:78622eeddef646d8da3dd4063e1675d7f40de9ba0957aef9816b7e8a1d383375",
+              "path": "application/contracts/contracts_notes_read-operation-6118f9e0b1e886385fe2ec1942ef566513fe31af0653bbbe1b6637cbfff9198c-bea4d63ee29df1f240f3f6b065f51d68c713bc2b75738219cbc835a0e8664afa.json"
+            },
+            {
+              "checksum": "sha256:be6e4e1d496c92ab73f5563448db998a08c55e45fb04f6eb221df5b8e272f158",
+              "path": "application/contracts/contracts_notes_read-route-58785adbba781c81bc788b4f6dde2d72f870267e33369e45f9d97cfe41800fd4-d898f926e30202c5168ffc4e159a02d8da803eda5a5aae2ab80ed6e1c16bb132.json"
+            },
+            {
+              "checksum": "sha256:fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f",
+              "path": "application/contracts/contracts_notes_read-unit-test-359d96faf4490e96bc47ef2031fc21ae44d50868ce843b4d898b826f46c353ad-fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f.json"
+            },
+            {
+              "checksum": "sha256:68422541296cadcbe8d3d4dc6a6530a9d2f57f51517629b25bf2501fd33944f0",
+              "path": "application/contracts/contracts_notes_update-contract-test-e13036779e00dc7f7236d7dac4b116073096d9cc264b0e7e674125ef7348ff1f-9b62895de73cbb830780d52e1a7ea21475dc7bb52ee187efe52ee8d1537fe342.json"
+            },
+            {
+              "checksum": "sha256:3f25f38890d98e1421601242c8bd18ac5a89829e853f54cc490afac91e58f463",
+              "path": "application/contracts/contracts_notes_update-operation-b14f7456bbfbabee6680af73446b87c0acc39e03c341f0e7f3c1dfe83fdba9a9-765c3039d5db23423c11401109782432db741e011f528d6ba7dba6055c706002.json"
+            },
+            {
+              "checksum": "sha256:346b1307f5248f391fa9ce0a84d3fe96ea850aeb772464531d73ec6eaa0ad409",
+              "path": "application/contracts/contracts_notes_update-route-82819ea3920b3b3219a47d8a107aacdee2a91ca2471766c0411129d6e773d0a5-286bac7cf79013c4c4aaa66959aa0c0f972ffc2104a6da943a90d17b257e4fd9.json"
+            },
+            {
+              "checksum": "sha256:d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893",
+              "path": "application/contracts/contracts_notes_update-unit-test-2fec14b60ac3864bb74c09c7a689f0c2ae1ea914a67837e4ece5228925d775bc-d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893.json"
+            },
+            {
+              "checksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+              "path": "application/lockfile.contract.json"
+            },
+            {
+              "checksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+              "path": "application/package.json"
+            },
+            {
+              "checksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+              "path": "application/src/functions/notes_handler/extensions/custom.ts"
+            },
+            {
+              "checksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+              "path": "application/src/functions/notes_handler/generated/bindings.ts"
+            },
+            {
+              "checksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+              "path": "application/src/functions/notes_handler/generated/operations/operation_create_note.ts"
+            },
+            {
+              "checksum": "sha256:852203c54d6814b4b29a0eb8218311c07871ac07560de022e1a18254747970ce",
+              "path": "application/src/functions/notes_handler/generated/operations/operation_delete_note.ts"
+            },
+            {
+              "checksum": "sha256:448a4778c1b14574f213bd994ad8ca1bd95c7b7ab154533c6f437df7603b2d20",
+              "path": "application/src/functions/notes_handler/generated/operations/operation_read_note.ts"
+            },
+            {
+              "checksum": "sha256:8e7898bbfc926f80a7c8eaf9bd9094f849c2cb19f5c14d7123458afa1761e58e",
+              "path": "application/src/functions/notes_handler/generated/operations/operation_update_note.ts"
+            },
+            {
+              "checksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+              "path": "application/src/functions/notes_handler/generated/types.ts"
+            },
+            {
+              "checksum": "sha256:0a9492954bd1c58864d27c47b2731c6be4bdb27685c9d5c61b26142c02088534",
+              "path": "application/src/functions/notes_handler/index.ts"
+            },
+            {
+              "checksum": "sha256:60024ee4ac35dae0ed166290fb73cc6f7a06fee68952873d7054d3a7fde40b04",
+              "path": "application/tests/functions/notes_handler/contracts.test.ts"
+            },
+            {
+              "checksum": "sha256:1ab06b75aa6f3293eb339ff80693c41f3036881a32feae2f2db1b1fc1eac7dc6",
+              "path": "application/tests/functions/notes_handler/unit.test.ts"
+            },
+            {
+              "checksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+              "path": "application/tsconfig.json"
+            }
+          ],
+          "sourceManifestPath": "application/manifest.json",
+          "toolchain": [
+            {
+              "digest": "sha256:190dc59c4837c79b96523891aa4813d7405781792ccf6d0b57296bcd1f2535a4",
+              "id": "runtime.nodejs",
+              "version": "24.18.0",
+              "digestKind": "canonical-coordinate",
+              "role": "runtime"
+            },
+            {
+              "digest": "sha256:feaa549c6eaf582c5fc70a9c99173bf39f53fcfbbaf6c92a9ccfbf778f9969f7",
+              "id": "package-manager.pnpm",
+              "version": "11.16.0",
+              "digestKind": "canonical-coordinate",
+              "role": "package-manager"
+            },
+            {
+              "digest": "sha256:16e16196923ee425d7a33b4248367b37b0402df8bdf92c33da14a361d9843e63",
+              "id": "compiler.typescript",
+              "version": "6.0.3",
+              "digestKind": "canonical-coordinate",
+              "role": "compiler"
+            },
+            {
+              "digest": "sha256:09708d6ffbdd0dcffdaef02c2eb41a596cf4cfe0b79e5c0b0427972112b6ec02",
+              "id": "test-runner.vitest",
+              "version": "4.1.10",
+              "digestKind": "canonical-coordinate",
+              "role": "test-runner"
+            },
+            {
+              "digest": "sha256:a241cf7ec1beb6f208e0a78af39611ebc7ac1bab9fbe4795481608bcce90b7bb",
+              "id": "packager.cloudmarkup-lambda-zip",
+              "version": "1.0.0",
+              "digestKind": "canonical-coordinate",
+              "role": "packager"
+            }
+          ],
+          "workloadId": "workload_notes_api"
+        },
+        "contractDigest": "sha256:141e6fa8e96888c6a1d24d8b27401d449d9ea96d3cc9df2aa27f044641d6ceae"
+      }
+    ],
+    "contractVersion": 1,
+    "coverage": {
+      "contractVersion": 1,
+      "missingRequirements": [],
+      "solutionRevisionId": "solution_notes_revision_1",
+      "state": "complete-supported-pattern",
+      "workloads": [
+        {
+          "implementationMode": "complete-supported-pattern",
+          "missingRequirements": [],
+          "representedOperationIds": [
+            "operation_create_note",
+            "operation_delete_note",
+            "operation_read_note",
+            "operation_update_note"
+          ],
+          "representedTestIds": [
+            "test_contract_create_note",
+            "test_contract_delete_note",
+            "test_contract_read_note",
+            "test_contract_update_note",
+            "test_unit_create_note",
+            "test_unit_delete_note",
+            "test_unit_read_note",
+            "test_unit_update_note"
+          ],
+          "sourceFilePaths": [
+            "application/README.md",
+            "application/build-contracts/workload_notes_api.json",
+            "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+            "application/contracts/contracts_notes_create-contract-test-381f80f622eeecbffba1e44ed8f4783c81e9041adf9b101760c765a9cea06a05-b8286262036184a64255bb79059ad034bad3f6be4dd88fd7bf310af24c5a4658.json",
+            "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json",
+            "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json",
+            "application/contracts/contracts_notes_create-unit-test-7b382cb8f2a7d0ab1f4278e4256203103a2d202b015b632f1a732e042cefbee7-978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f.json",
+            "application/contracts/contracts_notes_delete-contract-test-c0bcb74a818eecaddb95c6bffdc130a5078ef7915af0e51f5a186405084f3517-648e1989f712567c042454621405cf2db369978693d8580c66f70e0f382b7192.json",
+            "application/contracts/contracts_notes_delete-operation-19c4cb072a3368d6f309fe7cd5ebe80a54751b39f88980c41082645836ebaef5-7959bb884a2dbebb14b61dee7772a5e5259aaea1f81a5f21bad639c50db344c1.json",
+            "application/contracts/contracts_notes_delete-route-f13f7c0b7b38da6aee66b84366a6e9d44d98644d623524a9cf67b261c95b95fc-a846214334f54de6d680d3ebf4c1a228785e13e05ca450136330e303be6270e6.json",
+            "application/contracts/contracts_notes_delete-unit-test-0d26443db4af198655c4aad133240efe165b5899367964266bb39e7455625c48-5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae.json",
+            "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json",
+            "application/contracts/contracts_notes_read-contract-test-5a9b3969cfd7ea4df2261eb94a7c84dd89ed88c5dbc03eff80e19e0ed8c82a03-a7635d78f5919cd03fa031ac3e618998f1a5ac0147cb226ec1c47d34f461d918.json",
+            "application/contracts/contracts_notes_read-operation-6118f9e0b1e886385fe2ec1942ef566513fe31af0653bbbe1b6637cbfff9198c-bea4d63ee29df1f240f3f6b065f51d68c713bc2b75738219cbc835a0e8664afa.json",
+            "application/contracts/contracts_notes_read-route-58785adbba781c81bc788b4f6dde2d72f870267e33369e45f9d97cfe41800fd4-d898f926e30202c5168ffc4e159a02d8da803eda5a5aae2ab80ed6e1c16bb132.json",
+            "application/contracts/contracts_notes_read-unit-test-359d96faf4490e96bc47ef2031fc21ae44d50868ce843b4d898b826f46c353ad-fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f.json",
+            "application/contracts/contracts_notes_update-contract-test-e13036779e00dc7f7236d7dac4b116073096d9cc264b0e7e674125ef7348ff1f-9b62895de73cbb830780d52e1a7ea21475dc7bb52ee187efe52ee8d1537fe342.json",
+            "application/contracts/contracts_notes_update-operation-b14f7456bbfbabee6680af73446b87c0acc39e03c341f0e7f3c1dfe83fdba9a9-765c3039d5db23423c11401109782432db741e011f528d6ba7dba6055c706002.json",
+            "application/contracts/contracts_notes_update-route-82819ea3920b3b3219a47d8a107aacdee2a91ca2471766c0411129d6e773d0a5-286bac7cf79013c4c4aaa66959aa0c0f972ffc2104a6da943a90d17b257e4fd9.json",
+            "application/contracts/contracts_notes_update-unit-test-2fec14b60ac3864bb74c09c7a689f0c2ae1ea914a67837e4ece5228925d775bc-d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893.json",
+            "application/lockfile.contract.json",
+            "application/package.json",
+            "application/src/functions/notes_handler/extensions/custom.ts",
+            "application/src/functions/notes_handler/generated/bindings.ts",
+            "application/src/functions/notes_handler/generated/operations/operation_create_note.ts",
+            "application/src/functions/notes_handler/generated/operations/operation_delete_note.ts",
+            "application/src/functions/notes_handler/generated/operations/operation_read_note.ts",
+            "application/src/functions/notes_handler/generated/operations/operation_update_note.ts",
+            "application/src/functions/notes_handler/generated/types.ts",
+            "application/src/functions/notes_handler/index.ts",
+            "application/tests/functions/notes_handler/contracts.test.ts",
+            "application/tests/functions/notes_handler/unit.test.ts",
+            "application/tsconfig.json"
+          ],
+          "state": "complete-supported-pattern",
+          "unresolvedBehaviorIds": [],
+          "workloadId": "workload_notes_api"
+        }
+      ]
+    },
+    "coverageDigest": "sha256:7bbbe27d2eefc0e4583edae88cd3cbbd149a01e302a4dda7709eea1370acb890",
+    "diagnostics": [],
+    "diff": {
+      "files": [
+        {
+          "afterChecksum": "sha256:841181aaa53f221280360bac91f468671244168dc5e5b42501f90ea9c525b7b2",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/README.md",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:9611a9c61f8e085f6caf24df5197c70bbfca5b4efcd5793157430188ecdc9d9f",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/build-contracts/workload_notes_api.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:e95ecf0f059e78e5a27d7a8841e21ac3a8529c51c1c8b1eec6416c544941e709",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-contract-test-381f80f622eeecbffba1e44ed8f4783c81e9041adf9b101760c765a9cea06a05-b8286262036184a64255bb79059ad034bad3f6be4dd88fd7bf310af24c5a4658.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-unit-test-7b382cb8f2a7d0ab1f4278e4256203103a2d202b015b632f1a732e042cefbee7-978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:df2cec4026f180f995b3d93bd915122cdc369c727afc404df0b55e08d2fe2b7e",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_delete-contract-test-c0bcb74a818eecaddb95c6bffdc130a5078ef7915af0e51f5a186405084f3517-648e1989f712567c042454621405cf2db369978693d8580c66f70e0f382b7192.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:c113ceed2f34a74205aae5d06a8ceb8634f92ff0565a2b22fe9e273cdfb5b95d",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_delete-operation-19c4cb072a3368d6f309fe7cd5ebe80a54751b39f88980c41082645836ebaef5-7959bb884a2dbebb14b61dee7772a5e5259aaea1f81a5f21bad639c50db344c1.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:518a914b9def8ad1feae1bbe1ba007321246656583599c8fcfbc92f23263ba21",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_delete-route-f13f7c0b7b38da6aee66b84366a6e9d44d98644d623524a9cf67b261c95b95fc-a846214334f54de6d680d3ebf4c1a228785e13e05ca450136330e303be6270e6.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_delete-unit-test-0d26443db4af198655c4aad133240efe165b5899367964266bb39e7455625c48-5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:008edb436cd1fd1613d7dbf14eb7e7fc9c0bf2591a9b9986e5befad0599b9db9",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_read-contract-test-5a9b3969cfd7ea4df2261eb94a7c84dd89ed88c5dbc03eff80e19e0ed8c82a03-a7635d78f5919cd03fa031ac3e618998f1a5ac0147cb226ec1c47d34f461d918.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:78622eeddef646d8da3dd4063e1675d7f40de9ba0957aef9816b7e8a1d383375",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_read-operation-6118f9e0b1e886385fe2ec1942ef566513fe31af0653bbbe1b6637cbfff9198c-bea4d63ee29df1f240f3f6b065f51d68c713bc2b75738219cbc835a0e8664afa.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:be6e4e1d496c92ab73f5563448db998a08c55e45fb04f6eb221df5b8e272f158",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_read-route-58785adbba781c81bc788b4f6dde2d72f870267e33369e45f9d97cfe41800fd4-d898f926e30202c5168ffc4e159a02d8da803eda5a5aae2ab80ed6e1c16bb132.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_read-unit-test-359d96faf4490e96bc47ef2031fc21ae44d50868ce843b4d898b826f46c353ad-fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:68422541296cadcbe8d3d4dc6a6530a9d2f57f51517629b25bf2501fd33944f0",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_update-contract-test-e13036779e00dc7f7236d7dac4b116073096d9cc264b0e7e674125ef7348ff1f-9b62895de73cbb830780d52e1a7ea21475dc7bb52ee187efe52ee8d1537fe342.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:3f25f38890d98e1421601242c8bd18ac5a89829e853f54cc490afac91e58f463",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_update-operation-b14f7456bbfbabee6680af73446b87c0acc39e03c341f0e7f3c1dfe83fdba9a9-765c3039d5db23423c11401109782432db741e011f528d6ba7dba6055c706002.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:346b1307f5248f391fa9ce0a84d3fe96ea850aeb772464531d73ec6eaa0ad409",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_update-route-82819ea3920b3b3219a47d8a107aacdee2a91ca2471766c0411129d6e773d0a5-286bac7cf79013c4c4aaa66959aa0c0f972ffc2104a6da943a90d17b257e4fd9.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_update-unit-test-2fec14b60ac3864bb74c09c7a689f0c2ae1ea914a67837e4ece5228925d775bc-d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/lockfile.contract.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/package.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+          "change": "create",
+          "ownership": "user-owned",
+          "path": "application/src/functions/notes_handler/extensions/custom.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/bindings.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/operations/operation_create_note.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:852203c54d6814b4b29a0eb8218311c07871ac07560de022e1a18254747970ce",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/operations/operation_delete_note.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:448a4778c1b14574f213bd994ad8ca1bd95c7b7ab154533c6f437df7603b2d20",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/operations/operation_read_note.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:8e7898bbfc926f80a7c8eaf9bd9094f849c2cb19f5c14d7123458afa1761e58e",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/operations/operation_update_note.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/types.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:0a9492954bd1c58864d27c47b2731c6be4bdb27685c9d5c61b26142c02088534",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/index.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:60024ee4ac35dae0ed166290fb73cc6f7a06fee68952873d7054d3a7fde40b04",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/tests/functions/notes_handler/contracts.test.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:1ab06b75aa6f3293eb339ff80693c41f3036881a32feae2f2db1b1fc1eac7dc6",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/tests/functions/notes_handler/unit.test.ts",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        },
+        {
+          "afterChecksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+          "change": "create",
+          "ownership": "generated",
+          "path": "application/tsconfig.json",
+          "reason": "The deterministic path does not exist in the supplied repository inventory."
+        }
+      ],
+      "semantic": [
+        {
+          "afterDigest": "sha256:05b23b746fcac23e4584e1b1b86f5945d7bf2836accbde77eb7dfcfdfc008d76",
+          "kind": "binding",
+          "semanticId": "binding:workload_notes_api_environment_stage-c5eb5931949136b1606a23ff7354059cfb0a138b2e20c50f4f311927114b5c2a",
+          "sourceReferences": [
+            {
+              "document": "normalized-solution",
+              "path": "$.workloads.environment",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Validated environment binding represented without resolving secret values."
+        },
+        {
+          "afterDigest": "sha256:d40870e3fddd465fee2f3432745eb124e2551f9eb2902b977d02828d75e5cd32",
+          "kind": "binding",
+          "semanticId": "binding:workload_notes_api_environment_table_1-4508d655f631c15d4b94cd4ec34e1bdbc872d90927aae520c717d243a209938b",
+          "sourceReferences": [
+            {
+              "document": "normalized-solution",
+              "path": "$.workloads.environment",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Validated environment binding represented without resolving secret values."
+        },
+        {
+          "afterDigest": "sha256:141e6fa8e96888c6a1d24d8b27401d449d9ea96d3cc9df2aa27f044641d6ceae",
+          "kind": "build-contract",
+          "semanticId": "build:workload_notes_api",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Prompt 32A build and artifact handoff contract."
+        },
+        {
+          "afterDigest": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_auth_1_0_0_sha256_9738a872a5d2f9-bae346401c24e7b2c9ce551c72f010d7dc028081c6a1572ac324b330200de73f",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_create_note"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_delete_note"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_read_note"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_update_note"
+            },
+            {
+              "contractId": "contracts.notes.auth",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_create"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_delete"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_read"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_update"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:b8286262036184a64255bb79059ad034bad3f6be4dd88fd7bf310af24c5a4658",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_create-contract-test_1_0_0_sha25-dcb8418eb30734b381b8caf54350c228f8511122e361837574a5397dee9b522d",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_create_note"
+            },
+            {
+              "contractId": "contracts.notes.create-contract-test",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_create"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_create_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_create-operation_1_0_0_sha256_96-423b9375f793b65415e6e840033ec441b5649e503111b4113c99c37d1d18b895",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_create_note"
+            },
+            {
+              "contractId": "contracts.notes.create-operation",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_create"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_create_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_create-route_1_0_0_sha256_58c405-1f4fd8577a2540a6b234d8d3bdb27c474860f8d959552b6b5f4ac5271086cfe6",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_create_note"
+            },
+            {
+              "contractId": "contracts.notes.create-route",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_create"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_create_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_create-unit-test_1_0_0_sha256_97-44b6a1d01cfa16f47cd456fd09078f817a197b0b85f6d30f15699e67f85eb548",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_create_note"
+            },
+            {
+              "contractId": "contracts.notes.create-unit-test",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_create"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_create_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:648e1989f712567c042454621405cf2db369978693d8580c66f70e0f382b7192",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_delete-contract-test_1_0_0_sha25-9c4c568331c9d367477f4a52c445ccd90229eba34255db174b875bb83c1a8645",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_delete_note"
+            },
+            {
+              "contractId": "contracts.notes.delete-contract-test",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_delete"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_delete_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:7959bb884a2dbebb14b61dee7772a5e5259aaea1f81a5f21bad639c50db344c1",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_delete-operation_1_0_0_sha256_79-9a278693d84d2a0f8a8a41471629c2b946e89127acdac209fcc5bdc4f00a5134",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_delete_note"
+            },
+            {
+              "contractId": "contracts.notes.delete-operation",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_delete"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_delete_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:a846214334f54de6d680d3ebf4c1a228785e13e05ca450136330e303be6270e6",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_delete-route_1_0_0_sha256_a84621-f98d8da7ee923ff776447ae133cbca62702242085aca20bd4249c1f3b9c50655",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_delete_note"
+            },
+            {
+              "contractId": "contracts.notes.delete-route",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_delete"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_delete_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_delete-unit-test_1_0_0_sha256_51-7913778aaf1306df2fca9834e5fc6408e0482256dac0d28ec433245583eae374",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_delete_note"
+            },
+            {
+              "contractId": "contracts.notes.delete-unit-test",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_delete"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_delete_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_entity_1_0_0_sha256_32e854e018c1-6616b4d081a24215b34e1dda031e4acc3965a3d7006eb8fcfa10eddfe45a8e06",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_create_note"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_delete_note"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_read_note"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_update_note"
+            },
+            {
+              "contractId": "contracts.notes.entity",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_create"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_delete"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_read"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_update"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_create_table"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_delete_table"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_read_table"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_update_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:a7635d78f5919cd03fa031ac3e618998f1a5ac0147cb226ec1c47d34f461d918",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_read-contract-test_1_0_0_sha256_-dbfd3a3607610b98eff7427d17f9e8e00283c14400502232edd24d42120a8b63",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_read_note"
+            },
+            {
+              "contractId": "contracts.notes.read-contract-test",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_read"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_read_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:bea4d63ee29df1f240f3f6b065f51d68c713bc2b75738219cbc835a0e8664afa",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_read-operation_1_0_0_sha256_bea4-a735dfd658343f06b0c39f027c9afc7d93c54de33f9d5fa31edbf4ad2392265e",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_read_note"
+            },
+            {
+              "contractId": "contracts.notes.read-operation",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_read"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_read_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:d898f926e30202c5168ffc4e159a02d8da803eda5a5aae2ab80ed6e1c16bb132",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_read-route_1_0_0_sha256_d898f926-3820746b7d1992af04fe10aa69c31aa01fc1ca0d5a1f428840efa0c236d31394",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_read_note"
+            },
+            {
+              "contractId": "contracts.notes.read-route",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_read"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_read_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_read-unit-test_1_0_0_sha256_fdf7-e5a7008f2a31f8bb677b2508849ceb218ce0db8bcd9e92525a2e4257c8779c1b",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_read_note"
+            },
+            {
+              "contractId": "contracts.notes.read-unit-test",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_read"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_read_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:9b62895de73cbb830780d52e1a7ea21475dc7bb52ee187efe52ee8d1537fe342",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_update-contract-test_1_0_0_sha25-4a0bc57772246943a32b89357cc6a5df9f051c8e914fc78a19a29a899d8c93c1",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_update_note"
+            },
+            {
+              "contractId": "contracts.notes.update-contract-test",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_update"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_update_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:765c3039d5db23423c11401109782432db741e011f528d6ba7dba6055c706002",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_update-operation_1_0_0_sha256_76-9ab741d62221163151b6f4684c025731f1122b244960f86c140d4ac51a4aede0",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_update_note"
+            },
+            {
+              "contractId": "contracts.notes.update-operation",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_update"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_update_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:286bac7cf79013c4c4aaa66959aa0c0f972ffc2104a6da943a90d17b257e4fd9",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_update-route_1_0_0_sha256_286bac-2f5fa500797cadbfee1444b50cae2bc3f03d9cd8dfe6b0c81e24f8d9e5c18438",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_update_note"
+            },
+            {
+              "contractId": "contracts.notes.update-route",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_update"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_update_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893",
+          "kind": "contract",
+          "semanticId": "contract:contracts_notes_update-unit-test_1_0_0_sha256_d6-d52627335341ee21221f27eb547b4af861e03a1365f9885289a5c8dbb4f1739e",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "document": "workload",
+              "operationId": "operation_update_note"
+            },
+            {
+              "contractId": "contracts.notes.update-unit-test",
+              "document": "architecture"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_api_update"
+            },
+            {
+              "document": "architecture",
+              "edgeId": "edge_update_table"
+            },
+            {
+              "document": "normalized-solution",
+              "path": "$.resources"
+            }
+          ],
+          "summary": "Exact canonical Application Contract represented in generated source."
+        },
+        {
+          "afterDigest": "sha256:23d620979440ba9c77cbb19bdac91e785b2902274d2268ae98145744bcb2e446",
+          "kind": "operation",
+          "semanticId": "operation:workload_notes_api_operation_create_note-87c8cbf1d77457b302d74667a93eb7bd39c8efb673a8f11d0e83d63e45ec1090",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_create_note",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Canonical Workload operation and resolved bindings represented in emitted source."
+        },
+        {
+          "afterDigest": "sha256:93dfc97bc699cfdb40b707e1a6c70847b3ddc3592abbc4345b3254dcfb404f6d",
+          "kind": "operation",
+          "semanticId": "operation:workload_notes_api_operation_delete_note-f9db8ecfe643dc152b67a7b15662b0e98f91373e318143723c600160ae110156",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_delete_note",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Canonical Workload operation and resolved bindings represented in emitted source."
+        },
+        {
+          "afterDigest": "sha256:16ff87c45131e804537060402937e7a7a4676e5ed54a04b4d687ed060a6b58dc",
+          "kind": "operation",
+          "semanticId": "operation:workload_notes_api_operation_read_note-ce01a759d0639cf4834727f06d41ac56fb3da5c606a8ff72d18d2ac6498d88ab",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_read_note",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Canonical Workload operation and resolved bindings represented in emitted source."
+        },
+        {
+          "afterDigest": "sha256:ce27cd1469907ea09cb45cff251648a9d0502b556a6c70f6ae65c383d2864cb5",
+          "kind": "operation",
+          "semanticId": "operation:workload_notes_api_operation_update_note-4ccd1c70941f73e677b844d0d33ba98416f0f0d1fcd79e0cef328b8a73aec4e1",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_update_note",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Canonical Workload operation and resolved bindings represented in emitted source."
+        },
+        {
+          "afterDigest": "sha256:30eba622186c7672fb7a71f4b0c52c9e6558129c075d142fd0cc2d189500596e",
+          "kind": "ownership",
+          "semanticId": "ownership:workload_notes_api",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "path": "$.sourceOwnership",
+              "workloadId": "workload_notes_api"
+            }
+          ],
+          "summary": "Validated source-ownership and extension boundaries applied during materialization."
+        },
+        {
+          "afterDigest": "sha256:d93fa02b963a429392b7eafa9cd0b66ed3aec43ca681c8be377ed7543c9af887",
+          "kind": "test",
+          "semanticId": "test:workload_notes_api_test_contract_create_note-9fb2d2deaccafa05ade2540c2312ce15bf563090650f410a3669667b86d319ae",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_create_note",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "contractId": "contracts.notes.create-contract-test",
+              "document": "architecture"
+            }
+          ],
+          "summary": "Canonical required test metadata represented in generated tests."
+        },
+        {
+          "afterDigest": "sha256:791627df38e2a0aac984295d7dc4542a99e73223f7d3d692c8d21b18ebea0fca",
+          "kind": "test",
+          "semanticId": "test:workload_notes_api_test_contract_delete_note-cfaefa779f1bd6892a0c05546e095e2c20f398ec877ce26b5a79edc85456160a",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_delete_note",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "contractId": "contracts.notes.delete-contract-test",
+              "document": "architecture"
+            }
+          ],
+          "summary": "Canonical required test metadata represented in generated tests."
+        },
+        {
+          "afterDigest": "sha256:3113b1be75663f4cb6888268a1f1f0f76aba1b49bf28eef31c43fa07bf5ff9fd",
+          "kind": "test",
+          "semanticId": "test:workload_notes_api_test_contract_read_note-c4459b9e055ebe22e7e77f1d0c4064f011ef2940b4578565788c1ae10bed9c6d",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_read_note",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "contractId": "contracts.notes.read-contract-test",
+              "document": "architecture"
+            }
+          ],
+          "summary": "Canonical required test metadata represented in generated tests."
+        },
+        {
+          "afterDigest": "sha256:6ae627efb04939b33889c540579ae8c398545b11e6175cc769961222927ac401",
+          "kind": "test",
+          "semanticId": "test:workload_notes_api_test_contract_update_note-fcec159bf5eb5ef25d7dd37e16aa68360e00a0626dd310c75ce051b82957de2b",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_update_note",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "contractId": "contracts.notes.update-contract-test",
+              "document": "architecture"
+            }
+          ],
+          "summary": "Canonical required test metadata represented in generated tests."
+        },
+        {
+          "afterDigest": "sha256:8ad69cb0b5fdcd47d76753b35d03209caaf8348f32fe14ee98895cc87a0a0a9c",
+          "kind": "test",
+          "semanticId": "test:workload_notes_api_test_unit_create_note-45f4d1c66e9af1f22f84ec8aaa985b63119de2ce669bdb266787e249544dbfbc",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_create_note",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "contractId": "contracts.notes.create-unit-test",
+              "document": "architecture"
+            }
+          ],
+          "summary": "Canonical required test metadata represented in generated tests."
+        },
+        {
+          "afterDigest": "sha256:f0acfbdffde0387135e5cc5de2f0f5eb35ec91494bb72e053601a86daeede015",
+          "kind": "test",
+          "semanticId": "test:workload_notes_api_test_unit_delete_note-aa5340b6f6f023e1f4b302a2afdf437426ed1b8578d57502c4854cad2b704d38",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_delete_note",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "contractId": "contracts.notes.delete-unit-test",
+              "document": "architecture"
+            }
+          ],
+          "summary": "Canonical required test metadata represented in generated tests."
+        },
+        {
+          "afterDigest": "sha256:1cc9fdc2b1c4c6c4df9dcb9f766affeb6cb3730f5b712d9a54eba9e6e85c8dbd",
+          "kind": "test",
+          "semanticId": "test:workload_notes_api_test_unit_read_note-4f68edac32ed0ea3c0ac86b92502b3acebb6a0b4629313397fb56d7429b1e498",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_read_note",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "contractId": "contracts.notes.read-unit-test",
+              "document": "architecture"
+            }
+          ],
+          "summary": "Canonical required test metadata represented in generated tests."
+        },
+        {
+          "afterDigest": "sha256:ba6a1a902aac186268a3f82fadc7ab53cfcb5657bb4ff84997fa0113ea2af43c",
+          "kind": "test",
+          "semanticId": "test:workload_notes_api_test_unit_update_note-0f760500ac7b6bab7b3ea64019f6283822558290fd2d66d012d98ff9a884b7f1",
+          "sourceReferences": [
+            {
+              "document": "workload",
+              "operationId": "operation_update_note",
+              "workloadId": "workload_notes_api"
+            },
+            {
+              "contractId": "contracts.notes.update-unit-test",
+              "document": "architecture"
+            }
+          ],
+          "summary": "Canonical required test metadata represented in generated tests."
+        }
+      ]
+    },
+    "generator": {
+      "digest": "sha256:a102e772819d1d1657d89c422cd33d73912d62cabe4022b44e0cd3dd756af12e",
+      "id": "cloudmarkup.application-generator",
+      "version": "1.0.0"
+    },
+    "kind": "cloudmarkup.application-source-artifact",
+    "pattern": {
+      "digest": "sha256:cbe772e0adee53da524110278fe908d726a3e8f600588364bef33ba2fa900571",
+      "id": "cloudmarkup.pattern.aws-lambda-authenticated-notes",
+      "version": "1.0.0"
+    },
+    "runtime": {
+      "digest": "sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a",
+      "id": "cloudmarkup.runtime.aws-lambda-nodejs24-typescript",
+      "version": "1.0.0",
+      "handler": "index.handler",
+      "languageFamily": "cloudmarkup.language.typescript",
+      "moduleFormat": "esm",
+      "runtime": "nodejs24.x",
+      "runtimeFamily": "aws.lambda.runtime-family.nodejs24"
+    },
+    "solutionRevisionId": "solution_notes_revision_1",
+    "sourceFiles": [
+      {
+        "checksum": "sha256:841181aaa53f221280360bac91f468671244168dc5e5b42501f90ea9c525b7b2",
+        "mediaType": "text/markdown",
+        "path": "application/README.md",
+        "provenance": {
+          "contractIds": [],
+          "edgeIds": [],
+          "environmentBindingIds": [],
+          "extensionPointIds": [],
+          "operationIds": [],
+          "resourceTargetKeys": [],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:841181aaa53f221280360bac91f468671244168dc5e5b42501f90ea9c525b7b2",
+        "sizeBytes": 1674,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:9611a9c61f8e085f6caf24df5197c70bbfca5b4efcd5793157430188ecdc9d9f",
+        "mediaType": "application/json",
+        "path": "application/build-contracts/workload_notes_api.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.create-route",
+            "contracts.notes.delete-route",
+            "contracts.notes.entity",
+            "contracts.notes.read-route",
+            "contracts.notes.update-route"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_api_delete",
+            "edge_api_read",
+            "edge_api_update",
+            "edge_create_table",
+            "edge_delete_table",
+            "edge_read_table",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note",
+            "operation_delete_note",
+            "operation_read_note",
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:9611a9c61f8e085f6caf24df5197c70bbfca5b4efcd5793157430188ecdc9d9f",
+        "sizeBytes": 12301,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-route",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_api_delete",
+            "edge_api_read",
+            "edge_api_update"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note",
+            "operation_delete_note",
+            "operation_read_note",
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+        "sizeBytes": 735,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:e95ecf0f059e78e5a27d7a8841e21ac3a8529c51c1c8b1eec6416c544941e709",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_create-contract-test-381f80f622eeecbffba1e44ed8f4783c81e9041adf9b101760c765a9cea06a05-b8286262036184a64255bb79059ad034bad3f6be4dd88fd7bf310af24c5a4658.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.create-contract-test"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:e95ecf0f059e78e5a27d7a8841e21ac3a8529c51c1c8b1eec6416c544941e709",
+        "sizeBytes": 1573,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.create-contract-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.create-operation"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+        "sizeBytes": 1605,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.create-route"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+        "sizeBytes": 2226,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_create-unit-test-7b382cb8f2a7d0ab1f4278e4256203103a2d202b015b632f1a732e042cefbee7-978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.create-unit-test"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f",
+        "sizeBytes": 1114,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.create-unit-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:df2cec4026f180f995b3d93bd915122cdc369c727afc404df0b55e08d2fe2b7e",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_delete-contract-test-c0bcb74a818eecaddb95c6bffdc130a5078ef7915af0e51f5a186405084f3517-648e1989f712567c042454621405cf2db369978693d8580c66f70e0f382b7192.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.delete-contract-test"
+          ],
+          "edgeIds": [
+            "edge_api_delete",
+            "edge_delete_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_delete_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:df2cec4026f180f995b3d93bd915122cdc369c727afc404df0b55e08d2fe2b7e",
+        "sizeBytes": 1573,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "contractId": "contracts.notes.delete-contract-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:c113ceed2f34a74205aae5d06a8ceb8634f92ff0565a2b22fe9e273cdfb5b95d",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_delete-operation-19c4cb072a3368d6f309fe7cd5ebe80a54751b39f88980c41082645836ebaef5-7959bb884a2dbebb14b61dee7772a5e5259aaea1f81a5f21bad639c50db344c1.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.delete-operation"
+          ],
+          "edgeIds": [
+            "edge_api_delete",
+            "edge_delete_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_delete_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:c113ceed2f34a74205aae5d06a8ceb8634f92ff0565a2b22fe9e273cdfb5b95d",
+        "sizeBytes": 1497,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "contractId": "contracts.notes.delete-operation",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:518a914b9def8ad1feae1bbe1ba007321246656583599c8fcfbc92f23263ba21",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_delete-route-f13f7c0b7b38da6aee66b84366a6e9d44d98644d623524a9cf67b261c95b95fc-a846214334f54de6d680d3ebf4c1a228785e13e05ca450136330e303be6270e6.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.delete-route"
+          ],
+          "edgeIds": [
+            "edge_api_delete",
+            "edge_delete_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_delete_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:518a914b9def8ad1feae1bbe1ba007321246656583599c8fcfbc92f23263ba21",
+        "sizeBytes": 2056,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "contractId": "contracts.notes.delete-route",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_delete-unit-test-0d26443db4af198655c4aad133240efe165b5899367964266bb39e7455625c48-5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.delete-unit-test"
+          ],
+          "edgeIds": [
+            "edge_api_delete",
+            "edge_delete_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_delete_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae",
+        "sizeBytes": 1114,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "contractId": "contracts.notes.delete-unit-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.entity"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_api_delete",
+            "edge_api_read",
+            "edge_api_update",
+            "edge_create_table",
+            "edge_delete_table",
+            "edge_read_table",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note",
+            "operation_delete_note",
+            "operation_read_note",
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+        "sizeBytes": 1397,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:008edb436cd1fd1613d7dbf14eb7e7fc9c0bf2591a9b9986e5befad0599b9db9",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_read-contract-test-5a9b3969cfd7ea4df2261eb94a7c84dd89ed88c5dbc03eff80e19e0ed8c82a03-a7635d78f5919cd03fa031ac3e618998f1a5ac0147cb226ec1c47d34f461d918.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.read-contract-test"
+          ],
+          "edgeIds": [
+            "edge_api_read",
+            "edge_read_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_read_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:008edb436cd1fd1613d7dbf14eb7e7fc9c0bf2591a9b9986e5befad0599b9db9",
+        "sizeBytes": 1561,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "contractId": "contracts.notes.read-contract-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:78622eeddef646d8da3dd4063e1675d7f40de9ba0957aef9816b7e8a1d383375",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_read-operation-6118f9e0b1e886385fe2ec1942ef566513fe31af0653bbbe1b6637cbfff9198c-bea4d63ee29df1f240f3f6b065f51d68c713bc2b75738219cbc835a0e8664afa.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.read-operation"
+          ],
+          "edgeIds": [
+            "edge_api_read",
+            "edge_read_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_read_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:78622eeddef646d8da3dd4063e1675d7f40de9ba0957aef9816b7e8a1d383375",
+        "sizeBytes": 1738,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "contractId": "contracts.notes.read-operation",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:be6e4e1d496c92ab73f5563448db998a08c55e45fb04f6eb221df5b8e272f158",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_read-route-58785adbba781c81bc788b4f6dde2d72f870267e33369e45f9d97cfe41800fd4-d898f926e30202c5168ffc4e159a02d8da803eda5a5aae2ab80ed6e1c16bb132.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.read-route"
+          ],
+          "edgeIds": [
+            "edge_api_read",
+            "edge_read_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_read_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:be6e4e1d496c92ab73f5563448db998a08c55e45fb04f6eb221df5b8e272f158",
+        "sizeBytes": 2330,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "contractId": "contracts.notes.read-route",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_read-unit-test-359d96faf4490e96bc47ef2031fc21ae44d50868ce843b4d898b826f46c353ad-fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.read-unit-test"
+          ],
+          "edgeIds": [
+            "edge_api_read",
+            "edge_read_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_read_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f",
+        "sizeBytes": 1106,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "contractId": "contracts.notes.read-unit-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:68422541296cadcbe8d3d4dc6a6530a9d2f57f51517629b25bf2501fd33944f0",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_update-contract-test-e13036779e00dc7f7236d7dac4b116073096d9cc264b0e7e674125ef7348ff1f-9b62895de73cbb830780d52e1a7ea21475dc7bb52ee187efe52ee8d1537fe342.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.update-contract-test"
+          ],
+          "edgeIds": [
+            "edge_api_update",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:68422541296cadcbe8d3d4dc6a6530a9d2f57f51517629b25bf2501fd33944f0",
+        "sizeBytes": 1573,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.update-contract-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:3f25f38890d98e1421601242c8bd18ac5a89829e853f54cc490afac91e58f463",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_update-operation-b14f7456bbfbabee6680af73446b87c0acc39e03c341f0e7f3c1dfe83fdba9a9-765c3039d5db23423c11401109782432db741e011f528d6ba7dba6055c706002.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.update-operation"
+          ],
+          "edgeIds": [
+            "edge_api_update",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:3f25f38890d98e1421601242c8bd18ac5a89829e853f54cc490afac91e58f463",
+        "sizeBytes": 1744,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.update-operation",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:346b1307f5248f391fa9ce0a84d3fe96ea850aeb772464531d73ec6eaa0ad409",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_update-route-82819ea3920b3b3219a47d8a107aacdee2a91ca2471766c0411129d6e773d0a5-286bac7cf79013c4c4aaa66959aa0c0f972ffc2104a6da943a90d17b257e4fd9.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.update-route"
+          ],
+          "edgeIds": [
+            "edge_api_update",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:346b1307f5248f391fa9ce0a84d3fe96ea850aeb772464531d73ec6eaa0ad409",
+        "sizeBytes": 2659,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.update-route",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893",
+        "mediaType": "application/json",
+        "path": "application/contracts/contracts_notes_update-unit-test-2fec14b60ac3864bb74c09c7a689f0c2ae1ea914a67837e4ece5228925d775bc-d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893.json",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.update-unit-test"
+          ],
+          "edgeIds": [
+            "edge_api_update",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893",
+        "sizeBytes": 1114,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.update-unit-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+        "mediaType": "application/json",
+        "path": "application/lockfile.contract.json",
+        "provenance": {
+          "contractIds": [],
+          "edgeIds": [],
+          "environmentBindingIds": [],
+          "extensionPointIds": [],
+          "operationIds": [],
+          "resourceTargetKeys": [],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+        "sizeBytes": 258,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+        "mediaType": "application/json",
+        "path": "application/package.json",
+        "provenance": {
+          "contractIds": [],
+          "edgeIds": [],
+          "environmentBindingIds": [],
+          "extensionPointIds": [],
+          "operationIds": [],
+          "resourceTargetKeys": [],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+        "sizeBytes": 371,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/extensions/custom.ts",
+        "provenance": {
+          "contractIds": [],
+          "edgeIds": [],
+          "environmentBindingIds": [],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [],
+          "resourceTargetKeys": [],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+        "sizeBytes": 361,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "user-owned"
+      },
+      {
+        "checksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/generated/bindings.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth",
+            "contracts.notes.create-contract-test",
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.create-unit-test",
+            "contracts.notes.delete-contract-test",
+            "contracts.notes.delete-operation",
+            "contracts.notes.delete-route",
+            "contracts.notes.delete-unit-test",
+            "contracts.notes.entity",
+            "contracts.notes.read-contract-test",
+            "contracts.notes.read-operation",
+            "contracts.notes.read-route",
+            "contracts.notes.read-unit-test",
+            "contracts.notes.update-contract-test",
+            "contracts.notes.update-operation",
+            "contracts.notes.update-route",
+            "contracts.notes.update-unit-test"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_api_delete",
+            "edge_api_read",
+            "edge_api_update",
+            "edge_create_table",
+            "edge_delete_table",
+            "edge_read_table",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note",
+            "operation_delete_note",
+            "operation_read_note",
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+        "sizeBytes": 855,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-unit-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/generated/operations/operation_create_note.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.entity"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_create_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+        "sizeBytes": 1646,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:852203c54d6814b4b29a0eb8218311c07871ac07560de022e1a18254747970ce",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/generated/operations/operation_delete_note.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.delete-operation",
+            "contracts.notes.delete-route",
+            "contracts.notes.entity"
+          ],
+          "edgeIds": [
+            "edge_api_delete",
+            "edge_delete_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_delete_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:852203c54d6814b4b29a0eb8218311c07871ac07560de022e1a18254747970ce",
+        "sizeBytes": 1668,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "contractId": "contracts.notes.delete-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:448a4778c1b14574f213bd994ad8ca1bd95c7b7ab154533c6f437df7603b2d20",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/generated/operations/operation_read_note.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.entity",
+            "contracts.notes.read-operation",
+            "contracts.notes.read-route"
+          ],
+          "edgeIds": [
+            "edge_api_read",
+            "edge_read_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_read_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:448a4778c1b14574f213bd994ad8ca1bd95c7b7ab154533c6f437df7603b2d20",
+        "sizeBytes": 1648,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-route",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:8e7898bbfc926f80a7c8eaf9bd9094f849c2cb19f5c14d7123458afa1761e58e",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/generated/operations/operation_update_note.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.entity",
+            "contracts.notes.update-operation",
+            "contracts.notes.update-route"
+          ],
+          "edgeIds": [
+            "edge_api_update",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:8e7898bbfc926f80a7c8eaf9bd9094f849c2cb19f5c14d7123458afa1761e58e",
+        "sizeBytes": 3421,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-route",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/generated/types.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth",
+            "contracts.notes.create-contract-test",
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.create-unit-test",
+            "contracts.notes.delete-contract-test",
+            "contracts.notes.delete-operation",
+            "contracts.notes.delete-route",
+            "contracts.notes.delete-unit-test",
+            "contracts.notes.entity",
+            "contracts.notes.read-contract-test",
+            "contracts.notes.read-operation",
+            "contracts.notes.read-route",
+            "contracts.notes.read-unit-test",
+            "contracts.notes.update-contract-test",
+            "contracts.notes.update-operation",
+            "contracts.notes.update-route",
+            "contracts.notes.update-unit-test"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_api_delete",
+            "edge_api_read",
+            "edge_api_update",
+            "edge_create_table",
+            "edge_delete_table",
+            "edge_read_table",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note",
+            "operation_delete_note",
+            "operation_read_note",
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+        "sizeBytes": 3980,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-unit-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:0a9492954bd1c58864d27c47b2731c6be4bdb27685c9d5c61b26142c02088534",
+        "mediaType": "text/typescript",
+        "path": "application/src/functions/notes_handler/index.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth",
+            "contracts.notes.create-contract-test",
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.create-unit-test",
+            "contracts.notes.delete-contract-test",
+            "contracts.notes.delete-operation",
+            "contracts.notes.delete-route",
+            "contracts.notes.delete-unit-test",
+            "contracts.notes.entity",
+            "contracts.notes.read-contract-test",
+            "contracts.notes.read-operation",
+            "contracts.notes.read-route",
+            "contracts.notes.read-unit-test",
+            "contracts.notes.update-contract-test",
+            "contracts.notes.update-operation",
+            "contracts.notes.update-route",
+            "contracts.notes.update-unit-test"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_api_delete",
+            "edge_api_read",
+            "edge_api_update",
+            "edge_create_table",
+            "edge_delete_table",
+            "edge_read_table",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note",
+            "operation_delete_note",
+            "operation_read_note",
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:0a9492954bd1c58864d27c47b2731c6be4bdb27685c9d5c61b26142c02088534",
+        "sizeBytes": 5225,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-unit-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:60024ee4ac35dae0ed166290fb73cc6f7a06fee68952873d7054d3a7fde40b04",
+        "mediaType": "text/typescript",
+        "path": "application/tests/functions/notes_handler/contracts.test.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth",
+            "contracts.notes.create-contract-test",
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.create-unit-test",
+            "contracts.notes.delete-contract-test",
+            "contracts.notes.delete-operation",
+            "contracts.notes.delete-route",
+            "contracts.notes.delete-unit-test",
+            "contracts.notes.entity",
+            "contracts.notes.read-contract-test",
+            "contracts.notes.read-operation",
+            "contracts.notes.read-route",
+            "contracts.notes.read-unit-test",
+            "contracts.notes.update-contract-test",
+            "contracts.notes.update-operation",
+            "contracts.notes.update-route",
+            "contracts.notes.update-unit-test"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_api_delete",
+            "edge_api_read",
+            "edge_api_update",
+            "edge_create_table",
+            "edge_delete_table",
+            "edge_read_table",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note",
+            "operation_delete_note",
+            "operation_read_note",
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:60024ee4ac35dae0ed166290fb73cc6f7a06fee68952873d7054d3a7fde40b04",
+        "sizeBytes": 12441,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-unit-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:1ab06b75aa6f3293eb339ff80693c41f3036881a32feae2f2db1b1fc1eac7dc6",
+        "mediaType": "text/typescript",
+        "path": "application/tests/functions/notes_handler/unit.test.ts",
+        "provenance": {
+          "contractIds": [
+            "contracts.notes.auth",
+            "contracts.notes.create-contract-test",
+            "contracts.notes.create-operation",
+            "contracts.notes.create-route",
+            "contracts.notes.create-unit-test",
+            "contracts.notes.delete-contract-test",
+            "contracts.notes.delete-operation",
+            "contracts.notes.delete-route",
+            "contracts.notes.delete-unit-test",
+            "contracts.notes.entity",
+            "contracts.notes.read-contract-test",
+            "contracts.notes.read-operation",
+            "contracts.notes.read-route",
+            "contracts.notes.read-unit-test",
+            "contracts.notes.update-contract-test",
+            "contracts.notes.update-operation",
+            "contracts.notes.update-route",
+            "contracts.notes.update-unit-test"
+          ],
+          "edgeIds": [
+            "edge_api_create",
+            "edge_api_delete",
+            "edge_api_read",
+            "edge_api_update",
+            "edge_create_table",
+            "edge_delete_table",
+            "edge_read_table",
+            "edge_update_table"
+          ],
+          "environmentBindingIds": [
+            "environment_stage",
+            "environment_table_1"
+          ],
+          "extensionPointIds": [
+            "application.notes.extensions"
+          ],
+          "operationIds": [
+            "operation_create_note",
+            "operation_delete_note",
+            "operation_read_note",
+            "operation_update_note"
+          ],
+          "resourceTargetKeys": [
+            "notes_table"
+          ],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:1ab06b75aa6f3293eb339ff80693c41f3036881a32feae2f2db1b1fc1eac7dc6",
+        "sizeBytes": 5870,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_create_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_delete_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_read_note"
+          },
+          {
+            "document": "workload",
+            "operationId": "operation_update_note"
+          },
+          {
+            "contractId": "contracts.notes.auth",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.create-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.delete-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.entity",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.read-unit-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-contract-test",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-operation",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-route",
+            "document": "architecture"
+          },
+          {
+            "contractId": "contracts.notes.update-unit-test",
+            "document": "architecture"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_create"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_delete"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_read"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_api_update"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_create_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_delete_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_read_table"
+          },
+          {
+            "document": "architecture",
+            "edgeId": "edge_update_table"
+          },
+          {
+            "document": "normalized-solution",
+            "path": "$.resources"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      },
+      {
+        "checksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+        "mediaType": "application/json",
+        "path": "application/tsconfig.json",
+        "provenance": {
+          "contractIds": [],
+          "edgeIds": [],
+          "environmentBindingIds": [],
+          "extensionPointIds": [],
+          "operationIds": [],
+          "resourceTargetKeys": [],
+          "workloadIds": [
+            "workload_notes_api"
+          ]
+        },
+        "semanticChecksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+        "sizeBytes": 385,
+        "sourceReferences": [
+          {
+            "document": "workload",
+            "workloadId": "workload_notes_api"
+          }
+        ],
+        "disposition": "create",
+        "ownership": "generated"
+      }
+    ],
+    "sourceManifest": {
+      "architectureRevisionId": "revision_notes_1",
+      "buildContracts": [
+        {
+          "contractDigest": "sha256:141e6fa8e96888c6a1d24d8b27401d449d9ea96d3cc9df2aa27f044641d6ceae",
+          "workloadId": "workload_notes_api"
+        }
+      ],
+      "contractVersion": 1,
+      "catalog": {
+        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+        "id": "aws.cloudmarkup.notes-api-catalog",
+        "version": "0.30.0"
+      },
+      "coverageDigest": "sha256:7bbbe27d2eefc0e4583edae88cd3cbbd149a01e302a4dda7709eea1370acb890",
+      "files": [
+        {
+          "checksum": "sha256:841181aaa53f221280360bac91f468671244168dc5e5b42501f90ea9c525b7b2",
+          "mediaType": "text/markdown",
+          "ownership": "generated",
+          "path": "application/README.md",
+          "semanticChecksum": "sha256:841181aaa53f221280360bac91f468671244168dc5e5b42501f90ea9c525b7b2",
+          "sizeBytes": 1674
+        },
+        {
+          "checksum": "sha256:9611a9c61f8e085f6caf24df5197c70bbfca5b4efcd5793157430188ecdc9d9f",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/build-contracts/workload_notes_api.json",
+          "semanticChecksum": "sha256:9611a9c61f8e085f6caf24df5197c70bbfca5b4efcd5793157430188ecdc9d9f",
+          "sizeBytes": 12301
+        },
+        {
+          "checksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json",
+          "semanticChecksum": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+          "sizeBytes": 735
+        },
+        {
+          "checksum": "sha256:e95ecf0f059e78e5a27d7a8841e21ac3a8529c51c1c8b1eec6416c544941e709",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-contract-test-381f80f622eeecbffba1e44ed8f4783c81e9041adf9b101760c765a9cea06a05-b8286262036184a64255bb79059ad034bad3f6be4dd88fd7bf310af24c5a4658.json",
+          "semanticChecksum": "sha256:e95ecf0f059e78e5a27d7a8841e21ac3a8529c51c1c8b1eec6416c544941e709",
+          "sizeBytes": 1573
+        },
+        {
+          "checksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json",
+          "semanticChecksum": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac",
+          "sizeBytes": 1605
+        },
+        {
+          "checksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json",
+          "semanticChecksum": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88",
+          "sizeBytes": 2226
+        },
+        {
+          "checksum": "sha256:978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_create-unit-test-7b382cb8f2a7d0ab1f4278e4256203103a2d202b015b632f1a732e042cefbee7-978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f.json",
+          "semanticChecksum": "sha256:978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f",
+          "sizeBytes": 1114
+        },
+        {
+          "checksum": "sha256:df2cec4026f180f995b3d93bd915122cdc369c727afc404df0b55e08d2fe2b7e",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_delete-contract-test-c0bcb74a818eecaddb95c6bffdc130a5078ef7915af0e51f5a186405084f3517-648e1989f712567c042454621405cf2db369978693d8580c66f70e0f382b7192.json",
+          "semanticChecksum": "sha256:df2cec4026f180f995b3d93bd915122cdc369c727afc404df0b55e08d2fe2b7e",
+          "sizeBytes": 1573
+        },
+        {
+          "checksum": "sha256:c113ceed2f34a74205aae5d06a8ceb8634f92ff0565a2b22fe9e273cdfb5b95d",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_delete-operation-19c4cb072a3368d6f309fe7cd5ebe80a54751b39f88980c41082645836ebaef5-7959bb884a2dbebb14b61dee7772a5e5259aaea1f81a5f21bad639c50db344c1.json",
+          "semanticChecksum": "sha256:c113ceed2f34a74205aae5d06a8ceb8634f92ff0565a2b22fe9e273cdfb5b95d",
+          "sizeBytes": 1497
+        },
+        {
+          "checksum": "sha256:518a914b9def8ad1feae1bbe1ba007321246656583599c8fcfbc92f23263ba21",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_delete-route-f13f7c0b7b38da6aee66b84366a6e9d44d98644d623524a9cf67b261c95b95fc-a846214334f54de6d680d3ebf4c1a228785e13e05ca450136330e303be6270e6.json",
+          "semanticChecksum": "sha256:518a914b9def8ad1feae1bbe1ba007321246656583599c8fcfbc92f23263ba21",
+          "sizeBytes": 2056
+        },
+        {
+          "checksum": "sha256:5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_delete-unit-test-0d26443db4af198655c4aad133240efe165b5899367964266bb39e7455625c48-5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae.json",
+          "semanticChecksum": "sha256:5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae",
+          "sizeBytes": 1114
+        },
+        {
+          "checksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json",
+          "semanticChecksum": "sha256:4a58243b9493ca018747d33e4c3164fb8ec732fffb28619989f15090650f4df0",
+          "sizeBytes": 1397
+        },
+        {
+          "checksum": "sha256:008edb436cd1fd1613d7dbf14eb7e7fc9c0bf2591a9b9986e5befad0599b9db9",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_read-contract-test-5a9b3969cfd7ea4df2261eb94a7c84dd89ed88c5dbc03eff80e19e0ed8c82a03-a7635d78f5919cd03fa031ac3e618998f1a5ac0147cb226ec1c47d34f461d918.json",
+          "semanticChecksum": "sha256:008edb436cd1fd1613d7dbf14eb7e7fc9c0bf2591a9b9986e5befad0599b9db9",
+          "sizeBytes": 1561
+        },
+        {
+          "checksum": "sha256:78622eeddef646d8da3dd4063e1675d7f40de9ba0957aef9816b7e8a1d383375",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_read-operation-6118f9e0b1e886385fe2ec1942ef566513fe31af0653bbbe1b6637cbfff9198c-bea4d63ee29df1f240f3f6b065f51d68c713bc2b75738219cbc835a0e8664afa.json",
+          "semanticChecksum": "sha256:78622eeddef646d8da3dd4063e1675d7f40de9ba0957aef9816b7e8a1d383375",
+          "sizeBytes": 1738
+        },
+        {
+          "checksum": "sha256:be6e4e1d496c92ab73f5563448db998a08c55e45fb04f6eb221df5b8e272f158",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_read-route-58785adbba781c81bc788b4f6dde2d72f870267e33369e45f9d97cfe41800fd4-d898f926e30202c5168ffc4e159a02d8da803eda5a5aae2ab80ed6e1c16bb132.json",
+          "semanticChecksum": "sha256:be6e4e1d496c92ab73f5563448db998a08c55e45fb04f6eb221df5b8e272f158",
+          "sizeBytes": 2330
+        },
+        {
+          "checksum": "sha256:fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_read-unit-test-359d96faf4490e96bc47ef2031fc21ae44d50868ce843b4d898b826f46c353ad-fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f.json",
+          "semanticChecksum": "sha256:fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f",
+          "sizeBytes": 1106
+        },
+        {
+          "checksum": "sha256:68422541296cadcbe8d3d4dc6a6530a9d2f57f51517629b25bf2501fd33944f0",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_update-contract-test-e13036779e00dc7f7236d7dac4b116073096d9cc264b0e7e674125ef7348ff1f-9b62895de73cbb830780d52e1a7ea21475dc7bb52ee187efe52ee8d1537fe342.json",
+          "semanticChecksum": "sha256:68422541296cadcbe8d3d4dc6a6530a9d2f57f51517629b25bf2501fd33944f0",
+          "sizeBytes": 1573
+        },
+        {
+          "checksum": "sha256:3f25f38890d98e1421601242c8bd18ac5a89829e853f54cc490afac91e58f463",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_update-operation-b14f7456bbfbabee6680af73446b87c0acc39e03c341f0e7f3c1dfe83fdba9a9-765c3039d5db23423c11401109782432db741e011f528d6ba7dba6055c706002.json",
+          "semanticChecksum": "sha256:3f25f38890d98e1421601242c8bd18ac5a89829e853f54cc490afac91e58f463",
+          "sizeBytes": 1744
+        },
+        {
+          "checksum": "sha256:346b1307f5248f391fa9ce0a84d3fe96ea850aeb772464531d73ec6eaa0ad409",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_update-route-82819ea3920b3b3219a47d8a107aacdee2a91ca2471766c0411129d6e773d0a5-286bac7cf79013c4c4aaa66959aa0c0f972ffc2104a6da943a90d17b257e4fd9.json",
+          "semanticChecksum": "sha256:346b1307f5248f391fa9ce0a84d3fe96ea850aeb772464531d73ec6eaa0ad409",
+          "sizeBytes": 2659
+        },
+        {
+          "checksum": "sha256:d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/contracts/contracts_notes_update-unit-test-2fec14b60ac3864bb74c09c7a689f0c2ae1ea914a67837e4ece5228925d775bc-d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893.json",
+          "semanticChecksum": "sha256:d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893",
+          "sizeBytes": 1114
+        },
+        {
+          "checksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/lockfile.contract.json",
+          "semanticChecksum": "sha256:381e5005a36fcfe87319857965f2386fba71d622a8c6adb62bfe938d73190d2c",
+          "sizeBytes": 258
+        },
+        {
+          "checksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/package.json",
+          "semanticChecksum": "sha256:66ad746efc8e1f773a34433d8d34990ef9598f14beccec47f780b12c6cceae9a",
+          "sizeBytes": 371
+        },
+        {
+          "checksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+          "mediaType": "text/typescript",
+          "ownership": "user-owned",
+          "path": "application/src/functions/notes_handler/extensions/custom.ts",
+          "semanticChecksum": "sha256:9faf04c0ea85aa4c4e624d701a2592595ce464ee5ada89e6dbc7164f91104c78",
+          "sizeBytes": 361
+        },
+        {
+          "checksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/bindings.ts",
+          "semanticChecksum": "sha256:a14ff6323bd78a46cf2aae8c5d46f465a80b475dc4768a6f5c644f9e79e65227",
+          "sizeBytes": 855
+        },
+        {
+          "checksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/operations/operation_create_note.ts",
+          "semanticChecksum": "sha256:f4bad20637684d3cbcada19894bd0b5b8532e8af82a6f89bd5cd22b078074941",
+          "sizeBytes": 1646
+        },
+        {
+          "checksum": "sha256:852203c54d6814b4b29a0eb8218311c07871ac07560de022e1a18254747970ce",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/operations/operation_delete_note.ts",
+          "semanticChecksum": "sha256:852203c54d6814b4b29a0eb8218311c07871ac07560de022e1a18254747970ce",
+          "sizeBytes": 1668
+        },
+        {
+          "checksum": "sha256:448a4778c1b14574f213bd994ad8ca1bd95c7b7ab154533c6f437df7603b2d20",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/operations/operation_read_note.ts",
+          "semanticChecksum": "sha256:448a4778c1b14574f213bd994ad8ca1bd95c7b7ab154533c6f437df7603b2d20",
+          "sizeBytes": 1648
+        },
+        {
+          "checksum": "sha256:8e7898bbfc926f80a7c8eaf9bd9094f849c2cb19f5c14d7123458afa1761e58e",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/operations/operation_update_note.ts",
+          "semanticChecksum": "sha256:8e7898bbfc926f80a7c8eaf9bd9094f849c2cb19f5c14d7123458afa1761e58e",
+          "sizeBytes": 3421
+        },
+        {
+          "checksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/generated/types.ts",
+          "semanticChecksum": "sha256:317a8a1ffca2357ec1db522c78019edd73358fd51f9d6efbd8b6c6ff51012ae3",
+          "sizeBytes": 3980
+        },
+        {
+          "checksum": "sha256:0a9492954bd1c58864d27c47b2731c6be4bdb27685c9d5c61b26142c02088534",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/src/functions/notes_handler/index.ts",
+          "semanticChecksum": "sha256:0a9492954bd1c58864d27c47b2731c6be4bdb27685c9d5c61b26142c02088534",
+          "sizeBytes": 5225
+        },
+        {
+          "checksum": "sha256:60024ee4ac35dae0ed166290fb73cc6f7a06fee68952873d7054d3a7fde40b04",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/tests/functions/notes_handler/contracts.test.ts",
+          "semanticChecksum": "sha256:60024ee4ac35dae0ed166290fb73cc6f7a06fee68952873d7054d3a7fde40b04",
+          "sizeBytes": 12441
+        },
+        {
+          "checksum": "sha256:1ab06b75aa6f3293eb339ff80693c41f3036881a32feae2f2db1b1fc1eac7dc6",
+          "mediaType": "text/typescript",
+          "ownership": "generated",
+          "path": "application/tests/functions/notes_handler/unit.test.ts",
+          "semanticChecksum": "sha256:1ab06b75aa6f3293eb339ff80693c41f3036881a32feae2f2db1b1fc1eac7dc6",
+          "sizeBytes": 5870
+        },
+        {
+          "checksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+          "mediaType": "application/json",
+          "ownership": "generated",
+          "path": "application/tsconfig.json",
+          "semanticChecksum": "sha256:d0e61bde2e0db97a466ccc354c30d43f4b335593b8ff13ec3aee4f47c46180ef",
+          "sizeBytes": 385
+        }
+      ],
+      "generator": {
+        "digest": "sha256:a102e772819d1d1657d89c422cd33d73912d62cabe4022b44e0cd3dd756af12e",
+        "id": "cloudmarkup.application-generator",
+        "version": "1.0.0"
+      },
+      "kind": "cloudmarkup.application-source-manifest",
+      "inputDigests": {
+        "applicationContracts": "sha256:bce32b856b1e37ec24c360fda718a9ceda0b4a8601bda96ec3d465e1e9294df3",
+        "architectureDocument": "sha256:7b3feaae7f1817eaeb5a848cec5d9bb0aae26474963d662f0967aeb445b025a6",
+        "normalizedSolution": "sha256:299c8d4567d4c20f0b14ac670a75abcb9b9df7b4c9659e0f26b674bcc5e338bf",
+        "solutionRevision": "sha256:c497829711bcf15f64762dfe73501c10f4be28e112d5f591b6dfa50a3b6ada72",
+        "workloadBehavior": "sha256:5af2eadcdde15d1847336ad98d5a0bd91a2b05b56672441e1b9a4a03e25166b9"
+      },
+      "manifestPath": "application/manifest.json",
+      "pattern": {
+        "digest": "sha256:cbe772e0adee53da524110278fe908d726a3e8f600588364bef33ba2fa900571",
+        "id": "cloudmarkup.pattern.aws-lambda-authenticated-notes",
+        "version": "1.0.0"
+      },
+      "runtime": {
+        "digest": "sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a",
+        "id": "cloudmarkup.runtime.aws-lambda-nodejs24-typescript",
+        "version": "1.0.0",
+        "handler": "index.handler",
+        "languageFamily": "cloudmarkup.language.typescript",
+        "moduleFormat": "esm",
+        "runtime": "nodejs24.x",
+        "runtimeFamily": "aws.lambda.runtime-family.nodejs24"
+      },
+      "solutionRevisionId": "solution_notes_revision_1",
+      "template": {
+        "digest": "sha256:c7721961d935faa1e0c87b7356bc6d90112a02f3c7f716be33a648bf99740604",
+        "id": "cloudmarkup.template.aws-lambda-notes-typescript",
+        "version": "1.0.0"
+      }
+    },
+    "sourceManifestDigest": "sha256:ef3bf2bd98dd15ffc8cb580931ddb308b699c5d914325b1c6499b2b66ed40ba2",
+    "template": {
+      "digest": "sha256:c7721961d935faa1e0c87b7356bc6d90112a02f3c7f716be33a648bf99740604",
+      "id": "cloudmarkup.template.aws-lambda-notes-typescript",
+      "version": "1.0.0"
+    },
+    "workloadContracts": [
+      {
+        "expectedArtifact": {
+          "kind": "aws-lambda-zip",
+          "mediaType": "application/zip",
+          "path": "application/artifacts/workload_notes_api/function.zip"
+        },
+        "handler": "index.handler",
+        "packageManifestPath": "application/package.json",
+        "packageRoot": "application",
+        "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+        "implementationMode": "complete-supported-pattern",
+        "ownershipReadiness": "safe-to-materialize",
+        "readiness": "complete-source-ready",
+        "sourceFiles": [
+          {
+            "ownership": "generated",
+            "path": "application/README.md"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/build-contracts/workload_notes_api.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_auth-a10537b21de6a859f3315f97f764bad5b7568c630876299d0e2a7be446309f4a-9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_create-contract-test-381f80f622eeecbffba1e44ed8f4783c81e9041adf9b101760c765a9cea06a05-b8286262036184a64255bb79059ad034bad3f6be4dd88fd7bf310af24c5a4658.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_create-operation-2dabe8f9c17fc3c0db0dc027b36a4364a0176a813a048b4d451b5b697800a844-964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_create-route-4d906f5b93628eef57943c6da8742dd1221f317ea2409f52abf3884f64538e4a-58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_create-unit-test-7b382cb8f2a7d0ab1f4278e4256203103a2d202b015b632f1a732e042cefbee7-978c3a94966d45d491a2e9691dd6945319efbe3b885f0fe1a1da6b94e7a6ea3f.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_delete-contract-test-c0bcb74a818eecaddb95c6bffdc130a5078ef7915af0e51f5a186405084f3517-648e1989f712567c042454621405cf2db369978693d8580c66f70e0f382b7192.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_delete-operation-19c4cb072a3368d6f309fe7cd5ebe80a54751b39f88980c41082645836ebaef5-7959bb884a2dbebb14b61dee7772a5e5259aaea1f81a5f21bad639c50db344c1.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_delete-route-f13f7c0b7b38da6aee66b84366a6e9d44d98644d623524a9cf67b261c95b95fc-a846214334f54de6d680d3ebf4c1a228785e13e05ca450136330e303be6270e6.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_delete-unit-test-0d26443db4af198655c4aad133240efe165b5899367964266bb39e7455625c48-5119105e9b3795aab778bb166008a1773f3c4a4ef8e8a7ed925f73577f54d1ae.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_entity-40c313a239b5407da56270445402458f95b5743fc51c9e67995d0e856b505a9c-32e854e018c1f7b0f5af4591c55cf822807a60afa7a51e9d364437f334866bf5.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_read-contract-test-5a9b3969cfd7ea4df2261eb94a7c84dd89ed88c5dbc03eff80e19e0ed8c82a03-a7635d78f5919cd03fa031ac3e618998f1a5ac0147cb226ec1c47d34f461d918.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_read-operation-6118f9e0b1e886385fe2ec1942ef566513fe31af0653bbbe1b6637cbfff9198c-bea4d63ee29df1f240f3f6b065f51d68c713bc2b75738219cbc835a0e8664afa.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_read-route-58785adbba781c81bc788b4f6dde2d72f870267e33369e45f9d97cfe41800fd4-d898f926e30202c5168ffc4e159a02d8da803eda5a5aae2ab80ed6e1c16bb132.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_read-unit-test-359d96faf4490e96bc47ef2031fc21ae44d50868ce843b4d898b826f46c353ad-fdf76e1f4679265a5b0d2673e6cea9a5ffe36d0dc19412515e241c2c805c2f4f.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_update-contract-test-e13036779e00dc7f7236d7dac4b116073096d9cc264b0e7e674125ef7348ff1f-9b62895de73cbb830780d52e1a7ea21475dc7bb52ee187efe52ee8d1537fe342.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_update-operation-b14f7456bbfbabee6680af73446b87c0acc39e03c341f0e7f3c1dfe83fdba9a9-765c3039d5db23423c11401109782432db741e011f528d6ba7dba6055c706002.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_update-route-82819ea3920b3b3219a47d8a107aacdee2a91ca2471766c0411129d6e773d0a5-286bac7cf79013c4c4aaa66959aa0c0f972ffc2104a6da943a90d17b257e4fd9.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/contracts/contracts_notes_update-unit-test-2fec14b60ac3864bb74c09c7a689f0c2ae1ea914a67837e4ece5228925d775bc-d676e73c311fc485a155dea2e2fa6b757861cf183caa836b309e4827e87f7893.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/lockfile.contract.json"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/package.json"
+          },
+          {
+            "ownership": "user-owned",
+            "path": "application/src/functions/notes_handler/extensions/custom.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/src/functions/notes_handler/generated/bindings.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/src/functions/notes_handler/generated/operations/operation_create_note.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/src/functions/notes_handler/generated/operations/operation_delete_note.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/src/functions/notes_handler/generated/operations/operation_read_note.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/src/functions/notes_handler/generated/operations/operation_update_note.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/src/functions/notes_handler/generated/types.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/src/functions/notes_handler/index.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/tests/functions/notes_handler/contracts.test.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/tests/functions/notes_handler/unit.test.ts"
+          },
+          {
+            "ownership": "generated",
+            "path": "application/tsconfig.json"
+          }
+        ],
+        "workloadId": "workload_notes_api"
+      }
+    ]
+  },
+  "artifactDigest": "sha256:d3aff85fba4d5b3f3bc4f7b0b37927a19d165cd4869660a910a320f8e60d36c9"
+}

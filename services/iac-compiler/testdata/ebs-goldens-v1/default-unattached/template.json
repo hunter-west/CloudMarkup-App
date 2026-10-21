@@ -1,0 +1,388 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudMarkup deterministic curated serverless, networking, and event-driven application infrastructure.",
+  "Metadata": {
+    "CloudMarkup": {
+      "ArchitectureRevisionId": "revision_notes_1",
+      "CatalogDigest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+      "CatalogVersion": "0.30.0",
+      "Compiler": "cloudmarkup.iac-compiler@1.2.1",
+      "SolutionRevisionId": "solution_notes_1"
+    }
+  },
+  "Resources": {
+    "Ec2Role": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Sid": "ec2trust"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Description": "CloudMarkup explicit EC2 instance-profile role.",
+        "MaxSessionDuration": 3600,
+        "RoleName": "synthetic-ec2-role",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "ec2_role",
+          "GraphId": "ec2_role",
+          "Ownership": "user",
+          "TargetKey": "ec2_role"
+        }
+      }
+    },
+    "Group": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Explicit private workload policy",
+        "GroupName": "synthetic-private-instance",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "127.0.0.1/32",
+            "IpProtocol": "-1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "group",
+          "GraphId": "group",
+          "Ownership": "user",
+          "TargetKey": "group"
+        }
+      }
+    },
+    "Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "DeleteOnTermination": false,
+              "Encrypted": true,
+              "Iops": 3000,
+              "VolumeSize": 30,
+              "VolumeType": "gp3"
+            }
+          }
+        ],
+        "CreditSpecification": {
+          "CPUCredits": "standard"
+        },
+        "IamInstanceProfile": {
+          "Ref": "Profile"
+        },
+        "ImageId": "ami-0123456789abcdef0",
+        "InstanceType": "t3.small",
+        "MetadataOptions": {
+          "HttpEndpoint": "enabled",
+          "HttpProtocolIpv6": "disabled",
+          "HttpPutResponseHopLimit": 1,
+          "HttpTokens": "required",
+          "InstanceMetadataTags": "disabled"
+        },
+        "Monitoring": false,
+        "NetworkInterfaces": [
+          {
+            "AssociatePublicIpAddress": false,
+            "DeleteOnTermination": true,
+            "DeviceIndex": "0",
+            "GroupSet": [
+              {
+                "Fn::GetAtt": [
+                  "Group",
+                  "GroupId"
+                ]
+              }
+            ],
+            "SubnetId": {
+              "Ref": "SubnetSubnet"
+            }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "Tenancy": "default"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "instance",
+          "GraphId": "instance",
+          "Ownership": "user",
+          "TargetKey": "instance"
+        }
+      }
+    },
+    "PrivateAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateRoutes"
+        },
+        "SubnetId": {
+          "Ref": "SubnetSubnet"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "private_association",
+          "GraphId": "association_private",
+          "Ownership": "user",
+          "TargetKey": "private_association"
+        }
+      }
+    },
+    "PrivateRoutes": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          },
+          {
+            "Key": "Name",
+            "Value": "private-routes"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "private_routes",
+          "GraphId": "route_table_private",
+          "Ownership": "user",
+          "TargetKey": "private_routes"
+        }
+      }
+    },
+    "Profile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "InstanceProfileName": "synthetic-instance-profile",
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "Ec2Role"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "profile",
+          "GraphId": "profile",
+          "Ownership": "user",
+          "TargetKey": "profile"
+        }
+      }
+    },
+    "SubnetSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AssignIpv6AddressOnCreation": false,
+        "AvailabilityZone": "us-east-1a",
+        "CidrBlock": "10.20.1.0/24",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "subnet_subnet",
+          "GraphId": "subnet",
+          "Ownership": "user",
+          "TargetKey": "subnet_subnet"
+        }
+      }
+    },
+    "Volume": {
+      "Type": "AWS::EC2::Volume",
+      "Properties": {
+        "AvailabilityZone": "us-east-1a",
+        "Encrypted": true,
+        "Iops": 3000,
+        "MultiAttachEnabled": false,
+        "Size": 100,
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          },
+          {
+            "Key": "Name",
+            "Value": "synthetic-data"
+          }
+        ],
+        "Throughput": 125,
+        "VolumeType": "gp3"
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "volume",
+          "GraphId": "volume",
+          "Ownership": "user",
+          "TargetKey": "volume"
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Vpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.20.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "vpc",
+          "GraphId": "vpc",
+          "Ownership": "user",
+          "TargetKey": "vpc"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "VolumeIdOutput": {
+      "Description": "Architecture output volume_id.",
+      "Value": {
+        "Ref": "Volume"
+      }
+    }
+  }
+}

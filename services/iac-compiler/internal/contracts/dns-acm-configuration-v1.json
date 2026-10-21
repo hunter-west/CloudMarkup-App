@@ -1,0 +1,91 @@
+{
+  "aws.acm.public-dns-certificate": {
+    "certificateExport": {
+      "default": "DISABLED",
+      "enum": ["DISABLED"],
+      "type": "string"
+    },
+    "certificateRegion": {
+      "pattern": "^[a-z]{2}(?:-[a-z]+)+-[1-9]$",
+      "type": "string"
+    },
+    "certificateType": {
+      "default": "public",
+      "enum": ["public"],
+      "type": "string"
+    },
+    "domainName": {
+      "maxLength": 253,
+      "minLength": 3,
+      "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+      "type": "string"
+    },
+    "intendedUse": {
+      "default": "regional",
+      "enum": ["regional", "cloudfront-viewer"],
+      "type": "string"
+    },
+    "keyAlgorithm": {
+      "default": "RSA_2048",
+      "enum": ["RSA_2048"],
+      "type": "string"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "transparencyLogging": {
+      "default": "ENABLED",
+      "enum": ["ENABLED"],
+      "type": "string"
+    },
+    "validationMethod": {
+      "default": "DNS",
+      "enum": ["DNS"],
+      "type": "string"
+    },
+    "validationRecordsMode": {
+      "default": "managed-dns",
+      "enum": ["managed-dns"],
+      "type": "string"
+    }
+  },
+  "aws.route53.public-hosted-zone": {
+    "comment": {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string"
+    },
+    "delegationMode": {
+      "default": "external",
+      "enum": ["external"],
+      "type": "string"
+    },
+    "domainControlAttested": {
+      "const": true,
+      "type": "boolean"
+    },
+    "domainName": {
+      "maxLength": 253,
+      "minLength": 3,
+      "pattern": "^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+      "type": "string"
+    },
+    "forceDestroy": {
+      "const": false,
+      "default": false,
+      "type": "boolean"
+    },
+    "retain": {
+      "const": true,
+      "default": true,
+      "type": "boolean"
+    },
+    "zoneType": {
+      "default": "public",
+      "enum": ["public"],
+      "type": "string"
+    }
+  }
+}

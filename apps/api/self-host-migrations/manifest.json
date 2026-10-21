@@ -1,0 +1,21 @@
+{
+  "profileId": "cloudmarkup-standalone-pg17-v1",
+  "profileVersion": 1,
+  "engineMajor": 17,
+  "owner": "cloudmarkup_admin",
+  "bootstrapGrantor": "cloudmarkup_owner",
+  "canonicalManifestSha256": "bc316cae6997880786ecf27fee40f43f997669cfd521356dc942adca9d849a16",
+  "identityMigration": {
+    "version": "0000",
+    "file": "0000_self_host_profile_identity.sql",
+    "checksumSha256": "7c70c0172983510d83dcf54194cb5ef30e3e251ede556ed61975f5b725cde132"
+  },
+  "privateReceiptReplacement": {
+    "version": "0127",
+    "canonicalFile": "0127_private_notes_and_gpt6_receipt_authorities.sql",
+    "canonicalChecksumSha256": "9da42559c316d9d51d075dad1edbe2f48e65094c5b170853cfc7ed1324f9c69e",
+    "file": "0127_self_host_private_receipt_definitions.sql",
+    "checksumSha256": "beda90cedf963b4cf7f3a8b352e0d261f45ffac0b70034bc7aafcbb130e1f1ff",
+    "assembledChecksumSha256": "c1c78195ff39d22484345856c084b1b4693fccae1a8414dc2e1565ad1baf1f6a"
+  }
+}

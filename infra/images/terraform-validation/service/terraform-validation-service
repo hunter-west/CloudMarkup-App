@@ -1,0 +1,17 @@
+#!/usr/local/bin/node
+"use strict";
+
+const { ServiceError, canonicalServiceError, run } = require("./runtime.cjs");
+
+run()
+  .then((exitCode) => {
+    process.exitCode = exitCode;
+  })
+  .catch((error) => {
+    const safeError =
+      error instanceof ServiceError
+        ? error
+        : new ServiceError("runtime-integrity-failed", 70);
+    process.stderr.write(canonicalServiceError(safeError));
+    process.exitCode = safeError.exitCode;
+  });

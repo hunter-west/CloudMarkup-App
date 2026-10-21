@@ -1,0 +1,629 @@
+{
+  "aws": {
+    "accountId": "000000000000",
+    "enabledRegions": ["us-east-1", "us-east-2", "us-west-2"],
+    "partition": "aws",
+    "platformDeployment": {
+      "approval": {
+        "evidenceReference": "decision.platform-deployment.pending",
+        "owner": "Platform operations owner",
+        "status": "pending"
+      },
+      "githubEnvironment": "development",
+      "oidcProviderArn": "arn:aws:iam::000000000000:oidc-provider/token.actions.githubusercontent.com",
+      "repository": {
+        "approvedBranches": ["main"],
+        "id": "246813580",
+        "name": "cloud-markup-platform",
+        "owner": "cloud-markup-example",
+        "ownerId": "135792469"
+      },
+      "roleArn": "arn:aws:iam::000000000000:role/cloudmarkup-dev-platform-deploy",
+      "subject": "repo:cloud-markup-example@135792469/cloud-markup-platform@246813580:environment:development"
+    },
+    "primaryRegion": "us-east-1",
+    "quotaReviews": [
+      {
+        "evidenceReference": "quota.bedrock-runtime.pending",
+        "quotaCode": "bedrock-runtime-invocations",
+        "requestedValue": 20,
+        "serviceCode": "bedrock",
+        "status": "pending"
+      },
+      {
+        "evidenceReference": "quota.lambda-concurrency.not-required",
+        "quotaCode": "L-B99A9384",
+        "requestedValue": 100,
+        "serviceCode": "lambda",
+        "status": "not-required"
+      }
+    ]
+  },
+  "cognito": {
+    "callbackUrls": ["https://app.cloudmarkup.example/auth/callback"],
+    "email": {
+      "fromAddress": "no-reply@cloudmarkup.example",
+      "sendingMode": "cognito-default"
+    },
+    "logoutUrls": ["https://app.cloudmarkup.example"],
+    "mfa": "optional",
+    "recovery": "verified-email-only",
+    "session": {
+      "accessTokenMinutes": 30,
+      "idTokenMinutes": 30,
+      "refreshTokenDays": 7
+    },
+    "signInIdentifiers": ["email"]
+  },
+  "contacts": {
+    "account": {
+      "email": "account@cloudmarkup.example",
+      "escalationReference": "contact.account.pending"
+    },
+    "billing": {
+      "email": "billing@cloudmarkup.example",
+      "escalationReference": "contact.billing.pending"
+    },
+    "privacy": {
+      "email": "privacy@cloudmarkup.example",
+      "escalationReference": "contact.privacy.pending"
+    },
+    "security": {
+      "email": "security@cloudmarkup.example",
+      "escalationReference": "contact.security.pending"
+    },
+    "support": {
+      "email": "support@cloudmarkup.example",
+      "escalationReference": "contact.support.pending"
+    },
+    "terms": {
+      "email": "legal@cloudmarkup.example",
+      "escalationReference": "contact.terms.pending"
+    }
+  },
+  "customerCiCd": {
+    "attestation": {
+      "artifactSigning": "extension-point-disabled",
+      "provenance": "required"
+    },
+    "backend": {
+      "bucket": "cloudmarkup-customer-dev-terraform-state",
+      "encryption": "required",
+      "keyPrefix": "cloudmarkup/terraform",
+      "kmsKeyArn": "arn:aws:kms:us-east-1:314159265358:key/00000000-1111-2222-3333-444444444444",
+      "locking": "s3-native-lockfile",
+      "region": "us-east-1",
+      "useLockfile": true,
+      "workspaceKeyPrefix": "environments"
+    },
+    "deployment": {
+      "concurrency": 1,
+      "windows": ["operator-approved-window-required"]
+    },
+    "drift": {
+      "issueRouting": "github-issues-reviewed",
+      "schedule": "15 6 * * 1"
+    },
+    "github": {
+      "environments": [
+        {
+          "allowedBranches": ["main"],
+          "name": "dev",
+          "protected": false,
+          "requiredReviewers": 0
+        },
+        {
+          "allowedBranches": ["main"],
+          "name": "staging",
+          "protected": true,
+          "requiredReviewers": 1
+        },
+        {
+          "allowedBranches": ["main"],
+          "name": "production",
+          "protected": true,
+          "requiredReviewers": 2
+        }
+      ]
+    },
+    "oidc": {
+      "providerArn": "arn:aws:iam::314159265358:oidc-provider/token.actions.githubusercontent.com",
+      "repository": {
+        "id": "246813579",
+        "name": "sample-application",
+        "owner": "sample-customer",
+        "ownerId": "135792468"
+      },
+      "subjectMode": "immutable-owner-and-repository-ids",
+      "subjectPrefix": "repo:sample-customer@135792468/sample-application@246813579:environment:"
+    },
+    "plan": {
+      "artifactRetentionDays": 7,
+      "exactApprovedPlanRequired": true,
+      "expiresAfterMinutes": 240
+    },
+    "roles": {
+      "deploy": {
+        "roleArn": "arn:aws:iam::314159265358:role/cloudmarkup-customer-dev-deploy",
+        "trustPolicyEvidenceReference": "customer-role.deploy.pending"
+      },
+      "drift": {
+        "roleArn": "arn:aws:iam::314159265358:role/cloudmarkup-customer-dev-drift",
+        "trustPolicyEvidenceReference": "customer-role.drift.pending"
+      },
+      "ephemeral": null,
+      "plan": {
+        "roleArn": "arn:aws:iam::314159265358:role/cloudmarkup-customer-dev-plan",
+        "trustPolicyEvidenceReference": "customer-role.plan.pending"
+      }
+    },
+    "rollbackPolicy": "application-specific-reviewed-rollback-or-forward-fix",
+    "smokeEndpoints": ["https://sample-application.customer.example/health"],
+    "target": {
+      "accountId": "314159265358",
+      "region": "us-east-1"
+    }
+  },
+  "data": {
+    "backup": {
+      "restoreDrill": {
+        "evidenceReference": "decision.restore-drill.pending",
+        "owner": "Platform operations owner",
+        "status": "pending"
+      },
+      "retentionDays": 7
+    },
+    "database": {
+      "credentials": {
+        "management": "rds-managed-secret",
+        "secretReference": "cloudmarkup-dev/database/admin"
+      },
+      "deletionProtection": false,
+      "engine": "aurora-postgresql",
+      "region": "us-east-1"
+    },
+    "deletion": {
+      "completionObjective": {
+        "evidenceReference": "decision.data-deletion.pending",
+        "owner": "Privacy and security owners",
+        "status": "pending"
+      },
+      "productionServiceAvailable": false
+    },
+    "residency": {
+      "allowedRegions": ["us-east-1", "us-east-2", "us-west-2"],
+      "decision": {
+        "evidenceReference": "decision.data-residency.pending",
+        "owner": "Privacy and security owners",
+        "status": "pending"
+      }
+    },
+    "retention": {
+      "applicationArtifactsDays": 30,
+      "auditDays": 365,
+      "evidenceDays": 365,
+      "logsDays": 30,
+      "privateRepositoryCacheHours": 4,
+      "rawModelContent": "disabled"
+    },
+    "storage": {
+      "encryption": "sse-s3",
+      "region": "us-east-1",
+      "versioning": true
+    }
+  },
+  "domains": {
+    "apiDomain": "api.cloudmarkup.example",
+    "applicationDomain": "app.cloudmarkup.example",
+    "certificateArn": "arn:aws:acm:us-east-1:000000000000:certificate/00000000-1111-2222-3333-444444444444",
+    "dnsOwner": {
+      "email": "dns@cloudmarkup.example",
+      "escalationReference": "contact.dns.pending"
+    },
+    "hostedZoneId": "ZEXAMPLE123456",
+    "privacyUrl": "https://www.cloudmarkup.example/privacy",
+    "rootDomain": "cloudmarkup.example",
+    "securityUrl": "https://www.cloudmarkup.example/security",
+    "supportUrl": "https://www.cloudmarkup.example/support",
+    "termsUrl": "https://www.cloudmarkup.example/terms"
+  },
+  "environment": {
+    "name": "dev",
+    "stage": "development"
+  },
+  "features": {
+    "ai": false,
+    "aiCustomGeneration": false,
+    "applicationBuild": false,
+    "beta": false,
+    "billing": false,
+    "cloudFormation": true,
+    "customerDeploy": false,
+    "customerDrift": false,
+    "customerPlan": false,
+    "githubExport": false,
+    "repositoryImport": false,
+    "scanners": false,
+    "terraform": true,
+    "workflowExport": false
+  },
+  "github": {
+    "appId": "123456",
+    "callbackUrl": "https://app.cloudmarkup.example/integrations/github/callback",
+    "clientId": "Iv1.development1234",
+    "clientSecret": {
+      "localEnvironmentVariable": "CLOUDMARKUP_GITHUB_APP_CLIENT_SECRET",
+      "secretsManagerReference": "cloudmarkup/dev/github/app-client-secret"
+    },
+    "export": {
+      "enabled": false,
+      "permissions": {
+        "contents": "write",
+        "metadata": "read",
+        "pullRequests": "write",
+        "workflows": "none"
+      }
+    },
+    "import": {
+      "enabled": false,
+      "permissions": {
+        "contents": "read",
+        "metadata": "read",
+        "pullRequests": "none",
+        "workflows": "none"
+      }
+    },
+    "privateKey": {
+      "localEnvironmentVariable": "CLOUDMARKUP_GITHUB_APP_PRIVATE_KEY",
+      "secretsManagerReference": "cloudmarkup/dev/github/app-private-key"
+    },
+    "setupUrl": "https://app.cloudmarkup.example/integrations/github/setup",
+    "webhookSecret": {
+      "localEnvironmentVariable": "CLOUDMARKUP_GITHUB_APP_WEBHOOK_SECRET",
+      "secretsManagerReference": "cloudmarkup/dev/github/webhook-secret"
+    },
+    "webhookUrl": "https://api.cloudmarkup.example/webhooks/github",
+    "workflowExport": {
+      "enabled": false,
+      "permissions": {
+        "contents": "write",
+        "metadata": "read",
+        "pullRequests": "write",
+        "workflows": "write"
+      }
+    }
+  },
+  "modelRuntime": {
+    "amazonBedrock": {
+      "apiCredentialPolicy": "aws-iam-only-no-api-key",
+      "capabilities": [
+        {
+          "adaptiveThinking": false,
+          "caching": {
+            "maximumCheckpoints": 4,
+            "supported": true
+          },
+          "contextLimitTokens": 200000,
+          "id": "bedrock.standard.development",
+          "inferenceProfileArn": "arn:aws:bedrock:us-east-1:000000000000:inference-profile/us.vendor.standard-development-v1:0",
+          "inferenceProfileId": "us.vendor.standard-development-v1:0",
+          "modelArn": "arn:aws:bedrock:us-east-1::foundation-model/vendor.standard-development-v1:0",
+          "modelFamily": "review-required-standard-family",
+          "modelId": "vendor.standard-development-v1:0",
+          "modelVersion": "development-candidate",
+          "outputLimitTokens": 16000,
+          "residency": "geographic-cross-region",
+          "selectedRegion": "us-east-1",
+          "streaming": true,
+          "structuredOutput": "tool-schema",
+          "thinking": true,
+          "toolUse": true,
+          "usageFields": [
+            "inputTokens",
+            "outputTokens",
+            "cacheReadInputTokens",
+            "cacheWriteInputTokens"
+          ]
+        },
+        {
+          "adaptiveThinking": true,
+          "caching": {
+            "maximumCheckpoints": 4,
+            "supported": true
+          },
+          "contextLimitTokens": 200000,
+          "id": "bedrock.deep.development",
+          "inferenceProfileArn": "arn:aws:bedrock:us-east-1:000000000000:inference-profile/us.vendor.deep-development-v1:0",
+          "inferenceProfileId": "us.vendor.deep-development-v1:0",
+          "modelArn": "arn:aws:bedrock:us-east-1::foundation-model/vendor.deep-development-v1:0",
+          "modelFamily": "review-required-deep-family",
+          "modelId": "vendor.deep-development-v1:0",
+          "modelVersion": "development-candidate",
+          "outputLimitTokens": 32000,
+          "residency": "geographic-cross-region",
+          "selectedRegion": "us-east-1",
+          "streaming": true,
+          "structuredOutput": "tool-schema",
+          "thinking": true,
+          "toolUse": true,
+          "usageFields": [
+            "inputTokens",
+            "outputTokens",
+            "cacheReadInputTokens",
+            "cacheWriteInputTokens"
+          ]
+        }
+      ],
+      "costControls": {
+        "administrativeSuspension": true,
+        "alarmThresholdPercent": 80,
+        "killSwitch": true,
+        "monthlyBudgetUsd": 250
+      },
+      "dataResidencyDecision": {
+        "evidenceReference": "decision.bedrock-residency.pending",
+        "owner": "Privacy and security owners",
+        "status": "pending"
+      },
+      "enabled": false,
+      "inferenceMode": "geographic-cross-region",
+      "plans": {
+        "pro": ["architecture", "application-generation", "repair"],
+        "starter": ["architecture", "explanation"]
+      },
+      "prerequisites": {
+        "modelAccess": {
+          "evidenceReference": "bedrock.model-access.pending",
+          "owner": "Model operations owner",
+          "status": "pending"
+        },
+        "quotas": {
+          "evidenceReference": "bedrock.quotas.pending",
+          "owner": "Cloud operations owner",
+          "status": "pending"
+        },
+        "terms": {
+          "evidenceReference": "bedrock.terms.pending",
+          "owner": "Business and legal owners",
+          "status": "pending"
+        }
+      },
+      "pricing": {
+        "effectiveDate": "2026-08-30",
+        "sourceUrl": "https://aws.amazon.com/bedrock/pricing/",
+        "version": "0.1.0"
+      },
+      "primaryRegion": "us-east-1",
+      "retention": {
+        "applicationContent": "not-retained",
+        "providerPolicyReference": "bedrock.retention.review-required"
+      },
+      "routes": {
+        "deep": {
+          "allowedFeatures": ["architecture", "application-generation"],
+          "allowedPlans": ["pro"],
+          "capabilityId": "bedrock.deep.development",
+          "enabled": true,
+          "maximumAttempts": 2,
+          "maximumConcurrency": 5,
+          "maximumOutputTokens": 16000,
+          "thinkingEffort": "high",
+          "timeoutMilliseconds": 120000
+        },
+        "fallback": {
+          "allowedFeatures": ["provider-outage-fallback"],
+          "allowedPlans": [],
+          "capabilityId": "bedrock.standard.development",
+          "enabled": false,
+          "maximumAttempts": 1,
+          "maximumConcurrency": 2,
+          "maximumOutputTokens": 8000,
+          "thinkingEffort": "medium",
+          "timeoutMilliseconds": 90000
+        },
+        "lowCost": {
+          "allowedFeatures": ["extraction", "explanation"],
+          "allowedPlans": ["starter", "pro"],
+          "capabilityId": "bedrock.standard.development",
+          "enabled": true,
+          "maximumAttempts": 2,
+          "maximumConcurrency": 20,
+          "maximumOutputTokens": 4000,
+          "thinkingEffort": "low",
+          "timeoutMilliseconds": 60000
+        },
+        "repair": {
+          "allowedFeatures": ["application-generation", "repair"],
+          "allowedPlans": ["pro"],
+          "capabilityId": "bedrock.deep.development",
+          "enabled": true,
+          "maximumAttempts": 2,
+          "maximumConcurrency": 3,
+          "maximumOutputTokens": 12000,
+          "thinkingEffort": "high",
+          "timeoutMilliseconds": 120000
+        },
+        "standard": {
+          "allowedFeatures": ["architecture", "workload", "generation"],
+          "allowedPlans": ["starter", "pro"],
+          "capabilityId": "bedrock.standard.development",
+          "enabled": true,
+          "maximumAttempts": 2,
+          "maximumConcurrency": 20,
+          "maximumOutputTokens": 8000,
+          "thinkingEffort": "medium",
+          "timeoutMilliseconds": 90000
+        },
+        "strictStructuredOutput": {
+          "allowedFeatures": ["structured-proposal"],
+          "allowedPlans": ["starter", "pro"],
+          "capabilityId": "bedrock.standard.development",
+          "enabled": true,
+          "maximumAttempts": 2,
+          "maximumConcurrency": 20,
+          "maximumOutputTokens": 8000,
+          "thinkingEffort": "medium",
+          "timeoutMilliseconds": 90000
+        }
+      },
+      "workerIam": {
+        "actions": [
+          "bedrock:InvokeModel",
+          "bedrock:InvokeModelWithResponseStream"
+        ],
+        "invocationResourceArns": [
+          "arn:aws:bedrock:us-east-1:000000000000:inference-profile/us.vendor.deep-development-v1:0",
+          "arn:aws:bedrock:us-east-1:000000000000:inference-profile/us.vendor.standard-development-v1:0",
+          "arn:aws:bedrock:us-east-1::foundation-model/vendor.deep-development-v1:0",
+          "arn:aws:bedrock:us-east-1::foundation-model/vendor.standard-development-v1:0"
+        ],
+        "roleArn": "arn:aws:iam::000000000000:role/cloudmarkup-dev-model-worker"
+      }
+    },
+    "optionalProviders": {
+      "adapters": [],
+      "enabled": false
+    },
+    "providerBoundary": "provider-neutral-model-gateway-v1"
+  },
+  "platformLimits": {
+    "alarms": [
+      "api-denials",
+      "bedrock-budget",
+      "billing-webhook-failures",
+      "build-failures",
+      "repository-import-failures"
+    ],
+    "approvers": [
+      "Platform operations owner",
+      "Security owner",
+      "Business owner"
+    ],
+    "budgets": {
+      "monthlyPlatformUsd": 1000,
+      "notificationThresholdPercent": 80
+    },
+    "concurrency": {
+      "applicationBuilds": 2,
+      "modelInvocations": 20,
+      "terraformValidation": 2
+    },
+    "incidents": {
+      "escalationReference": "runbook.common-alarms",
+      "recoveryDecision": {
+        "evidenceReference": "decision.rto-rpo.pending",
+        "owner": "Business and platform owners",
+        "status": "pending"
+      },
+      "rpoHours": null,
+      "rtoHours": null
+    },
+    "resources": {
+      "maxArchitectureNodes": 500,
+      "maxExportBytes": 134217728,
+      "maxFilesPerExport": 20000,
+      "maxModelInputBytes": 1048576,
+      "maxModelOutputBytes": 1048576,
+      "maxPlanResources": 2000,
+      "maxProjectsPerOrganization": 100,
+      "maxRepositoriesPerOrganization": 64,
+      "maxRepairAttempts": 1,
+      "maxWorkloadOperations": 128
+    },
+    "waf": {
+      "apiRequestsPerFiveMinutes": 5000,
+      "enabled": false,
+      "webhookRequestsPerFiveMinutes": 1000
+    }
+  },
+  "repositorySync": {
+    "allowedOrganizations": ["sample-customer"],
+    "allowedRepositories": ["sample-customer/sample-application"],
+    "branchPolicy": {
+      "allowDefaultBranchDiscovery": true,
+      "allowedBranches": ["main"],
+      "requireExactCommit": true
+    },
+    "importLimits": {
+      "allowedFileExtensions": [
+        ".json",
+        ".md",
+        ".tf",
+        ".tf.json",
+        ".ts",
+        ".tsx",
+        ".yaml",
+        ".yml"
+      ],
+      "maxFileBytes": 8388608,
+      "maxFiles": 4096,
+      "maxPathBytes": 240,
+      "maxSelectedPaths": 128,
+      "maxTotalBytes": 134217728,
+      "maxTreeEntries": 20000
+    },
+    "privateContentCache": "tenant-isolated-no-cross-tenant",
+    "redaction": "required-before-storage-or-model",
+    "retentionHours": 4,
+    "webhookRefreshEvents": ["push"]
+  },
+  "schemaVersion": 1,
+  "stripe": {
+    "apiKey": {
+      "localEnvironmentVariable": "CLOUDMARKUP_STRIPE_API_KEY",
+      "secretsManagerReference": "cloudmarkup/dev/stripe/api-key"
+    },
+    "browserPublishableKeyIdentifier": "CLOUDMARKUP_STRIPE_PUBLISHABLE_KEY",
+    "businessDecisions": {
+      "refund": {
+        "evidenceReference": "decision.stripe-refund.pending",
+        "owner": "Business and legal owners",
+        "status": "pending"
+      },
+      "tax": {
+        "evidenceReference": "decision.stripe-tax.pending",
+        "owner": "Business and legal owners",
+        "status": "pending"
+      },
+      "terms": {
+        "evidenceReference": "decision.stripe-terms.pending",
+        "owner": "Business and legal owners",
+        "status": "pending"
+      }
+    },
+    "cancellationPolicy": "period-end-default",
+    "cancelUrl": "https://app.cloudmarkup.example/billing/cancel",
+    "currency": "USD",
+    "enabled": false,
+    "graceHours": 0,
+    "mappingVersion": "1.0.0",
+    "mode": "test",
+    "planMappings": {
+      "live": {
+        "configured": false
+      },
+      "test": {
+        "configured": true,
+        "pro": {
+          "credits": 1000,
+          "priceId": "price_TESTPRO0001",
+          "productId": "prod_TESTPRO0001"
+        },
+        "starter": {
+          "credits": 200,
+          "priceId": "price_TESTSTARTER0001",
+          "productId": "prod_TESTSTARTER0001"
+        }
+      }
+    },
+    "portalReturnUrl": "https://app.cloudmarkup.example/settings/billing",
+    "successUrl": "https://app.cloudmarkup.example/billing/success",
+    "trialPolicy": "no-trial",
+    "webhookEndpointVersion": "1.0.0",
+    "webhookSigningSecret": {
+      "localEnvironmentVariable": "CLOUDMARKUP_STRIPE_WEBHOOK_SIGNING_SECRET",
+      "secretsManagerReference": "cloudmarkup/dev/stripe/webhook-signing-secret"
+    },
+    "webhookSigningSecretPrevious": null
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "contractId": "contracts.notes.create-contract-test",
+  "contractKind": "test-case",
+  "contractVersion": "1.0.0",
+  "displayName": "contract create note test",
+  "expectations": [
+    {
+      "category": "application.validation",
+      "expectationId": "expect_create_contract_validation",
+      "kind": "error-category"
+    },
+    {
+      "expectationId": "expect_create_contract_status",
+      "kind": "http-status",
+      "statusCode": 400
+    }
+  ],
+  "fixtureReferences": [],
+  "level": "contract",
+  "preconditions": [
+    {
+      "contract": {
+        "contractId": "contracts.notes.create-route",
+        "contractKind": "http-api",
+        "contractVersion": "1.0.0",
+        "digest": "sha256:58c405ecb46e8d0b988dfd48921231c064cd5451dfdf342c96830297f810ad88"
+      },
+      "kind": "contract-available"
+    },
+    {
+      "authContract": {
+        "contractId": "contracts.notes.auth",
+        "contractKind": "auth",
+        "contractVersion": "1.0.0",
+        "digest": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f"
+      },
+      "kind": "authenticated-role",
+      "roleId": "role_member"
+    }
+  ],
+  "provenance": {
+    "recordedAt": "2026-08-17T12:00:00Z",
+    "recordedBy": "actor_fixture",
+    "source": "designed",
+    "sourceReferenceIds": [
+      "requirement_notes_api"
+    ]
+  },
+  "target": {
+    "contractId": "contracts.notes.create-operation",
+    "contractKind": "behavior-operation",
+    "contractVersion": "1.0.0",
+    "digest": "sha256:964fba83507c31ad0ea72f7d46f470a3d74064f3b7a539eb4e8163c500e1b9ac"
+  }
+}

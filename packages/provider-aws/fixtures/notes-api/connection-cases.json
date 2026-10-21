@@ -1,0 +1,127 @@
+{
+  "catalogVersion": "0.30.0",
+  "cases": [
+    {
+      "id": "api-route-to-lambda",
+      "ruleId": "aws.apigateway.http-api-invokes-lambda",
+      "sourceNodeId": "api",
+      "sourcePortId": "aws.apigateway.http-api.invocation",
+      "targetNodeId": "lambda",
+      "targetPortId": "aws.lambda.function.synchronous-invocation",
+      "configuration": {
+        "routeKey": {
+          "kind": "string",
+          "value": "GET /notes"
+        }
+      }
+    },
+    {
+      "id": "lambda-read-table",
+      "ruleId": "aws.lambda.reads-dynamodb-table",
+      "sourceNodeId": "lambda",
+      "sourcePortId": "aws.lambda.function.data-read",
+      "targetNodeId": "table",
+      "targetPortId": "aws.dynamodb.table.table-api",
+      "configuration": {}
+    },
+    {
+      "id": "lambda-write-table",
+      "ruleId": "aws.lambda.writes-dynamodb-table",
+      "sourceNodeId": "lambda",
+      "sourcePortId": "aws.lambda.function.data-write",
+      "targetNodeId": "table",
+      "targetPortId": "aws.dynamodb.table.table-api",
+      "configuration": {}
+    },
+    {
+      "id": "lambda-log-group",
+      "ruleId": "aws.lambda.writes-log-group",
+      "sourceNodeId": "lambda",
+      "sourcePortId": "aws.lambda.function.logging",
+      "targetNodeId": "logs",
+      "targetPortId": "aws.cloudwatch.log-group.logs",
+      "configuration": {}
+    },
+    {
+      "id": "lambda-errors-alarm",
+      "ruleId": "aws.lambda.monitored-by-alarm",
+      "sourceNodeId": "lambda",
+      "sourcePortId": "aws.lambda.function.telemetry",
+      "targetNodeId": "alarm",
+      "targetPortId": "aws.cloudwatch.metric-alarm.metric",
+      "configuration": {}
+    },
+    {
+      "id": "route-table-association-to-subnet",
+      "ruleId": "aws.ec2.route-table-association-targets-subnet",
+      "sourceNodeId": "route_table_association",
+      "sourcePortId": "aws.ec2.route-table-association.subnet",
+      "targetNodeId": "subnet",
+      "targetPortId": "aws.ec2.subnet.route-table-association",
+      "configuration": {}
+    },
+    {
+      "id": "vpc-to-internet-gateway",
+      "ruleId": "aws.ec2.vpc-attaches-internet-gateway",
+      "sourceNodeId": "vpc",
+      "sourcePortId": "aws.ec2.vpc.internet-gateway-attachment",
+      "targetNodeId": "internet_gateway",
+      "targetPortId": "aws.ec2.internet-gateway.vpc-attachment",
+      "configuration": {}
+    },
+    {
+      "id": "route-to-internet-gateway",
+      "ruleId": "aws.ec2.route-targets-internet-gateway",
+      "sourceNodeId": "route",
+      "sourcePortId": "aws.ec2.route.internet-gateway-target",
+      "targetNodeId": "internet_gateway",
+      "targetPortId": "aws.ec2.internet-gateway.route-target",
+      "configuration": {}
+    },
+    {
+      "id": "route-to-nat-gateway",
+      "ruleId": "aws.ec2.route-targets-nat-gateway",
+      "sourceNodeId": "route",
+      "sourcePortId": "aws.ec2.route.nat-gateway-target",
+      "targetNodeId": "nat_gateway",
+      "targetPortId": "aws.ec2.nat-gateway.route-target",
+      "configuration": {}
+    },
+    {
+      "id": "gateway-endpoint-to-route-table",
+      "ruleId": "aws.ec2.gateway-endpoint-associates-route-table",
+      "sourceNodeId": "gateway_endpoint",
+      "sourcePortId": "aws.ec2.gateway-vpc-endpoint.route-table-association",
+      "targetNodeId": "route_table",
+      "targetPortId": "aws.ec2.route-table.gateway-endpoint-association",
+      "configuration": {}
+    },
+    {
+      "id": "vpc-to-security-group",
+      "ruleId": "aws.ec2.vpc-associates-security-group",
+      "sourceNodeId": "vpc",
+      "sourcePortId": "aws.ec2.vpc.security-group-association",
+      "targetNodeId": "security_group",
+      "targetPortId": "aws.ec2.security-group.vpc",
+      "configuration": {}
+    },
+    {
+      "id": "lambda-vpc-access-to-subnet",
+      "ruleId": "aws.lambda.vpc-access-uses-subnet",
+      "sourceNodeId": "lambda_vpc_access",
+      "sourcePortId": "aws.lambda.vpc-access-configuration.subnet",
+      "targetNodeId": "subnet",
+      "targetPortId": "aws.ec2.subnet.lambda-vpc-access",
+      "configuration": {}
+    },
+    {
+      "id": "lambda-vpc-access-to-security-group",
+      "ruleId": "aws.lambda.vpc-access-uses-security-group",
+      "sourceNodeId": "lambda_vpc_access",
+      "sourcePortId": "aws.lambda.vpc-access-configuration.security-group",
+      "targetNodeId": "security_group",
+      "targetPortId": "aws.ec2.security-group.lambda-vpc-access",
+      "configuration": {}
+    }
+  ]
+}

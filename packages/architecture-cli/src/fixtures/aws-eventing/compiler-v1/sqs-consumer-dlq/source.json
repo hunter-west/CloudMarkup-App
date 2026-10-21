@@ -1,0 +1,1805 @@
+{
+  "applicationContracts": {
+    "kind": "cloudmarkup.application-contracts",
+    "schemaVersion": 1,
+    "contractSetId": "architecture_event_sqs_consumer_dlq",
+    "documentId": "document_event_sqs_consumer_dlq",
+    "revision": {
+      "revisionId": "revision_event_sqs_consumer_dlq_1",
+      "revisionNumber": 1,
+      "createdAt": "2026-08-17T12:00:00Z",
+      "createdBy": "actor_fixture"
+    },
+    "contracts": [
+      {
+        "contractId": "contracts.sqs-consumer-dlq.behavior",
+        "contractVersion": "1.0.0",
+        "displayName": "Curated event behavior",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "behavior-operation",
+        "capability": "cloudmarkup.event.sqs-consume",
+        "input": {
+          "kind": "contract-reference",
+          "reference": {
+            "contractId": "contracts.sqs-consumer-dlq.event",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:66643fdcbf206040bc734d26b855b9c7b73a4a5c22e7f8acd19488d9268ea670",
+            "contractKind": "event-message"
+          }
+        },
+        "output": {
+          "kind": "none"
+        },
+        "failureOutcomes": [
+          {
+            "category": "application.validation",
+            "retryable": false,
+            "description": "The typed event contract was not satisfied."
+          }
+        ]
+      },
+      {
+        "contractId": "contracts.sqs-consumer-dlq.event",
+        "contractVersion": "1.0.0",
+        "displayName": "Curated event envelope",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "event-message",
+        "transportKind": "message",
+        "semanticName": "application.sqs-consumer-dlq.event",
+        "payload": {
+          "contractId": "contracts.sqs-consumer-dlq.payload",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:7aa5b8009e098a09647adc7376a5a6c155c6caad64aa2ea74c0496ee72b03098",
+          "contractKind": "data-entity"
+        },
+        "headers": [],
+        "delivery": {
+          "ordering": "not-guaranteed",
+          "duplicates": "possible",
+          "delivery": "at-least-once"
+        }
+      },
+      {
+        "contractId": "contracts.sqs-consumer-dlq.payload",
+        "contractVersion": "1.0.0",
+        "displayName": "Curated event payload",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "data-entity",
+        "semanticName": "application.sqs-consumer-dlq.payload",
+        "storageIntent": "transient",
+        "fields": [
+          {
+            "name": "correlationId",
+            "fieldType": {
+              "kind": "scalar",
+              "scalarType": "string"
+            },
+            "required": false,
+            "nullable": false,
+            "classification": "internal"
+          },
+          {
+            "name": "eventId",
+            "fieldType": {
+              "kind": "scalar",
+              "scalarType": "string"
+            },
+            "required": true,
+            "nullable": false,
+            "classification": "internal"
+          }
+        ],
+        "indexes": [
+          {
+            "indexId": "index_event_sqs_consumer_dlq_primary",
+            "name": "primary",
+            "kind": "primary",
+            "partitionFields": ["eventId"],
+            "sortFields": []
+          }
+        ],
+        "supportedOperations": ["consume"]
+      },
+      {
+        "contractId": "contracts.sqs-consumer-dlq.test.contract",
+        "contractVersion": "1.0.0",
+        "displayName": "contract event contract test",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "test-case",
+        "level": "contract",
+        "target": {
+          "contractId": "contracts.sqs-consumer-dlq.behavior",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:df37eee3e98aada13fc07454150f6df12647ae1796b04f2ac261378e5f4239d3",
+          "contractKind": "behavior-operation"
+        },
+        "preconditions": [
+          {
+            "kind": "contract-available",
+            "contract": {
+              "contractId": "contracts.sqs-consumer-dlq.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:66643fdcbf206040bc734d26b855b9c7b73a4a5c22e7f8acd19488d9268ea670",
+              "contractKind": "event-message"
+            }
+          }
+        ],
+        "fixtureReferences": [],
+        "expectations": [
+          {
+            "expectationId": "expect_contract_validation",
+            "kind": "error-category",
+            "category": "application.validation"
+          }
+        ]
+      },
+      {
+        "contractId": "contracts.sqs-consumer-dlq.test.unit",
+        "contractVersion": "1.0.0",
+        "displayName": "unit event contract test",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "test-case",
+        "level": "unit",
+        "target": {
+          "contractId": "contracts.sqs-consumer-dlq.behavior",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:df37eee3e98aada13fc07454150f6df12647ae1796b04f2ac261378e5f4239d3",
+          "contractKind": "behavior-operation"
+        },
+        "preconditions": [
+          {
+            "kind": "contract-available",
+            "contract": {
+              "contractId": "contracts.sqs-consumer-dlq.payload",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:7aa5b8009e098a09647adc7376a5a6c155c6caad64aa2ea74c0496ee72b03098",
+              "contractKind": "data-entity"
+            }
+          }
+        ],
+        "fixtureReferences": [],
+        "expectations": [
+          {
+            "expectationId": "expect_unit_payload_conformance",
+            "kind": "contract-conformance",
+            "contract": {
+              "contractId": "contracts.sqs-consumer-dlq.payload",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:7aa5b8009e098a09647adc7376a5a6c155c6caad64aa2ea74c0496ee72b03098",
+              "contractKind": "data-entity"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "architectureDocument": {
+    "kind": "cloudmarkup.architecture-document",
+    "documentId": "document_event_sqs_consumer_dlq",
+    "architectureId": "architecture_event_sqs_consumer_dlq",
+    "revision": {
+      "revisionId": "revision_event_sqs_consumer_dlq_1",
+      "revisionNumber": 1,
+      "createdAt": "2026-08-17T12:00:00Z",
+      "createdBy": "actor_fixture",
+      "sourceDraftId": "draft_event_sqs_consumer_dlq_1"
+    },
+    "provider": {
+      "id": "aws.cloudmarkup",
+      "region": "us-east-1"
+    },
+    "catalog": {
+      "id": "aws.cloudmarkup.notes-api-catalog",
+      "version": "0.30.0",
+      "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+    },
+    "compilerCompatibility": {
+      "inputContractVersion": 1,
+      "minimumCompilerVersion": "1.0.0",
+      "maximumCompilerVersionExclusive": "2.0.0"
+    },
+    "metadata": {
+      "source": "template",
+      "serialization": {
+        "mediaType": "application/json",
+        "encoding": "utf-8",
+        "canonicalization": "cloudmarkup.canonical-json.v1"
+      }
+    },
+    "nodes": [
+      {
+        "id": "event_logs_policy_sqs_consumer_dlq",
+        "semantic": {
+          "deploymentKey": "event_logs_policy_sqs_consumer_dlq",
+          "serviceType": "aws.iam.policy-document",
+          "resourceType": "aws.iam.policy-document",
+          "configuration": {
+            "schemaId": "aws.iam.policy-document.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "policyKind": {
+                "kind": "string",
+                "value": "generated-permission"
+              },
+              "policyName": {
+                "kind": "string",
+                "value": "event_logs_policy_sqs_consumer_dlq"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_event_logs_sqs_consumer_dlq",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_event_logs_sqs_consumer_dlq"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "event logs policy sqs consumer dlq",
+          "position": {
+            "x": 80,
+            "y": 120
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sqs_consumer_dlq_statement",
+        "semantic": {
+          "deploymentKey": "event_logs_policy_sqs_consumer_dlq_statement",
+          "serviceType": "aws.iam.policy-statement",
+          "resourceType": "aws.iam.policy-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-statement.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "actions": {
+                "kind": "string-list",
+                "value": ["logs:CreateLogStream", "logs:PutLogEvents"]
+              },
+              "effect": {
+                "kind": "string",
+                "value": "allow"
+              },
+              "principalKind": {
+                "kind": "string",
+                "value": "none"
+              },
+              "principals": {
+                "kind": "string-list",
+                "value": []
+              },
+              "resourceExpressions": {
+                "kind": "string-list",
+                "value": []
+              },
+              "statementId": {
+                "kind": "string",
+                "value": "eventlogspolicysqsconsumerdlq"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_event_logs_sqs_consumer_dlq",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_event_logs_sqs_consumer_dlq"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "event logs policy sqs consumer dlq statement",
+          "position": {
+            "x": 400,
+            "y": 120
+          }
+        }
+      },
+      {
+        "id": "event_logs_sqs_consumer_dlq",
+        "semantic": {
+          "deploymentKey": "event_logs_sqs_consumer_dlq",
+          "serviceType": "aws.cloudwatch.log-group",
+          "resourceType": "aws.cloudwatch.log-group",
+          "configuration": {
+            "schemaId": "aws.cloudwatch.log-group.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "logClass": {
+                "kind": "string",
+                "value": "STANDARD"
+              },
+              "logGroupName": {
+                "kind": "string",
+                "value": "/aws/lambda/event_sqs_consumer_dlq"
+              },
+              "preventDestroy": {
+                "kind": "boolean",
+                "value": true
+              },
+              "retentionDays": {
+                "kind": "integer",
+                "value": 30
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "event logs sqs consumer dlq",
+          "position": {
+            "x": 720,
+            "y": 120
+          }
+        }
+      },
+      {
+        "id": "lambda",
+        "semantic": {
+          "deploymentKey": "event_sqs_consumer_dlq",
+          "serviceType": "aws.lambda.function",
+          "resourceType": "aws.lambda.function",
+          "configuration": {
+            "schemaId": "aws.lambda.function.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "architecture": {
+                "kind": "string",
+                "value": "arm64"
+              },
+              "functionName": {
+                "kind": "string",
+                "value": "event_sqs_consumer_dlq"
+              },
+              "handler": {
+                "kind": "string",
+                "value": "index.handler"
+              },
+              "memoryMegabytes": {
+                "kind": "integer",
+                "value": 256
+              },
+              "reservedConcurrency": {
+                "kind": "integer",
+                "value": 10
+              },
+              "runtime": {
+                "kind": "string",
+                "value": "nodejs24.x"
+              },
+              "timeoutSeconds": {
+                "kind": "integer",
+                "value": 30
+              },
+              "tracingEnabled": {
+                "kind": "boolean",
+                "value": true
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "lambda",
+          "position": {
+            "x": 1040,
+            "y": 120
+          }
+        }
+      },
+      {
+        "id": "queue_consumer_policy",
+        "semantic": {
+          "deploymentKey": "queue_consumer_policy",
+          "serviceType": "aws.iam.policy-document",
+          "resourceType": "aws.iam.policy-document",
+          "configuration": {
+            "schemaId": "aws.iam.policy-document.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "policyKind": {
+                "kind": "string",
+                "value": "generated-permission"
+              },
+              "policyName": {
+                "kind": "string",
+                "value": "queue_consumer_policy"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_queue_consumer"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "queue consumer policy",
+          "position": {
+            "x": 80,
+            "y": 340
+          }
+        }
+      },
+      {
+        "id": "queue_consumer_policy_statement",
+        "semantic": {
+          "deploymentKey": "queue_consumer_policy_statement",
+          "serviceType": "aws.iam.policy-statement",
+          "resourceType": "aws.iam.policy-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-statement.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "actions": {
+                "kind": "string-list",
+                "value": [
+                  "sqs:DeleteMessage",
+                  "sqs:GetQueueAttributes",
+                  "sqs:ReceiveMessage"
+                ]
+              },
+              "effect": {
+                "kind": "string",
+                "value": "allow"
+              },
+              "principalKind": {
+                "kind": "string",
+                "value": "none"
+              },
+              "principals": {
+                "kind": "string-list",
+                "value": []
+              },
+              "resourceExpressions": {
+                "kind": "string-list",
+                "value": []
+              },
+              "statementId": {
+                "kind": "string",
+                "value": "queueconsumerpolicy"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_queue_consumer"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "queue consumer policy statement",
+          "position": {
+            "x": 400,
+            "y": 340
+          }
+        }
+      },
+      {
+        "id": "queue_dlq",
+        "semantic": {
+          "deploymentKey": "event_sqs_consumer_dlq_dead_letter",
+          "serviceType": "aws.sqs.queue",
+          "resourceType": "aws.sqs.queue",
+          "configuration": {
+            "schemaId": "aws.sqs.queue.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "contentBasedDeduplication": {
+                "kind": "boolean",
+                "value": false
+              },
+              "deletionProtectionEnabled": {
+                "kind": "boolean",
+                "value": true
+              },
+              "encryption": {
+                "kind": "string",
+                "value": "SQS_MANAGED"
+              },
+              "messageRetentionSeconds": {
+                "kind": "integer",
+                "value": 345600
+              },
+              "queueName": {
+                "kind": "string",
+                "value": "image-processing-dlq"
+              },
+              "queueType": {
+                "kind": "string",
+                "value": "STANDARD"
+              },
+              "receiveWaitTimeSeconds": {
+                "kind": "integer",
+                "value": 20
+              },
+              "visibilityTimeoutSeconds": {
+                "kind": "integer",
+                "value": 60
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "queue dlq",
+          "position": {
+            "x": 720,
+            "y": 340
+          }
+        }
+      },
+      {
+        "id": "queue_source",
+        "semantic": {
+          "deploymentKey": "event_sqs_consumer_dlq_queue",
+          "serviceType": "aws.sqs.queue",
+          "resourceType": "aws.sqs.queue",
+          "configuration": {
+            "schemaId": "aws.sqs.queue.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "contentBasedDeduplication": {
+                "kind": "boolean",
+                "value": false
+              },
+              "deletionProtectionEnabled": {
+                "kind": "boolean",
+                "value": true
+              },
+              "encryption": {
+                "kind": "string",
+                "value": "SQS_MANAGED"
+              },
+              "messageRetentionSeconds": {
+                "kind": "integer",
+                "value": 345600
+              },
+              "queueName": {
+                "kind": "string",
+                "value": "image-processing"
+              },
+              "queueType": {
+                "kind": "string",
+                "value": "STANDARD"
+              },
+              "receiveWaitTimeSeconds": {
+                "kind": "integer",
+                "value": 20
+              },
+              "visibilityTimeoutSeconds": {
+                "kind": "integer",
+                "value": 60
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "queue source",
+          "position": {
+            "x": 1040,
+            "y": 340
+          }
+        }
+      },
+      {
+        "id": "role",
+        "semantic": {
+          "deploymentKey": "event_sqs_consumer_dlq_role",
+          "serviceType": "aws.iam.role",
+          "resourceType": "aws.iam.role",
+          "configuration": {
+            "schemaId": "aws.iam.role.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "maxSessionDurationSeconds": {
+                "kind": "integer",
+                "value": 3600
+              },
+              "roleName": {
+                "kind": "string",
+                "value": "notes-api-lambda-role"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        },
+        "presentation": {
+          "label": "role",
+          "position": {
+            "x": 80,
+            "y": 560
+          }
+        }
+      },
+      {
+        "id": "trust_policy",
+        "semantic": {
+          "deploymentKey": "trust_policy",
+          "serviceType": "aws.iam.policy-document",
+          "resourceType": "aws.iam.policy-document",
+          "configuration": {
+            "schemaId": "aws.iam.policy-document.configuration",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "policyKind": {
+                "kind": "string",
+                "value": "trust"
+              },
+              "policyName": {
+                "kind": "string",
+                "value": "trust_policy"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_role_lambda"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "trust policy",
+          "position": {
+            "x": 400,
+            "y": 560
+          }
+        }
+      },
+      {
+        "id": "trust_policy_statement",
+        "semantic": {
+          "deploymentKey": "trust_policy_statement",
+          "serviceType": "aws.iam.policy-statement",
+          "resourceType": "aws.iam.policy-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-statement.configuration",
+            "schemaVersion": "2.0.0",
+            "values": {
+              "actions": {
+                "kind": "string-list",
+                "value": ["sts:AssumeRole"]
+              },
+              "effect": {
+                "kind": "string",
+                "value": "allow"
+              },
+              "principalKind": {
+                "kind": "string",
+                "value": "service"
+              },
+              "principals": {
+                "kind": "string-list",
+                "value": ["lambda.amazonaws.com"]
+              },
+              "resourceExpressions": {
+                "kind": "string-list",
+                "value": []
+              },
+              "statementId": {
+                "kind": "string",
+                "value": "trustpolicy"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "generated",
+            "origin": "connection-rule",
+            "provenance": {
+              "generatorKind": "connection-rule",
+              "generatorId": "aws.cloudmarkup.connection-rule",
+              "generatorVersion": "1.0.0",
+              "operationId": "operation_fixture",
+              "dependentNodeIds": [],
+              "dependentEdgeIds": ["edge_role_lambda"]
+            }
+          }
+        },
+        "presentation": {
+          "label": "trust policy statement",
+          "position": {
+            "x": 720,
+            "y": 560
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge_event_logs_sqs_consumer_dlq",
+        "semantic": {
+          "source": {
+            "nodeId": "lambda",
+            "port": "aws.lambda.function.logs"
+          },
+          "target": {
+            "nodeId": "event_logs_sqs_consumer_dlq",
+            "port": "aws.cloudwatch.log-group.logs"
+          },
+          "relationshipType": "aws.lambda.writes-log-group",
+          "configuration": {
+            "schemaId": "aws.lambda.cloudwatch-logs.connection",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "deliveryMode": {
+                "kind": "string",
+                "value": "application-logs"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "edge_queue_consumer",
+        "semantic": {
+          "source": {
+            "nodeId": "queue_source",
+            "port": "aws.sqs.triggers-lambda.source"
+          },
+          "target": {
+            "nodeId": "lambda",
+            "port": "aws.sqs.triggers-lambda.target"
+          },
+          "relationshipType": "aws.sqs.triggers-lambda",
+          "configuration": {
+            "schemaId": "aws.sqs.lambda-consumer.connection",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "batchSize": {
+                "kind": "integer",
+                "value": 10
+              },
+              "batchingWindowSeconds": {
+                "kind": "integer",
+                "value": 5
+              },
+              "deliverySemantics": {
+                "kind": "string",
+                "value": "AT_LEAST_ONCE"
+              },
+              "maximumConcurrency": {
+                "kind": "integer",
+                "value": 10
+              },
+              "partialBatchResponse": {
+                "kind": "boolean",
+                "value": true
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "edge_queue_dlq",
+        "semantic": {
+          "source": {
+            "nodeId": "queue_source",
+            "port": "aws.sqs.uses-dead-letter-queue.source"
+          },
+          "target": {
+            "nodeId": "queue_dlq",
+            "port": "aws.sqs.uses-dead-letter-queue.target"
+          },
+          "relationshipType": "aws.sqs.uses-dead-letter-queue",
+          "configuration": {
+            "schemaId": "aws.sqs.redrive.connection",
+            "schemaVersion": "1.0.0",
+            "values": {
+              "maximumReceiveCount": {
+                "kind": "integer",
+                "value": 5
+              },
+              "replayMode": {
+                "kind": "string",
+                "value": "MANUAL_REVIEW"
+              }
+            }
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "edge_role_lambda",
+        "semantic": {
+          "source": {
+            "nodeId": "role",
+            "port": "aws.iam.role-assumed-by-lambda.source"
+          },
+          "target": {
+            "nodeId": "lambda",
+            "port": "aws.iam.role-assumed-by-lambda.target"
+          },
+          "relationshipType": "aws.iam.role-assumed-by-lambda",
+          "configuration": {
+            "schemaId": "aws.iam.lambda-role.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sqs_consumer_dlq_membership",
+        "semantic": {
+          "source": {
+            "nodeId": "event_logs_policy_sqs_consumer_dlq_statement",
+            "port": "aws.iam.policy-statement.member"
+          },
+          "target": {
+            "nodeId": "event_logs_policy_sqs_consumer_dlq",
+            "port": "aws.iam.policy.statements"
+          },
+          "relationshipType": "aws.iam.policy-contains-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-membership.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sqs_consumer_dlq_owner",
+        "semantic": {
+          "source": {
+            "nodeId": "event_logs_policy_sqs_consumer_dlq",
+            "port": "aws.iam.policy.owner"
+          },
+          "target": {
+            "nodeId": "role",
+            "port": "aws.iam.role.permission"
+          },
+          "relationshipType": "aws.iam.role-owns-generated-permission",
+          "configuration": {
+            "schemaId": "aws.iam.role-owns-generated-permission.attachment",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "event_logs_policy_sqs_consumer_dlq_scope",
+        "semantic": {
+          "source": {
+            "nodeId": "event_logs_policy_sqs_consumer_dlq_statement",
+            "port": "aws.iam.policy-statement.scope"
+          },
+          "target": {
+            "nodeId": "event_logs_sqs_consumer_dlq",
+            "port": "aws.cloudwatch.log-group.authorized"
+          },
+          "relationshipType": "aws.iam.authorizes-log-group",
+          "configuration": {
+            "schemaId": "aws.iam.policy-log-group.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "queue_consumer_policy_membership",
+        "semantic": {
+          "source": {
+            "nodeId": "queue_consumer_policy_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          },
+          "target": {
+            "nodeId": "queue_consumer_policy",
+            "port": "aws.iam.policy-contains-statement.target"
+          },
+          "relationshipType": "aws.iam.policy-contains-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-membership.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "queue_consumer_policy_owner",
+        "semantic": {
+          "source": {
+            "nodeId": "queue_consumer_policy",
+            "port": "aws.iam.role-owns-generated-permission.source"
+          },
+          "target": {
+            "nodeId": "role",
+            "port": "aws.iam.role-owns-generated-permission.target"
+          },
+          "relationshipType": "aws.iam.role-owns-generated-permission",
+          "configuration": {
+            "schemaId": "aws.iam.role-owns-generated-permission.attachment",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "queue_consumer_policy_scope",
+        "semantic": {
+          "source": {
+            "nodeId": "queue_consumer_policy_statement",
+            "port": "aws.iam.authorizes-sqs-queue.source"
+          },
+          "target": {
+            "nodeId": "queue_source",
+            "port": "aws.iam.authorizes-sqs-queue.target"
+          },
+          "relationshipType": "aws.iam.authorizes-sqs-queue",
+          "configuration": {
+            "schemaId": "aws.iam.policy-statement-authorizes-sqs-queue.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "trust_policy_membership",
+        "semantic": {
+          "source": {
+            "nodeId": "trust_policy_statement",
+            "port": "aws.iam.policy-contains-statement.source"
+          },
+          "target": {
+            "nodeId": "trust_policy",
+            "port": "aws.iam.policy-contains-statement.target"
+          },
+          "relationshipType": "aws.iam.policy-contains-statement",
+          "configuration": {
+            "schemaId": "aws.iam.policy-membership.connection",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      },
+      {
+        "id": "trust_policy_owner",
+        "semantic": {
+          "source": {
+            "nodeId": "trust_policy",
+            "port": "aws.iam.role-owns-trust-policy.source"
+          },
+          "target": {
+            "nodeId": "role",
+            "port": "aws.iam.role-owns-trust-policy.target"
+          },
+          "relationshipType": "aws.iam.role-owns-trust-policy",
+          "configuration": {
+            "schemaId": "aws.iam.role-owns-trust-policy.attachment",
+            "schemaVersion": "1.0.0",
+            "values": {}
+          },
+          "lifecycle": {
+            "ownership": "user",
+            "origin": "user"
+          }
+        }
+      }
+    ],
+    "variables": [
+      {
+        "id": "variable_stage",
+        "key": "stage",
+        "valueType": "string",
+        "required": false,
+        "defaultValue": {
+          "kind": "string",
+          "value": "test"
+        }
+      }
+    ],
+    "outputs": [],
+    "assumptions": [],
+    "unresolvedRequirements": [],
+    "applicationContracts": {
+      "kind": "cloudmarkup.application-contracts",
+      "schemaVersion": 1,
+      "contractSetId": "architecture_event_sqs_consumer_dlq",
+      "documentId": "document_event_sqs_consumer_dlq",
+      "revision": {
+        "revisionId": "revision_event_sqs_consumer_dlq_1",
+        "revisionNumber": 1,
+        "createdAt": "2026-08-17T12:00:00Z",
+        "createdBy": "actor_fixture"
+      },
+      "contracts": [
+        {
+          "contractId": "contracts.sqs-consumer-dlq.behavior",
+          "contractVersion": "1.0.0",
+          "displayName": "Curated event behavior",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "behavior-operation",
+          "capability": "cloudmarkup.event.sqs-consume",
+          "input": {
+            "kind": "contract-reference",
+            "reference": {
+              "contractId": "contracts.sqs-consumer-dlq.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:66643fdcbf206040bc734d26b855b9c7b73a4a5c22e7f8acd19488d9268ea670",
+              "contractKind": "event-message"
+            }
+          },
+          "output": {
+            "kind": "none"
+          },
+          "failureOutcomes": [
+            {
+              "category": "application.validation",
+              "retryable": false,
+              "description": "The typed event contract was not satisfied."
+            }
+          ]
+        },
+        {
+          "contractId": "contracts.sqs-consumer-dlq.event",
+          "contractVersion": "1.0.0",
+          "displayName": "Curated event envelope",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "event-message",
+          "transportKind": "message",
+          "semanticName": "application.sqs-consumer-dlq.event",
+          "payload": {
+            "contractId": "contracts.sqs-consumer-dlq.payload",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:7aa5b8009e098a09647adc7376a5a6c155c6caad64aa2ea74c0496ee72b03098",
+            "contractKind": "data-entity"
+          },
+          "headers": [],
+          "delivery": {
+            "ordering": "not-guaranteed",
+            "duplicates": "possible",
+            "delivery": "at-least-once"
+          }
+        },
+        {
+          "contractId": "contracts.sqs-consumer-dlq.payload",
+          "contractVersion": "1.0.0",
+          "displayName": "Curated event payload",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "data-entity",
+          "semanticName": "application.sqs-consumer-dlq.payload",
+          "storageIntent": "transient",
+          "fields": [
+            {
+              "name": "correlationId",
+              "fieldType": {
+                "kind": "scalar",
+                "scalarType": "string"
+              },
+              "required": false,
+              "nullable": false,
+              "classification": "internal"
+            },
+            {
+              "name": "eventId",
+              "fieldType": {
+                "kind": "scalar",
+                "scalarType": "string"
+              },
+              "required": true,
+              "nullable": false,
+              "classification": "internal"
+            }
+          ],
+          "indexes": [
+            {
+              "indexId": "index_event_sqs_consumer_dlq_primary",
+              "name": "primary",
+              "kind": "primary",
+              "partitionFields": ["eventId"],
+              "sortFields": []
+            }
+          ],
+          "supportedOperations": ["consume"]
+        },
+        {
+          "contractId": "contracts.sqs-consumer-dlq.test.contract",
+          "contractVersion": "1.0.0",
+          "displayName": "contract event contract test",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "test-case",
+          "level": "contract",
+          "target": {
+            "contractId": "contracts.sqs-consumer-dlq.behavior",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:df37eee3e98aada13fc07454150f6df12647ae1796b04f2ac261378e5f4239d3",
+            "contractKind": "behavior-operation"
+          },
+          "preconditions": [
+            {
+              "kind": "contract-available",
+              "contract": {
+                "contractId": "contracts.sqs-consumer-dlq.event",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:66643fdcbf206040bc734d26b855b9c7b73a4a5c22e7f8acd19488d9268ea670",
+                "contractKind": "event-message"
+              }
+            }
+          ],
+          "fixtureReferences": [],
+          "expectations": [
+            {
+              "expectationId": "expect_contract_validation",
+              "kind": "error-category",
+              "category": "application.validation"
+            }
+          ]
+        },
+        {
+          "contractId": "contracts.sqs-consumer-dlq.test.unit",
+          "contractVersion": "1.0.0",
+          "displayName": "unit event contract test",
+          "provenance": {
+            "source": "designed",
+            "sourceReferenceIds": ["requirement_notes_api"],
+            "recordedAt": "2026-08-17T12:00:00Z",
+            "recordedBy": "actor_fixture"
+          },
+          "contractKind": "test-case",
+          "level": "unit",
+          "target": {
+            "contractId": "contracts.sqs-consumer-dlq.behavior",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:df37eee3e98aada13fc07454150f6df12647ae1796b04f2ac261378e5f4239d3",
+            "contractKind": "behavior-operation"
+          },
+          "preconditions": [
+            {
+              "kind": "contract-available",
+              "contract": {
+                "contractId": "contracts.sqs-consumer-dlq.payload",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:7aa5b8009e098a09647adc7376a5a6c155c6caad64aa2ea74c0496ee72b03098",
+                "contractKind": "data-entity"
+              }
+            }
+          ],
+          "fixtureReferences": [],
+          "expectations": [
+            {
+              "expectationId": "expect_unit_payload_conformance",
+              "kind": "contract-conformance",
+              "contract": {
+                "contractId": "contracts.sqs-consumer-dlq.payload",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:7aa5b8009e098a09647adc7376a5a6c155c6caad64aa2ea74c0496ee72b03098",
+                "contractKind": "data-entity"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "externalResources": {
+      "kind": "cloudmarkup.external-resource-reference-document",
+      "schemaVersion": 1,
+      "documentId": "document_event_sqs_consumer_dlq",
+      "architectureId": "architecture_event_sqs_consumer_dlq",
+      "revision": {
+        "revisionId": "revision_event_sqs_consumer_dlq_1",
+        "revisionNumber": 1,
+        "createdAt": "2026-08-17T12:00:00Z",
+        "createdBy": "actor_fixture"
+      },
+      "resources": []
+    },
+    "schemaVersion": 3,
+    "workloadBehavior": {
+      "contractVersion": 2,
+      "workloads": [
+        {
+          "id": "workload_event_sqs_consumer_dlq",
+          "owningNodeId": "lambda",
+          "implementation": {
+            "mode": "complete-supported-pattern",
+            "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+            "handler": "index.handler",
+            "sourceOwnership": "cloudmarkup",
+            "supportedPattern": {
+              "patternId": "cloudmarkup.pattern.aws-lambda-curated-event-driven",
+              "patternVersion": "1.0.0",
+              "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686"
+            }
+          },
+          "operations": [
+            {
+              "id": "operation_event_sqs_consumer_dlq",
+              "capability": "cloudmarkup.event.sqs-consume",
+              "inputContract": {
+                "kind": "contract-reference",
+                "reference": {
+                  "contractId": "contracts.sqs-consumer-dlq.event",
+                  "contractVersion": "1.0.0",
+                  "digest": "sha256:66643fdcbf206040bc734d26b855b9c7b73a4a5c22e7f8acd19488d9268ea670"
+                }
+              },
+              "outputContract": {
+                "kind": "none"
+              }
+            }
+          ],
+          "triggers": [
+            {
+              "id": "trigger_event_sqs_consumer_dlq",
+              "edgeId": "edge_queue_consumer",
+              "targetOperationId": "operation_event_sqs_consumer_dlq"
+            }
+          ],
+          "downstreamActions": [],
+          "environment": [
+            {
+              "id": "environment_stage",
+              "name": "APP_STAGE",
+              "value": {
+                "kind": "variable-reference",
+                "variableId": "variable_stage"
+              }
+            }
+          ],
+          "errorBehavior": {
+            "mode": "continue"
+          },
+          "executionAssumptions": {
+            "timeout": {
+              "kind": "duration",
+              "milliseconds": 30000
+            },
+            "retry": {
+              "kind": "bounded",
+              "maximumAttempts": 5
+            }
+          },
+          "triggerDispatch": {
+            "mode": "generated-supported",
+            "dispatcherId": "cloudmarkup.event-trigger-dispatcher",
+            "dispatcherVersion": "1.0.0",
+            "dispatcherOperationId": "operation_event_sqs_consumer_dlq"
+          },
+          "unresolvedRequirementIds": [],
+          "behaviorContracts": [
+            {
+              "contractId": "contracts.sqs-consumer-dlq.behavior",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:df37eee3e98aada13fc07454150f6df12647ae1796b04f2ac261378e5f4239d3",
+              "contractKind": "behavior-operation"
+            }
+          ],
+          "languageFamily": "cloudmarkup.language.typescript",
+          "entrypoints": [
+            {
+              "entrypointId": "entrypoint_event_sqs_consumer_dlq",
+              "kind": "message-handler",
+              "operationId": "operation_event_sqs_consumer_dlq",
+              "handler": "index.handler"
+            }
+          ],
+          "httpRoutes": [],
+          "eventBindings": [
+            {
+              "bindingId": "event_event_sqs_consumer_dlq",
+              "direction": "inbound",
+              "transportKind": "message",
+              "operationId": "operation_event_sqs_consumer_dlq",
+              "edgeId": "edge_queue_consumer",
+              "contract": {
+                "contractId": "contracts.sqs-consumer-dlq.event",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:66643fdcbf206040bc734d26b855b9c7b73a4a5c22e7f8acd19488d9268ea670",
+                "contractKind": "event-message"
+              }
+            }
+          ],
+          "schedules": [],
+          "dataBindings": [],
+          "authorization": [],
+          "idempotency": [
+            {
+              "policyId": "idempotency_event_sqs_consumer_dlq",
+              "mode": "not-required",
+              "operationIds": ["operation_event_sqs_consumer_dlq"]
+            }
+          ],
+          "observability": {
+            "signals": ["logs"],
+            "healthChecks": [],
+            "smokeTests": []
+          },
+          "tests": [
+            {
+              "bindingId": "test_contract_event_sqs_consumer_dlq",
+              "level": "contract",
+              "testCase": {
+                "contractId": "contracts.sqs-consumer-dlq.test.contract",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:33497cd4b053f5e89daded9470e6fb4bb34c92a1632892bb9640a8d5664cf17e",
+                "contractKind": "test-case"
+              },
+              "requiredForCoverage": true
+            },
+            {
+              "bindingId": "test_unit_event_sqs_consumer_dlq",
+              "level": "unit",
+              "testCase": {
+                "contractId": "contracts.sqs-consumer-dlq.test.unit",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:6143fbf4786cad385b1d4c0e8758360f5c4e820d4ed29231f1cb4f4c442fb7e0",
+                "contractKind": "test-case"
+              },
+              "requiredForCoverage": true
+            }
+          ],
+          "sourceOwnership": [
+            {
+              "declarationId": "ownership_event_sqs_consumer_dlq_extension",
+              "path": "application/src/functions/event_sqs_consumer_dlq/extensions/custom.ts",
+              "pathKind": "file",
+              "ownership": "user-owned",
+              "ownerId": "application.sqs-consumer-dlq.owner",
+              "regeneration": "never",
+              "conflictBehavior": "preserve-user-content",
+              "semanticDiff": {
+                "strategy": "structured-language"
+              }
+            }
+          ],
+          "extensionPoints": [
+            {
+              "extensionPointId": "application.sqs-consumer-dlq.extensions",
+              "path": "application/src/functions/event_sqs_consumer_dlq/extensions/custom.ts",
+              "kind": "module",
+              "permittedOwnership": ["approved-extension", "user-owned"],
+              "conflictBehavior": "require-reviewed-resolution"
+            }
+          ],
+          "extensions": [],
+          "implementationRequirements": [],
+          "compatibility": {
+            "applicationGenerators": [
+              {
+                "generatorId": "cloudmarkup.event-application-generator",
+                "minimumVersion": "1.0.0",
+                "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+                "templateVersion": "1.0.0",
+                "supportedModes": [
+                  "complete-supported-pattern",
+                  "generated-starter"
+                ]
+              }
+            ],
+            "modelGateways": []
+          },
+          "provenance": {
+            "source": "deterministic-generator",
+            "generatorId": "cloudmarkup.event-application-generator",
+            "generatorVersion": "1.0.0",
+            "inputDigest": "sha256:2dd3c5fe5adf0640abb36dce3edbbbc93078fd94bccbe5ce16b3174d931996a0"
+          }
+        }
+      ]
+    }
+  },
+  "case": "sqs-consumer-dlq",
+  "solutionRevision": {
+    "aiExtensionIds": [],
+    "architecture": {
+      "contentHash": "sha256:2966f8f245acf5f4f24447a2c76b83eceef454e79d6c8127fe9a9b78aab2a447",
+      "documentHash": "sha256:e7020e6afa89ddf84c8d3e2178da57314716a8f13413f1c54c54fd64eb9533a9",
+      "documentKind": "cloudmarkup.architecture-document",
+      "revisionId": "revision_event_sqs_consumer_dlq_1",
+      "schemaVersion": 3,
+      "visualHash": "sha256:52dd5075f916c52cadd8f3beb41718fea7f49ace7bb1f37840c693113120efb6"
+    },
+    "assumptions": [],
+    "contractVersion": 1,
+    "contracts": {
+      "contentHash": "sha256:34ba986e3062713a9e61c8c2c179f7d1111424051485e7b6c4bc4844efcb6287",
+      "contractVersion": 1,
+      "recordHashes": [
+        "sha256:33497cd4b053f5e89daded9470e6fb4bb34c92a1632892bb9640a8d5664cf17e",
+        "sha256:6143fbf4786cad385b1d4c0e8758360f5c4e820d4ed29231f1cb4f4c442fb7e0",
+        "sha256:66643fdcbf206040bc734d26b855b9c7b73a4a5c22e7f8acd19488d9268ea670",
+        "sha256:7aa5b8009e098a09647adc7376a5a6c155c6caad64aa2ea74c0496ee72b03098",
+        "sha256:df37eee3e98aada13fc07454150f6df12647ae1796b04f2ac261378e5f4239d3"
+      ]
+    },
+    "createdAt": "2026-08-17T12:00:00Z",
+    "createdBy": "actor_fixture",
+    "evidenceIdsAtFreeze": [],
+    "externalResources": {
+      "contentHash": "sha256:d00b6bdfc2a7be5f2b6e7a2b010b0356c3f4ab42f12bca023b260482cac5798c",
+      "contractVersion": 1
+    },
+    "generationCoverage": {
+      "contractVersion": 1,
+      "evidence": [],
+      "missingRequirements": [
+        "deterministic-application-generation",
+        "application-build-and-tests",
+        "application-security-checks"
+      ],
+      "solutionRevisionId": "solution_notes_revision_1",
+      "state": "infrastructure-only",
+      "workloads": []
+    },
+    "intent": {
+      "reason": "This fixture exercises deterministic event application generation.",
+      "state": "not-applicable"
+    },
+    "issueIdsAtFreeze": [],
+    "kind": "cloudmarkup.solution-revision-manifest",
+    "repositoryObservations": [],
+    "solutionRevisionId": "solution_notes_revision_1",
+    "sourceOwnership": [],
+    "unresolvedDecisionIds": [],
+    "versions": {
+      "applicationGenerator": {
+        "state": "pinned",
+        "tool": {
+          "digest": "sha256:7cf9b85f31f427ac5f4dbe095bb227c10435fc86c84d8318ff41c88d5540e391",
+          "id": "cloudmarkup.event-application-generator",
+          "version": "1.0.0"
+        }
+      },
+      "catalog": {
+        "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+        "id": "aws.cloudmarkup.notes-api-catalog",
+        "version": "0.30.0"
+      },
+      "compiler": {
+        "state": "pinned",
+        "tool": {
+          "digest": "sha256:2c25a5610c825d171a167a38201c3090aa2278071ddd648bb957e67b7b98f203",
+          "id": "cloudmarkup.iac-compiler",
+          "version": "1.2.1"
+        }
+      },
+      "diagramRenderer": {
+        "state": "pinned",
+        "tool": {
+          "digest": "sha256:867c5704a20788af857059792e2427a88004f61ff66ede5c27f7236b7cb7f812",
+          "id": "cloudmarkup.diagram-renderer",
+          "version": "1.0.0"
+        }
+      },
+      "importer": {
+        "reason": "No repository import is used by the synthetic fixture.",
+        "state": "not-applicable"
+      },
+      "modelPrompt": {
+        "reason": "The deterministic generator never calls a model.",
+        "state": "not-applicable"
+      },
+      "policy": []
+    },
+    "workload": {
+      "contentHash": "sha256:70c365729fdd68d5200c3f58547bc72b83979cc54054e5642a045f5308537ea8",
+      "contractVersion": 2
+    }
+  },
+  "workloadBehavior": {
+    "contractVersion": 2,
+    "workloads": [
+      {
+        "id": "workload_event_sqs_consumer_dlq",
+        "owningNodeId": "lambda",
+        "implementation": {
+          "mode": "complete-supported-pattern",
+          "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+          "handler": "index.handler",
+          "sourceOwnership": "cloudmarkup",
+          "supportedPattern": {
+            "patternId": "cloudmarkup.pattern.aws-lambda-curated-event-driven",
+            "patternVersion": "1.0.0",
+            "digest": "sha256:b74c6d0c918d5dd3eac3485cb5004aece78e7dc9a9936f3ecbd85aa012a53686"
+          }
+        },
+        "operations": [
+          {
+            "id": "operation_event_sqs_consumer_dlq",
+            "capability": "cloudmarkup.event.sqs-consume",
+            "inputContract": {
+              "kind": "contract-reference",
+              "reference": {
+                "contractId": "contracts.sqs-consumer-dlq.event",
+                "contractVersion": "1.0.0",
+                "digest": "sha256:66643fdcbf206040bc734d26b855b9c7b73a4a5c22e7f8acd19488d9268ea670"
+              }
+            },
+            "outputContract": {
+              "kind": "none"
+            }
+          }
+        ],
+        "triggers": [
+          {
+            "id": "trigger_event_sqs_consumer_dlq",
+            "edgeId": "edge_queue_consumer",
+            "targetOperationId": "operation_event_sqs_consumer_dlq"
+          }
+        ],
+        "downstreamActions": [],
+        "environment": [
+          {
+            "id": "environment_stage",
+            "name": "APP_STAGE",
+            "value": {
+              "kind": "variable-reference",
+              "variableId": "variable_stage"
+            }
+          }
+        ],
+        "errorBehavior": {
+          "mode": "continue"
+        },
+        "executionAssumptions": {
+          "timeout": {
+            "kind": "duration",
+            "milliseconds": 30000
+          },
+          "retry": {
+            "kind": "bounded",
+            "maximumAttempts": 5
+          }
+        },
+        "triggerDispatch": {
+          "mode": "generated-supported",
+          "dispatcherId": "cloudmarkup.event-trigger-dispatcher",
+          "dispatcherVersion": "1.0.0",
+          "dispatcherOperationId": "operation_event_sqs_consumer_dlq"
+        },
+        "unresolvedRequirementIds": [],
+        "behaviorContracts": [
+          {
+            "contractId": "contracts.sqs-consumer-dlq.behavior",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:df37eee3e98aada13fc07454150f6df12647ae1796b04f2ac261378e5f4239d3",
+            "contractKind": "behavior-operation"
+          }
+        ],
+        "languageFamily": "cloudmarkup.language.typescript",
+        "entrypoints": [
+          {
+            "entrypointId": "entrypoint_event_sqs_consumer_dlq",
+            "kind": "message-handler",
+            "operationId": "operation_event_sqs_consumer_dlq",
+            "handler": "index.handler"
+          }
+        ],
+        "httpRoutes": [],
+        "eventBindings": [
+          {
+            "bindingId": "event_event_sqs_consumer_dlq",
+            "direction": "inbound",
+            "transportKind": "message",
+            "operationId": "operation_event_sqs_consumer_dlq",
+            "edgeId": "edge_queue_consumer",
+            "contract": {
+              "contractId": "contracts.sqs-consumer-dlq.event",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:66643fdcbf206040bc734d26b855b9c7b73a4a5c22e7f8acd19488d9268ea670",
+              "contractKind": "event-message"
+            }
+          }
+        ],
+        "schedules": [],
+        "dataBindings": [],
+        "authorization": [],
+        "idempotency": [
+          {
+            "policyId": "idempotency_event_sqs_consumer_dlq",
+            "mode": "not-required",
+            "operationIds": ["operation_event_sqs_consumer_dlq"]
+          }
+        ],
+        "observability": {
+          "signals": ["logs"],
+          "healthChecks": [],
+          "smokeTests": []
+        },
+        "tests": [
+          {
+            "bindingId": "test_contract_event_sqs_consumer_dlq",
+            "level": "contract",
+            "testCase": {
+              "contractId": "contracts.sqs-consumer-dlq.test.contract",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:33497cd4b053f5e89daded9470e6fb4bb34c92a1632892bb9640a8d5664cf17e",
+              "contractKind": "test-case"
+            },
+            "requiredForCoverage": true
+          },
+          {
+            "bindingId": "test_unit_event_sqs_consumer_dlq",
+            "level": "unit",
+            "testCase": {
+              "contractId": "contracts.sqs-consumer-dlq.test.unit",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:6143fbf4786cad385b1d4c0e8758360f5c4e820d4ed29231f1cb4f4c442fb7e0",
+              "contractKind": "test-case"
+            },
+            "requiredForCoverage": true
+          }
+        ],
+        "sourceOwnership": [
+          {
+            "declarationId": "ownership_event_sqs_consumer_dlq_extension",
+            "path": "application/src/functions/event_sqs_consumer_dlq/extensions/custom.ts",
+            "pathKind": "file",
+            "ownership": "user-owned",
+            "ownerId": "application.sqs-consumer-dlq.owner",
+            "regeneration": "never",
+            "conflictBehavior": "preserve-user-content",
+            "semanticDiff": {
+              "strategy": "structured-language"
+            }
+          }
+        ],
+        "extensionPoints": [
+          {
+            "extensionPointId": "application.sqs-consumer-dlq.extensions",
+            "path": "application/src/functions/event_sqs_consumer_dlq/extensions/custom.ts",
+            "kind": "module",
+            "permittedOwnership": ["approved-extension", "user-owned"],
+            "conflictBehavior": "require-reviewed-resolution"
+          }
+        ],
+        "extensions": [],
+        "implementationRequirements": [],
+        "compatibility": {
+          "applicationGenerators": [
+            {
+              "generatorId": "cloudmarkup.event-application-generator",
+              "minimumVersion": "1.0.0",
+              "templateId": "cloudmarkup.template.aws-lambda-curated-events-typescript",
+              "templateVersion": "1.0.0",
+              "supportedModes": [
+                "complete-supported-pattern",
+                "generated-starter"
+              ]
+            }
+          ],
+          "modelGateways": []
+        },
+        "provenance": {
+          "source": "deterministic-generator",
+          "generatorId": "cloudmarkup.event-application-generator",
+          "generatorVersion": "1.0.0",
+          "inputDigest": "sha256:2dd3c5fe5adf0640abb36dce3edbbbc93078fd94bccbe5ce16b3174d931996a0"
+        }
+      }
+    ]
+  }
+}

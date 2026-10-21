@@ -1,0 +1,1578 @@
+{
+  "kind": "cloudmarkup.architecture-document",
+  "documentId": "document_notes_api",
+  "architectureId": "architecture_notes_api",
+  "revision": {
+    "revisionId": "revision_notes_1",
+    "revisionNumber": 1,
+    "createdAt": "2026-08-17T12:00:00Z",
+    "createdBy": "actor_fixture",
+    "sourceDraftId": "draft_notes_1"
+  },
+  "provider": {
+    "id": "aws.cloudmarkup",
+    "region": "us-east-1"
+  },
+  "catalog": {
+    "id": "aws.cloudmarkup.notes-api-catalog",
+    "version": "0.30.0",
+    "digest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682"
+  },
+  "compilerCompatibility": {
+    "inputContractVersion": 1,
+    "minimumCompilerVersion": "1.0.0",
+    "maximumCompilerVersionExclusive": "2.0.0"
+  },
+  "metadata": {
+    "source": "template",
+    "serialization": {
+      "mediaType": "application/json",
+      "encoding": "utf-8",
+      "canonicalization": "cloudmarkup.canonical-json.v1"
+    }
+  },
+  "nodes": [
+    {
+      "id": "node_region_boundary",
+      "semantic": {
+        "deploymentKey": "region_boundary",
+        "serviceType": "aws.region.boundary",
+        "resourceType": "aws.region.boundary",
+        "configuration": {
+          "schemaId": "aws.region.boundary.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "regionName": {
+              "kind": "string",
+              "value": "us-east-1"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      "presentation": {
+        "label": "AWS Region",
+        "position": {
+          "x": 80,
+          "y": 80
+        }
+      }
+    },
+    {
+      "id": "node_lambda_function",
+      "semantic": {
+        "deploymentKey": "lambda_function",
+        "serviceType": "aws.lambda.function",
+        "resourceType": "aws.lambda.function",
+        "configuration": {
+          "schemaId": "aws.lambda.function.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "architecture": {
+              "kind": "string",
+              "value": "arm64"
+            },
+            "functionName": {
+              "kind": "string",
+              "value": "notes-api-handler"
+            },
+            "handler": {
+              "kind": "string",
+              "value": "index.handler"
+            },
+            "memoryMegabytes": {
+              "kind": "integer",
+              "value": 256
+            },
+            "reservedConcurrency": {
+              "kind": "integer",
+              "value": 10
+            },
+            "runtime": {
+              "kind": "string",
+              "value": "nodejs24.x"
+            },
+            "timeoutSeconds": {
+              "kind": "integer",
+              "value": 10
+            },
+            "tracingEnabled": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      "presentation": {
+        "label": "Lambda function",
+        "position": {
+          "x": 656,
+          "y": 80
+        }
+      }
+    },
+    {
+      "id": "node_iam_role",
+      "semantic": {
+        "deploymentKey": "iam_role",
+        "serviceType": "aws.iam.role",
+        "resourceType": "aws.iam.role",
+        "configuration": {
+          "schemaId": "aws.iam.role.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "maxSessionDurationSeconds": {
+              "kind": "integer",
+              "value": 3600
+            },
+            "roleName": {
+              "kind": "string",
+              "value": "notes-api-lambda-role"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      "presentation": {
+        "label": "IAM role",
+        "position": {
+          "x": 944,
+          "y": 80
+        }
+      }
+    },
+    {
+      "id": "node_cloudwatch_log_group",
+      "semantic": {
+        "deploymentKey": "cloudwatch_log_group",
+        "serviceType": "aws.cloudwatch.log-group",
+        "resourceType": "aws.cloudwatch.log-group",
+        "configuration": {
+          "schemaId": "aws.cloudwatch.log-group.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "logClass": {
+              "kind": "string",
+              "value": "STANDARD"
+            },
+            "logGroupName": {
+              "kind": "string",
+              "value": "/aws/lambda/notes-api-handler"
+            },
+            "preventDestroy": {
+              "kind": "boolean",
+              "value": true
+            },
+            "retentionDays": {
+              "kind": "integer",
+              "value": 30
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      "presentation": {
+        "label": "CloudWatch log group",
+        "position": {
+          "x": 656,
+          "y": 288
+        }
+      }
+    },
+    {
+      "id": "node_apigateway_http_api",
+      "semantic": {
+        "deploymentKey": "apigateway_http_api",
+        "serviceType": "aws.apigateway.http-api",
+        "resourceType": "aws.apigateway.http-api",
+        "configuration": {
+          "schemaId": "aws.apigateway.http-api.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "corsEnabled": {
+              "kind": "boolean",
+              "value": false
+            },
+            "jwtAuthorizationRequired": {
+              "kind": "boolean",
+              "value": true
+            },
+            "name": {
+              "kind": "string",
+              "value": "notes-api"
+            },
+            "protocolType": {
+              "kind": "string",
+              "value": "HTTP"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      "presentation": {
+        "label": "API Gateway HTTP API",
+        "position": {
+          "x": 944,
+          "y": 288
+        }
+      }
+    },
+    {
+      "id": "node_cognito_user_pool",
+      "semantic": {
+        "deploymentKey": "cognito_user_pool",
+        "serviceType": "aws.cognito.user-pool",
+        "resourceType": "aws.cognito.user-pool",
+        "configuration": {
+          "schemaId": "aws.cognito.user-pool.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "accountRecovery": {
+              "kind": "string",
+              "value": "verified_email_only"
+            },
+            "deletionProtectionEnabled": {
+              "kind": "boolean",
+              "value": true
+            },
+            "mfaMode": {
+              "kind": "string",
+              "value": "OPTIONAL"
+            },
+            "passwordMinimumLength": {
+              "kind": "integer",
+              "value": 12
+            },
+            "requirePasswordLowercase": {
+              "kind": "boolean",
+              "value": true
+            },
+            "requirePasswordNumbers": {
+              "kind": "boolean",
+              "value": true
+            },
+            "requirePasswordSymbols": {
+              "kind": "boolean",
+              "value": true
+            },
+            "requirePasswordUppercase": {
+              "kind": "boolean",
+              "value": true
+            },
+            "selfSignUpEnabled": {
+              "kind": "boolean",
+              "value": false
+            },
+            "signInAlias": {
+              "kind": "string",
+              "value": "email"
+            },
+            "userPoolName": {
+              "kind": "string",
+              "value": "notes-users"
+            },
+            "usernameCaseSensitive": {
+              "kind": "boolean",
+              "value": false
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      "presentation": {
+        "label": "Cognito user pool",
+        "position": {
+          "x": 80,
+          "y": 496
+        }
+      }
+    },
+    {
+      "id": "node_cognito_user_pool_client",
+      "semantic": {
+        "deploymentKey": "cognito_user_pool_client",
+        "serviceType": "aws.cognito.user-pool-client",
+        "resourceType": "aws.cognito.user-pool-client",
+        "configuration": {
+          "schemaId": "aws.cognito.user-pool-client.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "accessTokenValidityMinutes": {
+              "kind": "integer",
+              "value": 15
+            },
+            "allowRefreshTokenAuth": {
+              "kind": "boolean",
+              "value": true
+            },
+            "allowUserSrpAuth": {
+              "kind": "boolean",
+              "value": true
+            },
+            "clientName": {
+              "kind": "string",
+              "value": "notes-web"
+            },
+            "generateClientSecret": {
+              "kind": "boolean",
+              "value": false
+            },
+            "idTokenValidityMinutes": {
+              "kind": "integer",
+              "value": 15
+            },
+            "preventUserExistenceErrors": {
+              "kind": "boolean",
+              "value": true
+            },
+            "refreshTokenValidityDays": {
+              "kind": "integer",
+              "value": 30
+            }
+          }
+        },
+        "parent": {
+          "nodeId": "node_cognito_user_pool",
+          "relationshipType": "aws.cognito.contains-app-client"
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      },
+      "presentation": {
+        "label": "Cognito user pool app client",
+        "position": {
+          "x": 368,
+          "y": 496
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00023.node.lambda-trust-policy-document",
+      "semantic": {
+        "deploymentKey": "operation_no_content_00023_lambda_trust_policy_document",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "trust"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "LambdaTrustPolicy"
+            }
+          }
+        },
+        "parent": {
+          "nodeId": "node_iam_role",
+          "relationshipType": "aws.iam.role-owns-trust-policy"
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.iam.role-assumed-by-lambda",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00023",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00023.edge.connection"]
+          }
+        }
+      },
+      "presentation": {
+        "label": "Lambda trust policy",
+        "position": {
+          "x": 1104,
+          "y": 200
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00023.node.lambda-trust-policy",
+      "semantic": {
+        "deploymentKey": "operation_no_content_00023_lambda_trust_policy",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": ["sts:AssumeRole"]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": ["lambda.amazonaws.com"]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "LambdaTrust"
+            }
+          }
+        },
+        "parent": {
+          "nodeId": "operation_no_content_00023.node.lambda-trust-policy-document",
+          "relationshipType": "aws.iam.policy-contains-statement"
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.iam.role-assumed-by-lambda",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00023",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00023.edge.connection"]
+          }
+        }
+      },
+      "presentation": {
+        "label": "Lambda trust policy",
+        "position": {
+          "x": 1104,
+          "y": 200
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00024.node.logs-policy-document",
+      "semantic": {
+        "deploymentKey": "operation_no_content_00024_logs_policy_document",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "generated-permission"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "LambdaLogDelivery"
+            }
+          }
+        },
+        "parent": {
+          "nodeId": "node_iam_role",
+          "relationshipType": "aws.iam.role-owns-generated-permission"
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.lambda.writes-log-group",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00024",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00024.edge.connection"]
+          }
+        }
+      },
+      "presentation": {
+        "label": "Log delivery policy",
+        "position": {
+          "x": 1104,
+          "y": 200
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00024.node.logs-policy",
+      "semantic": {
+        "deploymentKey": "operation_no_content_00024_logs_policy",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": ["logs:CreateLogStream", "logs:PutLogEvents"]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "none"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceNode": {
+              "kind": "node-reference",
+              "nodeId": "node_cloudwatch_log_group",
+              "attribute": "aws.cloudwatch.log-group.arn"
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "LambdaLogDelivery"
+            }
+          }
+        },
+        "parent": {
+          "nodeId": "operation_no_content_00024.node.logs-policy-document",
+          "relationshipType": "aws.iam.policy-contains-statement"
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.lambda.writes-log-group",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00024",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00024.edge.connection"]
+          }
+        }
+      },
+      "presentation": {
+        "label": "Log delivery policy",
+        "position": {
+          "x": 1104,
+          "y": 200
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00027.node.lambda-service-grant-document",
+      "semantic": {
+        "deploymentKey": "operation_no_content_00027_lambda_service_grant_document",
+        "serviceType": "aws.iam.policy-document",
+        "resourceType": "aws.iam.policy-document",
+        "configuration": {
+          "schemaId": "aws.iam.policy-document.configuration",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "policyKind": {
+              "kind": "string",
+              "value": "service-grant"
+            },
+            "policyName": {
+              "kind": "string",
+              "value": "ApiGatewayInvokePermission"
+            }
+          }
+        },
+        "parent": {
+          "nodeId": "node_lambda_function",
+          "relationshipType": "aws.lambda.owns-invocation-permission"
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.apigateway.http-api-invokes-lambda",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00027",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00027.edge.connection"]
+          }
+        }
+      },
+      "presentation": {
+        "label": "API invocation grant",
+        "position": {
+          "x": 496,
+          "y": 200
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00027.node.lambda-service-grant",
+      "semantic": {
+        "deploymentKey": "operation_no_content_00027_lambda_service_grant",
+        "serviceType": "aws.iam.policy-statement",
+        "resourceType": "aws.iam.policy-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-statement.configuration",
+          "schemaVersion": "2.0.0",
+          "values": {
+            "actions": {
+              "kind": "string-list",
+              "value": ["lambda:InvokeFunction"]
+            },
+            "effect": {
+              "kind": "string",
+              "value": "allow"
+            },
+            "principalKind": {
+              "kind": "string",
+              "value": "service"
+            },
+            "principals": {
+              "kind": "string-list",
+              "value": ["apigateway.amazonaws.com"]
+            },
+            "resourceExpressions": {
+              "kind": "string-list",
+              "value": []
+            },
+            "resourceNode": {
+              "kind": "node-reference",
+              "nodeId": "node_lambda_function",
+              "attribute": "aws.lambda.function.arn"
+            },
+            "statementId": {
+              "kind": "string",
+              "value": "ApiGatewayInvokePermission"
+            }
+          }
+        },
+        "parent": {
+          "nodeId": "operation_no_content_00027.node.lambda-service-grant-document",
+          "relationshipType": "aws.iam.policy-contains-statement"
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.apigateway.http-api-invokes-lambda",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00027",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00027.edge.connection"]
+          }
+        }
+      },
+      "presentation": {
+        "label": "API invocation grant",
+        "position": {
+          "x": 496,
+          "y": 200
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_parent_node_cognito_user_pool_client",
+      "semantic": {
+        "source": {
+          "nodeId": "node_cognito_user_pool",
+          "port": "aws.cognito.user-pool.app-client-parent"
+        },
+        "target": {
+          "nodeId": "node_cognito_user_pool_client",
+          "port": "aws.cognito.user-pool-client.user-pool"
+        },
+        "relationshipType": "aws.cognito.contains-app-client",
+        "configuration": {
+          "schemaId": "aws.cognito.user-pool-client.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "user",
+          "origin": "user"
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00023.edge.connection",
+      "semantic": {
+        "source": {
+          "nodeId": "node_iam_role",
+          "port": "aws.iam.role.assumable-role"
+        },
+        "target": {
+          "nodeId": "node_lambda_function",
+          "port": "aws.lambda.function.execution-role"
+        },
+        "relationshipType": "aws.iam.role-assumed-by-lambda",
+        "configuration": {
+          "schemaId": "aws.iam.lambda-role.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.iam.role-assumed-by-lambda",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00023",
+            "dependentNodeIds": ["node_iam_role", "node_lambda_function"],
+            "dependentEdgeIds": []
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00023.edge.lambda-trust-policy-role",
+      "semantic": {
+        "source": {
+          "nodeId": "operation_no_content_00023.node.lambda-trust-policy-document",
+          "port": "aws.iam.policy-document.role-trust-policy"
+        },
+        "target": {
+          "nodeId": "node_iam_role",
+          "port": "aws.iam.role.trust-policy"
+        },
+        "relationshipType": "aws.iam.role-owns-trust-policy",
+        "configuration": {
+          "schemaId": "aws.iam.role-trust-policy.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.iam.role-assumed-by-lambda",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00023",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00023.edge.connection"]
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00023.edge.lambda-trust-policy-statement",
+      "semantic": {
+        "source": {
+          "nodeId": "operation_no_content_00023.node.lambda-trust-policy",
+          "port": "aws.iam.policy-statement.policy-document"
+        },
+        "target": {
+          "nodeId": "operation_no_content_00023.node.lambda-trust-policy-document",
+          "port": "aws.iam.policy-document.statement"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.iam.role-assumed-by-lambda",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00023",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00023.edge.connection"]
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00024.edge.connection",
+      "semantic": {
+        "source": {
+          "nodeId": "node_lambda_function",
+          "port": "aws.lambda.function.logging"
+        },
+        "target": {
+          "nodeId": "node_cloudwatch_log_group",
+          "port": "aws.cloudwatch.log-group.logs"
+        },
+        "relationshipType": "aws.lambda.writes-log-group",
+        "configuration": {
+          "schemaId": "aws.lambda.cloudwatch-logs.connection",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "deliveryMode": {
+              "kind": "string",
+              "value": "application-logs"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.lambda.writes-log-group",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00024",
+            "dependentNodeIds": [
+              "node_cloudwatch_log_group",
+              "node_lambda_function"
+            ],
+            "dependentEdgeIds": []
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00024.edge.logs-policy-role",
+      "semantic": {
+        "source": {
+          "nodeId": "operation_no_content_00024.node.logs-policy-document",
+          "port": "aws.iam.policy-document.role-generated-permission"
+        },
+        "target": {
+          "nodeId": "node_iam_role",
+          "port": "aws.iam.role.generated-permission"
+        },
+        "relationshipType": "aws.iam.role-owns-generated-permission",
+        "configuration": {
+          "schemaId": "aws.iam.role-generated-permission.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.lambda.writes-log-group",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00024",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00024.edge.connection"]
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00024.edge.logs-policy-statement",
+      "semantic": {
+        "source": {
+          "nodeId": "operation_no_content_00024.node.logs-policy",
+          "port": "aws.iam.policy-statement.policy-document"
+        },
+        "target": {
+          "nodeId": "operation_no_content_00024.node.logs-policy-document",
+          "port": "aws.iam.policy-document.statement"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.lambda.writes-log-group",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00024",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00024.edge.connection"]
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00024.edge.logs-policy-scope",
+      "semantic": {
+        "source": {
+          "nodeId": "operation_no_content_00024.node.logs-policy",
+          "port": "aws.iam.policy-statement.log-group-resource"
+        },
+        "target": {
+          "nodeId": "node_cloudwatch_log_group",
+          "port": "aws.cloudwatch.log-group.policy-resource"
+        },
+        "relationshipType": "aws.iam.authorizes-log-group",
+        "configuration": {
+          "schemaId": "aws.iam.policy-log-group.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.lambda.writes-log-group",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00024",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00024.edge.connection"]
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00025.edge.connection",
+      "semantic": {
+        "source": {
+          "nodeId": "node_cognito_user_pool",
+          "port": "aws.cognito.user-pool.jwt-issuer"
+        },
+        "target": {
+          "nodeId": "node_apigateway_http_api",
+          "port": "aws.apigateway.http-api.jwt-issuer"
+        },
+        "relationshipType": "aws.cognito.provides-jwt-issuer",
+        "configuration": {
+          "schemaId": "aws.cognito.jwt-issuer.connection",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "authorizerName": {
+              "kind": "string",
+              "value": "notesJwt"
+            },
+            "identitySource": {
+              "kind": "string",
+              "value": "$request.header.Authorization"
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cognito.user-pool-authorizes-http-api",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00025",
+            "dependentNodeIds": [
+              "node_apigateway_http_api",
+              "node_cognito_user_pool"
+            ],
+            "dependentEdgeIds": []
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00026.edge.connection",
+      "semantic": {
+        "source": {
+          "nodeId": "node_cognito_user_pool_client",
+          "port": "aws.cognito.user-pool-client.jwt-audience"
+        },
+        "target": {
+          "nodeId": "node_apigateway_http_api",
+          "port": "aws.apigateway.http-api.jwt-audience"
+        },
+        "relationshipType": "aws.cognito.provides-jwt-audience",
+        "configuration": {
+          "schemaId": "aws.cognito.jwt-audience.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.cognito.app-client-authorizes-http-api",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00026",
+            "dependentNodeIds": [
+              "node_apigateway_http_api",
+              "node_cognito_user_pool_client"
+            ],
+            "dependentEdgeIds": []
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00027.edge.connection",
+      "semantic": {
+        "source": {
+          "nodeId": "node_apigateway_http_api",
+          "port": "aws.apigateway.http-api.invocation"
+        },
+        "target": {
+          "nodeId": "node_lambda_function",
+          "port": "aws.lambda.function.synchronous-invocation"
+        },
+        "relationshipType": "aws.apigateway.integrates-lambda",
+        "configuration": {
+          "schemaId": "aws.apigateway.lambda-integration.connection",
+          "schemaVersion": "1.0.0",
+          "values": {
+            "payloadFormatVersion": {
+              "kind": "string",
+              "value": "2.0"
+            },
+            "routeKey": {
+              "kind": "string",
+              "value": "GET /status"
+            },
+            "timeoutMilliseconds": {
+              "kind": "integer",
+              "value": 10000
+            }
+          }
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.apigateway.http-api-invokes-lambda",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00027",
+            "dependentNodeIds": [
+              "node_apigateway_http_api",
+              "node_lambda_function"
+            ],
+            "dependentEdgeIds": []
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00027.edge.lambda-service-grant-owner",
+      "semantic": {
+        "source": {
+          "nodeId": "operation_no_content_00027.node.lambda-service-grant-document",
+          "port": "aws.iam.policy-document.lambda-service-grant"
+        },
+        "target": {
+          "nodeId": "node_lambda_function",
+          "port": "aws.lambda.function.invocation-permission"
+        },
+        "relationshipType": "aws.lambda.owns-invocation-permission",
+        "configuration": {
+          "schemaId": "aws.lambda.invocation-permission.attachment",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.apigateway.http-api-invokes-lambda",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00027",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00027.edge.connection"]
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00027.edge.lambda-service-grant-statement",
+      "semantic": {
+        "source": {
+          "nodeId": "operation_no_content_00027.node.lambda-service-grant",
+          "port": "aws.iam.policy-statement.policy-document"
+        },
+        "target": {
+          "nodeId": "operation_no_content_00027.node.lambda-service-grant-document",
+          "port": "aws.iam.policy-document.statement"
+        },
+        "relationshipType": "aws.iam.policy-contains-statement",
+        "configuration": {
+          "schemaId": "aws.iam.policy-membership.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.apigateway.http-api-invokes-lambda",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00027",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00027.edge.connection"]
+          }
+        }
+      }
+    },
+    {
+      "id": "operation_no_content_00027.edge.lambda-service-grant-scope",
+      "semantic": {
+        "source": {
+          "nodeId": "operation_no_content_00027.node.lambda-service-grant",
+          "port": "aws.iam.policy-statement.lambda-resource"
+        },
+        "target": {
+          "nodeId": "node_lambda_function",
+          "port": "aws.lambda.function.policy-resource"
+        },
+        "relationshipType": "aws.iam.authorizes-lambda-function",
+        "configuration": {
+          "schemaId": "aws.iam.policy-lambda.connection",
+          "schemaVersion": "1.0.0",
+          "values": {}
+        },
+        "lifecycle": {
+          "ownership": "generated",
+          "origin": "connection-rule",
+          "provenance": {
+            "generatorKind": "connection-rule",
+            "generatorId": "aws.apigateway.http-api-invokes-lambda",
+            "generatorVersion": "1.0.0",
+            "operationId": "operation_no_content_00027",
+            "dependentNodeIds": [],
+            "dependentEdgeIds": ["operation_no_content_00027.edge.connection"]
+          }
+        }
+      }
+    }
+  ],
+  "variables": [
+    {
+      "id": "variable_stage",
+      "key": "stage",
+      "valueType": "string",
+      "required": false,
+      "defaultValue": {
+        "kind": "string",
+        "value": "test"
+      }
+    }
+  ],
+  "outputs": [],
+  "assumptions": [],
+  "unresolvedRequirements": [],
+  "applicationContracts": {
+    "kind": "cloudmarkup.application-contracts",
+    "schemaVersion": 1,
+    "contractSetId": "architecture_blank_aws_editor_fixture",
+    "documentId": "document_notes_api",
+    "revision": {
+      "revisionId": "revision_notes_1",
+      "revisionNumber": 1,
+      "createdAt": "2026-08-17T12:00:00Z",
+      "createdBy": "actor_fixture"
+    },
+    "contracts": [
+      {
+        "contractId": "contracts.notes.auth",
+        "contractVersion": "1.0.0",
+        "displayName": "Notes authorization",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "auth",
+        "authenticationMethod": "oidc",
+        "claims": [
+          {
+            "name": "sub",
+            "source": "identity-token",
+            "valueType": "string",
+            "required": true,
+            "sensitive": false
+          }
+        ],
+        "roles": [
+          {
+            "roleId": "role_member",
+            "displayName": "Member",
+            "claimRequirements": [
+              {
+                "claimName": "sub",
+                "match": "present"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "contractId": "contracts.notes.create-route",
+        "contractVersion": "1.0.0",
+        "displayName": "create note route",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "http-api",
+        "method": "GET",
+        "pathTemplate": "/status",
+        "request": {
+          "parameters": []
+        },
+        "responses": [
+          {
+            "statusCode": 204,
+            "headers": [],
+            "description": "Empty response."
+          },
+          {
+            "statusCode": 400,
+            "headers": [],
+            "description": "Empty response."
+          },
+          {
+            "statusCode": 401,
+            "headers": [],
+            "description": "Empty response."
+          },
+          {
+            "statusCode": 403,
+            "headers": [],
+            "description": "Empty response."
+          },
+          {
+            "statusCode": 404,
+            "headers": [],
+            "description": "Empty response."
+          }
+        ],
+        "authentication": {
+          "contractId": "contracts.notes.auth",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+          "contractKind": "auth"
+        }
+      },
+      {
+        "contractId": "contracts.notes.create-operation",
+        "contractVersion": "1.0.0",
+        "displayName": "create note behavior",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "behavior-operation",
+        "capability": "application.http.authenticated-no-content",
+        "input": {
+          "kind": "none"
+        },
+        "output": {
+          "kind": "none"
+        },
+        "authorization": {
+          "authContract": {
+            "contractId": "contracts.notes.auth",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+            "contractKind": "auth"
+          },
+          "permittedRoleIds": ["role_member"]
+        },
+        "failureOutcomes": [
+          {
+            "category": "application.authorization",
+            "retryable": false,
+            "description": "Declared failure."
+          },
+          {
+            "category": "application.not-found",
+            "retryable": false,
+            "description": "Declared failure."
+          },
+          {
+            "category": "application.validation",
+            "retryable": false,
+            "description": "Declared failure."
+          }
+        ]
+      },
+      {
+        "contractId": "contracts.http.no-content-unit",
+        "contractVersion": "1.0.0",
+        "displayName": "unit create note test",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "test-case",
+        "level": "unit",
+        "target": {
+          "contractId": "contracts.notes.create-operation",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:094166000ba9423463c66d684531f339fdfce83f1346cf563d45bdeab2cfafba",
+          "contractKind": "behavior-operation"
+        },
+        "preconditions": [],
+        "fixtureReferences": [],
+        "expectations": [
+          {
+            "expectationId": "expect_authorization",
+            "kind": "error-category",
+            "category": "application.authorization"
+          }
+        ]
+      },
+      {
+        "contractId": "contracts.http.no-content-contract",
+        "contractVersion": "1.0.0",
+        "displayName": "unit create note test",
+        "provenance": {
+          "source": "designed",
+          "sourceReferenceIds": ["requirement_notes_api"],
+          "recordedAt": "2026-08-17T12:00:00Z",
+          "recordedBy": "actor_fixture"
+        },
+        "contractKind": "test-case",
+        "level": "contract",
+        "target": {
+          "contractId": "contracts.notes.create-operation",
+          "contractVersion": "1.0.0",
+          "digest": "sha256:094166000ba9423463c66d684531f339fdfce83f1346cf563d45bdeab2cfafba",
+          "contractKind": "behavior-operation"
+        },
+        "preconditions": [
+          {
+            "kind": "contract-available",
+            "contract": {
+              "contractId": "contracts.notes.create-route",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:714cdebe8fc7b5d5e5b879b115f0e947ddae4cce1f73ec65916aee6eb2bcbf01",
+              "contractKind": "http-api"
+            }
+          },
+          {
+            "kind": "authenticated-role",
+            "authContract": {
+              "contractId": "contracts.notes.auth",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+              "contractKind": "auth"
+            },
+            "roleId": "role_member"
+          }
+        ],
+        "fixtureReferences": [],
+        "expectations": [
+          {
+            "expectationId": "expect_no_content",
+            "kind": "http-status",
+            "statusCode": 204
+          }
+        ]
+      }
+    ]
+  },
+  "externalResources": {
+    "kind": "cloudmarkup.external-resource-reference-document",
+    "schemaVersion": 1,
+    "documentId": "document_notes_api",
+    "architectureId": "architecture_notes_api",
+    "revision": {
+      "revisionId": "revision_notes_1",
+      "revisionNumber": 1,
+      "createdAt": "2026-08-17T12:00:00Z",
+      "createdBy": "actor_fixture"
+    },
+    "resources": []
+  },
+  "schemaVersion": 3,
+  "workloadBehavior": {
+    "contractVersion": 2,
+    "workloads": [
+      {
+        "id": "workload_notes_api",
+        "owningNodeId": "node_lambda_function",
+        "implementation": {
+          "mode": "complete-supported-pattern",
+          "runtimeFamily": "aws.lambda.runtime-family.nodejs24",
+          "handler": "index.handler",
+          "sourceOwnership": "cloudmarkup",
+          "supportedPattern": {
+            "patternId": "pattern.aws.lambda.authenticated-http-no-content",
+            "patternVersion": "1.0.0",
+            "digest": "sha256:e13b99e92438caea30f2ec7a782d4d652095ab209cab44b51bdad29dc7f5c2f1"
+          }
+        },
+        "operations": [
+          {
+            "id": "operation_create_note",
+            "capability": "application.http.authenticated-no-content",
+            "inputContract": {
+              "kind": "none"
+            },
+            "outputContract": {
+              "kind": "none"
+            }
+          }
+        ],
+        "triggers": [
+          {
+            "id": "trigger_create",
+            "edgeId": "operation_no_content_00027.edge.connection",
+            "targetOperationId": "operation_create_note"
+          }
+        ],
+        "downstreamActions": [],
+        "environment": [],
+        "errorBehavior": {
+          "mode": "fail-invocation"
+        },
+        "executionAssumptions": {
+          "timeout": {
+            "kind": "duration",
+            "milliseconds": 10000
+          },
+          "retry": {
+            "kind": "none"
+          }
+        },
+        "triggerDispatch": {
+          "mode": "single"
+        },
+        "unresolvedRequirementIds": [],
+        "behaviorContracts": [
+          {
+            "contractId": "contracts.notes.create-operation",
+            "contractVersion": "1.0.0",
+            "digest": "sha256:094166000ba9423463c66d684531f339fdfce83f1346cf563d45bdeab2cfafba",
+            "contractKind": "behavior-operation"
+          }
+        ],
+        "languageFamily": "cloudmarkup.language.typescript",
+        "entrypoints": [
+          {
+            "entrypointId": "entrypoint_create",
+            "kind": "request-handler",
+            "operationId": "operation_create_note",
+            "handler": "index.handler"
+          }
+        ],
+        "httpRoutes": [
+          {
+            "routeId": "route_create_note",
+            "method": "GET",
+            "pathTemplate": "/status",
+            "operationId": "operation_create_note",
+            "triggerEdgeId": "operation_no_content_00027.edge.connection",
+            "contract": {
+              "contractId": "contracts.notes.create-route",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:714cdebe8fc7b5d5e5b879b115f0e947ddae4cce1f73ec65916aee6eb2bcbf01",
+              "contractKind": "http-api"
+            }
+          }
+        ],
+        "eventBindings": [],
+        "schedules": [],
+        "dataBindings": [],
+        "authorization": [
+          {
+            "bindingId": "authorization_create_member",
+            "authContract": {
+              "contractId": "contracts.notes.auth",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:9738a872a5d2f9d892b578a350385ad821a09e983e8a4190c63543532a917d4f",
+              "contractKind": "auth"
+            },
+            "operationIds": ["operation_create_note"],
+            "permittedRoleIds": ["role_member"],
+            "deniedBehavior": "reject"
+          }
+        ],
+        "idempotency": [
+          {
+            "policyId": "idempotency_create",
+            "mode": "not-required",
+            "operationIds": ["operation_create_note"]
+          }
+        ],
+        "observability": {
+          "signals": ["logs"],
+          "healthChecks": [],
+          "smokeTests": []
+        },
+        "tests": [
+          {
+            "bindingId": "test_no_content_0",
+            "level": "unit",
+            "testCase": {
+              "contractId": "contracts.http.no-content-unit",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:9b63bea4d950ebe5c444bac2a09e4b8c4656e45fb7f4f03d649639f8ce3bd7f6",
+              "contractKind": "test-case"
+            },
+            "requiredForCoverage": true
+          },
+          {
+            "bindingId": "test_no_content_1",
+            "level": "contract",
+            "testCase": {
+              "contractId": "contracts.http.no-content-contract",
+              "contractVersion": "1.0.0",
+              "digest": "sha256:16df0b7ccd797044d9f0367093d2f0dccacd74deb59fc93628a391abb18cd7e9",
+              "contractKind": "test-case"
+            },
+            "requiredForCoverage": true
+          }
+        ],
+        "sourceOwnership": [],
+        "extensionPoints": [],
+        "extensions": [],
+        "implementationRequirements": [],
+        "compatibility": {
+          "applicationGenerators": [
+            {
+              "generatorId": "generator.aws.lambda.http-no-content.typescript",
+              "minimumVersion": "1.0.0",
+              "templateId": "template.aws.lambda.http-no-content.typescript",
+              "templateVersion": "1.0.0",
+              "supportedModes": ["complete-supported-pattern"]
+            }
+          ],
+          "modelGateways": []
+        },
+        "provenance": {
+          "source": "deterministic-generator",
+          "generatorId": "generator.aws.lambda.http-no-content.typescript",
+          "generatorVersion": "1.0.0",
+          "inputDigest": "sha256:33489a488e6c86bef8641cd4e301f6b71cc17fcf13bf566cc49f247378c4b6c3"
+        }
+      }
+    ]
+  }
+}

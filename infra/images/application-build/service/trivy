@@ -1,0 +1,66 @@
+#!/bin/sh
+set -eu
+
+seed_dir=/opt/cloudmarkup/trivy-cache/db
+cache_root=/tmp/cloudmarkup-trivy-cache
+cache_dir="$cache_root/db"
+
+fail() {
+  echo "CloudMarkup frozen Trivy cache admission failed." >&2
+  exit 70
+}
+
+if { [ -e "$cache_root" ] || [ -L "$cache_root" ]; } &&
+  { [ -L "$cache_root" ] || [ ! -d "$cache_root" ]; }; then
+  fail
+fi
+mkdir -p "$cache_dir"
+if [ -L "$cache_dir" ] || [ ! -d "$cache_dir" ]; then
+  fail
+fi
+
+unexpected="$(
+  find "$cache_root" -mindepth 1 -maxdepth 1 ! -name db -print -quit
+)"
+if [ -n "$unexpected" ]; then
+  fail
+fi
+unexpected="$(
+  find "$cache_dir" -mindepth 1 -maxdepth 1 \
+    ! -name metadata.json ! -name trivy.db -print -quit
+)"
+if [ -n "$unexpected" ]; then
+  fail
+fi
+
+admit_file() {
+  name="$1"
+  seed="$seed_dir/$name"
+  target="$cache_dir/$name"
+  if [ ! -f "$seed" ] || [ -L "$seed" ] ||
+    [ "$(stat -c '%h' "$seed")" != "1" ]; then
+    fail
+  fi
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    if [ ! -f "$target" ] || [ -L "$target" ] ||
+      [ "$(stat -c '%h' "$target")" != "1" ] ||
+      ! cmp -s "$seed" "$target"; then
+      fail
+    fi
+    return
+  fi
+  temporary="$cache_dir/.$name.$$"
+  trap 'rm -f -- "$temporary"' EXIT HUP INT TERM
+  cp -- "$seed" "$temporary"
+  chmod 0600 "$temporary"
+  if ! cmp -s "$seed" "$temporary"; then
+    fail
+  fi
+  mv -f -- "$temporary" "$target"
+  trap - EXIT HUP INT TERM
+}
+
+admit_file metadata.json
+admit_file trivy.db
+export TRIVY_CACHE_DIR="$cache_root"
+exec /opt/cloudmarkup/toolchain/bin/trivy "$@"

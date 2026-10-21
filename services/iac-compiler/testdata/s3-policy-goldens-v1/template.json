@@ -1,0 +1,390 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "CloudMarkup deterministic curated serverless, networking, and event-driven application infrastructure.",
+  "Metadata": {
+    "CloudMarkup": {
+      "ArchitectureRevisionId": "revision_notes_1",
+      "CatalogDigest": "sha256:7bc6db32a69c5dd33ef85e02e2ebd38bb47333670259696165149ce39bcca682",
+      "CatalogVersion": "0.30.0",
+      "Compiler": "cloudmarkup.iac-compiler@1.2.1",
+      "SolutionRevisionId": "solution_notes_1"
+    }
+  },
+  "Parameters": {
+    "NotesHandlerArtifactBucketParameter": {
+      "Type": "String",
+      "Description": "S3 bucket containing the exact reviewed Lambda package.",
+      "AllowedPattern": "^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$",
+      "MinLength": 1
+    },
+    "NotesHandlerArtifactDigestParameter": {
+      "Type": "String",
+      "Description": "Base64-encoded SHA-256 of the exact reviewed Lambda package.",
+      "AllowedPattern": "^[A-Za-z0-9+/]{43}=$"
+    },
+    "NotesHandlerArtifactKeyParameter": {
+      "Type": "String",
+      "Description": "S3 object key containing the exact reviewed Lambda package.",
+      "AllowedPattern": "^.+$",
+      "MinLength": 1
+    },
+    "NotesHandlerArtifactVersionParameter": {
+      "Type": "String",
+      "Description": "Immutable S3 object version for the exact reviewed Lambda package.",
+      "AllowedPattern": "^.+$",
+      "MinLength": 1
+    }
+  },
+  "Resources": {
+    "NotesHandler": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "arm64"
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "NotesHandlerArtifactBucketParameter"
+          },
+          "S3Key": {
+            "Ref": "NotesHandlerArtifactKeyParameter"
+          },
+          "S3ObjectVersion": {
+            "Ref": "NotesHandlerArtifactVersionParameter"
+          }
+        },
+        "Description": "CloudMarkup notes-API workload.",
+        "FunctionName": "notes-api-handler",
+        "Handler": "index.handler",
+        "MemorySize": 256,
+        "ReservedConcurrentExecutions": 10,
+        "Role": {
+          "Fn::GetAtt": [
+            "NotesRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs24.x",
+        "Tags": {
+          "CloudMarkupArchitecture": "architecture_notes",
+          "CloudMarkupRevision": "revision_notes_1",
+          "CloudMarkupSolutionRevision": "solution_notes_1",
+          "ManagedBy": "CloudMarkup"
+        },
+        "Timeout": 10,
+        "TracingConfig": {
+          "Mode": "Active"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "ApplicationArtifact": {
+            "Base64Sha256Parameter": {
+              "Ref": "NotesHandlerArtifactDigestParameter"
+            },
+            "ImplementationMode": "infrastructure-only",
+            "Path": "application/artifacts/workload_notes/function.zip",
+            "Readiness": "application-generation-pending-prompt-45a",
+            "WorkloadId": "workload_notes"
+          },
+          "DeploymentKey": "notes_handler",
+          "GraphId": "lambda",
+          "Ownership": "user",
+          "TargetKey": "notes_handler"
+        }
+      }
+    },
+    "NotesRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Sid": "trustpolicy"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Description": "CloudMarkup notes-API Lambda execution role.",
+        "MaxSessionDuration": 3600,
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:ListBucket"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "Uploads",
+                        "Arn"
+                      ]
+                    }
+                  ],
+                  "Sid": "bucketaccess"
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "bucket_access"
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:ListBucket",
+                    "s3:PutObject"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "Uploads",
+                        "Arn"
+                      ]
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          {
+                            "Fn::GetAtt": [
+                              "Uploads",
+                              "Arn"
+                            ]
+                          },
+                          "/*"
+                        ]
+                      ]
+                    }
+                  ],
+                  "Sid": "mixedaccess"
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "mixed_access"
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:DeleteObject",
+                    "s3:GetObject",
+                    "s3:PutObject"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          {
+                            "Fn::GetAtt": [
+                              "Uploads",
+                              "Arn"
+                            ]
+                          },
+                          "/*"
+                        ]
+                      ]
+                    }
+                  ],
+                  "Sid": "objectaccess"
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "object_access"
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:DeleteObject"
+                  ],
+                  "Effect": "Deny",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          {
+                            "Fn::GetAtt": [
+                              "Uploads",
+                              "Arn"
+                            ]
+                          },
+                          "/*"
+                        ]
+                      ]
+                    }
+                  ],
+                  "Sid": "objectdeny"
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "object_deny"
+          }
+        ],
+        "RoleName": "notes-api-lambda-role",
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ]
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "notes_role",
+          "GraphId": "role",
+          "Ownership": "user",
+          "TargetKey": "notes_role"
+        }
+      }
+    },
+    "S3Permission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "NotesHandler"
+        },
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        },
+        "SourceArn": {
+          "Fn::Sub": "arn:${AWS::Partition}:s3:::cloudmarkup-image-uploads"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "s3_permission",
+          "GraphId": "s3_permission",
+          "Ownership": "generated",
+          "TargetKey": "s3_permission"
+        }
+      }
+    },
+    "Uploads": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "BucketName": "cloudmarkup-image-uploads",
+        "NotificationConfiguration": {
+          "LambdaConfigurations": [
+            {
+              "Event": "s3:ObjectCreated:*",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "prefix",
+                      "Value": "incoming/"
+                    },
+                    {
+                      "Name": "suffix",
+                      "Value": ".jpg"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "NotesHandler",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "BucketOwnerEnforced"
+            }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "Tags": [
+          {
+            "Key": "CloudMarkupArchitecture",
+            "Value": "architecture_notes"
+          },
+          {
+            "Key": "CloudMarkupRevision",
+            "Value": "revision_notes_1"
+          },
+          {
+            "Key": "CloudMarkupSolutionRevision",
+            "Value": "solution_notes_1"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CloudMarkup"
+          }
+        ],
+        "VersioningConfiguration": {
+          "Status": "Enabled"
+        }
+      },
+      "Metadata": {
+        "CloudMarkup": {
+          "DeploymentKey": "uploads",
+          "GraphId": "upload_bucket",
+          "Ownership": "user",
+          "TargetKey": "uploads"
+        }
+      },
+      "DependsOn": [
+        "S3Permission"
+      ],
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    }
+  }
+}
