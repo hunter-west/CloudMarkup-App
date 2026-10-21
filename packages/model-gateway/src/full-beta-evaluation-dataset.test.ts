@@ -23,6 +23,15 @@ const catalog: unknown = JSON.parse(
     "utf8",
   ),
 );
+const historicalCatalog: unknown = JSON.parse(
+  readFileSync(
+    new URL(
+      "../../provider-aws/src/model-evaluation-source/catalog-71-v1.json",
+      import.meta.url,
+    ),
+    "utf8",
+  ),
+);
 describe("frozen full beta evaluation source", () => {
   it("keeps the checked source mirror byte-derived from canonical metadata", () => {
     const mirrored: unknown = JSON.parse(
@@ -80,6 +89,9 @@ describe("frozen full beta evaluation source", () => {
   });
   it("preserves the historical 71-service input and binds the current 73-service artifact separately", () => {
     expect(() => {
+      assertFullBetaEvaluationCatalogV1(historicalCatalog);
+    }).not.toThrow();
+    expect(() => {
       assertRegionalWafEvaluationCatalogV1(catalog);
     }).not.toThrow();
     expect(() => {
@@ -113,34 +125,39 @@ describe("frozen full beta evaluation source", () => {
     "changed-schema",
     "rehashed-schema",
   ])("rejects %s drift before source preparation", (change) => {
-    const modified = JSON.parse(JSON.stringify(catalog)) as {
-      digest: string;
-      catalog: { version: string };
-      services: {
-        configuration: {
-          schemaVersion: string;
-          jsonSchema: { properties: Record<string, unknown> };
-        };
-      }[];
-    };
-    const first = modified.services[0];
-    if (first === undefined) throw Error("Missing catalog service");
-    if (change === "old-catalog") modified.catalog.version = "0.10.0";
-    else if (change === "missing-service") modified.services.pop();
-    else if (change === "extra-field")
-      first.configuration.jsonSchema.properties["inventedField"] = {
-        type: "string",
+    for (const [source, assertCatalog] of [
+      [catalog, assertRegionalWafEvaluationCatalogV1],
+      [historicalCatalog, assertFullBetaEvaluationCatalogV1],
+    ] as const) {
+      const modified = JSON.parse(JSON.stringify(source)) as {
+        digest: string;
+        catalog: { version: string };
+        services: {
+          configuration: {
+            schemaVersion: string;
+            jsonSchema: { properties: Record<string, unknown> };
+          };
+        }[];
       };
-    else first.configuration.schemaVersion = "99.0.0";
-    if (change === "rehashed-schema") {
-      const body = Object.fromEntries(
-        Object.entries(modified).filter(([key]) => key !== "digest"),
-      );
-      modified.digest = digestCanonicalValue(body);
+      const first = modified.services[0];
+      if (first === undefined) throw Error("Missing catalog service");
+      if (change === "old-catalog") modified.catalog.version = "0.10.0";
+      else if (change === "missing-service") modified.services.pop();
+      else if (change === "extra-field")
+        first.configuration.jsonSchema.properties["inventedField"] = {
+          type: "string",
+        };
+      else first.configuration.schemaVersion = "99.0.0";
+      if (change === "rehashed-schema") {
+        const body = Object.fromEntries(
+          Object.entries(modified).filter(([key]) => key !== "digest"),
+        );
+        modified.digest = digestCanonicalValue(body);
+      }
+      expect(() => {
+        assertCatalog(modified);
+      }).toThrow();
     }
-    expect(() => {
-      assertRegionalWafEvaluationCatalogV1(modified);
-    }).toThrow();
   });
 });
 

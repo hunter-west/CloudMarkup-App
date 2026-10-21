@@ -2,7 +2,7 @@ import {
   getArchitectureDocumentContentHash,
   parseArchitectureDocument,
 } from "@cloudmarkup/domain";
-import { resolveAwsCurrentCatalogV1 } from "@cloudmarkup/provider-aws";
+import { resolveAwsModelCatalogV1 } from "@cloudmarkup/provider-aws";
 import { validateProviderConfigurationV1 } from "@cloudmarkup/provider-sdk";
 import {
   digestCanonicalValue,
@@ -31,7 +31,7 @@ export function inspectModelLiveEventCoverage(raw: unknown) {
   const document = parseArchitectureDocument(raw);
   const awsCatalogV1 = (() => {
     try {
-      return resolveAwsCurrentCatalogV1(document.catalog).catalog;
+      return resolveAwsModelCatalogV1(document.catalog).catalog;
     } catch {
       throw Error("The current event evaluation catalog is unavailable.");
     }

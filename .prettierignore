@@ -48,5 +48,9 @@ services/iac-compiler/testdata/ebs-goldens-v1/
 packages/provider-aws/fixtures/waf-v1/
 services/iac-compiler/testdata/waf-goldens-v1/
 
+# Exact historical model-input artifacts; integrity is checked by their reader.
+packages/provider-aws/src/model-evaluation-source/catalog-71-v1.json
+packages/provider-aws/src/model-evaluation-source/service-extension-71-v1.json
+
 # Compact source-bound authorization receipt.
 apps/api/authorization-proposals/ordinary-local-business-acl.json

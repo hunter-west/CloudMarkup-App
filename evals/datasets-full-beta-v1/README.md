@@ -5,8 +5,8 @@
 > design.
 
 This immutable input source contains all 21 required case families and binds all
-71 installed AWS 0.30.0 services and their configuration schemas. It does not
-contain observations, an evaluation report, promotion or hosted evidence.
+71 historical AWS 0.30.0 definitions and their configuration schemas. It does
+not contain observations, an evaluation report, promotion or hosted evidence.
 
 The conflicting-requirements case now exercises intent.extract under the
 Standard low-cost-extraction-help role. The private-network case requests
@@ -26,11 +26,15 @@ After building schemas and ModelGateway, run:
 node evals/datasets-full-beta-v1/generate.mjs --check
 ```
 
-The generator rehashes the actual installed catalog before comparing its exact
-identity and each configuration schema/key. Catalog drift requires a new
+The generator rehashes the actual historical catalog retained under
+`packages/provider-aws/src/model-evaluation-source/` before comparing its exact
+identity and each configuration schema/key. Its original bytes include the old
+ALB definition and validation rules; filtering two WAF definitions out of the
+current catalog cannot reproduce it. Current catalog drift requires a separately
 reviewed source version; do not overwrite old frozen expectations after seeing a
-provider result. The focused source test also checks this mirror as part of the
-normal test gate.
+provider result. The focused source test checks the historical mirror and
+rejects the current catalog under this historical binding. The successor source
+checks the current catalog independently.
 
 Superseded source versions 1.0.0 through 1.3.0 remain in Git history (private
 historical evidence, omitted from this distribution). They have no current

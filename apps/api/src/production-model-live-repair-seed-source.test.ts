@@ -14,10 +14,8 @@ import {
   digestCanonicalValue,
   workloadImplementationV2Schema,
 } from "@cloudmarkup/schemas";
-import {
-  frozenFullBetaEvaluationDatasetV1,
-  fullBetaEvaluationCatalogV1,
-} from "@cloudmarkup/model-gateway";
+import { frozenFullBetaEvaluationDatasetV1 } from "@cloudmarkup/model-gateway";
+import { AWS_CURRENT_CATALOG_BINDING_V1 } from "@cloudmarkup/provider-aws";
 import {
   bindProductionRepairSeedCaseV1,
   createProductionRepairSeedSourceV1,
@@ -87,11 +85,11 @@ describe("fixed host-synthetic repair seed source", () => {
       "aws.dynamodb.table",
       "aws.lambda.function",
     ]);
-    expect(request.architectureDocument.catalog).toEqual({
-      id: fullBetaEvaluationCatalogV1.id,
-      version: fullBetaEvaluationCatalogV1.version,
-      digest: fullBetaEvaluationCatalogV1.digest,
-    });
+    // This is a newly generated host-synthetic scaffold, not historical model
+    // evidence. Its exact input follows the installed generator/catalog.
+    expect(request.architectureDocument.catalog).toEqual(
+      AWS_CURRENT_CATALOG_BINDING_V1,
+    );
     expect(request.architectureDocument.edges).toHaveLength(3);
     expect(
       request.architectureDocument.applicationContracts.contracts,

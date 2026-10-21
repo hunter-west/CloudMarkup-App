@@ -1,4 +1,4 @@
-import { resolveAwsCurrentCatalogV1 } from "@cloudmarkup/provider-aws";
+import { resolveAwsModelCatalogV1 } from "@cloudmarkup/provider-aws";
 import { awsConnectionRuleRegistrationsV1 } from "@cloudmarkup/provider-aws/connection-resolution";
 import { createProviderConnectionResolverV1 } from "@cloudmarkup/provider-sdk";
 import {
@@ -15,7 +15,7 @@ export function createSyntheticPrivateVpcGraph(validateConfigurations = false) {
   });
   if (source.operation !== "operations.propose") throw Error("Wrong source");
   const doc = structuredClone(source.architecture);
-  const awsCatalogV1 = resolveAwsCurrentCatalogV1(doc.catalog).catalog;
+  const awsCatalogV1 = resolveAwsModelCatalogV1(doc.catalog).catalog;
   const awsConnectionResolverV1 = createProviderConnectionResolverV1(
     awsCatalogV1.artifact,
     awsConnectionRuleRegistrationsV1.filter((registration) =>

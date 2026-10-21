@@ -1,5 +1,9 @@
 import { validateModelResponseAuthority } from "@cloudmarkup/model-gateway";
-import { AWS_CATALOG_DIGEST_V1, awsCatalogV1 } from "@cloudmarkup/provider-aws";
+import {
+  AWS_CATALOG_DIGEST_V1,
+  AWS_FROZEN_MODEL_CATALOG_BINDING_V1,
+  awsCatalogV1,
+} from "@cloudmarkup/provider-aws";
 import {
   architectureDocumentV3Schema,
   configurationKeySchema,
@@ -142,7 +146,13 @@ describe("real AWS catalog for AI planning", () => {
     const before = digestCanonicalValue(awsCatalogV1.artifact);
     const catalog = createProductionAiCatalogGrounding();
     expect(catalog.catalog.digest).toBe(AWS_CATALOG_DIGEST_V1);
-    expect(catalog.nodes).toHaveLength(71);
+    expect(catalog.nodes).toHaveLength(73);
+    expect(() =>
+      createProductionAiCatalogGrounding(AWS_FROZEN_MODEL_CATALOG_BINDING_V1),
+    ).toThrow("unsupported AWS catalog");
+    expect(
+      createBoundAiCatalogGrounding(AWS_FROZEN_MODEL_CATALOG_BINDING_V1).nodes,
+    ).toHaveLength(71);
     expect(catalog.nodes.map((node) => node.serviceType)).toEqual(
       awsCatalogV1.listServices().map((service) => service.id),
     );

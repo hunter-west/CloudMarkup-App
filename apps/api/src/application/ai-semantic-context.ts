@@ -4,7 +4,7 @@ import {
   getArchitectureDocumentHashes,
 } from "@cloudmarkup/domain";
 import { inspectModelValueForSecretCandidatesV1 } from "@cloudmarkup/model-gateway";
-import { resolveAwsCurrentCatalogV1 } from "@cloudmarkup/provider-aws";
+import { resolveAwsModelCatalogV1 } from "@cloudmarkup/provider-aws";
 import { awsValidationRulesV1 } from "@cloudmarkup/provider-aws/validation";
 import {
   isReviewedLiteralConfigurationPropertyV1,
@@ -311,7 +311,7 @@ export function projectAiSemanticContextV3(
   selectedIssue?: z.infer<typeof betaInfrastructureSelectedIssueV1Schema>,
 ) {
   const document = architectureDocumentV3Schema.parse(raw);
-  const { catalog } = resolveAwsCurrentCatalogV1(document.catalog);
+  const { catalog } = resolveAwsModelCatalogV1(document.catalog);
   if (document.provider.id !== catalog.artifact.provider.id)
     throw new Error(
       "AI context provider does not match its immutable catalog.",

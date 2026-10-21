@@ -67,7 +67,7 @@ describe("production operations request from current catalog and approved RAM co
         target,
         createProductionAiCatalogGrounding().catalog,
       );
-      expect(authority.targetReadiness).toHaveLength(71);
+      expect(authority.targetReadiness).toHaveLength(73);
       expect(authority.validationRules.map((entry) => entry.ruleId)).toEqual(
         awsValidationRuleRegistrationsV1.map((entry) => entry.descriptor.id),
       );

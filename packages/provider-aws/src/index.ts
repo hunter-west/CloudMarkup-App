@@ -52,3 +52,8 @@ export {
   resolveAwsCurrentCatalogV1,
   type AwsCatalogBindingV1,
 } from "./current-catalog.js";
+
+export {
+  AWS_FROZEN_MODEL_CATALOG_BINDING_V1,
+  resolveAwsModelCatalogV1,
+} from "./model-evaluation-catalog.js";

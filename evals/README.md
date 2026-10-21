@@ -4,11 +4,14 @@
 > records are omitted here; the retained text describes the original decision or
 > design.
 
-The current [full beta source](datasets-full-beta-v1/README.md) adds a
+The frozen [full beta source](datasets-full-beta-v1/README.md) contains a
 separately versioned 21-family dataset with Intent extraction and the exact
-38-service AWS 0.15.0 catalog. It is input data only. Genuine family validation,
-hosted report issuance and promotion remain tracked in the current evaluation
-plan. The historical suites below retain their original scope and artifacts.
+71-definition AWS 0.30.0 catalog. Its historical catalog artifact remains
+available for exact model-input interpretation. The separately versioned
+[regional WAF input](datasets-regional-waf-v1/README.md) binds the current
+73-definition catalog. Both are input data only. Deterministic catalog support
+does not issue provider observations, a hosted report or model promotion. The
+historical suites below retain their original scope and artifacts.
 
 Prompt 38 evaluation assets live here. The canonical source for the frozen
 synthetic dataset is `frozenModelEvaluationDatasetV1` in

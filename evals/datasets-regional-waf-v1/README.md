@@ -30,13 +30,21 @@ update the reviewed projection, old inputs, an evaluation policy or a report.
 The source test rejects altered artifacts even when the caller supplies a newly
 computed digest.
 
-Fresh actual invocation envelopes, input counts, catalog-bound authority,
-validator evidence and a separately reviewed admitting policy are still
-required. Current report projection remains bound to full-beta 1.5.0 and cannot
-admit this input by substituting its source/dataset digest. The original
-installed-71-service assertion and source generator are intentionally preserved;
-their current-catalog failure remains until a reviewed verification transition
-and the required qualification are admitted together.
+The historical source generator verifies the retained exact 71-definition
+artifact. This successor generator and its source tests verify the installed
+73-definition artifact. Both reject a substituted catalog, including changes to
+existing definitions or validation rules. Historical model grounding resolves
+only the original exact binding; current grounding defaults to the installed
+catalog. The explicitly current-only resolver and native compiler do not admit
+the historical artifact.
+
+Deterministic configuration, connection validation and native CloudFormation
+export admission use these structural checks and their owning tests. Model
+quality remains a separate gate. Fresh actual invocation envelopes, input
+counts, catalog-bound authority, validator evidence and a separately reviewed
+admitting policy are required for model qualification. Current report projection
+remains bound to full-beta 1.5.0 and cannot admit this input by substituting its
+source/dataset digest.
 
 `pnpm eval:model:deterministic` remains the existing fake-only harness. It does
 not evaluate this successor against a provider. There is no executable live

@@ -1,6 +1,7 @@
 import {
   AWS_CURRENT_CATALOG_BINDING_V1,
   AWS_IAM_POLICY_RESOURCE_SCOPES_V1,
+  resolveAwsModelCatalogV1,
   resolveAwsCurrentCatalogV1,
   type AwsCatalogBindingV1,
 } from "@cloudmarkup/provider-aws";
@@ -67,7 +68,7 @@ function configurationAuthority(
 export function createProductionAiCatalogGrounding(
   binding: AwsCatalogBindingV1 = AWS_CURRENT_CATALOG_BINDING_V1,
 ) {
-  const { catalog: awsCatalogV1 } = resolveAwsCurrentCatalogV1(binding);
+  const { catalog: awsCatalogV1 } = resolveAwsModelCatalogV1(binding);
   const services = awsCatalogV1.listServices();
   // A frozen catalog cannot acquire reference authority from newer services.
   const installedServiceTypes = new Set(services.map((service) => service.id));
@@ -123,4 +124,11 @@ export function createProductionAiCatalogGrounding(
   });
 }
 
-export { createProductionAiCatalogGrounding as createCurrentProductionAiCatalogGrounding };
+/** Current planning stays current-only even when historical model inputs are
+ * readable through the explicit immutable-binding entry above. */
+export function createCurrentProductionAiCatalogGrounding(
+  binding: AwsCatalogBindingV1 = AWS_CURRENT_CATALOG_BINDING_V1,
+) {
+  resolveAwsCurrentCatalogV1(binding);
+  return createProductionAiCatalogGrounding(binding);
+}

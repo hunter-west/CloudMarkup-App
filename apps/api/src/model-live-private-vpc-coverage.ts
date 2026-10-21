@@ -2,7 +2,7 @@ import {
   getArchitectureDocumentContentHash,
   parseArchitectureDocument,
 } from "@cloudmarkup/domain";
-import { resolveAwsCurrentCatalogV1 } from "@cloudmarkup/provider-aws";
+import { resolveAwsModelCatalogV1 } from "@cloudmarkup/provider-aws";
 import {
   digestCanonicalValue,
   type ArchitectureDocumentV3,
@@ -85,7 +85,7 @@ export function inspectModelLivePrivateVpcCoverage(value: unknown) {
   const document = parseArchitectureDocument(value);
   const awsCatalogV1 = (() => {
     try {
-      return resolveAwsCurrentCatalogV1(document.catalog).catalog;
+      return resolveAwsModelCatalogV1(document.catalog).catalog;
     } catch {
       throw Error(
         "The current private-network evaluation catalog is unavailable.",

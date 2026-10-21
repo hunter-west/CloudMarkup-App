@@ -28,8 +28,27 @@ Configuration schema version changes require explicit review of a lossless
 adaptation. Unknown fields, unavailable services, removed ports, changed schema
 identities and invalid values retain the original project with issue paths,
 recovery download and migration guidance. They are never filtered or guessed.
-Normal export validation and exact revision bindings remain required. Historical
-catalog snapshots and arbitrary migration dispatch are not installed.
+Normal export validation and exact revision bindings remain required. The editor
+and native compiler install one current catalog; they do not dispatch arbitrary
+historical migrations.
+
+## Frozen model inputs
+
+`resolveAwsModelCatalogV1` provides read-only interpretation of two exact
+bindings: the current catalog and the frozen 71-definition model-input catalog.
+The latter uses the original catalog and service-extension bytes retained under
+`src/model-evaluation-source/`, with complete artifact digests verified before
+constructing immutable accessors. It is not a reconstructed subset of the
+current catalog. Unknown or relabeled bindings fail closed. Its no-argument
+default is the current catalog; `resolveAwsCurrentCatalogV1` remains
+current-only.
+
+Historical model request construction and read-only coverage checks use the
+explicit frozen binding. Historical assessor bytes and executable current-only
+validator checks remain unchanged; this reader does not qualify live assessment.
+This reader grants no graph mutation, compiler compatibility, provider
+invocation, commercial reservation, report issuance or model promotion. Existing
+evaluation inputs, policies and receipts keep their original commitments.
 
 ## Source and generated outputs
 

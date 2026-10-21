@@ -5,7 +5,6 @@ import {
   modelEvaluationDatasetV1Schema,
 } from "@cloudmarkup/schemas";
 import {
-  assertFullBetaEvaluationCatalogV1,
   frozenFullBetaEvaluationDatasetV1,
   fullBetaEvaluationCatalogV1,
 } from "./full-beta-evaluation-dataset.js";
@@ -93,9 +92,6 @@ describe("regional WAF catalog evaluation input successor", () => {
     expect(() => {
       assertRegionalWafEvaluationCatalogV1(catalog);
     }).not.toThrow();
-    expect(() => {
-      assertFullBetaEvaluationCatalogV1(catalog);
-    }).toThrow("differs from the frozen full beta evaluation source");
     expect(Object.isFrozen(regionalWafEvaluationCatalogV1.services)).toBe(true);
     expect(
       Object.isFrozen(frozenRegionalWafEvaluationDatasetV1.cases[0]?.expected),

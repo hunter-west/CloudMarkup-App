@@ -3,7 +3,7 @@ import { inspectModelValueForSecretCandidatesV1 } from "@cloudmarkup/model-gatew
 import {
   AWS_CURRENT_CATALOG_BINDING_V1,
   awsValidationRuleRegistrationsV1,
-  resolveAwsCurrentCatalogV1,
+  resolveAwsModelCatalogV1,
   type AwsCatalogBindingV1,
 } from "@cloudmarkup/provider-aws";
 import {
@@ -55,6 +55,7 @@ const ruleKinds: Readonly<
   "aws.cloudmarkup.validation.cloudfront-readiness": "target-readiness",
   "aws.cloudmarkup.validation.elb-readiness": "target-readiness",
   "aws.cloudmarkup.validation.ebs-readiness": "target-readiness",
+  "aws.cloudmarkup.validation.regional-waf-readiness": "target-readiness",
 };
 function requirePlanning(value: boolean): asserts value {
   if (!value)
@@ -70,7 +71,7 @@ export function productionAiPlanningCatalogAuthority(
   binding: AwsCatalogBindingV1 = AWS_CURRENT_CATALOG_BINDING_V1,
 ) {
   const { catalog: awsCatalogV1, serviceExtension: awsServiceExtensionV1 } =
-    resolveAwsCurrentCatalogV1(binding);
+    resolveAwsModelCatalogV1(binding);
   const grounding = createProductionAiCatalogGrounding(binding);
   requirePlanning(
     digestCanonicalValue(awsServiceExtensionV1.artifact.catalog) ===

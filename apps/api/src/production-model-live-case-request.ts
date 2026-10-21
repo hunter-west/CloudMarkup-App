@@ -7,7 +7,7 @@ import {
   frozenTypedPlanningFullBetaEvaluationDatasetV1,
   fullBetaEvaluationCatalogV1,
 } from "@cloudmarkup/model-gateway";
-import { resolveAwsCurrentCatalogV1 } from "@cloudmarkup/provider-aws";
+import { resolveAwsModelCatalogV1 } from "@cloudmarkup/provider-aws";
 import {
   modelBlockingQuestionsRequestV1Schema,
   modelIntentExtractionRequestV1Schema,
@@ -260,7 +260,7 @@ function createCaseRequest(input: {
     throw new Error(
       "The installed catalog differs from the frozen evaluation source.",
     );
-  const region = resolveAwsCurrentCatalogV1(
+  const region = resolveAwsModelCatalogV1(
     fullBetaEvaluationCatalogV1,
   ).catalog.requireService("aws.region.boundary");
   const architecture = parseArchitectureDocument({
