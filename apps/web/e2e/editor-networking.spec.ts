@@ -1755,11 +1755,9 @@ test("turns nested network boundaries into readable overview tiles as the canvas
     .poll(async () =>
       subnet
         .locator(".architecture-boundary-heading")
-        .evaluate(
-          (heading) => heading.scrollHeight <= heading.clientHeight + 1,
-        ),
+        .evaluate((heading) => heading.scrollHeight - heading.clientHeight),
     )
-    .toBe(true);
+    .toBeLessThanOrEqual(1);
   await expect(
     editor(page).locator(
       ".architecture-node--boundary .architecture-connection-dock:not(.architecture-connection-dock--aggregate):not(.architecture-connection-anchor)",
