@@ -36,6 +36,7 @@ export {
   awsServiceExtensionV1,
 } from "./service-extension-v1-accessors.js";
 export {
+  createAwsFrozenModelEvaluationRulesV1,
   awsValidationRuleRegistrationsV1,
   awsValidationRulesV1,
   createAwsValidationRuleRegistrationsV1,

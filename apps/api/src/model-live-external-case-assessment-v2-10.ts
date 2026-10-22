@@ -18,7 +18,7 @@ import {
   modelEvaluationMeasurementV1Schema,
   type ModelEvaluationMeasurementV1,
 } from "@cloudmarkup/model-gateway";
-import { awsValidationRulesV1 } from "@cloudmarkup/provider-aws/validation";
+import { createAwsFrozenModelEvaluationRulesV1 } from "@cloudmarkup/provider-aws/validation";
 import { createProductionModelLiveCaseRequest } from "./production-model-live-case-request.js";
 import { prepareModelLiveRepositoryInput } from "./model-live-repository-input.js";
 import type { PinnedCompilerConfiguration } from "./adapters/pinned-go-executable.js";
@@ -185,7 +185,7 @@ export async function assessModelLiveExternalCaseV2_10(
       ...options.proposal,
       dependencies: {
         ...options.proposal.dependencies,
-        validationRules: awsValidationRulesV1,
+        validationRules: createAwsFrozenModelEvaluationRulesV1(),
       },
     },
   });

@@ -62,11 +62,19 @@ it("registers exact 0059 and preserves the actual parser predecessor guards", as
   ).toEqual([29, 3]);
 });
 
-it("preserves the exact historical 2.8 assessor bytes", async () => {
+it("binds the historical 2.8 assessor to its exact frozen validation source", async () => {
   const bytes = await readFile(
     new URL("../../model-live-event-case-assessment.ts", import.meta.url),
   );
+  // The WAF catalog successor must not make the frozen 71-service assessment
+  // execute the installed current rules. Stored receipts remain immutable.
+  expect(bytes.toString("utf8")).toContain(
+    "validationRules: createAwsFrozenModelEvaluationRulesV1()",
+  );
+  expect(bytes.toString("utf8")).toContain(
+    "const evaluationCatalog = resolveAwsModelCatalogV1(",
+  );
   expect(createHash("sha256").update(bytes).digest("hex")).toBe(
-    "bea6f86537b8147f729423e7435769a882d5b4d99d09b4cc21a884572dfa88fd",
+    "930c87ca808c19cc641cc1c56885b18b37d6a6652cda71d01bf8583b628b4fe7",
   );
 });

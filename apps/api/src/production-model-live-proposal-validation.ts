@@ -12,7 +12,10 @@ import {
   type ModelLiveRuntimeControlExecutionInputV2,
   type ModelProviderInvocationV1,
 } from "@cloudmarkup/model-gateway";
-import { awsValidationRulesV1 } from "@cloudmarkup/provider-aws/validation";
+import {
+  awsValidationRulesV1,
+  createAwsFrozenModelEvaluationRulesV1,
+} from "@cloudmarkup/provider-aws/validation";
 import {
   modelOperationProposalResponseV1Schema,
   modelIntentExtractionResponseV1Schema,
@@ -203,6 +206,19 @@ export async function prepareProductionModelLiveProposalValidation(input: {
   const evaluationCase = frozenFullBetaEvaluationDatasetV1.cases.find(
     (c) => c.caseId === execution.admissionRequest.evaluationCaseId,
   );
+  // The immutable evaluation input is assessed with its own exact catalog
+  // rules. Other requests continue to use the installed current rules.
+  const validationRules =
+    evaluationCase !== undefined &&
+    same(
+      request,
+      createProductionModelLiveCaseRequest({
+        caseId: evaluationCase.caseId,
+        requestedMode: request.requestedMode,
+      }),
+    )
+      ? createAwsFrozenModelEvaluationRulesV1()
+      : awsValidationRulesV1;
   if (evaluationCase?.caseKind === "event-driven-image-processing")
     selectModelLiveEventValidatorVersion(
       execution.plan.definition.policy.evaluationRequirement,
@@ -249,7 +265,7 @@ export async function prepareProductionModelLiveProposalValidation(input: {
         ...(repositoryCompiler === undefined ? {} : { repositoryCompiler }),
         dependencies: {
           allowedApprovalPathIds,
-          validationRules: awsValidationRulesV1,
+          validationRules,
         },
         authorization: {
           authorizeStart: async (candidate) => {

@@ -35,6 +35,10 @@ import { createSecretReadinessRuleV1 } from "./secret-readiness-rule.js";
 
 import { awsCatalogArtifactV1 } from "../catalog-v1-accessors.js";
 import {
+  AWS_FROZEN_MODEL_CATALOG_BINDING_V1,
+  resolveAwsModelCatalogV1,
+} from "../model-evaluation-catalog.js";
+import {
   apiRouteAuthenticationValidationRuleDescriptor,
   compilerReadinessValidationRuleDescriptor,
   connectionCardinalityValidationRuleDescriptor,
@@ -243,6 +247,22 @@ export const awsValidationRuleRegistrationsV1 =
 export const awsValidationRulesV1 = Object.freeze(
   awsValidationRuleRegistrationsV1.map((registration) => registration.rule),
 );
+
+/** Validation of the exact frozen model-evaluation input only. This does not
+ * install historical rules for mutable projects or current-catalog admission. */
+export function createAwsFrozenModelEvaluationRulesV1() {
+  const { catalog } = resolveAwsModelCatalogV1(
+    AWS_FROZEN_MODEL_CATALOG_BINDING_V1,
+  );
+  return Object.freeze(
+    createAwsValidationRuleRegistrationsV1(catalog.artifact)
+      .filter(
+        ({ descriptor }) =>
+          catalog.getValidationRule(descriptor.id) !== undefined,
+      )
+      .map(({ rule }) => rule),
+  );
+}
 
 export type { AwsValidationCatalogV1 } from "./rule-helpers.js";
 export {

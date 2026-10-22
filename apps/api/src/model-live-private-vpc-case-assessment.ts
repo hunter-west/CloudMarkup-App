@@ -3,12 +3,13 @@ import {
   assessSolutionProposalPreferencesV2,
   digestStructuredValue,
   frozenFullBetaEvaluationDatasetV1,
+  fullBetaEvaluationCatalogV1,
   modelLiveIntentCaseAssessmentV2Schema,
   modelEvaluationMeasurementV1Schema,
   type ModelEvaluationMeasurementV1,
 } from "@cloudmarkup/model-gateway";
-import { awsCatalogV1 } from "@cloudmarkup/provider-aws/catalog";
-import { awsValidationRulesV1 } from "@cloudmarkup/provider-aws/validation";
+import { resolveAwsModelCatalogV1 } from "@cloudmarkup/provider-aws";
+import { createAwsFrozenModelEvaluationRulesV1 } from "@cloudmarkup/provider-aws/validation";
 import { modelEvaluationCaseV1Schema } from "@cloudmarkup/schemas";
 import { inspectModelLivePrivateVpcCoverage } from "./model-live-private-vpc-coverage.js";
 import { requireProductionModelLiveCaseSource } from "./production-model-live-case-source.js";
@@ -130,14 +131,23 @@ export async function assessModelLivePrivateVpcCaseV2(
       ),
       dimensions,
     ) ||
-    !same(request.catalogGrounding, createProductionAiCatalogGrounding()) ||
+    !same(
+      request.catalogGrounding,
+      createProductionAiCatalogGrounding(fullBetaEvaluationCatalogV1),
+    ) ||
     !same(
       planning.validationRules,
-      productionAiPlanningCatalogAuthority(planning.target).validationRules,
+      productionAiPlanningCatalogAuthority(
+        planning.target,
+        fullBetaEvaluationCatalogV1,
+      ).validationRules,
     ) ||
     !same(
       planning.targetReadiness,
-      productionAiPlanningCatalogAuthority(planning.target).targetReadiness,
+      productionAiPlanningCatalogAuthority(
+        planning.target,
+        fullBetaEvaluationCatalogV1,
+      ).targetReadiness,
     )
   )
     throw Error("The complete current private-network case is unavailable.");
@@ -145,13 +155,16 @@ export async function assessModelLivePrivateVpcCaseV2(
     evaluationCase,
     invocation: { request, descriptor: options.proposal.result.descriptor },
   });
+  const evaluationCatalog = resolveAwsModelCatalogV1(
+    fullBetaEvaluationCatalogV1,
+  ).catalog;
   const preferences = await assessSolutionProposalPreferencesV2({
     ...options,
     proposal: {
       ...options.proposal,
       dependencies: {
         ...options.proposal.dependencies,
-        validationRules: awsValidationRulesV1,
+        validationRules: createAwsFrozenModelEvaluationRulesV1(),
       },
     },
   });
@@ -164,7 +177,7 @@ export async function assessModelLivePrivateVpcCaseV2(
   );
   const unsupported: boolean[] = [];
   for (const node of candidate.nodes) {
-    const service = awsCatalogV1.getService(node.semantic.serviceType);
+    const service = evaluationCatalog.getService(node.semantic.serviceType);
     unsupported.push(
       service?.configuration.schemaId !==
         node.semantic.configuration.schemaId ||
@@ -181,7 +194,7 @@ export async function assessModelLivePrivateVpcCaseV2(
     );
   }
   for (const edge of candidate.edges) {
-    const rule = awsCatalogV1
+    const rule = evaluationCatalog
       .listConnectionRules()
       .find((r) => r.relationshipType === edge.semantic.relationshipType);
     unsupported.push(

@@ -8,7 +8,7 @@ import {
   type ModelEvaluationMeasurementV1,
 } from "@cloudmarkup/model-gateway";
 import { awsCatalogV1 } from "@cloudmarkup/provider-aws/catalog";
-import { awsValidationRulesV1 } from "@cloudmarkup/provider-aws/validation";
+import { createAwsFrozenModelEvaluationRulesV1 } from "@cloudmarkup/provider-aws/validation";
 import { createProductionModelLiveCaseRequest } from "./production-model-live-case-request.js";
 
 const commonDimensions = [
@@ -162,7 +162,7 @@ export async function assessModelLiveBoundedRefusalCaseV2(
       ...options.proposal,
       dependencies: {
         ...options.proposal.dependencies,
-        validationRules: awsValidationRulesV1,
+        validationRules: createAwsFrozenModelEvaluationRulesV1(),
       },
     },
   });

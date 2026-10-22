@@ -21,6 +21,10 @@ import type {
 } from "@cloudmarkup/provider-sdk";
 import type { ConfigurationValue } from "@cloudmarkup/schemas";
 import { resolveAwsCurrentCatalogV1 } from "../current-catalog.js";
+import {
+  AWS_FROZEN_MODEL_CATALOG_BINDING_V1,
+  resolveAwsModelCatalogV1,
+} from "../model-evaluation-catalog.js";
 
 export type AwsValidationNode = NonNullable<
   ValidationRuleContextV1["document"]
@@ -35,7 +39,7 @@ export type AwsConfigurationValue = ConfigurationValue;
 
 export type AwsValidationCatalogV1 = Pick<
   ProviderCatalogArtifactV1,
-  "catalog" | "provider" | "services" | "connectionRules"
+  "catalog" | "digest" | "provider" | "services" | "connectionRules"
 >;
 
 export interface AwsValidationRuleDefinition {
@@ -73,8 +77,22 @@ export function defineAwsValidationRuleV1(
     input: "architecture-document",
     applicability,
     evaluate(context) {
-      if (context.document)
-        resolveAwsCurrentCatalogV1(context.document.catalog);
+      if (context.document) {
+        if (
+          definition.catalog.digest ===
+          AWS_FROZEN_MODEL_CATALOG_BINDING_V1.digest
+        ) {
+          const { catalog } = resolveAwsModelCatalogV1(
+            context.document.catalog,
+          );
+          if (catalog.artifact.digest !== definition.catalog.digest)
+            throw new Error(
+              "The frozen validation catalog binding is unavailable.",
+            );
+        } else {
+          resolveAwsCurrentCatalogV1(context.document.catalog);
+        }
+      }
       return definition.evaluate(context);
     },
   });

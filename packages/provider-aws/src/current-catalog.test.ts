@@ -9,6 +9,10 @@ import {
   AWS_CURRENT_CATALOG_BINDING_V1,
   resolveAwsCurrentCatalogV1,
 } from "./current-catalog.js";
+import {
+  awsValidationRulesV1,
+  createAwsFrozenModelEvaluationRulesV1,
+} from "./validation/index.js";
 describe("installed current AWS catalog", () => {
   it("binds all current services and service metadata to their verified digest", () => {
     const current = resolveAwsCurrentCatalogV1();
@@ -74,5 +78,19 @@ describe("installed current AWS catalog", () => {
           ...change,
         }),
       ).toThrow("unsupported AWS catalog");
+  });
+  it("uses only frozen descriptors for historical model assessment while retaining current rules", () => {
+    const historical = resolveAwsModelCatalogV1(
+      AWS_FROZEN_MODEL_CATALOG_BINDING_V1,
+    ).catalog;
+    expect(
+      createAwsFrozenModelEvaluationRulesV1().map((rule) => rule.id),
+    ).toEqual(
+      awsValidationRulesV1
+        .map((rule) => rule.id)
+        .filter((id) => historical.getValidationRule(id) !== undefined),
+    );
+    expect(awsValidationRulesV1).toHaveLength(34);
+    expect(createAwsFrozenModelEvaluationRulesV1()).toHaveLength(33);
   });
 });
