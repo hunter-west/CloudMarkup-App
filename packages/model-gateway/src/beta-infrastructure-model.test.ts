@@ -425,6 +425,44 @@ it("reports only allowlisted schema fields for an invalid model response", async
   expect(onFailure.mock.calls).toEqual([
     ["invalid-response", { validationFields: ["resources"] }],
   ]);
+
+  const invalidRoot = {
+    ...proposal,
+    contractVersion: 5,
+    existingResources: [],
+    updates: [],
+    review: {
+      intent: "Review",
+      assumptions: [],
+      checks: ["Checked"],
+      questions: ["private prompt and tenant identity"],
+    },
+  };
+  send.mockResolvedValueOnce({
+    stopReason: "tool_use",
+    output: {
+      message: {
+        content: [
+          { toolUse: { name: "infrastructure_proposal", input: invalidRoot } },
+        ],
+      },
+    },
+  });
+  await expect(
+    createBetaInfrastructureModel({ onFailure })({
+      requirements: "private prompt and tenant identity",
+      proposalVersion: 5,
+      catalog: {},
+      signal: new AbortController().signal,
+    }),
+  ).rejects.toThrow();
+  expect(onFailure).toHaveBeenLastCalledWith("invalid-response", {
+    validationFields: ["root"],
+    validationRules: ["blocking-question"],
+  });
+  expect(JSON.stringify(onFailure.mock.calls)).not.toContain(
+    "private prompt and tenant identity",
+  );
 });
 
 it("selects a bounded v5 tool without changing the legacy request path", async () => {
