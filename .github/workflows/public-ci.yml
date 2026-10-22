@@ -85,8 +85,18 @@ jobs:
       - name:
           Verify existing editor and light/dark authenticated browser journeys
         run:
-          pnpm test:e2e && pnpm test:e2e:typed-backend && pnpm
-          test:e2e:solution-export
+          pnpm test:e2e --grep-invert 'AWS networking visual baselines' && pnpm
+          test:e2e:typed-backend && pnpm test:e2e:solution-export
+
+      - name: Verify reviewed Linux networking visuals
+        run: |
+          docker run --rm --init \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/repo" \
+            --workdir /repo \
+            --env CI=true \
+            --env TURBO_TELEMETRY_DISABLED=1 \
+            mcr.microsoft.com/playwright@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48 \
+            bash -lc 'corepack enable && pnpm exec playwright test --config config/playwright/default.config.ts apps/web/e2e/editor-networking.visual.spec.ts'
 
       - name: Retain synthetic networking screenshots on browser failure
         if: failure()

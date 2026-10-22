@@ -2927,7 +2927,7 @@ button.architecture-tree__button:hover {
 }
 .architecture-node--boundary[data-condensed-heading="true"]
   .architecture-boundary-heading {
-  gap: calc(2px * var(--boundary-heading-scale, 1));
+  gap: 0;
   padding-block-end: 0;
 }
 .architecture-node--boundary[data-condensed-heading="true"]
