@@ -35,6 +35,18 @@ const proposalFields = new Set([
   "updates",
   "review",
 ]);
+const rootValidationRules: Readonly<Record<string, string>> = {
+  "Resource keys and existing node references must be unique.":
+    "resource-identity",
+  "Parents must precede children in the proposal.": "parent-order",
+  "Connections must reference distinct declared resources.":
+    "connection-reference",
+  "Updates require unique existing resources and bounded nonempty settings.":
+    "update-binding",
+  "A proposal requires changes, a substantive assessment or a question to resolve.":
+    "empty-assessment",
+  "Resolve blocking questions before proposing changes.": "blocking-question",
+};
 
 function proposalSchemaForVersion(version: 1 | 2 | 3 | 4 | 5 | 6 = 1) {
   return version === 6
@@ -50,13 +62,16 @@ function proposalSchemaForVersion(version: 1 | 2 | 3 | 4 | 5 | 6 = 1) {
             : betaInfrastructureProposalV1Schema;
 }
 
-function sanitizedValidationFields(
+function sanitizedValidationDiagnostic(
   version: 1 | 2 | 3 | 4 | 5 | 6 | undefined,
   value: unknown,
-): readonly string[] {
+): {
+  readonly validationFields: readonly string[];
+  readonly validationRules?: readonly string[];
+} {
   const result = proposalSchemaForVersion(version).safeParse(value);
-  if (result.success) return ["root"];
-  return [
+  if (result.success) return { validationFields: ["root"] };
+  const validationFields = [
     ...new Set(
       result.error.issues.map((issue) => {
         const field = issue.path[0];
@@ -66,6 +81,21 @@ function sanitizedValidationFields(
       }),
     ),
   ].sort();
+  const validationRules = [
+    ...new Set(
+      result.error.issues
+        .filter((issue) => issue.path.length === 0)
+        .map((issue) =>
+          issue.code === "custom"
+            ? (rootValidationRules[issue.message] ?? "root-constraint")
+            : "root-shape",
+        ),
+    ),
+  ].sort();
+  return {
+    validationFields,
+    ...(validationRules.length === 0 ? {} : { validationRules }),
+  };
 }
 
 export function requireBetaConverseUsage(
@@ -134,7 +164,10 @@ export function createBetaInfrastructureModel(
         | "incomplete-response"
         | "invalid-response"
         | "unavailable",
-      diagnostic?: { readonly validationFields: readonly string[] },
+      diagnostic?: {
+        readonly validationFields: readonly string[];
+        readonly validationRules?: readonly string[];
+      },
     ) => void;
   } = {},
 ) {
@@ -190,12 +223,10 @@ export function createBetaInfrastructureModel(
                     ? "incomplete-response"
                     : "unavailable";
       if (reason === "invalid-response")
-        options.onFailure?.(reason, {
-          validationFields: sanitizedValidationFields(
-            input.proposalVersion,
-            responseInput,
-          ),
-        });
+        options.onFailure?.(
+          reason,
+          sanitizedValidationDiagnostic(input.proposalVersion, responseInput),
+        );
       else options.onFailure?.(reason);
       throw error;
     }
