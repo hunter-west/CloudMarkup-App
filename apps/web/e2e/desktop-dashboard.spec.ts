@@ -648,12 +648,23 @@ test("loads the editor without flashing navigation and puts Canvas actions on th
   const service = page.locator(".architecture-node--service").first();
   await expect(service).toHaveCSS("transition-property", "box-shadow");
   await expect(service).toHaveCSS("transition-delay", "0s");
-  await expect(service.locator(".architecture-service-details")).toHaveCSS(
+  await expect(service.locator(".architecture-service-details")).toHaveCount(0);
+  const serviceToggle = service.locator(".architecture-service-toggle");
+  await service.hover();
+  await serviceToggle.click();
+  const serviceDetails = page.locator(
+    ".architecture-service-floating-toolbar .architecture-service-details",
+  );
+  await expect(serviceDetails).toBeVisible();
+  await expect(serviceDetails).toHaveCSS(
     "animation-name",
-    "none",
+    "architecture-service-open",
   );
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(service).toHaveCSS("transition-duration", "0s");
+  await expect(serviceDetails).toHaveCSS("animation-name", "none");
+  await serviceToggle.click();
+  await expect(serviceDetails).toHaveCount(0);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.mouse.move(800, 400);
   await page.mouse.wheel(0, 100);
