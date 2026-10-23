@@ -6,6 +6,14 @@ services, typed connections, workload intent and deterministic
 Terraform/CloudFormation generation. AI contributes proposals; deterministic
 domain logic and explicit review control what becomes an approved design.
 
+**Website:** [cloudmarkup.com](https://cloudmarkup.com/) has the product
+overview and walkthroughs.
+[Try the hosted beta](https://beta.cloudmarkup.com/login) to use the separately
+deployed service; its available capabilities follow its deployed release. To run
+this application yourself, use the
+[local editor quickstart](#try-the-editor-locally) or the
+[persisted standalone guide](scripts/self-host/README.md).
+
 ![Cloud Markup editor with a synthetic architecture and AWS service catalog](docs/images/editor-synthetic-preview.png)
 
 _Editor preview using a synthetic test fixture. The catalog, canvas and local
@@ -14,10 +22,10 @@ deployed._
 
 ## Try the editor locally
 
-The initial public application repository destination is
+The public application source is
 [`hunter-west/CloudMarkup-App`](https://github.com/hunter-west/CloudMarkup-App).
-Install Node.js **24.18.0** and pnpm **11.16.0**. After publication, clone the
-application source and run:
+Install Node.js **24.18.0** and pnpm **11.16.0**. Clone the application source
+and run:
 
 ```sh
 git clone https://github.com/hunter-west/CloudMarkup-App.git
