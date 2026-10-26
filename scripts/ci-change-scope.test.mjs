@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { mkdtemp, mkdir, writeFile, rename, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve, relative } from "node:path";
@@ -597,14 +598,48 @@ test("revision selection reads the complete exact diff and exact-source workspac
   );
 });
 
-test("committed workspace project selection matches real web and UI dependency boundaries", () => {
+test("source workspace project selection matches real web and UI dependency boundaries", () => {
   const revision = execFileSync("git", ["rev-parse", "HEAD"], {
     encoding: "utf8",
   }).trim();
+  const committedFiles = execFileSync(
+    "git",
+    ["ls-tree", "-r", "--name-only", revision],
+    { encoding: "utf8" },
+  )
+    .trim()
+    .split("\n");
+  const sparsePrivateCheckout = !committedFiles.includes("pnpm-workspace.yaml");
+  const composedFiles = sparsePrivateCheckout
+    ? JSON.parse(
+        readFileSync(".cache/application-source-intake/manifest.json", "utf8"),
+      ).files.map(({ path }) => path)
+    : committedFiles;
+  const workspace = sparsePrivateCheckout
+    ? {
+        files: composedFiles,
+        packages: composedFiles
+          .filter((path) =>
+            /^(?:apps|packages|infra)\/[^/]+\/package\.json$/u.test(path),
+          )
+          .map((path) => ({
+            root: path.slice(0, -13),
+            manifest: JSON.parse(readFileSync(path, "utf8")),
+          })),
+        projects: readVitestProjects(readFileSync("vitest.config.ts", "utf8")),
+      }
+    : undefined;
   for (const [path, expected] of [
     ["apps/web/src/main.tsx", ["web"]],
     ["packages/ui/src/index.ts", ["ui", "web"]],
   ]) {
+    if (sparsePrivateCheckout) {
+      assert.deepEqual(
+        impactedTestProjects(Buffer.from(record(path)), workspace),
+        expected,
+      );
+      continue;
+    }
     const git = (command, args, options) => {
       if (args[0] === "merge-base") return Buffer.alloc(0);
       if (args[0] === "diff") return Buffer.from(record(path));
