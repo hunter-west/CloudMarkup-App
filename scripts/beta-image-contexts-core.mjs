@@ -1855,7 +1855,15 @@ async function validateApplicationBindings({
   );
   exactKeys(
     toolchainPackage,
-    ["dependencies", "name", "packageManager", "private", "type", "version"],
+    [
+      "dependencies",
+      "license",
+      "name",
+      "packageManager",
+      "private",
+      "type",
+      "version",
+    ],
     toolchainPackagePath,
   );
   exactKeys(
@@ -1876,6 +1884,7 @@ async function validateApplicationBindings({
     toolchainPackage.name !==
       "@cloudmarkup/application-build-image-toolchain" ||
     toolchainPackage.version !== "1.0.0" ||
+    toolchainPackage.license !== "Apache-2.0" ||
     toolchainPackage.private !== true ||
     toolchainPackage.type !== "module" ||
     toolchainPackage.packageManager !== "pnpm@11.16.0" ||
