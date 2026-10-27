@@ -1,0 +1,282 @@
+name: Public native application proofs
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  normalization:
+    name: Actual native compiler normalization and cleanup
+    if:
+      github.repository == 'hunter-west/CloudMarkup-App' && github.ref ==
+      'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the exact candidate
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install pinned pnpm
+        uses: pnpm/action-setup@d15e628ca66d93ee5f352c71671a7bc6a97af5c9 # v6.0.8
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Set up Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version-file: services/iac-compiler/go.mod
+          cache: true
+          cache-dependency-path: services/iac-compiler/go.sum
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Check the public preparation and supervisor boundaries
+        run: >-
+          node --test scripts/prepare-native-normalization-proof.test.mjs
+          scripts/native-normalization-proof.test.mjs
+      - name: Build the exact API dependency closure
+        run: pnpm exec turbo run build --filter='@cloudmarkup/api...'
+      - name: Admit the disposable native host and prepare public tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = "true"
+          test "${RUNNER_ENVIRONMENT:-}" = "github-hosted"
+          test "${RUNNER_OS:-}" = "Linux"
+          test "${GITHUB_REPOSITORY:-}" = "hunter-west/CloudMarkup-App"
+          sudo -n swapoff --all
+          sudo -n sysctl -w kernel.core_pattern=core
+          ulimit -c 0
+          node --input-type=module -e "import { assertMemoryApplicationBuildHost } from './packages/application-build-runner/dist/index.js'; await assertMemoryApplicationBuildHost();"
+          image="$(node --input-type=module -e "import { readFileSync } from 'node:fs'; import { pinnedNormalizationImage } from './scripts/prepare-native-normalization-proof.mjs'; process.stdout.write(pinnedNormalizationImage(JSON.parse(readFileSync('infra/images/application-build/image-inputs-v1.json', 'utf8'))));")"
+          docker pull --platform linux/amd64 "$image"
+          image_id="$(docker image inspect --format '{{.Id}}' "$image")"
+          mkdir -p .cache
+          node scripts/prepare-native-normalization-proof.mjs "$GITHUB_SHA" "$image_id" "$GITHUB_WORKSPACE/.cache/native-normalization-public"
+      - name: Execute the independently inspected full normalization
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          mkdir .cache/native-normalization-records
+          manifest_sha="$(cat .cache/native-normalization-public/manifest.sha256)"
+          node scripts/native-normalization-proof.mjs --manifest "$GITHUB_WORKSPACE/.cache/native-normalization-public/manifest.json" --manifest-sha256 "$manifest_sha" --records "$GITHUB_WORKSPACE/.cache/native-normalization-records"
+      - name: Retain only completed public identity and observation metadata
+        if: ${{ success() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: beta-native-normalization-observation
+          path: |
+            .cache/native-normalization-public/public-build.json
+            .cache/native-normalization-public/manifest.json
+            .cache/native-normalization-records/*.admission.json
+            .cache/native-normalization-records/*.result.json
+          if-no-files-found: error
+          retention-days: 7
+          include-hidden-files: true
+
+  memory:
+    name: Actual native Linux memory-only application proof
+    if:
+      github.repository == 'hunter-west/CloudMarkup-App' && github.ref ==
+      'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the exact candidate
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install pinned pnpm
+        uses: pnpm/action-setup@d15e628ca66d93ee5f352c71671a7bc6a97af5c9 # v6.0.8
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Validate image context bindings before builds
+        run: node scripts/beta-image-contexts.mjs check
+      - name: Check proof and acquisition boundaries
+        run: >-
+          node --test scripts/beta-memory-application-verification.test.mjs
+          scripts/beta-host-repair-seed-verification.test.mjs
+          scripts/memory-proof-diagnostics.test.mjs
+          scripts/memory-image-layout.test.mjs
+          scripts/prepare-memory-application-image.test.mjs
+          scripts/beta-application-package-verification.test.mjs
+      - name: Build the actual runner and fixed generator
+        run: >-
+          pnpm exec turbo run build
+          --filter='@cloudmarkup/application-build-runner...'
+          --filter='@cloudmarkup/application-generator...'
+          --filter='@cloudmarkup/api...'
+      - name: Verify the actual built helper bundle
+        run:
+          node --test scripts/prepare-memory-application-image-bundle.test.mjs
+      - name: Admit native Linux before public context acquisition
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_ACTIONS:-}" = "true"
+          test "${RUNNER_ENVIRONMENT:-}" = "github-hosted"
+          test "${RUNNER_OS:-}" = "Linux"
+          test "${GITHUB_REPOSITORY:-}" = "hunter-west/CloudMarkup-App"
+          sudo -n swapoff --all
+          sudo -n sysctl -w kernel.core_pattern=core
+          ulimit -c 0
+          node --input-type=module -e "import { assertMemoryApplicationBuildHost } from './packages/application-build-runner/dist/index.js'; await assertMemoryApplicationBuildHost();"
+      - name: Enable local manifest references on the disposable runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('/etc/docker/daemon.json')
+          config = json.loads(path.read_text()) if path.exists() else {}
+          config.setdefault('features', {})['containerd-snapshotter'] = True
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_text(json.dumps(config))
+          PY
+          sudo systemctl restart docker
+          docker info --format '{{json .DriverStatus}}'
+      - name: Reserve space for fixed public tool sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Disposable GitHub-hosted runner; these unused SDKs are outside the checkout.
+          sudo rm -rf -- /usr/share/dotnet /usr/local/lib/android /usr/local/share/boost /usr/share/swift /opt/ghc
+          available_kib="$(df -Pk / | awk 'NR == 2 {print $4}')"
+          test "$available_kib" -ge 31457280
+      - name: Restore hash-verified public Go tools
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: .cache/reviewed-go-tools
+          key:
+            reviewed-go-linux-x64-v1-${{ hashFiles('infra/images/go-tools/**',
+            'scripts/beta-go-tool-builds.mjs') }}
+      - name: Materialize verified public tool contexts
+        run: |
+          mkdir -p .cache/beta-memory-contexts .cache/beta-memory-runtime
+          pnpm beta:image-contexts:archive:application .cache/beta-memory-contexts .cache/beta-memory-runtime --go-cache .cache/reviewed-go-tools
+      - name: Execute actual memory and fixed-host proofs
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -c 0
+          node --experimental-import-meta-resolve scripts/beta-host-repair-seed-verification.mjs .cache/beta-memory-runtime .cache/beta-memory-proof /usr/bin/docker
+      - name: Retain only completed observation metadata
+        if: ${{ success() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: beta-memory-runner-observation
+          path: |
+            .cache/beta-memory-proof/memory-application-observation.json
+            .cache/beta-memory-proof/host-repair-observation.json
+          if-no-files-found: error
+          retention-days: 7
+          include-hidden-files: true
+
+  package:
+    name: Actual Linux candidate Lambda ZIPs (${{ matrix.group }})
+    if:
+      github.repository == 'hunter-west/CloudMarkup-App' && github.ref ==
+      'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        group: [http-and-storage, events]
+    steps:
+      - name: Check out the candidate
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Install pinned pnpm
+        uses: pnpm/action-setup@d15e628ca66d93ee5f352c71671a7bc6a97af5c9 # v6.0.8
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Verify acquisition and workflow boundaries
+        run: node --test scripts/beta-application-package-verification.test.mjs
+      - name: Enable exact local image references on this ephemeral runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('/etc/docker/daemon.json')
+          config = json.loads(path.read_text()) if path.exists() else {}
+          config.setdefault('features', {})['containerd-snapshotter'] = True
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_text(json.dumps(config))
+          PY
+          sudo systemctl restart docker
+          docker info --format '{{json .DriverStatus}}'
+      - name: Build actual package and generator dependencies
+        run:
+          pnpm exec turbo run build
+          --filter='@cloudmarkup/application-build-runner...'
+          --filter='@cloudmarkup/application-generator...'
+      - name: Reserve space for the fixed public Go source builds
+        shell: bash
+        run: |
+          set -euo pipefail
+          # This job runs only on a disposable GitHub-hosted Ubuntu runner.
+          # These unused SDKs are outside the checkout, Node, pnpm and Docker.
+          df -h /
+          sudo rm -rf -- /usr/share/dotnet /usr/local/lib/android /usr/local/share/boost /usr/share/swift /opt/ghc
+          df -h /
+          available_kib="$(df -Pk / | awk 'NR == 2 {print $4}')"
+          test "$available_kib" -ge 31457280
+      - name: Restore hash-verified public Go tools
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: .cache/reviewed-go-tools
+          key:
+            reviewed-go-linux-x64-v1-${{ hashFiles('infra/images/go-tools/**',
+            'scripts/beta-go-tool-builds.mjs') }}
+      - name: Materialize verified source-built candidate contexts
+        run: |
+          mkdir -p .cache/beta-runner-contexts .cache/beta-runner-runtime
+          pnpm beta:image-contexts:archive:application .cache/beta-runner-contexts .cache/beta-runner-runtime --go-cache .cache/reviewed-go-tools
+      - name:
+          Run actual isolated tools and package the fixed application family
+          group
+        run:
+          node --experimental-import-meta-resolve
+          scripts/beta-application-package-verification.mjs
+          .cache/beta-runner-runtime .cache/beta-runner-packages ${{
+          matrix.group }}
+      - name: Retain actual candidate evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: beta-runner-candidate-evidence-${{ matrix.group }}
+          path: |
+            .cache/beta-runner-contexts/CONTEXT_DIGESTS
+            .cache/beta-runner-packages/*.json
+          if-no-files-found: error
+          retention-days: 7
+          include-hidden-files: true
