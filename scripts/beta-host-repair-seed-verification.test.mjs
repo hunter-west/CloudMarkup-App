@@ -190,14 +190,17 @@ test("unknown failure payloads remain closed and cannot leak content", () => {
 test("native repair follows admission and actual memory proof and retains only its closed record", async () => {
   const workflow = parse(
     await readFile(
-      new URL(
-        "../.github/workflows/beta-memory-runner-verification.yml",
-        import.meta.url,
-      ),
+      new URL("../.github/workflows/public-native.yml", import.meta.url),
       "utf8",
     ),
   );
-  const steps = workflow.jobs.proof.steps;
+  assert.deepEqual(workflow.on.push.branches, ["main"]);
+  assert.equal(workflow.on.pull_request, undefined);
+  assert.match(
+    workflow.jobs.memory.if,
+    /github\.repository == 'hunter-west\/CloudMarkup-App'/u,
+  );
+  const steps = workflow.jobs.memory.steps;
   const bindings = steps.findIndex(
     (step) => step.name === "Validate image context bindings before builds",
   );
@@ -231,16 +234,6 @@ test("native repair follows admission and actual memory proof and retains only i
     ".cache/beta-memory-proof/memory-application-observation.json",
     ".cache/beta-memory-proof/host-repair-observation.json",
   ]);
-  assert.ok(
-    workflow.on.pull_request.paths.includes(
-      "scripts/beta-host-repair-seed-verification*.mjs",
-    ),
-  );
-  assert.ok(
-    workflow.on.pull_request.paths.includes(
-      "apps/api/src/production-model-live-repair-seed*.ts",
-    ),
-  );
   assert.match(
     steps.find(
       (step) => step.name === "Build the actual runner and fixed generator",
