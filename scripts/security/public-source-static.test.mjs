@@ -54,6 +54,38 @@ test("native proofs run only for the published public main revision", () => {
   );
 });
 
+test("public source checks retain PostgreSQL-backed model SQL and SDK contracts", () => {
+  const workflow = parse(
+    readFileSync(".github/workflows/public-ci.yml", "utf8"),
+  );
+  const scripts = JSON.parse(readFileSync("package.json", "utf8")).scripts;
+  const verify = workflow.jobs.verify;
+  assert.match(verify.env.CLOUDMARKUP_TEST_DATABASE_URL, /^postgresql:\/\//u);
+  assert.match(
+    verify.services.postgres.image,
+    /^postgres@sha256:[a-f0-9]{64}$/u,
+  );
+  assert.ok(
+    verify.steps.some((step) =>
+      String(step.run ?? "").includes("go -C services/iac-compiler build"),
+    ),
+  );
+  assert.ok(verify.steps.some((step) => step.run === "pnpm check:public"));
+  assert.ok(scripts["check:public"].includes("pnpm test:public:backend"));
+  assert.ok(scripts["test:public:backend"].startsWith("pnpm test:backend"));
+  assert.ok(scripts["test:backend"].includes("--project=api"));
+  for (const file of [
+    "apps/api/src/production-model-live-execution-postgres.integration.test.ts",
+    "apps/api/src/adapters/persistence/model-live-seed-stage-postgres.integration.test.ts",
+  ]) {
+    assert.doesNotMatch(
+      scripts["test:public:backend"],
+      new RegExp(file.replaceAll(".", "\\."), "u"),
+    );
+    assert.match(readFileSync(file, "utf8"), /(?:describe|it)\(/u);
+  }
+});
+
 test("generated source still rejects command execution and hides secrets", () => {
   const secret = ["whsec", "C".repeat(24)].join("_");
   const findings = verifyGeneratedSourceSecurity(
