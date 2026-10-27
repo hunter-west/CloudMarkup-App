@@ -315,10 +315,14 @@ describe("account authenticator controls", () => {
       });
     });
     await start();
-    const timer = timers.mock.calls.find(
-      ([, delay]) => typeof delay === "number" && delay > 1000 && delay <= 5000,
-    )?.[0];
-    expect(typeof timer).toBe("function");
+    const timer = await waitFor(() => {
+      const callback = timers.mock.calls.find(
+        ([, delay]) =>
+          typeof delay === "number" && delay > 1000 && delay <= 5000,
+      )?.[0];
+      expect(typeof callback).toBe("function");
+      return callback;
+    });
     act(() => {
       if (typeof timer === "function") timer();
     });

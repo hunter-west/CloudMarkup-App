@@ -215,24 +215,19 @@ test("runtime closure follows transitive dependencies and rejects optional or mi
   );
 });
 
-test("GitHub verification uses same-repository PRs without credentials or deployment authority", async () => {
+test("public-main package verification uses no credentials or deployment authority", async () => {
   const workflow = parse(
     await readFile(
-      new URL(
-        "../.github/workflows/beta-runner-verification.yml",
-        import.meta.url,
-      ),
+      new URL("../.github/workflows/public-native.yml", import.meta.url),
       "utf8",
     ),
   );
   assert.deepEqual(workflow.permissions, { contents: "read" });
   assert.equal(workflow.on.pull_request_target, undefined);
-  assert.deepEqual(
-    workflow.on.pull_request.paths.filter((path) => path.startsWith("!")),
-    ["!packages/*/README.md", "!packages/*/AGENTS.md"],
-  );
+  assert.deepEqual(workflow.on.push.branches, ["main"]);
+  assert.equal(workflow.on.pull_request, undefined);
   const job = workflow.jobs.package;
-  assert.equal(job["timeout-minutes"], 45);
+  assert.equal(job["timeout-minutes"], 30);
   assert.deepEqual(
     job.strategy.matrix.group,
     Object.keys(candidatePackageGroups),
@@ -241,7 +236,7 @@ test("GitHub verification uses same-repository PRs without credentials or deploy
   assert.equal(job.strategy["max-parallel"], 2);
   assert.match(
     job.if,
-    /github.event.pull_request.head.repo.full_name == github.repository/,
+    /github.repository == 'hunter-west\/CloudMarkup-App'.*github.ref == 'refs\/heads\/main'.*github.event_name == 'push'/,
   );
   assert.equal(job.environment, undefined);
   const cache = job.steps.find(

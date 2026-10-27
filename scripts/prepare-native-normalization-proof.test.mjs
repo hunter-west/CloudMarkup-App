@@ -124,33 +124,23 @@ test("bundling fingerprints public inputs without evaluating the entry or writin
     await rm(root, { recursive: true, force: true });
   }
 });
-test("workflow isolates same-repository native verification and retains only closed metadata", async () => {
+test("public-main workflow isolates native verification and retains only closed metadata", async () => {
   const workflow = parse(
     await readFile(
-      new URL(
-        "../.github/workflows/beta-native-normalization-verification.yml",
-        import.meta.url,
-      ),
+      new URL("../.github/workflows/public-native.yml", import.meta.url),
       "utf8",
     ),
   );
   assert.deepEqual(workflow.permissions, { contents: "read" });
   assert.equal(workflow.on.pull_request_target, undefined);
-  assert.deepEqual(
-    workflow.on.pull_request.paths.filter((path) => path.startsWith("!")),
-    [
-      "!packages/*/README.md",
-      "!packages/*/AGENTS.md",
-      "!services/iac-compiler/README.md",
-      "!services/iac-compiler/AGENTS.md",
-    ],
-  );
-  assert.equal(workflow.jobs.proof["timeout-minutes"], 20);
+  assert.deepEqual(workflow.on.push.branches, ["main"]);
+  assert.equal(workflow.on.pull_request, undefined);
+  assert.equal(workflow.jobs.normalization["timeout-minutes"], 20);
   assert.match(
-    workflow.jobs.proof.if,
-    /head\.repo\.full_name == github\.repository/u,
+    workflow.jobs.normalization.if,
+    /github\.repository == 'hunter-west\/CloudMarkup-App'.*github\.ref == 'refs\/heads\/main'.*github\.event_name == 'push'/u,
   );
-  const steps = workflow.jobs.proof.steps;
+  const steps = workflow.jobs.normalization.steps;
   assert.equal(steps[0].with["persist-credentials"], false);
   const preparation = steps.find(
     (step) =>
