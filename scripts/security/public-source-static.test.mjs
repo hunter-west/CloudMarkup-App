@@ -71,6 +71,7 @@ test("public source checks retain PostgreSQL-backed model SQL and SDK contracts"
     ),
   );
   assert.ok(verify.steps.some((step) => step.run === "pnpm check:public"));
+  assert.ok(scripts["check:public:quality"].includes("pnpm security:audit"));
   assert.ok(scripts["check:public"].includes("pnpm test:public:backend"));
   assert.ok(scripts["test:public:backend"].startsWith("pnpm test:backend"));
   assert.ok(scripts["test:backend"].includes("--project=api"));
