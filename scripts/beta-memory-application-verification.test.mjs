@@ -129,7 +129,7 @@ test("source, package content, extra metadata and unsafe artifact paths are refu
 });
 
 const hostedPreparation =
-  'set -euo pipefail\ntest "${GITHUB_ACTIONS:-}" = "true"\ntest "${RUNNER_ENVIRONMENT:-}" = "github-hosted"\ntest "${RUNNER_OS:-}" = "Linux"\ntest "${GITHUB_REPOSITORY:-}" = "hunter-west/CloudMarkup"\nsudo -n swapoff --all\nsudo -n sysctl -w kernel.core_pattern=core\nulimit -c 0\nnode --input-type=module -e "import { assertMemoryApplicationBuildHost } from \'./packages/application-build-runner/dist/index.js\'; await assertMemoryApplicationBuildHost();"\n';
+  'set -euo pipefail\ntest "${GITHUB_ACTIONS:-}" = "true"\ntest "${RUNNER_ENVIRONMENT:-}" = "github-hosted"\ntest "${RUNNER_OS:-}" = "Linux"\ntest "${GITHUB_REPOSITORY:-}" = "hunter-west/CloudMarkup-App"\nsudo -n swapoff --all\nsudo -n sysctl -w kernel.core_pattern=core\nulimit -c 0\nnode --input-type=module -e "import { assertMemoryApplicationBuildHost } from \'./packages/application-build-runner/dist/index.js\'; await assertMemoryApplicationBuildHost();"\n';
 function assertHostedPreparation(job) {
   assert.equal(job["runs-on"], "ubuntu-latest");
   assert.equal(job.env, undefined);
@@ -162,23 +162,18 @@ function assertHostedPreparation(job) {
 test("Linux proof workflow has read-only authority, preflight and one metadata-only artifact", async () => {
   const workflow = parse(
     await readFile(
-      new URL(
-        "../.github/workflows/beta-memory-runner-verification.yml",
-        import.meta.url,
-      ),
+      new URL("../.github/workflows/public-native.yml", import.meta.url),
       "utf8",
     ),
   );
   assert.deepEqual(workflow.permissions, { contents: "read" });
   assert.equal(workflow.on.pull_request_target, undefined);
-  assert.deepEqual(
-    workflow.on.pull_request.paths.filter((path) => path.startsWith("!")),
-    ["!packages/*/README.md", "!packages/*/AGENTS.md"],
-  );
+  assert.deepEqual(workflow.on.push.branches, ["main"]);
+  assert.equal(workflow.on.pull_request, undefined);
   assert.equal(workflow.on.workflow_run, undefined);
-  const job = workflow.jobs.proof;
+  const job = workflow.jobs.memory;
   assertHostedPreparation(job);
-  assert.equal(job["timeout-minutes"], 45);
+  assert.equal(job["timeout-minutes"], 30);
   assert.equal(job["runs-on"], "ubuntu-latest");
   assert.equal(job.environment, undefined);
   const cache = job.steps.find(
@@ -198,7 +193,7 @@ test("Linux proof workflow has read-only authority, preflight and one metadata-o
 
   assert.match(
     job.if,
-    /github.event.pull_request.head.repo.full_name == github.repository/,
+    /github.repository == 'hunter-west\/CloudMarkup-App'.*github.ref == 'refs\/heads\/main'.*github.event_name == 'push'/u,
   );
   assert.equal(job.steps[0].with["persist-credentials"], false);
   for (const step of job.steps) {
@@ -308,14 +303,11 @@ test("failed real child process cannot echo captured stdout or stderr before san
 test("host preparation rejects other machines, altered commands and late or bypassed admission", async () => {
   const workflow = parse(
     await readFile(
-      new URL(
-        "../.github/workflows/beta-memory-runner-verification.yml",
-        import.meta.url,
-      ),
+      new URL("../.github/workflows/public-native.yml", import.meta.url),
       "utf8",
     ),
   );
-  const base = workflow.jobs.proof;
+  const base = workflow.jobs.memory;
   const mutations = [
     (job) => {
       job["runs-on"] = ["self-hosted", "linux"];
