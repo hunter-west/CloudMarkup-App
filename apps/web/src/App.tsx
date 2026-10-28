@@ -377,6 +377,46 @@ function AuthenticatedApplication({
   );
 }
 
+interface NavigationWorkspaceHint {
+  readonly principalId: string;
+  readonly membershipId: string;
+  readonly organizationId: string;
+}
+
+function navigationWorkspaceStorageKey(principalId: string): string {
+  return `cloudmarkup.navigation-workspace.v1:${encodeURIComponent(principalId)}`;
+}
+
+function readNavigationWorkspaceHint(
+  principalId: string,
+): NavigationWorkspaceHint | null {
+  try {
+    const stored = window.sessionStorage.getItem(
+      navigationWorkspaceStorageKey(principalId),
+    );
+    const hint: unknown = stored === null ? null : JSON.parse(stored);
+    if (
+      typeof hint === "object" &&
+      hint !== null &&
+      "principalId" in hint &&
+      hint.principalId === principalId &&
+      "membershipId" in hint &&
+      typeof hint.membershipId === "string" &&
+      "organizationId" in hint &&
+      typeof hint.organizationId === "string"
+    ) {
+      return {
+        principalId,
+        membershipId: hint.membershipId,
+        organizationId: hint.organizationId,
+      };
+    }
+  } catch {
+    // Storage is optional; the verified session still supplies safe defaults.
+  }
+  return null;
+}
+
 function useNavigationOrganizationId(
   principal: CurrentPrincipalV1,
   organizationContext:
@@ -384,23 +424,31 @@ function useNavigationOrganizationId(
 ): string | null {
   const organizationId = organizationContext?.organizationId;
   const membershipId = organizationContext?.membershipId;
-  const [lastWorkspace, setLastWorkspace] = useState<{
-    readonly principalId: string;
-    readonly membershipId: string;
-    readonly organizationId: string;
-  } | null>(null);
+  const [lastWorkspace, setLastWorkspace] =
+    useState<NavigationWorkspaceHint | null>(() =>
+      readNavigationWorkspaceHint(principal.id),
+    );
 
-  // This session-local hint supplies return links only. Every tenant route and
+  // This reload-safe hint supplies return links only. Every tenant route and
   // request still resolves its own authorization from the current principal.
   /* eslint-disable react-hooks/set-state-in-effect -- Remember the last explicit
-     route selection without persisting it or treating it as tenant authority. */
+     route selection without treating browser storage as tenant authority. */
   useEffect(() => {
     if (organizationId !== undefined && membershipId !== undefined) {
-      setLastWorkspace({
+      const hint = {
         principalId: principal.id,
         membershipId,
         organizationId,
-      });
+      };
+      setLastWorkspace(hint);
+      try {
+        window.sessionStorage.setItem(
+          navigationWorkspaceStorageKey(principal.id),
+          JSON.stringify(hint),
+        );
+      } catch {
+        // Keep the current navigation usable when browser storage is blocked.
+      }
     }
   }, [membershipId, organizationId, principal.id]);
   /* eslint-enable react-hooks/set-state-in-effect */
@@ -413,7 +461,16 @@ function useNavigationOrganizationId(
             context.membershipId === lastWorkspace.membershipId,
         )
       : undefined;
-  return organizationId ?? rememberedContext?.organizationId ?? null;
+  const onlyWorkspace =
+    principal.organizationContexts.length === 1
+      ? principal.organizationContexts[0]
+      : undefined;
+  return (
+    organizationId ??
+    rememberedContext?.organizationId ??
+    onlyWorkspace?.organizationId ??
+    null
+  );
 }
 
 function verifiedShellIdentity(

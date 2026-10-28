@@ -235,6 +235,57 @@ describe("GitLab account integration settings", () => {
       screen.getByText(/GitLab availability must be confirmed/u),
     ).toBeVisible();
   });
+  it("stops pending authorization when current connection access is denied", async () => {
+    let denied = false;
+    const stop = vi.fn();
+    vi.mocked(subscribeToGitLabLinkCallback).mockReturnValue(stop);
+    const request = vi.fn().mockImplementation((operation: string) => {
+      if (operation === "gitlab-connections.list") {
+        if (denied)
+          return Promise.reject(
+            new ApiClientError(403, {
+              apiVersion: "v1",
+              error: {
+                code: "access_denied",
+                correlationId: "correlation_gitlab_revoked",
+                message: "Connection access is unavailable.",
+              },
+            }),
+          );
+        return Promise.resolve(collection([connected]));
+      }
+      if (operation === "gitlab-link-intents.create")
+        return Promise.resolve({ data: intent() });
+      throw Error("Unexpected synthetic request");
+    });
+    mount(request);
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Connect GitLab" }),
+    );
+    expect(
+      await screen.findByRole("link", { name: "Continue to GitLab" }),
+    ).toBeVisible();
+    denied = true;
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reload GitLab status" }),
+    );
+    expect(await screen.findByRole("alert")).toBeVisible();
+    expect(screen.queryByText(connected.providerUsername)).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: "Continue to GitLab" }),
+    ).toBeNull();
+    expect(
+      screen.queryByRole("button", {
+        name: /Connect GitLab|Start new GitLab connection|Disconnect /,
+      }),
+    ).toBeNull();
+    expect(stop).toHaveBeenCalled();
+    expect(
+      request.mock.calls.some(
+        ([operation]) => operation === "gitlab-link-completions.create",
+      ),
+    ).toBe(false);
+  });
   it("prepares an exact callback and completes only from the original authenticated tab", async () => {
     const next = intent();
     let linked = false;

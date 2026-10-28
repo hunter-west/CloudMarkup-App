@@ -1769,6 +1769,35 @@ function PrimaryNavigation({
       className={`primary-navigation${collapsed ? " primary-navigation--collapsed" : ""}`}
       id={id}
     >
+      {organizationId === null ? (
+        <section className="navigation-group">
+          <h2 className={collapsed ? "visually-hidden" : undefined}>
+            Workspace
+          </h2>
+          <p
+            className={
+              collapsed ? "visually-hidden" : "navigation-workspace-note"
+            }
+          >
+            Choose a workspace to open Dashboard, Projects, Usage, and billing.
+          </p>
+          <ul>
+            <li>
+              <AppLink
+                aria-label={collapsed ? "Choose workspace" : undefined}
+                title={collapsed ? "Choose workspace" : undefined}
+                onClick={onNavigate}
+                to="/organizations"
+              >
+                <MenuIcon size={18} aria-hidden="true" />
+                <span className={collapsed ? "visually-hidden" : undefined}>
+                  Choose workspace
+                </span>
+              </AppLink>
+            </li>
+          </ul>
+        </section>
+      ) : null}
       {navigationGroups
         .filter(
           (group) => organizationId !== null || group.label !== "Workspace",

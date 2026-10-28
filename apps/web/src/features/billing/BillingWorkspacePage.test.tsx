@@ -15,7 +15,10 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { CloudMarkupQueryRuntime } from "../../api/index.js";
+import {
+  cloudMarkupQueryKeys,
+  type CloudMarkupQueryRuntime,
+} from "../../api/index.js";
 import { RouterProvider } from "../../routing/index.js";
 import { BillingWorkspacePage } from "./BillingWorkspacePage.js";
 
@@ -200,6 +203,7 @@ function renderBilling(
     action,
     request,
     openHosted,
+    queryClient,
     changeScope: (organizationId: string, selectedPrincipal = principal) => {
       view.rerender(content(organizationId, selectedPrincipal));
     },
@@ -455,7 +459,7 @@ describe("hosted billing workspace", () => {
     ).toBeVisible();
   });
 
-  it("stops return-status polling when the server confirms a subscription", async () => {
+  it("refreshes scoped credits and stops polling after a verified subscription", async () => {
     vi.useFakeTimers();
     window.history.replaceState(
       null,
@@ -466,16 +470,35 @@ describe("hosted billing workspace", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(10);
     });
-    view.request.mockImplementation(() =>
-      Promise.resolve({
-        data: {
-          ...workspace(),
-          subscriptionState: "active",
-          currentPlanKey: "starter",
-          canCheckout: false,
-          canManage: true,
-        },
-      }),
+    expect(
+      screen.getByRole("button", { name: "Buy 100 credits" }),
+    ).toBeDisabled();
+    const otherScope = cloudMarkupQueryKeys.commercialSummary(
+      principal.id,
+      "org_other",
+    );
+    view.queryClient.setQueryData(otherScope, { availableCreditUnits: 50 });
+    view.request.mockImplementation((operation) =>
+      Promise.resolve(
+        operation === "billing.top-ups.get"
+          ? {
+              data: {
+                ...topUps().data,
+                mode: "stripe-sandbox",
+                canPurchase: true,
+                availableCreditUnits: "200",
+              },
+            }
+          : {
+              data: {
+                ...workspace(),
+                subscriptionState: "active",
+                currentPlanKey: "starter",
+                canCheckout: false,
+                canManage: true,
+              },
+            },
+      ),
     );
     await act(async () => {
       await vi.advanceTimersByTimeAsync(5_010);
@@ -485,6 +508,13 @@ describe("hosted billing workspace", () => {
         screen.getByRole("region", { name: "Current subscription" }),
       ).getByRole("heading", { name: "Starter" }),
     ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Buy 100 credits" }),
+    ).toBeEnabled();
+    expect(screen.getByText("200")).toBeVisible();
+    expect(view.queryClient.getQueryState(otherScope)?.isInvalidated).toBe(
+      false,
+    );
     const reads = view.request.mock.calls.length;
     await act(async () => {
       await vi.advanceTimersByTimeAsync(60_000);

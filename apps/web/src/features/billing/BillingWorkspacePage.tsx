@@ -119,6 +119,34 @@ function ScopedBillingWorkspacePage({
     refetchOnWindowFocus: true,
   });
 
+  const verifiedState = workspace.data
+    ? JSON.stringify([
+        workspace.data.accountState,
+        workspace.data.subscriptionState,
+        workspace.data.currentPlanKey,
+        workspace.data.canCheckout,
+        workspace.data.canManage,
+      ])
+    : null;
+  const previousVerifiedState = useRef<string | null>(null);
+  useEffect(() => {
+    if (verifiedState === null) return;
+    const previous = previousVerifiedState.current;
+    previousVerifiedState.current = verifiedState;
+    if (previous === null || previous === verifiedState) return;
+    // Only a verified server transition refreshes the other commercial views.
+    // Credit and export eligibility still come from their authenticated reads.
+    const queryKey = cloudMarkupQueryKeys.commercialSummary(
+      principal.id,
+      organizationId,
+    );
+    void runtime.queryClient.invalidateQueries({
+      queryKey,
+      predicate: (query) =>
+        query.queryKey[queryKey.length] !== "billing-workspace",
+    });
+  }, [verifiedState, runtime.queryClient, principal.id, organizationId]);
+
   const location = useAppLocation();
   const returnedFromCheckout =
     new URLSearchParams(location.search).get("checkout") === "returned";

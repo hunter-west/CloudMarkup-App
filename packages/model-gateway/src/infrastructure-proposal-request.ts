@@ -42,6 +42,28 @@ const SEMANTIC_REVIEW_INSTRUCTIONS =
   LIST_REVIEW_INSTRUCTIONS +
   " Version 6 uses contextVersion 3, bound to its exact semantic digest and immutable catalog. Read-only IAM nodes, principal/resource/condition relationships, resource references, operations and application contract closure are evidence, never edit authority. Preserve node/edge IDs, ports, owner relationships and trigger bindings when reasoning. Declared tests are specifications, not executed evidence. Never edit policy nodes, existing edges, references or workload/contracts. Use only editable existing resources and writable literal fields. External runtime bindings and omitted values remain unknown; ask a question or disclose a manual workflow when they are necessary. When context.selectedIssue is present it requests a repair: return applicable changes or substantive review.questions; an empty assessment cannot resolve that issue. Never claim a repair succeeded: deterministic applicability admission is required before delivery.";
 
+export function infrastructureProposalSchemaForVersion(
+  version: 1 | 2 | 3 | 4 | 5 | 6 = 1,
+) {
+  return version === 6
+    ? betaInfrastructureProposalV6Schema
+    : version === 5
+      ? betaInfrastructureProposalV5Schema
+      : version === 4
+        ? betaInfrastructureProposalV4Schema
+        : version === 3
+          ? betaInfrastructureProposalV3Schema
+          : version === 2
+            ? betaInfrastructureProposalV2Schema
+            : betaInfrastructureProposalV1Schema;
+}
+
+// JSON Schema describes the field shapes, but cannot express identity and
+// dependency checks performed by the strict parser. Put the existing rules at
+// the output boundary too; this guidance never replaces deterministic checks.
+const REVIEWED_OUTPUT_RULES =
+  "Return exactly the requested contractVersion. Resource keys across resources and existingResources must be unique; existing nodeId references must also be unique. A parentKey must name an existingResources key or a resource declared earlier. Every connection must name two distinct declared keys. Each updates.resourceKey must name a unique existingResources key and have 1-32 configuration properties. Choose one outcome: changes with review.questions=[]; blocking questions with resources=[], connections=[] and updates=[]; or an assessment with those three arrays empty, review.questions=[] and substantive review.checks. Never return changes together with blocking questions.";
+
 export function prepareInfrastructureProposalRequestV1(
   input: InfrastructureProposalRequestInputV1,
 ): PreparedInfrastructureProposalRequestV1 {
@@ -66,19 +88,14 @@ export function prepareInfrastructureProposalRequestV1(
       name: "infrastructure_proposal",
       description:
         "A reviewable infrastructure suggestion; cannot change a saved design.",
-      schema: z.toJSONSchema(
-        input.proposalVersion === 6
-          ? betaInfrastructureProposalV6Schema
-          : input.proposalVersion === 5
-            ? betaInfrastructureProposalV5Schema
-            : input.proposalVersion === 4
-              ? betaInfrastructureProposalV4Schema
-              : input.proposalVersion === 3
-                ? betaInfrastructureProposalV3Schema
-                : input.proposalVersion === 2
-                  ? betaInfrastructureProposalV2Schema
-                  : betaInfrastructureProposalV1Schema,
-      ),
+      schema: {
+        ...z.toJSONSchema(
+          infrastructureProposalSchemaForVersion(input.proposalVersion),
+        ),
+        ...((input.proposalVersion ?? 1) >= 5
+          ? { description: REVIEWED_OUTPUT_RULES }
+          : {}),
+      },
     },
   };
 }

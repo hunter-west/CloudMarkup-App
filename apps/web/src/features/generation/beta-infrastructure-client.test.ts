@@ -2,6 +2,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import type { BetaInfrastructureJobCreditsV1 } from "@cloudmarkup/api-contract";
 import {
   BetaInfrastructureAccessDeniedError,
+  BetaInfrastructureRequestError,
   requestBetaInfrastructureProposal,
 } from "./beta-infrastructure-client.js";
 import { loadBlankAwsEditorArchitectureDocument } from "../../provider-catalog/aws-editor-fixture.js";
@@ -609,7 +610,7 @@ it("refreshes the exact terminal credit receipt after a v6 applicability rejecti
       request: { ...args().request, proposalVersion: 6 },
       onCredits,
     }),
-  ).rejects.toThrow("could not finish");
+  ).rejects.toThrow("Request reference: job_test.");
   expect(onCredits.mock.calls.map(([receipt]) => receipt?.state)).toEqual([
     "reserved",
     "released",
@@ -618,4 +619,14 @@ it("refreshes the exact terminal credit receipt after a v6 applicability rejecti
     fetcher.mock.calls.filter(([, init]) => init?.method === "POST"),
   ).toHaveLength(1);
   expect(fetcher.mock.calls[2]?.[0]).toMatch(/\/job_test\/credits$/u);
+});
+
+it("never displays an untrusted request reference as support instructions", () => {
+  const error = new BetaInfrastructureRequestError(
+    "ai.failed",
+    "private content <script>run()</script>",
+  );
+  expect(error.safeMessage).not.toContain("private content");
+  expect(error.safeMessage).not.toContain("<script>");
+  expect(error.safeMessage).not.toContain("Request reference:");
 });

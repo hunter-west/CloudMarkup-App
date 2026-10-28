@@ -34,7 +34,7 @@ const requestFailureMessages = {
     "The proposal no longer matches this request. Check the original request's status before trying again.",
   "ai.cancelled": "Proposal cancelled.",
   "ai.failed":
-    "The AI proposal could not finish. Your diagram is unchanged. Retry, or split the requested change into smaller steps.",
+    "The AI proposal could not finish. Your diagram is unchanged. You can continue editing manually. If this happens again, contact support with the request reference before submitting another AI request.",
   "ai.result-mismatch":
     "The proposal does not match the saved canvas or request version. Request a fresh proposal.",
 } as const;
@@ -44,8 +44,14 @@ export class BetaInfrastructureRequestError extends Error {
   readonly code: keyof typeof requestFailureMessages;
   readonly safeMessage: string;
 
-  constructor(code: keyof typeof requestFailureMessages) {
-    const message = requestFailureMessages[code];
+  constructor(code: keyof typeof requestFailureMessages, requestId?: string) {
+    // Job IDs are references, never remote error prose. Keep the display
+    // alphabet bounded even if the response was structurally valid.
+    const reference =
+      requestId && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u.test(requestId)
+        ? ` Request reference: ${requestId}.`
+        : "";
+    const message = requestFailureMessages[code] + reference;
     super(message);
     this.name = "BetaInfrastructureRequestError";
     this.code = code;
@@ -327,6 +333,7 @@ export async function requestBetaInfrastructureProposal(input: {
     if (job.state !== "succeeded" || !job.result)
       throw new BetaInfrastructureRequestError(
         job.state === "canceled" ? "ai.cancelled" : "ai.failed",
+        job.id,
       );
     if (
       job.architectureDigest !==
