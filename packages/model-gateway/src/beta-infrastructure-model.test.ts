@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import {
+  infrastructureProposalSchemaForVersion,
+  prepareInfrastructureProposalRequestV1,
+} from "./infrastructure-proposal-request.js";
+import {
   BETA_INFRASTRUCTURE_MODEL_ID,
   betaInfrastructureModelRequest,
   createBetaInfrastructureModel,
@@ -72,6 +76,79 @@ const proposal = {
   connections: [],
   limitations: [],
 };
+it("uses identical reviewed content for both transports and rejects a different response version", async () => {
+  for (const proposalVersion of [1, 2, 3, 4, 5, 6] as const) {
+    const input = {
+      requirements: "Synthetic review",
+      proposalVersion,
+      catalog: {},
+    };
+    const prepared = prepareInfrastructureProposalRequestV1(input);
+    const bedrock = betaInfrastructureModelRequest(input);
+    if (proposalVersion >= 5)
+      expect(prepared.responseTool.schema).toHaveProperty(
+        "description",
+        expect.stringContaining(
+          "Never return changes together with blocking questions",
+        ),
+      );
+    expect(bedrock.system).toEqual([{ text: prepared.systemText }]);
+    expect(bedrock.messages?.[0]?.content).toEqual([
+      { text: prepared.userText },
+    ]);
+    expect(bedrock.inferenceConfig).toEqual({
+      maxTokens: prepared.maximumOutputTokens,
+      temperature: prepared.temperature,
+    });
+    expect(bedrock.toolConfig?.tools?.[0]?.toolSpec).toEqual({
+      name: prepared.responseTool.name,
+      description: prepared.responseTool.description,
+      inputSchema: { json: prepared.responseTool.schema },
+    });
+  }
+  const onFailure = vi.fn(),
+    onUsage = vi.fn();
+  const wrongVersion = {
+    ...proposal,
+    contractVersion: 6,
+    existingResources: [],
+    updates: [],
+    review: {
+      intent: "Synthetic review",
+      assumptions: [],
+      checks: ["Checked"],
+      questions: [],
+    },
+  };
+  expect(
+    infrastructureProposalSchemaForVersion(6).safeParse(wrongVersion).success,
+  ).toBe(true);
+  send.mockResolvedValueOnce({
+    stopReason: "tool_use",
+    output: {
+      message: {
+        content: [
+          { toolUse: { name: "infrastructure_proposal", input: wrongVersion } },
+        ],
+      },
+    },
+  });
+  const before = send.mock.calls.length;
+  await expect(
+    createBetaInfrastructureModel({ onFailure })({
+      requirements: "Synthetic review",
+      proposalVersion: 5,
+      catalog: {},
+      signal: new AbortController().signal,
+      onUsage,
+    }),
+  ).rejects.toThrow();
+  expect(send.mock.calls.length - before).toBe(1);
+  expect(onUsage).not.toHaveBeenCalled();
+  expect(onFailure).toHaveBeenCalledExactlyOnceWith("invalid-response", {
+    validationFields: ["contractVersion"],
+  });
+});
 describe("explicit beta model transport", () => {
   it("uses one fixed route, bounded output, one attempt and a response-only tool", async () => {
     send.mockResolvedValueOnce({
@@ -426,44 +503,126 @@ it("reports only allowlisted schema fields for an invalid model response", async
     ["invalid-response", { validationFields: ["resources"] }],
   ]);
 
-  const invalidRoot = {
-    ...proposal,
-    contractVersion: 5,
-    existingResources: [],
-    updates: [],
-    review: {
-      intent: "Review",
-      assumptions: [],
-      checks: ["Checked"],
-      questions: ["private prompt and tenant identity"],
-    },
-  };
-  send.mockResolvedValueOnce({
-    stopReason: "tool_use",
-    output: {
-      message: {
-        content: [
-          { toolUse: { name: "infrastructure_proposal", input: invalidRoot } },
-        ],
-      },
-    },
-  });
-  await expect(
-    createBetaInfrastructureModel({ onFailure })({
-      requirements: "private prompt and tenant identity",
-      proposalVersion: 5,
-      catalog: {},
-      signal: new AbortController().signal,
-    }),
-  ).rejects.toThrow();
-  expect(onFailure).toHaveBeenLastCalledWith("invalid-response", {
-    validationFields: ["root"],
-    validationRules: ["blocking-question"],
-  });
   expect(JSON.stringify(onFailure.mock.calls)).not.toContain(
     "private prompt and tenant identity",
   );
 });
+
+it.each([
+  "resource-identity",
+  "parent-order",
+  "connection-reference",
+  "update-binding",
+  "empty-assessment",
+  "blocking-question",
+] as const)(
+  "refuses %s without retry, usage delivery or private diagnostic text",
+  async (rule) => {
+    const valid = {
+      ...proposal,
+      contractVersion: 5 as const,
+      existingResources: [],
+      updates: [],
+      review: {
+        intent: "Synthetic review",
+        assumptions: [],
+        checks: ["Review required"],
+        questions: [],
+      },
+    };
+    expect(
+      infrastructureProposalSchemaForVersion(5).safeParse(valid).success,
+    ).toBe(true);
+    const resource = valid.resources[0];
+    if (!resource) throw new Error("Missing synthetic resource");
+    const invalid = {
+      ...valid,
+      ...(rule === "resource-identity"
+        ? { resources: [resource, resource] }
+        : {}),
+      ...(rule === "parent-order"
+        ? {
+            resources: [
+              { ...resource, key: "child", parentKey: resource.key },
+              resource,
+            ],
+          }
+        : {}),
+      ...(rule === "connection-reference"
+        ? {
+            connections: [
+              {
+                ruleId: "synthetic.rule",
+                sourceKey: resource.key,
+                targetKey: "missing",
+                configuration: {},
+              },
+            ],
+          }
+        : {}),
+      ...(rule === "update-binding"
+        ? {
+            updates: [
+              {
+                resourceKey: "missing",
+                configuration: { enabled: true },
+                reason: "Synthetic",
+              },
+            ],
+          }
+        : {}),
+      ...(rule === "empty-assessment"
+        ? { resources: [], review: { ...valid.review, checks: [] } }
+        : {}),
+      ...(rule === "blocking-question"
+        ? {
+            review: {
+              ...valid.review,
+              questions: ["private prompt and tenant identity"],
+            },
+          }
+        : {}),
+    };
+    const rejected =
+      infrastructureProposalSchemaForVersion(5).safeParse(invalid);
+    expect(rejected.success).toBe(false);
+    if (rejected.success) throw new Error("Expected strict rejection");
+    expect(
+      rejected.error.issues.every((issue) => issue.path.length === 0),
+    ).toBe(true);
+    const onFailure = vi.fn(),
+      onUsage = vi.fn();
+    send.mockResolvedValueOnce({
+      stopReason: "tool_use",
+      output: {
+        message: {
+          content: [
+            { toolUse: { name: "infrastructure_proposal", input: invalid } },
+          ],
+        },
+      },
+    });
+    const before = send.mock.calls.length;
+    await expect(
+      createBetaInfrastructureModel({ onFailure })({
+        requirements: "private prompt and tenant identity",
+        proposalVersion: 5,
+        catalog: {},
+        signal: new AbortController().signal,
+        onUsage,
+      }),
+    ).rejects.toThrow();
+    expect(send.mock.calls.length - before).toBe(1);
+    expect(onUsage).not.toHaveBeenCalled();
+    expect(onFailure).toHaveBeenCalledExactlyOnceWith("invalid-response", {
+      validationFields: ["root"],
+      validationRules: [rule],
+    });
+    expect(JSON.stringify(onFailure.mock.calls)).not.toContain(
+      "private prompt and tenant identity",
+    );
+  },
+);
 
 it("selects a bounded v5 tool without changing the legacy request path", async () => {
   const v5 = {

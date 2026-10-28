@@ -1,5 +1,8 @@
 import { digestCanonicalValue } from "@cloudmarkup/schemas";
-import { BetaInfrastructureAccessDeniedError } from "../generation/beta-infrastructure-client.js";
+import {
+  BetaInfrastructureAccessDeniedError,
+  BetaInfrastructureRequestError,
+} from "../generation/beta-infrastructure-client.js";
 import { loadBlankAwsEditorArchitectureDocument } from "../../provider-catalog/aws-editor-fixture.js";
 import {
   readProjectCreationProposal,
@@ -21,6 +24,7 @@ import {
 import { describe, expect, it, vi } from "vitest";
 
 import { CloudMarkupQueryProvider } from "../../api/index.js";
+import type { AiCapabilitiesLoader } from "../../api/ai-capabilities-loader.js";
 import { ExperiencePreferenceProvider } from "../../preferences/ExperiencePreferenceProvider.js";
 import { RouterProvider } from "../../routing/index.js";
 import { NewProjectPage, ProjectIntentPage } from "./ProjectPages.js";
@@ -50,7 +54,17 @@ const principal: CurrentPrincipalV1 = {
   resourceVersion: 1,
 };
 
-function renderSetup(page: "new" | "intent", search = "", actor = principal) {
+function renderSetup(
+  page: "new" | "intent",
+  search = "",
+  actor = principal,
+  loadAiCapabilities: AiCapabilitiesLoader = () =>
+    Promise.resolve({
+      schemaVersion: 1,
+      proposalVersions: [6],
+      applicationSources: [],
+    }),
+) {
   const request = vi.fn();
   const client = {
     request,
@@ -64,6 +78,7 @@ function renderSetup(page: "new" | "intent", search = "", actor = principal) {
   render(
     <CloudMarkupQueryProvider
       client={client}
+      loadAiCapabilities={loadAiCapabilities}
       queryClient={
         new QueryClient({
           defaultOptions: {
@@ -279,7 +294,15 @@ it("collects an AI prompt and waits for a proposal before opening the editor wit
   finish({
     architectureDigest: digestCanonicalValue(architectureDocument),
     proposal: {
-      contractVersion: 1,
+      contractVersion: 6,
+      existingResources: [],
+      updates: [],
+      review: {
+        intent: "Private uploads",
+        assumptions: [],
+        checks: ["Review the upload requirements"],
+        questions: [],
+      },
       summary: "An upload bucket",
       resources: [
         {
@@ -304,7 +327,7 @@ it("collects an AI prompt and waits for a proposal before opening the editor wit
   expect(request).toHaveBeenCalledOnce();
   expect(ai.request.mock.calls[0]?.[0]).toMatchObject({
     projectId: "project_ai",
-    request: { proposalVersion: 5, requirements: "An S3 bucket for uploads" },
+    request: { proposalVersion: 6, requirements: "An S3 bucket for uploads" },
   });
   expect(readProjectCreationProposal("project_ai")?.credits).toMatchObject({
     state: "settled",
@@ -312,6 +335,62 @@ it("collects an AI prompt and waits for a proposal before opening the editor wit
   });
   forgetProjectCreationProposal("project_ai");
 });
+
+it.each(["unsupported", "availability-error", "publication-pending"] as const)(
+  "keeps the saved project without AI dispatch after %s",
+  async (fault) => {
+    ai.request.mockReset();
+    ai.draft.mockReset();
+    const request = renderSetup("new", "?start=prompt", principal, () =>
+      fault === "availability-error"
+        ? Promise.reject(new Error("private runtime details"))
+        : Promise.resolve({
+            schemaVersion: 1,
+            proposalVersions: fault === "unsupported" ? [] : [6],
+            applicationSources: [],
+          }),
+    );
+    request.mockResolvedValue({
+      data: {
+        project: { id: "project_ai_blocked", organizationId: "org_setup" },
+      },
+    });
+    ai.draft.mockResolvedValue({
+      data: {
+        data: {
+          projectId: "project_ai_blocked",
+          storageStatus: "publication-pending",
+          architectureDocument: loadBlankAwsEditorArchitectureDocument(),
+        },
+      },
+      metadata: { etag: '"draft-1"' },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: /^Project name/u }), {
+      target: { value: "Synthetic application" },
+    });
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "What would you like to build?" }),
+      { target: { value: "A private upload bucket" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Create project" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      fault === "publication-pending"
+        ? "saved draft changed"
+        : "Reviewed canvas AI is unavailable",
+    );
+    expect(screen.getByRole("alert")).not.toHaveTextContent(
+      "private runtime details",
+    );
+    expect(
+      screen.getByRole("link", { name: "Open saved project" }),
+    ).toHaveAttribute(
+      "href",
+      "/organizations/org_setup/projects/project_ai_blocked/editor",
+    );
+    expect(ai.request).not.toHaveBeenCalled();
+    expect(request).toHaveBeenCalledOnce();
+  },
+);
 
 it("retries generation in the already-created project without creating another project", async () => {
   ai.request.mockReset();
@@ -325,7 +404,9 @@ it("retries generation in the already-created project without creating another p
     data: { data: { projectId: "project_ai_retry", architectureDocument } },
     metadata: { etag: '"draft-1"' },
   });
-  ai.request.mockRejectedValue(new Error("Temporary failure"));
+  ai.request.mockRejectedValue(
+    new BetaInfrastructureRequestError("ai.failed", "job_setup_test"),
+  );
   fireEvent.click(screen.getByRole("radio", { name: /^Describe with AI/u }));
   fireEvent.change(screen.getByRole("textbox", { name: /^Project name/u }), {
     target: { value: "AI application" },
@@ -335,7 +416,13 @@ it("retries generation in the already-created project without creating another p
     { target: { value: "An S3 bucket for uploads" } },
   );
   fireEvent.click(screen.getByRole("button", { name: "Create project" }));
-  fireEvent.click(await screen.findByRole("button", { name: "Retry diagram" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Request reference: job_setup_test.",
+  );
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "continue editing manually",
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Retry diagram" }));
   await waitFor(() => {
     expect(ai.request).toHaveBeenCalledTimes(2);
   });

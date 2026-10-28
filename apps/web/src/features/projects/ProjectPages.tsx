@@ -6,6 +6,7 @@ import {
 } from "@cloudmarkup/schemas";
 import {
   BetaInfrastructureAccessDeniedError,
+  BetaInfrastructureRequestError,
   describeBetaInfrastructureCredits,
   requestBetaInfrastructureProposal,
 } from "../generation/beta-infrastructure-client.js";
@@ -610,12 +611,23 @@ function AuthenticatedNewProjectPage({
       setAiProgress("Preparing your project…");
       setAiCreditMessage("");
       let credits: BetaInfrastructureJobCreditsV1 | null = null;
+      let support;
+      try {
+        support = await context.runtime.loadAiCapabilities?.(controller.signal);
+      } catch {
+        // A failed availability read never authorizes a paid legacy fallback.
+      }
+      controller.signal.throwIfAborted();
+      if (support?.proposalVersions[0] !== 6)
+        throw new BetaInfrastructureRequestError("ai.unavailable");
       const response = await context.runtime.client.requestWithMetadata(
         "drafts.get",
         { path: { projectId } },
       );
       if (response.data.data.projectId !== projectId)
         throw new Error("The draft did not match this project.");
+      if (response.data.data.storageStatus === "publication-pending")
+        throw new BetaInfrastructureRequestError("ai.saved-source-changed");
       const architectureDocument = parseArchitectureDocument(
         response.data.data.architectureDocument,
       );
@@ -631,7 +643,7 @@ function AuthenticatedNewProjectPage({
         },
         request: {
           contractVersion: 1,
-          proposalVersion: 5,
+          proposalVersion: 6,
           requirements: prompt,
           architectureDocument,
         },
@@ -1015,9 +1027,8 @@ function AuthenticatedNewProjectPage({
           />
           <p role={generateDiagram.isError ? "alert" : "status"}>
             {generateDiagram.isError
-              ? generateDiagram.error instanceof
-                BetaInfrastructureAccessDeniedError
-                ? generateDiagram.error.message
+              ? generateDiagram.error instanceof BetaInfrastructureRequestError
+                ? generateDiagram.error.safeMessage
                 : generationCanceled
                   ? "Diagram generation was canceled. Your project is saved; open it to continue manually or retry in this same project."
                   : apiErrorMessage(
