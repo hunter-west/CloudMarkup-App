@@ -1,11 +1,13 @@
 import {
   Bell,
+  BookOpen,
   Cable,
   Building2,
   CreditCard,
   Gauge,
   LogOut,
   Mail,
+  MessageCircle,
   Settings2,
   ShieldCheck,
   SlidersHorizontal,
@@ -250,6 +252,39 @@ export function AccountMenu({
                 )}
           </MenuGroup>
         )}
+        <MenuGroup
+          label="Help & support"
+          icon={<BookOpen size={18} aria-hidden="true" />}
+        >
+          <a
+            className="account-menu-link"
+            aria-label="Help center (opens in a new tab)"
+            href="https://support.cloudmarkup.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+          >
+            <BookOpen size={18} aria-hidden="true" />
+            <span>Help center</span>
+          </a>
+          <a
+            className="account-menu-link"
+            aria-label="Contact support (opens in a new tab)"
+            href="https://support.cloudmarkup.com/new-ticket/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+          >
+            <MessageCircle size={18} aria-hidden="true" />
+            <span>Contact support</span>
+          </a>
+          <p className="account-menu-group__context">
+            Guides are public. Support requests use a separate support account.
+            You can also email{" "}
+            <a href="mailto:support@cloudmarkup.com">support@cloudmarkup.com</a>
+            .
+          </p>
+        </MenuGroup>
         <div className="account-menu-appearance">
           <ThemeSwitch settings />
           {hasWorkspace ? (

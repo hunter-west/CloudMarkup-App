@@ -727,6 +727,26 @@ describe("CloudMarkup application routes", () => {
     });
     const signOut = within(account).getByRole("button", { name: "Sign out" });
     expect(signOut).toBeEnabled();
+    const support = within(account).getByRole("region", {
+      name: "Help & support",
+    });
+    for (const [name, href] of [
+      ["Help center", "https://support.cloudmarkup.com/"],
+      ["Contact support", "https://support.cloudmarkup.com/new-ticket/"],
+    ] as const) {
+      const link = within(support).getByRole("link", {
+        name: `${name} (opens in a new tab)`,
+      });
+      expect(link).toHaveAttribute("href", href);
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    }
+    expect(
+      within(support).getByRole("link", { name: "support@cloudmarkup.com" }),
+    ).toHaveAttribute("href", "mailto:support@cloudmarkup.com");
+    expect(support).toHaveTextContent(
+      "Support requests use a separate support account.",
+    );
     expect(
       document.querySelector('a[href*="/organizations/unavailable"]'),
     ).toBeNull();
