@@ -52,11 +52,15 @@ async function renderRoute(path: string, width = 1440) {
   return result;
 }
 
-function renderVerifiedNavigationRoute(path: string, width = 1440) {
+function renderVerifiedNavigationRoute(
+  path: string,
+  width = 1440,
+  organizationContexts?: CurrentPrincipalV1["organizationContexts"],
+) {
   const principal: CurrentPrincipalV1 = {
     displayName: "Morgan Architect",
     id: "principal_navigation",
-    organizationContexts: [
+    organizationContexts: organizationContexts ?? [
       {
         capabilities: ["organizations.read", "projects.read"],
         isOwner: true,
@@ -145,6 +149,7 @@ function renderVerifiedNavigationRoute(path: string, width = 1440) {
 describe("CloudMarkup application routes", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
     setOnlineStatus(true);
   });
 
@@ -382,6 +387,14 @@ describe("CloudMarkup application routes", () => {
     expect(
       within(navigation).queryByRole("link", { name: "Projects" }),
     ).not.toBeInTheDocument();
+    expect(
+      within(navigation).getByRole("link", { name: "Choose workspace" }),
+    ).toHaveAttribute("href", "/organizations");
+    expect(
+      within(navigation).getByText(
+        /Choose a workspace to open Dashboard, Projects/u,
+      ),
+    ).toBeVisible();
     expect(screen.getByText("Account workspace")).toBeVisible();
     fireEvent.click(
       screen.getByRole("button", { name: "Open authenticated account" }),
@@ -406,13 +419,13 @@ describe("CloudMarkup application routes", () => {
   });
 
   it.each([1440, 390])(
-    "keeps account navigation and an authorized Projects return path at %i pixels",
+    "opens the sole authorized workspace from first entry and account navigation at %i pixels",
     async (width) => {
       const { request } = renderVerifiedNavigationRoute(
-        "/organizations/org_navigation/projects",
+        "/organizations",
         width,
       );
-      await screen.findByRole("heading", { level: 1, name: "Projects" });
+      await screen.findByRole("heading", { level: 1, name: "Workspaces" });
       const openNavigation = async () => {
         if (width < 1280) {
           fireEvent.click(
@@ -423,17 +436,25 @@ describe("CloudMarkup application routes", () => {
       };
       const initialNavigation = await openNavigation();
       expect(
-        within(initialNavigation).queryByRole("link", {
+        within(initialNavigation).getByRole("link", { name: "Dashboard" }),
+      ).toHaveAttribute("href", "/organizations/org_navigation/dashboard");
+      fireEvent.click(
+        within(initialNavigation).getByRole("link", { name: "Projects" }),
+      );
+      await screen.findByRole("heading", { level: 1, name: "Projects" });
+      const workspaceNavigation = await openNavigation();
+      expect(
+        within(workspaceNavigation).queryByRole("link", {
           name: "Members & roles",
         }),
       ).not.toBeInTheDocument();
       expect(
-        within(initialNavigation).queryByRole("link", {
+        within(workspaceNavigation).queryByRole("link", {
           name: "Organization integrations",
         }),
       ).not.toBeInTheDocument();
       fireEvent.click(
-        within(initialNavigation).getByRole("link", {
+        within(workspaceNavigation).getByRole("link", {
           name: "Organizations",
         }),
       );
@@ -485,7 +506,7 @@ describe("CloudMarkup application routes", () => {
     },
   );
 
-  it("does not invent a tenant for a direct preferences link", async () => {
+  it("offers the sole verified workspace without fetching tenant data on account pages", async () => {
     const { request } = renderVerifiedNavigationRoute("/settings/preferences");
     expect(
       await screen.findByRole("heading", {
@@ -500,8 +521,8 @@ describe("CloudMarkup application routes", () => {
       within(navigation).getByRole("link", { name: "Organizations" }),
     ).toHaveAttribute("href", "/organizations");
     expect(
-      within(navigation).queryByRole("link", { name: "Projects" }),
-    ).not.toBeInTheDocument();
+      within(navigation).getByRole("link", { name: "Projects" }),
+    ).toHaveAttribute("href", "/organizations/org_navigation/projects");
     expect(request).not.toHaveBeenCalledWith(
       "account.workspaces.get",
       expect.anything(),
@@ -512,24 +533,44 @@ describe("CloudMarkup application routes", () => {
     );
   });
 
-  it("removes remembered tenant links when verified membership is revoked", async () => {
-    const { principal, queryClient } = renderVerifiedNavigationRoute(
+  it("restores a workspace across reload only while its principal and membership still match", async () => {
+    const { principal } = renderVerifiedNavigationRoute(
       "/organizations/org_navigation/projects",
     );
     await screen.findByRole("heading", { level: 1, name: "Projects" });
-    fireEvent.click(
-      within(
-        screen.getByRole("navigation", { name: "Primary navigation" }),
-      ).getByRole("link", { name: "Preferences" }),
+    cleanup();
+    const contexts: CurrentPrincipalV1["organizationContexts"] = [
+      ...principal.organizationContexts,
+      {
+        capabilities: ["organizations.read", "projects.read"],
+        isOwner: false,
+        membershipId: "membership_other",
+        organizationId: "org_other",
+        role: "viewer",
+      },
+    ];
+    const { queryClient, request } = renderVerifiedNavigationRoute(
+      "/settings/preferences",
+      1440,
+      contexts,
     );
     await screen.findByRole("heading", {
       level: 1,
       name: "Experience preferences",
     });
+    expect(
+      within(
+        screen.getByRole("navigation", { name: "Primary navigation" }),
+      ).getByRole("link", { name: "Projects" }),
+    ).toHaveAttribute("href", "/organizations/org_navigation/projects");
     act(() => {
       queryClient.setQueryData(cloudMarkupQueryKeys.currentPrincipal(), {
         ...principal,
-        organizationContexts: [],
+        organizationContexts: contexts.map((context) =>
+          context.organizationId === "org_navigation"
+            ? { ...context, membershipId: "membership_replaced" }
+            : context,
+        ),
       });
     });
     await waitFor(() =>
@@ -538,6 +579,31 @@ describe("CloudMarkup application routes", () => {
           screen.getByRole("navigation", { name: "Primary navigation" }),
         ).queryByRole("link", { name: "Projects" }),
       ).not.toBeInTheDocument(),
+    );
+    expect(
+      screen.getByRole("link", { name: "Choose workspace" }),
+    ).toBeVisible();
+    act(() => {
+      queryClient.setQueryData(cloudMarkupQueryKeys.currentPrincipal(), {
+        ...principal,
+        id: "principal_other",
+        organizationContexts: contexts,
+      });
+    });
+    await waitFor(() =>
+      expect(
+        within(
+          screen.getByRole("navigation", { name: "Primary navigation" }),
+        ).queryByRole("link", { name: "Projects" }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(request).not.toHaveBeenCalledWith(
+      "account.workspaces.get",
+      expect.anything(),
+    );
+    expect(request).not.toHaveBeenCalledWith(
+      "projects.list",
+      expect.anything(),
     );
   });
 

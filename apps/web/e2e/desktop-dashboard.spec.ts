@@ -214,7 +214,27 @@ test("keeps settings sections beside the primary navigation with history and key
         json: { apiVersion: "v1", data: [], page: { hasMore: false } },
       }),
   );
-  await page.goto(root + "/dashboard");
+  await page.goto("/organizations");
+  await expect(
+    page.getByRole("heading", { name: "Workspaces", exact: true }),
+  ).toBeVisible();
+  const entryNavigation = page.getByRole("navigation", {
+    name: "Primary navigation",
+    exact: true,
+  });
+  await expect(
+    entryNavigation.getByRole("link", { name: "Dashboard", exact: true }),
+  ).toHaveAttribute("href", root + "/dashboard");
+  await expect(
+    entryNavigation.getByRole("link", { name: "Projects", exact: true }),
+  ).toHaveAttribute("href", root + "/projects");
+  await page.screenshot({
+    path: testInfo.outputPath("workspace-navigation-first-entry.png"),
+    fullPage: true,
+  });
+  await entryNavigation
+    .getByRole("link", { name: "Dashboard", exact: true })
+    .click();
   await expect(
     page.getByRole("heading", { name: "Dashboard", exact: true }),
   ).toBeVisible();
@@ -344,6 +364,20 @@ test("keeps settings sections beside the primary navigation with history and key
       await expect(navigation).toBeVisible();
     }
   }
+  await page.goto("/organizations");
+  await expect(
+    page.getByRole("heading", { name: "Workspaces", exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Workspaces", exact: true }),
+  ).toBeVisible();
+  await expect(
+    navigation.getByRole("link", { name: "Dashboard", exact: true }),
+  ).toHaveAttribute("href", root + "/dashboard");
+  await expect(
+    navigation.getByRole("link", { name: "Projects", exact: true }),
+  ).toHaveAttribute("href", root + "/projects");
   await page
     .getByRole("button", { name: "Hide Navigation", exact: true })
     .click();
@@ -351,13 +385,17 @@ test("keeps settings sections beside the primary navigation with history and key
     name: "Collapsed application navigation",
   });
   await expect(collapsed).toBeVisible();
-  await collapsed.getByRole("link", { name: "Profile", exact: true }).click();
+  await collapsed.getByRole("link", { name: "Projects", exact: true }).click();
   await expect(
-    panel.getByRole("heading", { name: "Profile settings", level: 1 }),
+    panel.getByRole("heading", { name: "Projects", level: 1, exact: true }),
   ).toBeFocused();
   await expect(
-    collapsed.getByRole("link", { name: "Profile", exact: true }),
+    collapsed.getByRole("link", { name: "Projects", exact: true }),
   ).toHaveAttribute("aria-current", "page");
+  await page.screenshot({
+    path: testInfo.outputPath("workspace-navigation-collapsed.png"),
+    fullPage: true,
+  });
   await page
     .getByRole("button", { name: "Show Navigation", exact: true })
     .click();
