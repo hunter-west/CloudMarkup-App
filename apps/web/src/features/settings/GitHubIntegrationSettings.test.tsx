@@ -210,6 +210,91 @@ describe("organization GitHub integrations", () => {
     expect(screen.queryByText("private-other-owner")).toBeNull();
   });
 
+  it.each(["denied", "other organization"])(
+    "withholds cached repositories and pending linking after a refresh is %s",
+    async (failure) => {
+      let invalid = false;
+      const stop = vi.fn();
+      vi.mocked(subscribeToGitHubInstallationLinkCallback).mockReturnValue(
+        stop,
+      );
+      const request = vi.fn().mockImplementation((operation: string) => {
+        if (operation === "github-installations.list") {
+          if (invalid && failure === "denied")
+            return Promise.reject(
+              new ApiClientError(403, {
+                apiVersion: "v1",
+                error: {
+                  code: "access_denied",
+                  correlationId: "correlation_github_revoked",
+                  message: "Connection access is unavailable.",
+                },
+              }),
+            );
+          return Promise.resolve({
+            data: [
+              invalid
+                ? { ...installed, organizationId: "org_other" }
+                : installed,
+            ],
+          });
+        }
+        if (operation === "github-repositories.list")
+          return Promise.resolve({
+            data: [
+              {
+                organizationId,
+                integrationId: installed.integrationId,
+                installationId: installed.installationId,
+                repositoryId: 789,
+                owner: "fixture-owner",
+                name: "private-project",
+                private: true,
+                archived: false,
+                disabled: false,
+              },
+            ],
+          });
+        if (operation === "github-installation-link-intents.create")
+          return Promise.resolve({ data: intent() });
+        throw Error("Unexpected synthetic request");
+      });
+      mount(request);
+      fireEvent.click(
+        await screen.findByRole("button", { name: "View repositories" }),
+      );
+      expect(
+        await screen.findByText("fixture-owner/private-project"),
+      ).toBeVisible();
+      fireEvent.click(screen.getByRole("button", { name: "Connect GitHub" }));
+      expect(
+        await screen.findByRole("link", { name: "Continue to GitHub" }),
+      ).toBeVisible();
+      invalid = true;
+      fireEvent.click(
+        screen.getByRole("button", { name: "Reload GitHub status" }),
+      );
+      expect(await screen.findByRole("alert")).toBeVisible();
+      expect(screen.queryByText("fixture-owner/private-project")).toBeNull();
+      expect(
+        screen.queryByRole("region", { name: /Repositories for/ }),
+      ).toBeNull();
+      expect(
+        screen.queryByRole("link", { name: "Continue to GitHub" }),
+      ).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Start new connection" }),
+      ).toBeNull();
+      expect(stop).toHaveBeenCalled();
+      expect(
+        request.mock.calls.some(
+          ([operation]) =>
+            operation === "github-installation-link-completions.create",
+        ),
+      ).toBe(false);
+    },
+  );
+
   it("keeps read-only connections available without a connect action", async () => {
     mount(
       vi.fn().mockResolvedValue({ data: [installed] }),

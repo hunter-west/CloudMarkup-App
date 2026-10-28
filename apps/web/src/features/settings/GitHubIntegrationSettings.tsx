@@ -74,7 +74,7 @@ export function GitHubIntegrationSettings({
     organizationId,
   );
   const installations = useQuery({
-    enabled: canRead,
+    enabled: canRead && !runtime.sessionExpired,
     queryKey,
     queryFn: async () => {
       const response = await runtime.client.request(
@@ -93,10 +93,11 @@ export function GitHubIntegrationSettings({
     },
     retry: false,
   });
+  const canConnect =
+    canManage && installations.isSuccess && !runtime.sessionExpired;
   const list =
-    installations.data?.every(
-      (item) => item.organizationId === organizationId,
-    ) === true
+    installations.isSuccess &&
+    installations.data.every((item) => item.organizationId === organizationId)
       ? installations.data
       : [];
   const selected = list.find(
@@ -105,7 +106,7 @@ export function GitHubIntegrationSettings({
       item.status === "connected",
   );
   const repositories = useQuery({
-    enabled: canRead && selected !== undefined,
+    enabled: canRead && !runtime.sessionExpired && selected !== undefined,
     queryKey: [
       ...queryKey,
       selectedIntegrationId ?? "unselected",
@@ -137,7 +138,7 @@ export function GitHubIntegrationSettings({
   const complete = useMutation({
     mutationFn: async (callback: CompleteGithubAppInstallationLinkV1) => {
       if (
-        !canManage ||
+        !canConnect ||
         callback.intentId !== intent?.intentId ||
         Date.parse(intent.expiresAt) <= Date.now()
       )
@@ -159,7 +160,7 @@ export function GitHubIntegrationSettings({
   const completeLink = complete.mutateAsync;
   const createLink = useMutation({
     mutationFn: async () => {
-      if (!canManage) throw new IntegrationBindingError();
+      if (!canConnect) throw new IntegrationBindingError();
       const response = await runtime.client.request(
         "github-installation-link-intents.create",
         {
@@ -184,7 +185,7 @@ export function GitHubIntegrationSettings({
   });
 
   useEffect(() => {
-    if (intent === null || !canManage) return;
+    if (intent === null || !canConnect) return;
     let active = true;
     let unsubscribe: (() => void) | undefined;
     try {
@@ -210,9 +211,9 @@ export function GitHubIntegrationSettings({
       clearTimeout(timeout);
       unsubscribe?.();
     };
-  }, [canManage, completeLink, intent, organizationId, principal.id]);
+  }, [canConnect, completeLink, intent, organizationId, principal.id]);
 
-  if (!canRead)
+  if (!canRead || runtime.sessionExpired)
     return (
       <p role="alert">
         You do not have permission to view organization integrations.
@@ -306,8 +307,15 @@ export function GitHubIntegrationSettings({
               })}
             </ul>
           )}
-          {canManage ? (
-            <div className="form-actions">
+          <div className="form-actions">
+            <Button
+              loading={installations.isFetching}
+              loadingLabel="Checking GitHub status"
+              onClick={() => void installations.refetch()}
+            >
+              Reload GitHub status
+            </Button>
+            {canConnect ? (
               <Button
                 loading={createLink.isPending}
                 loadingLabel="Preparing connection"
@@ -317,16 +325,17 @@ export function GitHubIntegrationSettings({
               >
                 {intent === null ? "Connect GitHub" : "Start new connection"}
               </Button>
-            </div>
-          ) : (
+            ) : null}
+          </div>
+          {!canManage ? (
             <p>Ask an organization owner or administrator to connect GitHub.</p>
-          )}
+          ) : null}
         </>
       )}
       {createLink.isError ? (
         <p role="alert">{errorMessage(createLink.error)}</p>
       ) : null}
-      {canManage &&
+      {canConnect &&
       intent !== null &&
       !complete.isSuccess &&
       !complete.isError ? (

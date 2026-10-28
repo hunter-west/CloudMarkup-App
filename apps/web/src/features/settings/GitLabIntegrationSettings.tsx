@@ -84,7 +84,7 @@ export function GitLabIntegrationSettings({
   }
   const connections = useInfiniteQuery({
     queryKey,
-    enabled: canRead,
+    enabled: canRead && !runtime.sessionExpired,
     retry: false,
     initialPageParam: "",
     queryFn: async ({ pageParam }) => {
@@ -109,6 +109,8 @@ export function GitLabIntegrationSettings({
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
+  const canConnect =
+    canManage && connections.isSuccess && !runtime.sessionExpired;
   const list = connections.isError
     ? []
     : (connections.data?.pages.flatMap((page) => page.items) ?? []);
@@ -116,7 +118,7 @@ export function GitLabIntegrationSettings({
     retry: false,
     mutationFn: async (callback: GitLabLinkCallback) => {
       if (
-        !canManage ||
+        !canConnect ||
         !intent ||
         remainingLifetime(intent.expiresAt) <= 0 ||
         new URL(intent.authorizationUrl).searchParams.get("state") !==
@@ -139,7 +141,7 @@ export function GitLabIntegrationSettings({
   const createLink = useMutation({
     retry: false,
     mutationFn: async () => {
-      if (!canManage) throw new ConnectionBindingError();
+      if (!canConnect) throw new ConnectionBindingError();
       const response = await runtime.client.request(
         "gitlab-link-intents.create",
         {
@@ -170,7 +172,7 @@ export function GitLabIntegrationSettings({
   const disconnect = useMutation({
     retry: false,
     mutationFn: async (connectionId: string) => {
-      if (!canManage || !list.some((value) => value.id === connectionId))
+      if (!canConnect || !list.some((value) => value.id === connectionId))
         throw new ConnectionBindingError();
       const response = await runtime.client.request(
         "gitlab-connections.disconnect",
@@ -192,7 +194,7 @@ export function GitLabIntegrationSettings({
     },
   });
   useEffect(() => {
-    if (!intent || !canManage) return;
+    if (!intent || !canConnect) return;
     let active = true;
     let stop: (() => void) | undefined;
     try {
@@ -218,8 +220,8 @@ export function GitLabIntegrationSettings({
       clearTimeout(timer);
       stop?.();
     };
-  }, [canManage, completeLink, intent, organizationId, principal.id]);
-  if (!canRead)
+  }, [canConnect, completeLink, intent, organizationId, principal.id]);
+  if (!canRead || runtime.sessionExpired)
     return (
       <p role="alert">
         You do not have permission to view workspace integrations.
@@ -305,7 +307,7 @@ export function GitLabIntegrationSettings({
                       Choose projects
                     </Button>
                   ) : null}
-                  {canManage &&
+                  {canConnect &&
                   item.status !== "revoked" &&
                   !(
                     item.status === "disconnected" &&
@@ -339,7 +341,7 @@ export function GitLabIntegrationSettings({
             <Button onClick={() => void connections.refetch()}>
               Reload GitLab status
             </Button>
-            {canManage ? (
+            {canConnect ? (
               <Button
                 loading={createLink.isPending}
                 disabled={complete.isPending}
@@ -371,7 +373,7 @@ export function GitLabIntegrationSettings({
       {createLink.isError ? (
         <p role="alert">{errorMessage(createLink.error)}</p>
       ) : null}
-      {canManage && intent && !complete.isSuccess && !complete.isError ? (
+      {canConnect && intent && !complete.isSuccess && !complete.isError ? (
         <div className="integration-settings__link-flow">
           {intentExpired || relayUnavailable ? (
             <p role="alert">
