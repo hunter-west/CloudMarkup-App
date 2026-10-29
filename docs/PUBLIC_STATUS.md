@@ -56,8 +56,11 @@ scenarios. Integrated release admission and live verification remain separate.
 
 The [separate follow-on](roadmap/plans/catalog-tutorial-followon-20261029.md)
 implements exact editor-tour step resume after remount with local focused proof.
-Ten definition-level icon replacements are prepared, but promotion requires a
-new product-owner mapping approval record; checked artwork remains unchanged.
+Hunter West approved the ten definition-level icon replacements on October
+29, 2026. Asset set 1.22.0 promotes those official service-family mappings: all
+55 icon-backed definitions now have approved artwork from 41 canonical SVGs.
+Local admission and live acceptance evidence remain separately recorded in the
+follow-on plan.
 
 ## Repository identities
 
