@@ -49,7 +49,17 @@ export function WorkspaceTour({
       return true;
     }
   });
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      const savedIndex = steps.findIndex(
+        (candidate) => saved === `step:${candidate.key}`,
+      );
+      return savedIndex < 0 ? 0 : savedIndex;
+    } catch {
+      return 0;
+    }
+  });
   const current = steps[step] ?? steps[0];
   const visible =
     open && ["dashboard", "projects", "organizations"].includes(route.id);
@@ -84,12 +94,28 @@ export function WorkspaceTour({
     const restart = () => {
       setStep(0);
       setOpen(true);
+      try {
+        localStorage.setItem(storageKey, `step:${steps[0].key}`);
+      } catch {
+        /* The restarted tour remains available in this session. */
+      }
     };
     window.addEventListener(workspaceTourRestartEvent, restart);
     return () => {
       window.removeEventListener(workspaceTourRestartEvent, restart);
     };
-  }, []);
+  }, [storageKey]);
+  function moveToStep(nextStep: number) {
+    setStep(nextStep);
+    try {
+      localStorage.setItem(
+        storageKey,
+        `step:${steps[nextStep]?.key ?? steps[0].key}`,
+      );
+    } catch {
+      /* Progress remains available in this session. */
+    }
+  }
   function close() {
     setOpen(false);
     try {
@@ -130,7 +156,7 @@ export function WorkspaceTour({
           <button
             className="button button--secondary"
             onClick={() => {
-              setStep(step - 1);
+              moveToStep(step - 1);
             }}
           >
             Back
@@ -140,7 +166,7 @@ export function WorkspaceTour({
           className="button button--primary"
           onClick={() => {
             if (step === steps.length - 1) close();
-            else setStep(step + 1);
+            else moveToStep(step + 1);
           }}
         >
           {step === steps.length - 1 ? "Done" : "Next"}

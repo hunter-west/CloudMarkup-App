@@ -1206,8 +1206,9 @@ describe("shell behavior and presentation modes", () => {
     expect(
       screen.getByRole("dialog", { name: "Service catalog" }),
     ).toBeInTheDocument();
-
-    setViewport(1440);
+    act(() => {
+      setViewport(1440);
+    });
 
     await waitFor(() => {
       expect(
@@ -1215,18 +1216,21 @@ describe("shell behavior and presentation modes", () => {
       ).not.toBeInTheDocument();
       expect(screen.getByLabelText("Service catalog region")).toHaveFocus();
     });
-
-    setViewport(900);
+    act(() => {
+      setViewport(900);
+    });
+    // Catalog owned desktop focus, so responsive focus preservation reopens
+    // its review drawer. Check the committed posture, not the previous DOM.
     expect(
-      screen.queryByRole("dialog", { name: "Service catalog" }),
-    ).not.toBeInTheDocument();
-
-    fireEvent.click(await screen.findByRole("button", { name: "Inspector" }));
+      screen.getByRole("dialog", { name: "Service catalog" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Inspector", { selector: "button" }));
     expect(
       await screen.findByRole("dialog", { name: "Configure inspector" }),
     ).toBeInTheDocument();
-
-    setViewport(1440);
+    act(() => {
+      setViewport(1440);
+    });
 
     await waitFor(() => {
       expect(

@@ -107,10 +107,11 @@ async function runCommand(
   fireEvent.keyUp(command, { key: "Enter" });
 
   await waitFor(() => {
-    expect(
-      screen.queryByRole("dialog", { name: "Command palette" }),
-    ).not.toBeInTheDocument();
+    expect(palette).not.toBeInTheDocument();
   });
+  expect(
+    screen.queryByRole("dialog", { name: "Command palette" }),
+  ).not.toBeInTheDocument();
 }
 
 describe("guided onboarding and professional productivity", () => {
@@ -122,26 +123,33 @@ describe("guided onboarding and professional productivity", () => {
     cleanup();
   });
 
-  // This full walkthrough includes dismissal, restart, seven steps, and a remount.
-
   it("resets an active walkthrough and restarts Professional users in Guided mode", async () => {
-    await renderEditor("template");
+    // This lifecycle does not need the full desktop catalog open. Desktop
+    // catalog/inspector transitions remain covered by App.test.tsx.
+    await renderEditor("template", 900);
+    const tour = screen.getByTestId("guided-walkthrough");
 
     expect(
-      await screen.findByRole("heading", { name: "Add a service" }),
+      within(tour).getByRole("heading", { name: "Add a service" }),
     ).toBeVisible();
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(within(tour).getByRole("button", { name: "Next" }));
+    fireEvent.click(within(tour).getByRole("button", { name: "Next" }));
     expect(
-      screen.getByRole("heading", { name: "Connect services" }),
+      within(tour).getByRole("heading", { name: "Connect services" }),
     ).toBeVisible();
 
     await runCommand("restart walkthrough", /^Restart notes API walkthrough/u);
     expect(
-      screen.getByRole("heading", { name: "Add a service" }),
+      within(screen.getByTestId("guided-walkthrough")).getByRole("heading", {
+        name: "Add a service",
+      }),
     ).toBeVisible();
 
-    fireEvent.click(screen.getByRole("button", { name: "Professional" }));
+    fireEvent.click(
+      within(
+        screen.getByRole("banner", { name: "Application header" }),
+      ).getByRole("button", { name: "Professional" }),
+    );
     expect(screen.queryByTestId("guided-walkthrough")).not.toBeInTheDocument();
 
     await runCommand("restart walkthrough", /^Restart notes API walkthrough/u);
