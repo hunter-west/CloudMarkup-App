@@ -195,6 +195,9 @@ describe("compact project setup", () => {
 
   it("keeps template identity visible and explains its scope only on demand without losing the draft", async () => {
     const request = renderSetup("new", "?template=queue-consumer-with-dlq");
+    await act(async () => {
+      await vi.dynamicImportSettled();
+    });
     const name = await screen.findByRole("textbox", { name: /^Project name/u });
     fireEvent.change(name, { target: { value: "Customer queue" } });
     const disclosure = screen.getByText("What the template includes");
