@@ -52,9 +52,12 @@ The
 [catalog, canvas and tutorial audit](roadmap/plans/catalog-canvas-tutorial-20261029.md)
 records source-matched local feature evidence, a workspace-tour restart/resume
 repair, focused responsive/tutorial test corrections and exact live acceptance
-scenarios. Integrated release admission and live verification remain separate;
-exact editor-tour step resume after remount and ten definition-level icon
-placeholders remain follow-up work.
+scenarios. Integrated release admission and live verification remain separate.
+
+The [separate follow-on](roadmap/plans/catalog-tutorial-followon-20261029.md)
+implements exact editor-tour step resume after remount with local focused proof.
+Ten definition-level icon replacements are prepared, but promotion requires a
+new product-owner mapping approval record; checked artwork remains unchanged.
 
 ## Repository identities
 
