@@ -52,6 +52,39 @@ export const staffAccountListV1Schema = z
 export const staffAccountListResponseV1Schema = createDataEnvelopeSchema(
   staffAccountListV1Schema,
 );
+/** A preview does not claim a persisted account, subscription or grant. */
+export const staffUnprovisionedAccountV2Schema = staffAccountV1Schema
+  .extend({
+    contractVersion: z.literal(2),
+    billingState: z.literal("unprovisioned"),
+    subscriptionState: z.literal("not-subscribed"),
+    planDisplayName: z.null(),
+    expensiveOperationsEnabled: z.literal(false),
+    version: z.literal(0),
+    organizationVersion: z
+      .number()
+      .int()
+      .positive()
+      .max(Number.MAX_SAFE_INTEGER),
+  })
+  .strict();
+export const staffAccountSummarySchema = z.union([
+  staffAccountV1Schema,
+  staffUnprovisionedAccountV2Schema,
+]);
+export const staffAccountListV2Schema = staffAccountListV1Schema
+  .extend({
+    contractVersion: z.literal(2),
+    items: z.array(staffAccountSummarySchema).max(50),
+  })
+  .strict();
+export const staffAccountListSchema = z.union([
+  staffAccountListV1Schema,
+  staffAccountListV2Schema,
+]);
+export const staffAccountListResponseSchema = createDataEnvelopeSchema(
+  staffAccountListSchema,
+);
 export const staffCreditGrantV1Schema = z
   .object({
     id: identifier,
@@ -148,6 +181,24 @@ export const staffAccountDetailV1Schema = z
 export const staffAccountDetailResponseV1Schema = createDataEnvelopeSchema(
   staffAccountDetailV1Schema,
 );
+export const staffAccountDetailV2Schema = staffAccountDetailV1Schema
+  .extend({
+    contractVersion: z.literal(2),
+    account: staffUnprovisionedAccountV2Schema,
+    availableCreditUnits: z.literal("0"),
+    reservedCreditUnits: z.literal("0"),
+    grants: z.tuple([]),
+    history: z.tuple([]),
+    trial: z.never().optional(),
+  })
+  .strict();
+export const staffAccountDetailSchema = z.union([
+  staffAccountDetailV1Schema,
+  staffAccountDetailV2Schema,
+]);
+export const staffAccountDetailResponseSchema = createDataEnvelopeSchema(
+  staffAccountDetailSchema,
+);
 export const staffActionReceiptResponseV1Schema = createDataEnvelopeSchema(
   staffActionReceiptV1Schema,
 );
@@ -218,6 +269,9 @@ export const staffAccountSearchV1Schema = z
 export type StaffPermissionV1 = z.infer<typeof staffPermissionV1Schema>;
 export type StaffAccessV1 = z.infer<typeof staffAccessV1Schema>;
 export type StaffAccountV1 = z.infer<typeof staffAccountV1Schema>;
+export type StaffAccountSummary = z.infer<typeof staffAccountSummarySchema>;
+export type StaffAccountList = z.infer<typeof staffAccountListSchema>;
+export type StaffAccountDetail = z.infer<typeof staffAccountDetailSchema>;
 export type StaffAccountListV1 = z.infer<typeof staffAccountListV1Schema>;
 export type StaffAccountDetailV1 = z.infer<typeof staffAccountDetailV1Schema>;
 export type StaffAccountActionV1 = z.infer<typeof staffAccountActionV1Schema>;

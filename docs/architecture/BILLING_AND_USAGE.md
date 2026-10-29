@@ -870,6 +870,27 @@ Loopback billing integration tests emulate Data API parameter types and JSON
 timestamp/integer representations, covering hosted session recovery, verified
 expiration, both monthly plans, duplicate/reordered events and denied ownership.
 
+### Fresh-workspace staff support
+
+Workspace creation still does not create billing, funding or subscription state.
+Authorized staff directory/detail reads at /v1/staff/workspaces can discover an
+unprovisioned workspace. Its explicit version-2 preview has zero funds, no
+subscription/trial, operations disabled and an ETag bound to the workspace
+version. Reads never initialize billing. Existing /v1/staff/accounts reads keep
+their version-1 wire contracts, typed client shapes and missing-account
+behavior.
+
+Only the existing credits.grant or trials.grant authority can initialize the
+empty billing account as part of the reviewed first action. Its stable identity
+matches lazy Checkout. Initialization, credit/trial funding and immutable staff
+receipt share one transaction; audit failure rolls them all back. Actor-bound
+idempotency, same-origin transport, recent authentication, exact target
+confirmation and optimistic preconditions remain required. A competing
+initialization invalidates the preview rather than issuing a second grant.
+Operations-management or read-only staff cannot initialize accounts, and no
+subscription is created. No migration or new staff/IAM permission is introduced.
+See [the staff-credit decision](../adr/0092-staff-credit-ai-access.md).
+
 ### Hosted billing return
 
 The browser opens Checkout and Portal in a separate window during the user's

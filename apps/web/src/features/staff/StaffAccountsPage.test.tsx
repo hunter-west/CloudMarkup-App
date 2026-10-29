@@ -46,8 +46,19 @@ function fixture(
     trials?: boolean;
     unsubscribed?: boolean;
     suspended?: boolean;
+    fresh?: boolean;
   } = {},
 ) {
+  const preview = {
+    ...account,
+    contractVersion: 2,
+    billingState: "unprovisioned",
+    version: 0,
+    organizationVersion: 1,
+    subscriptionState: "not-subscribed",
+    planDisplayName: null,
+    expensiveOperationsEnabled: false,
+  };
   const receipt: StaffActionReceiptV1 = {
     contractVersion: 1,
     actionId: "staff_receipt",
@@ -91,8 +102,13 @@ function fixture(
                 ],
         },
       };
-    if (operation === "staff.accounts.list")
-      return { data: { contractVersion: 1, items: [account] } };
+    if (operation === "staff.workspaces.list")
+      return {
+        data: {
+          contractVersion: options.fresh ? 2 : 1,
+          items: [options.fresh ? preview : account],
+        },
+      };
     if (operation === "staff.accounts.act") return action();
     throw Error("Unexpected operation");
   });
@@ -100,15 +116,21 @@ function fixture(
     Promise.resolve({
       data: {
         data: {
-          contractVersion: 1,
-          account: {
-            ...account,
-            version: applied ? 2 : 1,
-            ...(options.unsubscribed
-              ? { subscriptionState: "not-subscribed", planDisplayName: null }
-              : {}),
-            ...(options.suspended ? { billingState: "suspended" } : {}),
-          },
+          contractVersion: options.fresh && !applied ? 2 : 1,
+          account:
+            options.fresh && !applied
+              ? preview
+              : {
+                  ...account,
+                  version: applied ? 2 : 1,
+                  ...(options.unsubscribed || options.fresh
+                    ? {
+                        subscriptionState: "not-subscribed",
+                        planDisplayName: null,
+                      }
+                    : {}),
+                  ...(options.suspended ? { billingState: "suspended" } : {}),
+                },
           availableCreditUnits: applied ? "100" : "0",
           reservedCreditUnits: "0",
           grants: [],
@@ -116,7 +138,10 @@ function fixture(
         },
       },
       metadata: {
-        etag: '"staff-account:billing_target:' + (applied ? "2" : "1") + '"',
+        etag:
+          '"staff-account:billing_target:' +
+          (applied ? "2" : options.fresh ? "unprovisioned:1" : "1") +
+          '"',
       },
     }),
   );
@@ -157,6 +182,54 @@ async function review() {
   await screen.findByRole("region", { name: "Review staff action" });
 }
 describe("staff account workspace", () => {
+  it.each(["credits", "trial"] as const)(
+    "reviews a fresh workspace before its first %s action initializes billing",
+    async (kind) => {
+      const f = fixture({ fresh: true, trials: kind === "trial" });
+      await selectAccount();
+      expect(
+        screen.getByText(/ready for its first grant or trial/u),
+      ).toBeVisible();
+      expect(
+        screen.queryByRole("option", { name: /Pause or resume/u }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("option", { name: /Revoke unused/u }),
+      ).not.toBeInTheDocument();
+      if (kind === "trial")
+        fireEvent.change(screen.getByRole("combobox", { name: "Action" }), {
+          target: { value: "grant-trial" },
+        });
+      fireEvent.change(screen.getByRole("textbox", { name: "Reason" }), {
+        target: { value: "Synthetic test allowance" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Review action" }));
+      expect(
+        await screen.findByRole("region", { name: "Review staff action" }),
+      ).toHaveTextContent("No subscription is started.");
+      expect(f.action).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByRole("button", { name: "Confirm action" }));
+      await screen.findByRole("heading", { name: "Staff action history" });
+      await waitFor(() => {
+        expect(f.action).toHaveBeenCalledTimes(1);
+      });
+      expect(
+        f.request.mock.calls.find((call) => call[0] === "staff.accounts.act"),
+      ).toEqual([
+        "staff.accounts.act",
+        expect.objectContaining({
+          headers: {
+            "if-match": '"staff-account:billing_target:unprovisioned:1"',
+            "idempotency-key": expect.any(String) as unknown,
+          },
+          body: expect.objectContaining({
+            action: kind === "trial" ? "grant-trial" : "grant-credits",
+            confirmBillingAccountId: "billing_target",
+          }) as unknown,
+        }),
+      ]);
+    },
+  );
   it("denies ordinary accounts before issuing account searches", async () => {
     const f = fixture({ staff: false });
     await screen.findByRole("heading", { name: "Staff access required" });

@@ -2,7 +2,7 @@
 
 - Milestone: current application quality work
 - Workflows: account creation, billing, AI credits, project export
-- Status: blocked
+- Status: active
 - Owners: billing reliability owner; parent coordinates release
 
 ## Goals
@@ -10,6 +10,8 @@
 - Refresh the scoped commercial cache when verified subscription authority
   changes.
 - Preserve server-only payment, trial, credit and export admission decisions.
+- Make fresh workspaces discoverable for a first reviewed staff grant/trial,
+  without provisioning from reads or adding staff authority.
 
 ## Context
 
@@ -23,7 +25,9 @@ checking that handoff. See
 
 ## Constraints
 
-- Exact public base c44c8026210d3c25d93e35d8991278a3891acb8e.
+- Original implementation base: c44c8026210d3c25d93e35d8991278a3891acb8e.
+- Current focused acceptance base: merged PR5,
+  641ed0822598be162df2e67155e40484d67b5579.
 - Use synthetic fixtures only. No live balance, purchase, subscription, account,
   IAM, credential, deployment or approval changes.
 - Browser ownership and integrated release remain with the designated owners.
@@ -40,10 +44,239 @@ checking that handoff. See
 - [x] Fix verified subscription-to-credit cache handoff and extend its existing
       regression.
 - [x] Run focused billing/web tests and affected checks; review complete diff.
-- [ ] (current) Parent/QA resolves broad web gate timeouts and completes
-      coordinated browser and release qualification.
+- [x] Verify the fix is present in merged PR5 and refresh focused billing,
+      credit, staff, onboarding and provider evidence at that exact source.
+- [x] Reproduce FRESH-STAFF-01 against immutable 641ed082 source and implement
+      the correction with current staff authority and native regressions.
+- [ ] (current) QA verifies the reviewed correction in the deployed candidate;
+      release owner completes integrated and exact-release qualification.
 
-## Validation commands
+## FRESH-STAFF-01 correction: local implementation
+
+Staff with accounts.read can use additive staff-workspace reads to discover a
+canonical unprovisioned workspace. Its version-2 preview has zero funds, no
+subscription or trial, disabled operations and an ETag bound to the workspace's
+record version. Existing staff-account operations retain version-1 wire
+contracts and typed client request/response shapes. Action requests and
+immutable receipts remain v1. The web reader uses the workspace reads and
+explains first-action initialization before review.
+
+Only the existing credits.grant or trials.grant permission can initialize the
+empty account, within the same transaction as the reviewed grant/trial, ledger
+and receipt. Read-only and operations-only staff cannot initialize it. Ordinary
+organization owners remain denied. Recent application authentication, exact
+target confirmation, original optimistic precondition, bounded amounts and
+actor-bound idempotency still apply. The stable account identity is shared with
+lazy Checkout. A competing initializer invalidates the old preview; audit
+failure rolls back account creation as well as funding. No subscription is
+created, and no staff, database-role or IAM permission is added.
+
+The baseline proof ran the new first-grant scenario against the exact staff
+implementation from 641ed082: it failed at the expected missing-account boundary
+with "This billing account is unavailable." The temporary source/test copies
+were removed. The corrected owning PostgreSQL suite has 26 cases, including five
+new cases; its 21-case comparison passed in 25.82s. After the final
+compatibility correction, staff and related Checkout persistence suites passed
+all 43 cases in 78.00s, with 27.83s in test bodies. The HTTP, contract, staff
+UI, billing workspace, OpenAPI and client selection passed 73 of 74 cases in
+180.74s. Its sole failure was a new assertion that omitted middleware-added
+actor metadata. After preserving all expected actor fields with a partial object
+match, the exact HTTP suite passed all 23 cases in 41.88s. All 74 selected cases
+therefore have passing final evidence. Import/transform load varied, so these
+timings are evidence rather than a controlled performance comparison. After
+registering both new reads under the existing principal boundary, the owning
+authorization and staff HTTP suites passed all 37 cases in 6.95s. The final
+selections cover 131 distinct passing cases across nine suites. Browser
+collection found the three existing staff cases; none was executed by this
+owner.
+
+Final compatibility review rejected adding a query schema or widening the
+response type on released account operations: either would break existing typed
+callers. The correction instead adds two read-only workspace operations.
+Existing account operations retain their exact request/response schemas. A
+separate TypeScript compile of the client request-type regression passed; the
+temporary compile configuration was removed.
+
+Fourteen executable cases were added across existing owning suites: five native
+financial/authorization/concurrency/rollback cases (criticality 10), two read
+compatibility/fundless-contract cases (9), one HTTP preview-route case (9), and
+two first-action UI review cases for credits and independently authorized trials
+(8), and four strict-selector rejection rows (9). The existing client typing
+case also pins the legacy account request and response shapes; existing HTTP
+authentication/denial coverage now includes both new reads. The existing browser
+fixture intercepts the new read paths while retaining the original action path;
+its browser run remains with QA. Existing cases and assertions remain. No
+deadlines or retry settings were weakened. An intermediate negative fixture
+tried to mutate immutable personal workspace state; it was corrected to create a
+suspended synthetic workspace directly, preserving the ownership guard.
+
+Docker's original named-pipe error and the first sandbox loopback connection
+error were OS access errors, not approval-review denials. Normal tool-approved
+elevated calls succeeded. The PostgreSQL fixture used the repository's pinned CI
+image, a dedicated named container, a random loopback-only port and bounded
+resources; the release owner's existing container was left untouched. No live
+account, grant, provider payment, subscription or access state was changed.
+After native checks completed, the exact task-owned container ID and fixture
+label were verified before its container and new volume were removed. No other
+owner's fixture was changed.
+
+Final API/web type checks, the API and web production builds, scoped lint,
+regenerated OpenAPI verification and the owning security checks passed. The API
+type guard initially caught missing authorization-registry entries for the two
+new reads. Both now use the same principal boundary as existing staff routes;
+canonical accounts.read authorization stays in the transaction adapter. The
+owning authorization tests and final compile/build passed after that correction.
+The four released staff path contracts are identical to immutable 641ed082; only
+the two workspace GET paths are added. An earlier standalone staff UI run also
+passed all 11 cases in 46.12s after lint-only test assertion corrections. The
+security audit remains at nine moderate advisories with none at the configured
+high-severity threshold; no dependency versions changed. No aggregate
+application gate or CI run was started by this owner. The release owner retains
+integrated public/hosted admission, protected-role qualification and deployment;
+the designated QA owner retains browser acceptance. The previously delivered QA
+handoff was not duplicated.
+
+QA scenario 5 below now expects the fresh workspace to appear as an
+unprovisioned preview. Search and detail reads must leave billing absent;
+confirming the first authorized action on a synthetic workspace must initialize
+and fund exactly once. The previous missing-candidate result is baseline
+evidence, not the expected behavior of the corrected candidate. Browser and
+deployed qualification remain with their designated owners.
+
+## Earlier acceptance snapshot before the FRESH correction (2026-10-29)
+
+The cache fix is merged in
+[PR5](https://github.com/hunter-west/CloudMarkup-App/pull/5). Do not reimplement
+it. The October 28 gate timeouts below are historical implementation receipts,
+not a current gate failure for the merged candidate. This pass ran focused tests
+only; aggregate, CI, deployed browser and provider qualification remain with
+their existing owners. Source presence does not prove which build a hosted
+browser is running.
+
+| Feature                                        | Current source and focused evidence                                                                                                         | Remaining acceptance                                                                             |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Verified billing refresh                       | Implemented in PR5; all 24 BillingWorkspacePage cases pass, including scoped credit refresh, bounded polling and no extra Checkout          | QA must observe the deployed revision before checking the new behavior                           |
+| Available/reserved balance and funding buckets | Editor, top-up and credit-overview contract/reader fixtures pass; available excludes held credits and buckets reconcile to one snapshot     | Real PostgreSQL ledger projection and stable-workspace browser comparison                        |
+| Monthly and purchased credits                  | Reviewed monthly allowance/expiry and purchased-credit payment validation have passing focused coverage                                     | Sandbox event delivery and durable exactly-once funding; no live payment test                    |
+| Staff credits                                  | Current UI/API fixtures cover unsubscribed target review, scoped balance invalidation, retry identity, denied actors and suspended accounts | Real transaction/audit/rollback and target lookup on synthetic PostgreSQL                        |
+| Subscription status                            | Current billing, invoice-period, provider-signature, Checkout and environment fixtures pass                                                 | Deployed mode/catalog/secrets/queue configuration and event processing                           |
+| Credit top-ups                                 | Implemented; approved packs, stable retries, duplicate suppression, delayed/unpaid evidence and review state covered                        | Active-subscription eligibility is intentional policy; complete payment only in sandbox          |
+| Staff search                                   | Implemented for existing billing accounts; canonical email search has an owning PostgreSQL scenario                                         | Fresh unprovisioned workspaces are excluded; see FRESH-STAFF-01 below                            |
+| Independent trials and export eligibility      | Domain and contract cases pass for expiry, revocation, paid conversion and reviewed trial privileges                                        | SQL admission, queue/worker fencing and end-to-end export on synthetic fixtures                  |
+| Staff/admin entry and reauthentication         | Account support is gated on accounts.read; sensitive mutations retain the ten-minute recent-authentication check                            | Existing Cognito application session/staff permissions; AWS SSO renewal does not establish these |
+
+Focused results at the acceptance base: 350 API/domain/contract cases passed in
+60.29s; 63 onboarding/provider/environment cases passed in 37.79s. The first
+four-file web command passed 22 cases but its Billing worker failed to start
+before loading that suite. After the concurrent API selection ended, the exact
+Billing suite passed all 24 cases alone in 19.44s with the same single-worker
+setting. The other three suites were then run separately and passed all 22 cases
+in 39.93s. All 46 selected web cases therefore have clean focused passing
+evidence; the first command's worker-startup failure is retained and is not a
+product assertion failure. No test assertions, retry settings, timeouts or
+dependency versions changed. At that earlier snapshot no synthetic database URL
+or PostgreSQL binaries were configured. Docker inspection hit an OS named-pipe
+access error; no database was started during that initial pass. The subsequent
+approved synthetic reproduction and cleanup are recorded above. No live account,
+balance, purchase, grant or subscription was changed.
+
+## Baseline source defect at 641ed082: FRESH-STAFF-01
+
+The following records the pre-correction defect and proposed remedy. The local
+implementation and native proof above supersede its pending-source/native
+status.
+
+Source confirms a missing path for staff support of an unprovisioned workspace:
+
+1. [Workspace creation](../../../apps/api/src/adapters/persistence/account-workspaces.ts)
+   creates the tenant, roles, owner and audit, without a billing account. The
+   [owning integration test](../../../apps/api/src/adapters/persistence/account-workspaces-postgres.integration.test.ts)
+   explicitly expects no billing-account row. Cognito personal onboarding also
+   creates no billing-account row.
+2. [Staff account search](../../../apps/api/src/adapters/persistence/staff-accounts.ts)
+   starts from organization_billing_accounts. Searching a new workspace's exact
+   organization ID or member email cannot return that workspace without a row.
+3. The ordinary runtime's
+   [lazy provisioning entry point](../../../apps/api/src/production-billing-workspace.ts)
+   is createCheckout; ordinary billing/credit reads intentionally do not
+   provision. The staff API has no separate preparation operation. As a result,
+   grants and independent trials are not reachable from Account support for this
+   unprovisioned state through the current public-source flow.
+
+At the initial audit snapshot this workflow limitation was source-confirmed; the
+subsequent real PostgreSQL reproduction and correction are recorded above.
+Hosted incidence remains unverified. It is not evidence that existing
+provisioned accounts or staff grant accounting are broken. No production
+workaround or live Checkout was attempted.
+
+[ADR-0068](../../adr/0068-personal-and-organization-workspaces.md), which
+remains Proposed, describes the current choice: "Billing retains the existing
+lazy account provisioning path." Its current integration assertion also pins
+that behavior. Do not silently initialize every account or mutate state from
+search GETs. The proposed bounded follow-up is an explicit, audited staff path
+that can discover a canonical unprovisioned workspace, review its identity, then
+lazily initialize an empty billing account together with the authorized staff
+action. It must create no subscription or automatic trial, preserve actor-bound
+retry identity/target confirmation/recent authentication, and commit account,
+grant and audit atomically. Contract handling for the unprovisioned preview
+needs review with the workspace and release owners before changing the current
+v1 shape.
+
+The decisive synthetic reproduction is: create a fresh personal or organization
+workspace, verify there is no billing row, search as staff by exact workspace ID
+and exact projected member email, and record the missing candidate. Then, for a
+reviewed fix, verify a single explicit staff action initializes/grants once,
+concurrent retries cannot duplicate either row or grant, other workspaces remain
+unchanged, and audit failure rolls everything back. Use no live account.
+
+## QA acceptance scenarios
+
+The designated QA owner runs the browser work; this owner opened no browser.
+Record deployed source/build identity, mode, timestamp and organization scope
+before interpreting results. Use synthetic tenants for payment, grant, trial and
+export mutations. Reuse the existing typed browser fixtures in
+credit-overview.spec.ts and staff-accounts.spec.ts rather than another aggregate
+or CI run.
+
+1. In the selected workspace's account menu, verify Usage and Plans & billing
+   target that workspace. Account support appears only for accounts.read staff.
+   Switch workspace and check every destination's scope.
+2. In a stable synthetic workspace, compare editor available/reserved values,
+   Usage buckets and the Billing top-up balance at compatible snapshot times.
+   Monthly + purchased + other must equal available; held credit is excluded. A
+   denied refresh hides stale amounts. Credit-summary GETs can reconcile expired
+   reservations, so they are not inert live-account probes.
+3. Apply a verified fixture subscription transition from not-subscribed to
+   active. Credit/top-up eligibility refreshes without a new payment request. A
+   return URL alone grants nothing; polling remains bounded and another
+   workspace's cache stays unchanged.
+4. In sandbox/fixtures only, exercise unpaid/delayed payment, verified paid
+   payment, duplicate event and review/dispute state. Funding occurs exactly
+   once after verification; purchased credits do not expire, monthly credits
+   expire at their period boundary.
+5. Search exact synthetic email, username and workspace/account ID. Review the
+   canonical target. Include an unprovisioned fresh workspace as FRESH-STAFF-01;
+   do not start a live purchase to make it searchable.
+6. In fixtures only, grant with exact account confirmation, ETag, reason and
+   stable retry key after recent authentication. Retry issues once, updates the
+   selected balance and leaves the other workspace untouched. Verify audit
+   failure rolls back and revocation affects only available selected-grant
+   funds.
+7. Customer owners cannot administer platform grants; credit-only staff cannot
+   grant trials. A valid independent trial enables its reviewed export profile;
+   expiry/revocation denies new export admission. Staff credit funding alone
+   adds no subscription, trial or paid export privilege. Paid conversion cannot
+   revive a trial.
+
+Current focused commands use the installed pinned runner directly:
+
+```powershell
+node node_modules/vitest/vitest.mjs run --project web apps/web/src/features/billing/BillingWorkspacePage.test.tsx apps/web/src/features/billing/CreditTopUpSection.test.tsx apps/web/src/features/editor/EditorCreditBalance.test.tsx apps/web/src/features/staff/StaffAccountsPage.test.tsx --maxWorkers=1
+node node_modules/vitest/vitest.mjs run --project api --project contracts --project api-contract apps/api/src/application/billing.test.ts apps/api/src/adapters/billing/stripe-top-ups.test.ts apps/api/src/adapters/billing/stripe-invoice-period.test.ts apps/api/src/production-billing-workspace.test.ts apps/api/src/production-commercial-reads.test.ts apps/api/src/modules/staff-accounts.test.ts packages/domain/src/commercial.test.ts packages/domain/src/credit-plans.test.ts packages/domain/src/staff-trial-policy.test.ts packages/api-contract/src/credit-overview.test.ts packages/api-contract/src/staff-trials.test.ts --maxWorkers=1
+node node_modules/vitest/vitest.mjs run --project api apps/api/src/adapters/identity/beta-cognito-principal-directory.test.ts apps/api/src/modules/account-workspaces.test.ts apps/api/src/adapters/billing/stripe-billing-provider.test.ts apps/api/src/adapters/billing/stripe-checkout-session.test.ts apps/api/src/production-billing-environment.test.ts --maxWorkers=1
+```
+
+## Historical implementation validation commands (2026-10-28)
 
 ```powershell
 pnpm install --frozen-lockfile
@@ -56,26 +289,33 @@ git diff --check
 
 ## Migration impact
 
-None. No schema, public API, provider or historical accounting record changes.
-Rollback restores the former cache behavior; canonical server state is
-unaffected.
+No database migration is needed; no columns, grants, subscriptions or historical
+ledger records are rewritten. Versioned read previews use additive staff
+workspace GET operations. Existing v1 reads, typed client calls and v1
+action/receipt shapes stay compatible. Older runtimes can read accounts
+initialized by this correction; rollback hides unprovisioned workspaces again
+without changing financial history.
 
 ## Security impact
 
 Refresh only the authenticated principal/organization commercial cache.
 Redirects remain signals for read-only requests and cannot grant payment or
 entitlement. Keep existing scope-change, denied/session and idempotency
-regressions.
+regressions. Staff preview and initialization retain canonical platform
+permissions and add no staff enrollment or IAM capability. Native negative cases
+verify that denied, stale, wrong-target and suspended-workspace actions leave
+billing unprovisioned. Accounting and immutable audit share initialization's
+transaction.
 
 ## Stopping condition
 
-The existing verified return scenario proves current top-up eligibility and
-credit state refresh without starting another payment, and polling stays
-bounded. Focused tests and affected checks pass, or exact environment blockers
-and owners are recorded. Local evidence does not establish hosted release
-admission.
+The verified return regression remains green, and the first-action regressions
+prove read-only discovery, authorization, exact targeting, optimistic conflicts,
+concurrent retries and atomic audit/accounting rollback. Affected focused checks
+pass, or exact blockers and owners are recorded. Local evidence does not
+establish hosted release admission; the release owner owns integrated gates.
 
-## Handoff
+## Historical implementation receipt (2026-10-28)
 
 Audit confirms no automatic signup trial; audited staff grants can fund AI only;
 paid or valid independent trial authority gates exports. Stripe event processing

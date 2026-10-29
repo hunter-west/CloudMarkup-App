@@ -110,6 +110,8 @@ export const API_AUTHORIZATION_REQUIREMENTS = {
   "staff.accounts.list": { kind: "principal" },
   "staff.accounts.get": { kind: "principal" },
   "staff.accounts.act": { kind: "principal" },
+  "staff.workspaces.list": { kind: "principal" },
+  "staff.workspaces.get": { kind: "principal" },
   "gitlab-export-reviews.create": {
     kind: "organization-permission",
     permission: "exports.run",

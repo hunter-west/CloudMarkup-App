@@ -3,14 +3,17 @@ import { createHash, randomUUID } from "node:crypto";
 import {
   staffAccessV1Schema,
   staffAccountV1Schema,
+  staffUnprovisionedAccountV2Schema,
+  staffAccountListSchema,
   staffAccountDetailV1Schema,
+  staffAccountDetailV2Schema,
   staffAccountActionV1Schema,
   staffAccountSearchV1Schema,
   staffActionReceiptV1Schema,
   idempotencyHeadersV1Schema,
   organizationIdSchema,
   type StaffPermissionV1,
-  type StaffAccountV1,
+  type StaffAccountSummary,
 } from "@cloudmarkup/api-contract";
 import type { StaffAccountsApplication } from "../../application/staff-accounts.js";
 import type { PrincipalContext } from "../../application/ports.js";
@@ -26,6 +29,7 @@ import {
   readStaffCreditBalanceInTransaction,
 } from "./commercial-repositories.js";
 import { sql, type SqlDatabase, type SqlExecutor, type SqlRow } from "./sql.js";
+import { billingAccountIdForOrganization } from "./billing-account-identity.js";
 const policy = "cloudmarkup-staff-credits-v1";
 const digest = (value: string) =>
   createHash("sha256").update(value).digest("hex");
@@ -50,16 +54,36 @@ function readActionReceipt(value: unknown) {
     typeof value === "string" ? JSON.parse(value) : value;
   return staffActionReceiptV1Schema.parse(receipt);
 }
-function etag(account: StaffAccountV1) {
+function etag(account: StaffAccountSummary) {
   return (
     '"staff-account:' +
     account.billingAccountId +
     ":" +
-    String(account.version) +
+    (account.contractVersion === 2
+      ? "unprovisioned:" + String(account.organizationVersion)
+      : String(account.version)) +
     '"'
   );
 }
-function account(row: SqlRow): StaffAccountV1 {
+function account(row: SqlRow): StaffAccountSummary {
+  if (row["billing_account_id"] === null) {
+    return staffUnprovisionedAccountV2Schema.parse({
+      contractVersion: 2,
+      organizationId: row["organization_id"],
+      billingAccountId: billingAccountIdForOrganization(
+        String(row["organization_id"]),
+      ),
+      displayName: row["display_name"],
+      kind: row["workspace_kind"],
+      organizationState: row["organization_state"],
+      billingState: "unprovisioned",
+      subscriptionState: "not-subscribed",
+      planDisplayName: null,
+      expensiveOperationsEnabled: false,
+      version: 0,
+      organizationVersion: Number(row["organization_version"]),
+    });
+  }
   return staffAccountV1Schema.parse({
     contractVersion: 1,
     organizationId: row["organization_id"],
@@ -75,6 +99,7 @@ function account(row: SqlRow): StaffAccountV1 {
   });
 }
 const accountSelect = `SELECT a.billing_account_id,a.organization_id,a.lifecycle_status,a.expensive_operations_enabled,a.record_version,o.display_name,o.workspace_kind,o.lifecycle_status AS organization_state,s.normalized_status AS subscription_state,CASE WHEN d.plan_key='starter' AND s.provider_environment='live' THEN 'Standard' WHEN d.plan_key='pro' THEN 'Professional' ELSE d.display_name END AS plan_display_name FROM organization_billing_accounts a JOIN organizations o ON o.organization_id=a.organization_id LEFT JOIN organization_subscription_projections s ON s.organization_id=a.organization_id AND s.billing_account_id=a.billing_account_id LEFT JOIN commercial_plan_versions v ON v.plan_version_id=s.plan_version_id LEFT JOIN commercial_plan_definitions d ON d.plan_id=v.plan_id`;
+const searchableWorkspaceSelect = `SELECT a.billing_account_id,o.organization_id,a.lifecycle_status,a.expensive_operations_enabled,a.record_version,o.record_version AS organization_version,o.display_name,o.workspace_kind,o.lifecycle_status AS organization_state,s.normalized_status AS subscription_state,CASE WHEN d.plan_key='starter' AND s.provider_environment='live' THEN 'Standard' WHEN d.plan_key='pro' THEN 'Professional' ELSE d.display_name END AS plan_display_name FROM organizations o LEFT JOIN organization_billing_accounts a ON a.organization_id=o.organization_id LEFT JOIN organization_subscription_projections s ON s.organization_id=a.organization_id AND s.billing_account_id=a.billing_account_id LEFT JOIN commercial_plan_versions v ON v.plan_version_id=s.plan_version_id LEFT JOIN commercial_plan_definitions d ON d.plan_id=v.plan_id`;
 /** No browser role, email or organization membership can create platform authority. */
 export class PostgresStaffAccounts implements StaffAccountsApplication {
   readonly database: SqlDatabase;
@@ -127,7 +152,11 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
     const actor = Object.freeze({ ...principal });
     return this.#transaction((tx) => this.#authorize(tx, actor));
   };
-  search: StaffAccountsApplication["search"] = (principal, input) => {
+  search: StaffAccountsApplication["search"] = (
+    principal,
+    input,
+    previewVersion,
+  ) => {
     const actor = Object.freeze({ ...principal });
     const parsed = staffAccountSearchV1Schema.safeParse(input);
     if (!parsed.success)
@@ -142,19 +171,21 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
       await this.#authorize(tx, actor, "accounts.read");
       const result = await tx.query(
         sql(
-          accountSelect +
-            ` WHERE a.organization_id>$2 AND (a.organization_id=$1 OR a.billing_account_id=$1 OR position(lower($1) in lower(o.display_name))>0 OR EXISTS(SELECT 1 FROM memberships m JOIN principals p ON p.principal_id=m.principal_id WHERE m.organization_id=a.organization_id AND m.lifecycle_status='active' AND (lower(p.email)=lower($1) OR p.principal_id=$1 OR p.public_username=lower($1)))) ORDER BY a.organization_id LIMIT 51`,
-          [value.q, value.cursor ?? ""],
+          searchableWorkspaceSelect +
+            ` WHERE o.organization_id>$2 AND o.lifecycle_status IN ('active','suspended') AND ($3::boolean OR a.billing_account_id IS NOT NULL) AND (o.organization_id=$1 OR a.billing_account_id=$1 OR position(lower($1) in lower(o.display_name))>0 OR EXISTS(SELECT 1 FROM memberships m JOIN principals p ON p.principal_id=m.principal_id WHERE m.organization_id=o.organization_id AND m.lifecycle_status='active' AND (lower(p.email)=lower($1) OR p.principal_id=$1 OR p.public_username=lower($1)))) ORDER BY o.organization_id LIMIT 51`,
+          [value.q, value.cursor ?? "", previewVersion === "2"],
         ),
       );
       const items = result.rows.slice(0, 50).map(account),
         nextCursor = items.at(-1)?.organizationId;
       await this.#authorize(tx, actor, "accounts.read");
-      return {
-        contractVersion: 1,
+      return staffAccountListSchema.parse({
+        contractVersion: items.some((item) => item.contractVersion === 2)
+          ? 2
+          : 1,
         items,
         ...(result.rows.length > 50 && nextCursor ? { nextCursor } : {}),
-      };
+      });
     });
   };
   async #account(tx: SqlExecutor, organizationId: string) {
@@ -167,18 +198,51 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
       ),
     );
     const row = rows.rows[0];
-    if (!row)
+    if (row) return account(row);
+    // The read proves a workspace exists but does not initialize billing.
+    const workspace = (
+      await tx.query(
+        sql(
+          "SELECT organization_id,display_name,workspace_kind,lifecycle_status AS organization_state,record_version AS organization_version FROM organizations WHERE organization_id=$1 AND lifecycle_status IN ('active','suspended') FOR SHARE",
+          [organizationId],
+        ),
+      )
+    ).rows[0];
+    if (!workspace)
       throw new ApplicationError(
         "not_found",
         "This billing account is unavailable.",
       );
-    return account(row);
+    return account({ ...workspace, billing_account_id: null });
   }
-  get: StaffAccountsApplication["get"] = (principal, organizationId) => {
+  get: StaffAccountsApplication["get"] = (
+    principal,
+    organizationId,
+    previewVersion,
+  ) => {
     const actor = Object.freeze({ ...principal });
     return this.#transaction(async (tx) => {
       await this.#authorize(tx, actor, "accounts.read");
       const target = await this.#account(tx, organizationId);
+      if (target.contractVersion === 2) {
+        if (previewVersion !== "2")
+          throw new ApplicationError(
+            "not_found",
+            "This billing account is unavailable.",
+          );
+        await this.#authorize(tx, actor, "accounts.read");
+        return {
+          value: staffAccountDetailV2Schema.parse({
+            contractVersion: 2,
+            account: target,
+            availableCreditUnits: "0",
+            reservedCreditUnits: "0",
+            grants: [],
+            history: [],
+          }),
+          etag: etag(target),
+        };
+      }
       const balance = await readStaffCreditBalanceInTransaction(tx, {
         authority: "internal-administration",
         actorId: actor.principalId,
@@ -271,7 +335,39 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
           "staff-action:" + actor.principalId + ":" + key,
         ]),
       );
-      const target = await this.#account(tx, organizationId);
+      let target = await this.#account(tx, organizationId);
+      let currentPrecondition = expectedEtag;
+      if (target.contractVersion === 2) {
+        if (value.action !== "grant-credits" && value.action !== "grant-trial")
+          throw new ApplicationError(
+            "conflict",
+            "Initialize this account with a reviewed grant or trial first.",
+          );
+        if (value.confirmBillingAccountId !== target.billingAccountId)
+          invalid();
+        if (etag(target) !== expectedEtag)
+          throw new ApplicationError(
+            "precondition_failed",
+            "The workspace changed. Reload it before applying this action.",
+          );
+        if (target.organizationState !== "active")
+          throw new ApplicationError(
+            "conflict",
+            "This workspace cannot receive credit changes in its current state.",
+          );
+        // Existing grant authority is checked above. Materialization and the
+        // grant/trial receipt share this transaction; reads never create it.
+        const created = await tx.query(
+          sql(
+            "INSERT INTO organization_billing_accounts(billing_account_id,organization_id) VALUES($1,$2) ON CONFLICT(organization_id) DO NOTHING RETURNING billing_account_id",
+            [target.billingAccountId, organizationId],
+          ),
+        );
+        target = await this.#account(tx, organizationId);
+        if (target.contractVersion !== 1)
+          throw Error("Billing initialization unavailable");
+        if (created.rows.length === 1) currentPrecondition = etag(target);
+      }
       const replay = (
         await tx.query(
           sql(
@@ -290,7 +386,7 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
         return readActionReceipt(replay["receipt_json"]);
       }
       if (value.confirmBillingAccountId !== target.billingAccountId) invalid();
-      if (etag(target) !== expectedEtag)
+      if (etag(target) !== currentPrecondition)
         throw new ApplicationError(
           "precondition_failed",
           "The account changed. Reload it before applying this action.",

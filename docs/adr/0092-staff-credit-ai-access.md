@@ -38,6 +38,25 @@ an access policy does not issue credits. There is no automatic trial or plan
 conversion. The new hosted migration, closed helpers, ACL metadata and schema
 pins must be admitted atomically by the integrated release owner.
 
+Fresh workspaces remain lazily provisioned. Staff directory reads can expose an
+explicit version-2 unprovisioned preview with zero funds, no subscription or
+trial, and no enabled operations; existing account reads retain version 1. The
+preview's ETag binds the workspace version and its deterministic future billing
+identity. It is not a persisted billing-account version. Only a reviewed credit
+grant or separately authorized trial can materialize the empty account, in the
+same transaction as the existing grant/trial and immutable receipt. Search and
+detail GETs never initialize it. Existing permissions, recent authentication,
+target confirmation, bounds, optimistic checks and actor-bound retries still
+apply; no staff permission is added. Audit failure rolls back initialization as
+well as accounting, and a competing initialization invalidates the old preview.
+No subscription is created. Additive staff-workspace directory/detail reads
+expose previews; existing staff-account operations keep their version-1 wire
+contracts and typed client request/response shapes. The new web reader uses the
+workspace reads, so the API can be delivered first without forcing older readers
+to consume the preview. Action/receipt version-1 contracts remain compatible.
+This correction needs no database migration or rewrite of existing grants or
+payment evidence.
+
 The model adapter maps this verified profile to the existing Starter standard AI
 routing tier, retaining the canonical staff-credit plan version and no
 subscription. Existing valid Professional trials map to their Pro AI tier and

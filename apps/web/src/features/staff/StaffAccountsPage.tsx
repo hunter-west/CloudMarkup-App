@@ -1,13 +1,13 @@
 import {
   ApiClientError,
   entityTagSchema,
-  staffAccountListV1Schema,
-  staffAccountDetailV1Schema,
+  staffAccountListSchema,
+  staffAccountDetailSchema,
   staffAccountActionV1Schema,
   staffActionReceiptV1Schema,
   type CurrentPrincipalV1,
   type StaffAccountActionV1,
-  type StaffAccountDetailV1,
+  type StaffAccountDetail,
   type StaffPermissionV1,
 } from "@cloudmarkup/api-contract";
 import { useQuery } from "@tanstack/react-query";
@@ -65,10 +65,13 @@ export function StaffWorkspace({
     queryKey: ["staff-accounts", principal.id, submitted, cursor],
     enabled: permitted && submitted.length >= 2,
     queryFn: async () =>
-      staffAccountListV1Schema.parse(
+      staffAccountListSchema.parse(
         (
-          await runtime.client.request("staff.accounts.list", {
-            query: { q: submitted, ...(cursor ? { cursor } : {}) },
+          await runtime.client.request("staff.workspaces.list", {
+            query: {
+              q: submitted,
+              ...(cursor ? { cursor } : {}),
+            },
           })
         ).data,
       ),
@@ -209,10 +212,10 @@ function StaffAccount({
     queryKey: ["staff-account", principal.id, organizationId],
     queryFn: async () => {
       const result = await runtime.client.requestWithMetadata(
-        "staff.accounts.get",
+        "staff.workspaces.get",
         { path: { organizationId } },
       );
-      const value = staffAccountDetailV1Schema.parse(result.data.data);
+      const value = staffAccountDetailSchema.parse(result.data.data);
       if (value.account.organizationId !== organizationId)
         throw Error("Account response mismatch");
       return { value, etag: entityTagSchema.parse(result.metadata.etag) };
@@ -255,6 +258,13 @@ function StaffAccount({
           {detail.account.subscriptionState.replaceAll("-", " ")}
         </p>
         <p className="staff-identifier">{detail.account.billingAccountId}</p>
+        {detail.account.billingState === "unprovisioned" ? (
+          <p className="staff-help">
+            This workspace is ready for its first grant or trial. The reviewed
+            action initializes its billing record without starting a
+            subscription.
+          </p>
+        ) : null}
         {detail.trial ? (
           <section aria-label="Staff trial">
             <h3>Staff trial</h3>
@@ -283,7 +293,11 @@ function StaffAccount({
           <div>
             <dt>Expensive operations</dt>
             <dd>
-              {detail.account.expensiveOperationsEnabled ? "Enabled" : "Paused"}
+              {detail.account.billingState === "unprovisioned"
+                ? "Not initialized"
+                : detail.account.expensiveOperationsEnabled
+                  ? "Enabled"
+                  : "Paused"}
             </dd>
           </div>
         </dl>
@@ -391,7 +405,7 @@ function StaffActionForm({
   readonly runtime: CloudMarkupQueryRuntime;
   readonly principalId: string;
   readonly snapshot: {
-    readonly value: StaffAccountDetailV1;
+    readonly value: StaffAccountDetail;
     readonly etag: string;
   };
   readonly permissions: readonly StaffPermissionV1[];
@@ -400,13 +414,16 @@ function StaffActionForm({
   const [action, setAction] = useState<StaffAccountActionV1["action"]>(
       permissions.includes("credits.grant")
         ? "grant-credits"
-        : permissions.includes("credits.revoke")
-          ? "revoke-credits"
-          : permissions.includes("trials.grant")
-            ? "grant-trial"
-            : permissions.includes("trials.revoke")
-              ? "revoke-trial"
-              : "set-operations",
+        : snapshot.value.account.billingState === "unprovisioned" &&
+            permissions.includes("trials.grant")
+          ? "grant-trial"
+          : permissions.includes("credits.revoke")
+            ? "revoke-credits"
+            : permissions.includes("trials.grant")
+              ? "grant-trial"
+              : permissions.includes("trials.revoke")
+                ? "revoke-trial"
+                : "set-operations",
     ),
     [units, setUnits] = useState("100"),
     [days, setDays] = useState("30"),
@@ -429,13 +446,18 @@ function StaffActionForm({
     account = snapshot.value.account,
     grantBlocked =
       action === "grant-credits" &&
-      (account.billingState !== "active" ||
+      ((account.billingState !== "active" &&
+        account.billingState !== "unprovisioned") ||
         account.organizationState !== "active");
   useEffect(() => {
     if (attemptKey) reviewHeading.current?.focus();
     else if (message) actionHeading.current?.focus();
   }, [attemptKey, message]);
   if (
+    (account.billingState === "unprovisioned" &&
+      !permissions.some(
+        (p) => p === "credits.grant" || p === "trials.grant",
+      )) ||
     !permissions.some((p) =>
       [
         "credits.grant",
@@ -582,6 +604,12 @@ function StaffActionForm({
             <strong>{account.displayName}</strong>
           </p>
           <p className="staff-identifier">{account.billingAccountId}</p>
+          {account.billingState === "unprovisioned" ? (
+            <p>
+              This first action initializes billing and records its grant and
+              audit together. No subscription is started.
+            </p>
+          ) : null}
           <p>
             {attempt.body.action === "grant-credits" ||
             attempt.body.action === "grant-trial"
@@ -662,7 +690,8 @@ function StaffActionForm({
                   Grant complimentary credits
                 </option>
               ) : null}
-              {permissions.includes("credits.revoke") ? (
+              {account.billingState !== "unprovisioned" &&
+              permissions.includes("credits.revoke") ? (
                 <option value="revoke-credits">
                   Revoke unused complimentary credits
                 </option>
@@ -672,7 +701,8 @@ function StaffActionForm({
                   Grant time-limited trial
                 </option>
               ) : null}
-              {permissions.includes("trials.revoke") ? (
+              {account.billingState !== "unprovisioned" &&
+              permissions.includes("trials.revoke") ? (
                 <option
                   value="revoke-trial"
                   disabled={
@@ -683,7 +713,8 @@ function StaffActionForm({
                   Revoke trial access
                 </option>
               ) : null}
-              {permissions.includes("operations.manage") ? (
+              {account.billingState !== "unprovisioned" &&
+              permissions.includes("operations.manage") ? (
                 <option value="set-operations">
                   Pause or resume expensive operations
                 </option>
