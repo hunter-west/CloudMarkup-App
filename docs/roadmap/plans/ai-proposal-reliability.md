@@ -29,6 +29,48 @@ cannot be recovered or claimed fixed. Existing fixed root-rule telemetry is
 retained. Zod refinements enforce relationships that JSON Schema shape alone
 cannot prove. See [ModelGateway](../../architecture/MODEL_GATEWAY.md).
 
+## October 29 continuation
+
+The initial fix is merged in public PR #5 at
+`641ed0822598be162df2e67155e40484d67b5579`. This audit starts from that public
+source. Merge, integrated qualification, deployment and live proof remain
+separate records. The earlier full-run failure below is historical local
+evidence, not admission for the current candidate.
+
+The new audit found that creation discarded the v6 applicability receipt at the
+RAM handoff, whereas editor adjustments compared it to the actual prepared
+command/result. The existing review fixture used v1 and did not reach this v6
+boundary. A valid v6 fixture passed, while six missing/mismatched-proof controls
+incorrectly left Apply enabled. The fix carries the receipt and verifies its
+baseline, proposal, catalog, command, result and outcome kind before review.
+No-change assessments now receive the stale-baseline check too. Missing or
+mismatched proof disables application with fixed recovery guidance.
+
+The resumed focused run passes 74/74 web cases across five owning suites, with
+12/12 runtime/capability API cases. The creation suite grows from five to twelve
+cases: six proof bindings (9/10 each; each protects a different admitted input
+or prepared output) and the stale no-change branch (8/10). Existing positive,
+editing-denied, session-expired, stale-mutation and cancellation cases now use a
+real deterministic synthetic v6 preparation. The setup journey additionally
+asserts exact receipt retention. Before the fix the six proof controls failed
+and five prior behaviors passed in 44.40 seconds; the resumed five-suite run
+passed in 150.80 seconds, with 13.17 seconds test execution. One earlier
+post-fix process failed to start a worker and executed no tests; it is not
+counted as a product pass. No timeout, retry, assertion or gate was weakened.
+
+Final correction checks passed: creation review 12/12 in 90.94 seconds, web
+types and changed-file lint, direct production web build in 1.89 seconds,
+formatting, 334 Markdown link checks and diff whitespace checks. Security
+policy/static/secret checks passed; the unchanged dependency set has nine
+moderate audit advisories and no high/critical advisories. No broad suite or CI
+run was started for this continuation. Integrated admission belongs to the
+release owner after the resumed patch is combined with other workstreams.
+
+No live generation or deployment proof is claimed. Exact served-source binding,
+spending authorization and campaign/job identities belong in the separate
+private operational handoff, not this public source plan. This procedure cannot
+authorize inference from an account balance or AWS sign-in status.
+
 ## Constraints
 
 - One provider attempt, existing token/deadline limits, unchanged funding
@@ -52,8 +94,12 @@ cannot prove. See [ModelGateway](../../architecture/MODEL_GATEWAY.md).
 - [x] Share request preparation, require version-exact output, retain root
       diagnostics and improve safe failure recovery.
 - [x] Run focused package/web checks and review the complete diff.
-- [ ] (current) Release owner integrates the candidate, qualifies the full gate,
-      and coordinates the separately authorized live acceptance.
+- [x] Reproduce and repair the v6 creation proof handoff with focused
+      regressions.
+- [x] Supply exact supported prompts and recovery/export expectations.
+- [x] Finish focused candidate checks and deliver the resumed patch.
+- [ ] (current) Release owner integrates and qualifies the candidate, then
+      coordinates separately authorized deployment and live acceptance.
 
 ## Validation commands
 
@@ -72,7 +118,7 @@ Root-rule cases protect the untrusted AI boundary (9/10); a version mismatch
 must never be delivered (9/10); request-reference recovery is a distinct failed
 core workflow (8/10). Measure focused timing and case delta at handoff.
 
-## Local verification checkpoint
+## October 28 local verification checkpoint
 
 - Full model-gateway project: 1,287/1,287 tests passed in 109.21 seconds. The
   owning model file grew from 20 to 27 cases: one transport/version invariant
@@ -115,58 +161,14 @@ core workflow (8/10). Measure focused timing and case delta at handoff.
 
 ## Coordinated ten-project acceptance
 
-This is a procedure, with no live execution or credit authorization implied.
-Before the first request, the parent coordinates the existing bounded allowance
-and the sole Chrome driver, records remaining credits and entitlement, and binds
-the served revision to the release owner's exact candidate. Use fresh synthetic
-projects named `QA-<date>-AI-01` through `AI-10`. Preserve previous failed
-projects as evidence. Run one initial smoke request; continue only if its strict
-output and actual graph preview succeed. Stop on a schema/provider failure,
-unknown charge or allowance exhaustion. There are no automatic retries.
-
-For each create, append: "Use only the current supported catalog. Propose
-infrastructure only, disclose unimplemented application logic and unknown
-settings, use least privilege, and do not deploy." For each adjustment, append:
-"Change only the requested settings; preserve all unrelated graph IDs,
-relationships, configuration and workload contracts. Ask a blocking question or
-explain a supported manual workflow when the request cannot be represented."
-
-| Project       | Create requirements                                                                                                                                        | Adjustment 1                  | Adjustment 2                                                         | Adjustment 3                                                            |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| 01 Notes      | Authenticated notes API: HTTP API, Cognito, Lambda, DynamoDB; Lambda 256 MB/10 seconds                                                                     | Lambda 512 MB                 | Lambda timeout 15 seconds                                            | Explain ownership isolation and missing business logic; no graph change |
-| 02 Catalog    | Read-only product lookup API with Lambda 128 MB/3 seconds and DynamoDB; no write endpoints                                                                 | Lambda 256 MB                 | Lambda timeout 10 seconds                                            | Review read permissions and unresolved query behavior; no graph change  |
-| 03 Uploads    | Private S3 JSON uploads under incoming/ trigger Lambda 256 MB/10 seconds, with metadata table and logs                                                     | Lambda 512 MB                 | Lambda timeout 30 seconds                                            | Explain duplicate delivery and retry limitations; no graph change       |
-| 04 Orders     | Standard SQS, Lambda 256 MB/15 seconds, DynamoDB, DLQ; queue visibility 120 seconds, redrive after 5 receives                                              | Visibility 180 seconds        | Queue long polling 20 seconds                                        | Lambda 512 MB                                                           |
-| 05 Fanout     | Standard SNS to two independent standard SQS queues, no external endpoints; analytics retention 1 day                                                      | Analytics retention 7 days    | Billing queue long polling 20 seconds                                | Explain topic delivery versus consumer processing; no graph change      |
-| 06 Events     | Custom EventBridge bus, enabled OrderCreated rule and Lambda 256 MB/10 seconds; source qa.orders                                                           | Disable rule                  | Re-enable same rule                                                  | Lambda timeout 15 seconds                                               |
-| 07 Reports    | Daily EventBridge rate schedule, Lambda 256 MB/10 seconds, private output bucket                                                                           | Lambda 512 MB                 | Lambda timeout 30 seconds                                            | Disable schedule while retaining its interval/target                    |
-| 08 Static     | Private S3 origin with CloudFront origin access control; default hostname/certificate, HTTPS redirect, index.html; cache 0/60/300 seconds                  | Default cache TTL 120 seconds | Maximum cache TTL 600 seconds                                        | Explain private origin versus public viewer access; no graph change     |
-| 09 Postgres   | Private encrypted RDS PostgreSQL foundation, two AZs, RDS-managed authentication, 20 GiB, backups 7 days, no public ingress; ask for unknown engine inputs | Backup retention 14 days      | Storage 40 GiB                                                       | Explain authentication/network prerequisites; no graph change           |
-| 10 Containers | Private ECS Fargate foundation, 256 CPU/512 MiB, non-root/read-only container, desired count zero; published image digest remains unresolved               | Task 512 CPU/1024 MiB         | Keep desired count zero and explain pending image; no invented image | Explain readiness and unresolved runtime inputs; no graph change        |
-
-Create plus three requests gives at most 40 planned interactions. A question is
-valid advisory output, but it does not establish a created architecture. Mark
-that project's dependent edits blocked until the parent supplies the missing
-input and approves any additional budgeted interaction. Unsupported label,
-policy, reference or workload edits must never be counted as completed
-mutations.
-
-For every interaction, record request reference, timestamps, requested version,
-safe diagnostics, credit receipt, returned proposal and actual preview result in
-private evidence. Review and explicitly accept only a valid proposal. Compare
-before/after graph data, check unrelated stable IDs/configuration, exercise one
-Undo/Redo, save/reload, and create an immutable revision. Explanations must make
-no changes and claim no source execution. Rejected output must leave the saved
-baseline unchanged and expose its real accounting outcome.
-
-For each generated baseline that reaches export, record the immutable revision,
-provider/catalog bindings, real export job/download, archive contents and
-deterministic validation. Export entitlement failure is a blocker, not a pass.
-Application-source generation, builds and runnable backend tests are separate
-evidence owned by the application-generation workstream. Score only completed
-observations; unrun/blocked results remain null, with a denominator that
-excludes them. The release owner selects integrated public/private CI and
-browser/native acceptance; these local tests supply no deployment authority.
+Use the
+[exact architecture AI runbook](../../development/AI_ARCHITECTURE_ACCEPTANCE.md)
+for ten creates, thirty follow-ups, expected diagrams/export results and the
+stale/interruption/recovery controls. It replaces the initial draft matrix: SQS
+visibility 180 seconds, seven-day retention and arbitrary EventBridge
+source/detail values are not supported by the current catalog. The runbook uses
+supported literals and separates clarification from completed mutations. It
+supplies no paid authorization or live success receipt.
 
 ## Migration impact
 
@@ -191,9 +193,10 @@ never guess the rejected content or report a passing matrix.
 
 ## Handoff
 
-Local implementation is ready for release-owner integration. The unresolved full
-web result and unknown historical rejected output block release/quality claims.
-The release owner owns the integrated public/private gates and delivery; the
-designated Chrome owner owns a source-bound smoke request and subsequent
-ten-project campaign after parent budget coordination. No new full suite should
-run concurrently with the other workstreams on the shared PC.
+The initial implementation is merged in public PR #5; deployment/live proof
+remain separate. The resumed creation-proof correction is local and passed
+focused qualification. The release owner owns its integrated public/private
+gates and delivery; the designated Chrome owner owns source-bound live testing
+after parent budget coordination. No new full suite runs independently on the
+shared PC. Application generation remains a separate handoff; its default
+unavailable stages are not activated by this work.

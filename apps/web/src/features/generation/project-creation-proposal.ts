@@ -1,8 +1,14 @@
 import type { BetaInfrastructureProposal } from "@cloudmarkup/schemas";
-import type { BetaInfrastructureJobCreditsV1 } from "@cloudmarkup/api-contract";
+import type {
+  BetaInfrastructureJobCreditsV1,
+  BetaInfrastructureJobV1,
+} from "@cloudmarkup/api-contract";
 export interface ProjectCreationProposal {
   readonly architectureDigest: string;
   readonly proposal: BetaInfrastructureProposal;
+  readonly applicability?: NonNullable<
+    BetaInfrastructureJobV1["result"]
+  >["applicability"];
   readonly credits: BetaInfrastructureJobCreditsV1 | null;
 }
 const pending = new Map<

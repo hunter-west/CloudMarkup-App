@@ -1,4 +1,10 @@
-import { digestCanonicalValue } from "@cloudmarkup/schemas";
+import {
+  betaProposalApplicabilityReceiptV1Schema,
+  digestCanonicalValue,
+} from "@cloudmarkup/schemas";
+import { applyGraphCommand } from "@cloudmarkup/domain";
+import { awsEditorCatalog } from "../../provider-catalog/aws-editor-catalog.js";
+import { prepareBetaInfrastructureProposal } from "../generation/beta-infrastructure-proposal.js";
 import {
   BetaInfrastructureAccessDeniedError,
   BetaInfrastructureRequestError,
@@ -291,7 +297,7 @@ it("collects an AI prompt and waits for a proposal before opening the editor wit
       actualCreditUnits: "2",
     });
   });
-  finish({
+  const response = {
     architectureDigest: digestCanonicalValue(architectureDocument),
     proposal: {
       contractVersion: 6,
@@ -315,7 +321,26 @@ it("collects an AI prompt and waits for a proposal before opening the editor wit
       connections: [],
       limitations: [],
     },
+  };
+  const command = prepareBetaInfrastructureProposal({
+    document: architectureDocument,
+    catalog: awsEditorCatalog,
+    proposal: response.proposal,
+    createId: () => "synthetic_creation_proof",
+  }).command;
+  const receipt = betaProposalApplicabilityReceiptV1Schema.parse({
+    contractVersion: 1,
+    validatorVersion: "beta-applicability-v1",
+    architectureDigest: response.architectureDigest,
+    catalogDigest: architectureDocument.catalog.digest,
+    proposalDigest: digestCanonicalValue(response.proposal),
+    commandDigest: digestCanonicalValue(command),
+    resultDigest: digestCanonicalValue(
+      applyGraphCommand(architectureDocument, command).document,
+    ),
+    kind: "mutation",
   });
+  finish({ ...response, applicability: receipt });
   await waitFor(() => {
     expect(window.location.pathname + window.location.search).toBe(
       "/organizations/org_setup/projects/project_ai/editor",
@@ -333,6 +358,9 @@ it("collects an AI prompt and waits for a proposal before opening the editor wit
     state: "settled",
     actualCreditUnits: "2",
   });
+  expect(readProjectCreationProposal("project_ai")?.applicability).toEqual(
+    receipt,
+  );
   forgetProjectCreationProposal("project_ai");
 });
 

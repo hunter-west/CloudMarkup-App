@@ -1,7 +1,11 @@
 import { AiProposalReview, AiWorkflowProgress } from "./AiProposalReview.js";
 import { useMemo, useState } from "react";
 import { Button, Dialog } from "@cloudmarkup/ui";
-import { digestCanonicalValue } from "@cloudmarkup/schemas";
+import {
+  betaProposalApplicabilityReceiptV1Schema,
+  digestCanonicalValue,
+} from "@cloudmarkup/schemas";
+import { applyGraphCommand } from "@cloudmarkup/domain";
 import { useOptionalCloudMarkupQueryRuntime } from "../../api/index.js";
 import { useEditorDocumentSession } from "../editor/session/index.js";
 import { prepareBetaInfrastructureProposal } from "./beta-infrastructure-proposal.js";
@@ -23,15 +27,7 @@ export function ProjectCreationProposalReview({
     editingAvailable && runtime !== null && !runtime.sessionExpired;
   const [error, setError] = useState("");
   const prepared = useMemo(() => {
-    if (
-      session.status !== "ready" ||
-      ("review" in proposal.proposal &&
-        proposal.proposal.resources.length +
-          proposal.proposal.connections.length +
-          proposal.proposal.updates.length ===
-          0)
-    )
-      return null;
+    if (session.status !== "ready") return null;
     try {
       if (
         digestCanonicalValue(session.document) !== proposal.architectureDigest
@@ -39,13 +35,43 @@ export function ProjectCreationProposalReview({
         throw new Error(
           "The draft changed while your diagram was being prepared. Open Assistant to request an updated proposal.",
         );
+      const assessment =
+        "review" in proposal.proposal &&
+        proposal.proposal.resources.length +
+          proposal.proposal.connections.length +
+          proposal.proposal.updates.length ===
+          0;
+      const command = assessment
+        ? null
+        : prepareBetaInfrastructureProposal({
+            document: session.document,
+            catalog: session.catalog,
+            proposal: proposal.proposal,
+            createId: () => session.createId(),
+          });
+      if (proposal.proposal.contractVersion === 6) {
+        const parsed = betaProposalApplicabilityReceiptV1Schema.safeParse(
+          proposal.applicability,
+        );
+        const receipt = parsed.success ? parsed.data : undefined;
+        const resultDocument = command
+          ? applyGraphCommand(session.document, command.command).document
+          : session.document;
+        if (
+          receipt?.architectureDigest !== proposal.architectureDigest ||
+          receipt.proposalDigest !== digestCanonicalValue(proposal.proposal) ||
+          receipt.catalogDigest !== session.document.catalog.digest ||
+          receipt.commandDigest !==
+            (command ? digestCanonicalValue(command.command) : null) ||
+          receipt.resultDigest !== digestCanonicalValue(resultDocument) ||
+          receipt.kind !== (command ? "mutation" : "questions-or-assessment")
+        )
+          throw new Error(
+            "The proposal proof does not match this project. Open Assistant to request a fresh proposal.",
+          );
+      }
       return {
-        command: prepareBetaInfrastructureProposal({
-          document: session.document,
-          catalog: session.catalog,
-          proposal: proposal.proposal,
-          createId: () => session.createId(),
-        }),
+        command,
         error: null,
       };
     } catch (caught) {
@@ -61,10 +87,12 @@ export function ProjectCreationProposalReview({
   return (
     <Dialog
       title={
-        "review" in proposal.proposal &&
-        proposal.proposal.review.questions.length
-          ? "Your project needs a little more detail"
-          : "Your diagram is ready to review"
+        prepared?.error
+          ? "Your diagram could not be confirmed"
+          : "review" in proposal.proposal &&
+              proposal.proposal.review.questions.length
+            ? "Your project needs a little more detail"
+            : "Your diagram is ready to review"
       }
       description="Review the proposal and any open questions before making changes."
       open
