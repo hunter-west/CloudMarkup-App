@@ -222,7 +222,9 @@ export function verifyWorkflowSecurity(path, text) {
     }
     const maximumTimeoutMinutes =
       (path === ROOT_CI_WORKFLOW_PATH && jobName === "quality") ||
-      (path === ".github/workflows/public-ci.yml" && jobName === "verify")
+      (path === ".github/workflows/public-ci.yml" && jobName === "verify") ||
+      (path === ".github/workflows/public-diagnostics.yml" &&
+        jobName === "coverage")
         ? 120
         : path === ROOT_CI_WORKFLOW_PATH && jobName === "tests"
           ? 120

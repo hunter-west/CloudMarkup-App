@@ -70,6 +70,7 @@
     "test:public:backend": "pnpm test:backend --exclude=**/model-live-historical-importer-upgrade-postgres.integration.test.ts",
     "test:infra": "vitest run --project=platform",
     "test:coverage": "pnpm build && vitest run --coverage --maxWorkers=1 --testTimeout=30000 --hookTimeout=120000",
+    "test:public:coverage": "pnpm test:coverage --exclude=**/beta-setup.test.ts --exclude=**/model-evaluation.e2e.test.ts --exclude=**/model-live-historical-importer-upgrade-postgres.integration.test.ts",
     "test:live-counted-execution": "pnpm build && vitest run --project=api apps/api/src/production-model-live-execution-postgres.integration.test.ts -t \"builds implemented (standard|deep) counted execution\" --maxWorkers=1 && pnpm test:live-counted-seed-preparation",
     "test:e2e": "playwright test --config config/playwright/default.config.ts",
     "test:e2e:typed-backend": "playwright test --config config/playwright/typed-backend.config.ts",

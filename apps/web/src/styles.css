@@ -234,7 +234,7 @@ p {
   background: var(--cm-color-app);
 }
 
-.authenticated-shell--workspace[data-posture="desktop"] {
+.authenticated-shell[data-posture="desktop"] {
   block-size: 100dvh;
   min-block-size: 0;
   overflow: hidden;
@@ -579,7 +579,9 @@ p {
 }
 
 .primary-navigation {
+  position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: var(--cm-space-3);
   height: calc(100% - 48px);
@@ -629,6 +631,11 @@ p {
 
 .navigation-group a:hover {
   background: var(--cm-color-action-subtle);
+}
+
+.navigation-group a > span {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 .navigation-group a[aria-current="page"] {
@@ -2255,10 +2262,18 @@ input:disabled {
   gap: 0;
 }
 .standard-shell > .shell-left-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   border: var(--cm-menu-border);
   border-radius: var(--cm-radius-lg);
   box-shadow: var(--cm-shadow-1);
-  overflow: auto;
+  overflow: hidden;
+}
+.standard-shell > .shell-left-panel > .primary-navigation {
+  height: auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .standard-shell > .shell-main {
   background: transparent;
@@ -2412,7 +2427,8 @@ input:disabled {
 }
 .primary-navigation--collapsed {
   gap: var(--cm-space-3);
-  padding: var(--cm-space-2) var(--cm-space-3);
+  justify-items: center;
+  padding: var(--cm-space-2) var(--cm-space-1);
   overflow: visible;
 }
 .primary-navigation--collapsed .navigation-group + .navigation-group {
