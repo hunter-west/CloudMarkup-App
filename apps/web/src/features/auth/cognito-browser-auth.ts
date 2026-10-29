@@ -1255,6 +1255,7 @@ export async function startCognitoSignInWithPopup(
 
   return new Promise<void>((resolve, reject) => {
     let settled = false;
+    let callbackInProgress = false;
     const closePopup = () => {
       try {
         popup.close();
@@ -1315,10 +1316,13 @@ export async function startCognitoSignInWithPopup(
       );
     }, COGNITO_AUTHORIZATION_TIMEOUT_MILLISECONDS);
     channel.onmessage = (event: MessageEvent<unknown>) => {
+      if (settled || callbackInProgress) return;
       if (!isCallbackMessage(event.data)) return;
       if (!safeEqual(event.data.callback.state, prepared.state)) return;
+      callbackInProgress = true;
       void session.completeCallback(event.data.callback).then(
         () => {
+          if (settled) return;
           const acknowledgement: CognitoCallbackAcknowledgement = {
             kind: "cloudmarkup.cognito-callback-acknowledgement",
             schemaVersion: 1,
@@ -1328,6 +1332,7 @@ export async function startCognitoSignInWithPopup(
           finish();
         },
         (error: unknown) => {
+          if (settled) return;
           const acknowledgement: CognitoCallbackAcknowledgement = {
             kind: "cloudmarkup.cognito-callback-acknowledgement",
             schemaVersion: 1,

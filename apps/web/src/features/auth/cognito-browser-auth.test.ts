@@ -285,6 +285,79 @@ describe("Cognito browser Authorization Code + PKCE", () => {
     expect(popup.closedReads()).toBe(0);
   });
 
+  it("accepts a relayed callback once while duplicate deliveries overlap the token exchange", async () => {
+    const channels: TestBroadcastChannel[] = [];
+    vi.stubGlobal(
+      "BroadcastChannel",
+      class extends TestBroadcastChannel {
+        public constructor(name: string) {
+          super(name);
+          channels.push(this);
+        }
+      },
+    );
+    const popup = popupFixture();
+    vi.spyOn(window, "open").mockReturnValue(popup.popup);
+    const exchange = deferredResponse();
+    const fetchImplementation = vi
+      .fn<typeof globalThis.fetch>()
+      .mockResolvedValueOnce(jsonResponse(runtimeConfig()))
+      .mockReturnValueOnce(exchange.promise);
+    const session = new CognitoBrowserAuthSession(() =>
+      authEnvironment(fetchImplementation),
+    );
+    const completeCallback = vi.spyOn(session, "completeCallback");
+    const completion = startCognitoSignInWithPopup(session);
+    const outcome = completion.then(
+      () => undefined,
+      (error: unknown) => error,
+    );
+    await vi.waitFor(() => {
+      expect(popup.replace).toHaveBeenCalledOnce();
+    });
+    const channel = channels[0];
+    const authorizationUrl: unknown = popup.replace.mock.calls[0]?.[0];
+    if (channel === undefined || typeof authorizationUrl !== "string") {
+      throw Error("The sign-in callback channel was not initialized.");
+    }
+    const state = new URL(authorizationUrl).searchParams.get("state");
+    const callback = (callbackState: string | null) =>
+      new MessageEvent("message", {
+        data: {
+          kind: "cloudmarkup.cognito-callback",
+          schemaVersion: 1,
+          callback: {
+            kind: "success",
+            code: "synthetic_code",
+            state: callbackState,
+          },
+        },
+      });
+    channel.onmessage?.(callback("z".repeat(43)));
+    expect(completeCallback).not.toHaveBeenCalled();
+    channel.onmessage?.(callback(state));
+    channel.onmessage?.(callback(state));
+    exchange.finish(
+      jsonResponse({
+        access_token: accessToken,
+        expires_in: 1800,
+        token_type: "Bearer",
+      }),
+    );
+    expect(await outcome).toBeUndefined();
+    channel.onmessage?.(callback(state));
+    expect(completeCallback).toHaveBeenCalledOnce();
+    expect(fetchImplementation).toHaveBeenCalledTimes(2);
+    expect(session.getAccessToken()).toBe(accessToken);
+    expect(channel.postMessage).toHaveBeenCalledExactlyOnceWith({
+      kind: "cloudmarkup.cognito-callback-acknowledgement",
+      schemaVersion: 1,
+      status: "accepted",
+    });
+    expect(channel.close).toHaveBeenCalledOnce();
+    expect(popup.close).toHaveBeenCalledOnce();
+  });
+
   it.each(["acknowledged", "unavailable"])(
     "settles cancellation when popup closure is blocked and cancellation is %s",
     async (cancellation) => {

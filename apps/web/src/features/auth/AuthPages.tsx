@@ -1,14 +1,21 @@
-import type { AccountAccessV1 } from "@cloudmarkup/api-contract";
+import type {
+  AccountAccessV1,
+  CloudMarkupClient,
+} from "@cloudmarkup/api-contract";
 import { signInReturnPathFromSearch } from "./sign-in-return-path.js";
 import { Disclosure } from "@cloudmarkup/ui";
-import { useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import { ArrowRight, LockKeyhole } from "lucide-react";
 
-import {
-  useOptionalCloudMarkupQueryRuntime,
-  type CloudMarkupQueryRuntime,
-} from "../../api/index.js";
+import { useOptionalCloudMarkupQueryRuntime } from "../../api/index.js";
 import { AppLink, useAppLocation, useNavigate } from "../../routing/index.js";
 import { RoutePage } from "../../shell/RoutePage.js";
 import {
@@ -56,11 +63,11 @@ async function loadAccountAccessDefault() {
 }
 
 async function resolveAuthenticatedLanding(
-  runtime: CloudMarkupQueryRuntime | null,
+  client: CloudMarkupClient | undefined,
 ): Promise<string> {
-  if (runtime === null) return "/settings/profile";
+  if (client === undefined) return "/settings/profile";
   try {
-    const principal = await runtime.client.request("principal.get", {});
+    const principal = await client.request("principal.get", {});
     if (principal.data.organizationContexts.length > 1) {
       return "/organizations";
     }
@@ -81,6 +88,8 @@ function readExistingSession() {
   return browserCognitoAuthSession.getValidAccessToken();
 }
 
+const ExplicitAuthenticationContext = createContext<(() => void) | null>(null);
+
 export function PublicEntrySessionBoundary({
   children,
   readSession = readExistingSession,
@@ -93,23 +102,36 @@ export function PublicEntrySessionBoundary({
   const runtime = useOptionalCloudMarkupQueryRuntime();
   const location = useAppLocation();
   const navigate = useNavigate();
+  const locationKey = location.pathname + location.search;
+  const entry = useRef({ locationKey, explicitAuthentication: false });
+  const automaticRedirect = useRef<AbortController | undefined>(undefined);
+  const beginExplicitAuthentication = useCallback(() => {
+    // This attempt owns navigation for this visit, including late session reads.
+    entry.current = { locationKey, explicitAuthentication: true };
+    automaticRedirect.current?.abort();
+  }, [locationKey]);
   useEffect(() => {
+    if (entry.current.locationKey !== locationKey) {
+      entry.current = { locationKey, explicitAuthentication: false };
+    }
     if (
       development ||
       runtime === null ||
+      entry.current.explicitAuthentication ||
       !["/", "/login", "/sign-in", "/signup", "/sign-up"].includes(
         location.pathname,
       )
     )
       return;
     const controller = new AbortController();
+    automaticRedirect.current = controller;
     const isCancelled = () => controller.signal.aborted;
     void readSession()
       .then(async (token) => {
         if (isCancelled() || token === undefined) return;
         const destination =
           signInReturnPathFromSearch(location.search) ??
-          (await resolveAuthenticatedLanding(runtime));
+          (await resolveAuthenticatedLanding(runtime.client));
         if (isCancelled()) return;
         runtime.resumeSession();
         navigate(destination, { replace: true });
@@ -119,16 +141,24 @@ export function PublicEntrySessionBoundary({
       });
     return () => {
       controller.abort();
+      if (automaticRedirect.current === controller) {
+        automaticRedirect.current = undefined;
+      }
     };
   }, [
     development,
     location.pathname,
     location.search,
+    locationKey,
     navigate,
     readSession,
     runtime,
   ]);
-  return children;
+  return (
+    <ExplicitAuthenticationContext.Provider value={beginExplicitAuthentication}>
+      {children}
+    </ExplicitAuthenticationContext.Provider>
+  );
 }
 
 export function SignInPage(props: SignInPageProps = {}) {
@@ -145,6 +175,7 @@ function SignInEntry({
   const navigate = useNavigate();
   const location = useAppLocation();
   const runtime = useOptionalCloudMarkupQueryRuntime();
+  const beginExplicitAuthentication = useContext(ExplicitAuthenticationContext);
   const mode: AccountAuthenticationIntent = ["/sign-up", "/signup"].includes(
     location.pathname,
   )
@@ -294,6 +325,7 @@ function SignInEntry({
               ref={signInButton}
               type="button"
               onClick={() => {
+                beginExplicitAuthentication?.();
                 const controller = new AbortController();
                 activeSignIn.current = controller;
                 setSignInError(null);
@@ -308,7 +340,7 @@ function SignInEntry({
                     runtime?.resumeSession();
                     const destination =
                       signInReturnPathFromSearch(location.search) ??
-                      (await resolveAuthenticatedLanding(runtime));
+                      (await resolveAuthenticatedLanding(runtime?.client));
                     if (
                       activeSignIn.current !== controller ||
                       controller.signal.aborted
@@ -492,6 +524,8 @@ export function AuthCallbackPage({
 }: AuthCallbackPageProps) {
   const navigate = useNavigate();
   const runtime = useOptionalCloudMarkupQueryRuntime();
+  const client = runtime?.client;
+  const resumeSession = runtime?.resumeSession;
   const [productionStatus, setProductionStatus] = useState<
     "complete" | "error" | "loading"
   >("loading");
@@ -499,32 +533,43 @@ export function AuthCallbackPage({
 
   useEffect(() => {
     if (development) return undefined;
-    let active = true;
+    const controller = new AbortController();
+    const isCancelled = () => controller.signal.aborted;
     const complete = async () => {
       try {
         const callback = parseCognitoCallback(search);
         if (authSession.hasPendingAuthorization(callback.state)) {
           await authSession.completeCallback(callback);
-          if (!active) return;
-          runtime?.resumeSession();
-          navigate(await resolveAuthenticatedLanding(runtime), {
+          if (isCancelled()) return;
+          resumeSession?.();
+          const destination = await resolveAuthenticatedLanding(client);
+          if (isCancelled()) return;
+          navigate(destination, {
             replace: true,
           });
           return;
         }
         await relayCallback(callback);
-        if (!active) return;
+        if (isCancelled()) return;
         setProductionStatus("complete");
         window.close();
       } catch {
-        if (active) setProductionStatus("error");
+        if (!isCancelled()) setProductionStatus("error");
       }
     };
     void complete();
     return () => {
-      active = false;
+      controller.abort();
     };
-  }, [authSession, development, navigate, relayCallback, runtime, search]);
+  }, [
+    authSession,
+    client,
+    development,
+    navigate,
+    relayCallback,
+    resumeSession,
+    search,
+  ]);
 
   if (!development) {
     const failed = productionStatus === "error";
