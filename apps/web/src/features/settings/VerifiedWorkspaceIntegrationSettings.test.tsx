@@ -4,7 +4,13 @@ import {
   type CurrentPrincipalV1,
 } from "@cloudmarkup/api-contract";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CloudMarkupQueryRuntime } from "../../api/index.js";
 import { VerifiedWorkspaceIntegrationSettings } from "./VerifiedWorkspaceIntegrationSettings.js";
@@ -93,6 +99,28 @@ describe("verified integration route scope", () => {
         await screen.findByText(`GitHub: org_fixture / ${kind}`),
       ).toBeVisible();
       expect(screen.getByText(`GitLab: org_fixture / ${kind}`)).toBeVisible();
+      expect(
+        screen.getByRole("heading", {
+          name:
+            kind === "personal"
+              ? "Personal integrations"
+              : "Organization integrations",
+        }),
+      ).toBeVisible();
+      const bitbucket = screen.getByRole("region", { name: "Bitbucket" });
+      expect(within(bitbucket).getByText("Coming soon")).toBeVisible();
+      expect(
+        within(bitbucket).getByText(
+          kind === "personal"
+            ? "Bitbucket Cloud is planned for your personal projects."
+            : "Bitbucket Cloud is planned for this organization's projects.",
+        ),
+      ).toBeVisible();
+      const connect = within(bitbucket).getByRole("button", {
+        name: "Connect Bitbucket",
+      });
+      expect(connect).toBeDisabled();
+      fireEvent.click(connect);
       expect(request).toHaveBeenCalledExactlyOnceWith(
         "account.workspaces.get",
         { path: { organizationId: workspace.id } },
@@ -123,6 +151,9 @@ describe("verified integration route scope", () => {
     expect(screen.getByRole("alert")).toBeVisible();
     expect(request).not.toHaveBeenCalled();
     expect(screen.queryByText(/GitHub:/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "Bitbucket" }),
+    ).not.toBeInTheDocument();
   });
   it.each([
     { name: "tenant", response: { ...workspace, id: "org_other" } },
@@ -140,6 +171,9 @@ describe("verified integration route scope", () => {
       );
       expect(screen.queryByText(/GitHub:/)).not.toBeInTheDocument();
       expect(screen.queryByText(/GitLab:/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("region", { name: "Bitbucket" }),
+      ).not.toBeInTheDocument();
     },
   );
   it("withholds providers when the server denies current workspace access", async () => {

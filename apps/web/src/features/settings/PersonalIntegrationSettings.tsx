@@ -13,6 +13,7 @@ import {
 } from "../../api/index.js";
 import { GitHubIntegrationSettings } from "./GitHubIntegrationSettings.js";
 import { GitLabIntegrationSettings } from "./GitLabIntegrationSettings.js";
+import { BitbucketIntegrationPlaceholder } from "./BitbucketIntegrationPlaceholder.js";
 
 class PersonalWorkspaceBindingError extends Error {}
 
@@ -132,8 +133,12 @@ export function PersonalIntegrationSettings({
       <section className="state-card">
         <h2>Personal integrations</h2>
         <p>
-          Connect repositories for your personal projects. Organization
-          integrations are managed separately in that organization’s settings.
+          These connections are for your personal projects. Manage connections
+          for shared projects in the organization&apos;s integration settings.
+        </p>
+        <p>
+          Connect GitHub or GitLab when available for your account. Bitbucket is
+          coming soon. Other repository providers cannot be added.
         </p>
         {details.isPending ? (
           <p role="status">Checking your personal workspace.</p>
@@ -151,7 +156,7 @@ export function PersonalIntegrationSettings({
         ) : verified === null ? (
           <>
             <p>
-              Create your private workspace to connect integrations. You do not
+              Create your personal workspace to connect integrations. You do not
               need to join an organization.
             </p>
             <button
@@ -188,6 +193,7 @@ export function PersonalIntegrationSettings({
             principal={verified.actor}
             runtime={runtime}
           />
+          <BitbucketIntegrationPlaceholder workspaceKind="personal" />
         </>
       ) : null}
     </div>

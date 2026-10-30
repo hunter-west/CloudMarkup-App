@@ -12,6 +12,8 @@
 - Withhold retained repository details and pending authorization when a current
   provider connection check fails.
 - Let users refresh GitHub status explicitly from settings.
+- Use distinct personal/organization labels and enumerate supported repository
+  providers, with Bitbucket explicitly unavailable in both contexts.
 
 ## Context
 
@@ -49,8 +51,12 @@ provider-native acceptance and release admission.
 - [x] Extend the existing suites with three regression cases.
 - [x] Restore execution, build prerequisites, run focused tests and affected
       web/security checks, and review the full diff.
-- [ ] (current) Release owner coordinates browser acceptance, exact integrated
-      admission and authorized public submission before readiness.
+- [x] Clarify the personal/organization directory and integration context; add
+      matching disabled Bitbucket cards without changing provider authority.
+- [x] Qualify the presentation follow-up with its owning suites, changed-file
+      lint/formatting, web typing/build and security checks.
+- [ ] (current) Release owner coordinates consolidated publication, browser
+      acceptance and exact integrated admission before readiness.
 
 ## Validation commands
 
@@ -96,6 +102,45 @@ complete. Keep release readiness pending coordinated browser and exact-source
 admission; do not infer provider activation from source completeness.
 
 ## Handoff
+
+### Personal and organization presentation follow-up
+
+The October 30 follow-up starts at public main `d2dd7619`. The directory is
+"Personal & organizations"; its cards retain their existing dashboard/settings
+routes. "Personal workspace" denotes private projects, "Organization" plus its
+name denotes shared projects, and "Personal account" denotes profile, sign-in
+and preferences. Global menu grouping and billing presentation have separate
+owners; existing route IDs and tour anchors stay unchanged.
+
+Both verified integration contexts enumerate GitHub, GitLab and a disabled
+"Coming soon" Bitbucket card using the existing card styles. Other repository
+providers cannot be added. GitHub's selected installation may be shared within
+the organization under existing authorization; GitLab remains member-owned and
+cannot be borrowed by other members. Current service failures still withhold
+connection controls. A placeholder does not register a provider, authorize a
+grant, or imply that import/export is active.
+
+The four existing integration suites pass 46/46 before presentation changes
+(79.62 seconds overall; 4.43 seconds in tests). Reuse those cases to check that
+Bitbucket is disabled, makes no request and stays behind verified context. No
+new test case, provider route, wire contract, dependency, credential, activation
+flag, style rule or global menu change belongs to this follow-up.
+
+The six owning integration/directory/creation suites pass 59/59 in 27.29
+seconds. After final JSX escaping and creation-status copy corrections, the two
+affected suites pass 16/16 in 23.38 seconds; this is a subset rerun, not an
+additional case count. Changed-file typed lint passes with zero warnings after
+correcting the unescaped apostrophe reported by its initial invocation; no rule
+or assertion is weakened. Web typing and all 15 build tasks pass (13 cached;
+10.898 seconds), with the existing chunk-size warning retained. Security passes
+12 static cases and a scan of 3,909 text files with eight explicit binary skips;
+dependency audit reports nine moderate and no high/critical advisories.
+Formatting, three local plan links and whitespace checks pass. The test
+selections/cache states differ, so the timings do not establish a speed
+improvement. Full web/public/private gates and browser acceptance remain with
+the release and QA owners.
+
+### Earlier provider recovery evidence
 
 Frozen installation passed using Node 24.18.0 and pnpm 11.16.0. The original
 focused run was stopped without results; the original build lost its terminal
