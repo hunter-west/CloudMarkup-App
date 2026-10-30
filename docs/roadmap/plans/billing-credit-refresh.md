@@ -12,6 +12,8 @@
 - Preserve server-only payment, trial, credit and export admission decisions.
 - Make fresh workspaces discoverable for a first reviewed staff grant/trial,
   without provisioning from reads or adding staff authority.
+- Explain personal versus organization billing and member coverage using
+  existing verified summaries, while preserving the current visual design.
 
 ## Context
 
@@ -28,6 +30,9 @@ checking that handoff. See
 - Original implementation base: c44c8026210d3c25d93e35d8991278a3891acb8e.
 - Current focused acceptance base: merged PR5,
   641ed0822598be162df2e67155e40484d67b5579.
+- Organization-member presentation base (October 30): verified public main
+  d2dd761903b192d3691c5601948a10b28df38d3f, including the fresh-staff
+  correction.
 - Use synthetic fixtures only. No live balance, purchase, subscription, account,
   IAM, credential, deployment or approval changes.
 - Browser ownership and integrated release remain with the designated owners.
@@ -48,8 +53,133 @@ checking that handoff. See
       credit, staff, onboarding and provider evidence at that exact source.
 - [x] Reproduce FRESH-STAFF-01 against immutable 641ed082 source and implement
       the correction with current staff authority and native regressions.
-- [ ] (current) QA verifies the reviewed correction in the deployed candidate;
-      release owner completes integrated and exact-release qualification.
+- [ ] QA verifies the reviewed correction in the deployed candidate; release
+      owner completes integrated and exact-release qualification.
+- [x] Complete role-aware billing/Usage presentation and affected local checks
+      for the October 30 UX batch.
+- [ ] (current) Release owner integrates the frozen billing packet into the
+      consolidated public UX batch; QA qualifies the deployed screens
+      separately.
+
+## Organization-member billing presentation (October 30)
+
+This pass changes the existing billing, top-up and Usage screens. Global menus,
+organization navigation and integrations remain with their assigned owners.
+Cards, typography, CSS and payment providers retain their existing design.
+
+The user model follows the existing tenant boundary: choose Personal workspace
+for personal projects, or the named Organization for organization work. Plans
+and credits belong to that selection. Organization membership does not attach
+the organization's subscription to the person's personal projects or merge
+credit pools. A paid organization member does not need to purchase a personal
+subscription to use features covered in that organization, subject to their
+role, available credits, service availability and operation admission.
+
+| Scope or role                                                       | Existing read visibility                                                    | Existing payer/management boundary                                                                                 | Access and credit meaning                                                                                                                     |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Personal workspace owner                                            | Own plan, credit and subscription summaries                                 | Existing personal billing account/customer; owner manages hosted sessions                                          | Personal projects use this pool; organization work stays separate                                                                             |
+| Organization owner/administrator                                    | Organization commercial summaries and existing restricted usage permissions | Existing organization billing account/customer; billing.manage plus recent application authentication for payments | Organization plan and shared credits apply here; role and entitlement checks still gate operations                                            |
+| Organization editor                                                 | Organization commercial summaries                                           | No Checkout, Portal or credit-purchase authority                                                                   | Uses the organization's applicable features/shared budget; no personal purchase is required for covered organization work                     |
+| Organization viewer                                                 | Organization commercial summaries                                           | No Checkout, Portal or credit-purchase authority                                                                   | Read access remains read-only; a paid plan does not grant editor or expensive-operation permission                                            |
+| Multiple organizations                                              | Separate summaries for each current membership                              | Each organization retains its own billing account                                                                  | No automatic cross-organization or personal credit transfer, subscription inheritance or pool aggregation                                     |
+| Independent trial or complimentary credits                          | Existing current-plan summary, distinct from paid subscription state        | Existing separately authorized staff action only                                                                   | A trial has recorded expiry/revocation; complimentary funding supplies its existing AI policy without a paid subscription or export privilege |
+| Inactive subscription, suspended/closed account or disabled service | Verified status; failed/revoked reads withhold prior data                   | Existing server action flags remain authoritative                                                                  | Neither a personal purchase nor a plan label bypasses account state, service, role or credit checks                                           |
+
+Evidence comes from
+[canonical role permissions](../../../apps/api/src/application/authorization.ts),
+[commercial request authorization](../../../apps/api/src/production-commercial-authorization.ts),
+[billing summaries and hosted actions](../../../apps/api/src/production-billing-workspace.ts),
+[top-up eligibility](../../../apps/api/src/production-credit-top-ups.ts),
+[commercial reads](../../../apps/api/src/production-commercial-reads.ts), and
+[the existing billing architecture](../../architecture/BILLING_AND_USAGE.md#commercial-authorization-policy-version-2).
+The ordinary payment path operates on the selected organization's billing
+account/customer, not a separate subscription for every member. Role-based
+billable-seat candidates and plan limits already exist; they do not establish a
+new per-seat price or authorize automatic charges on joining. Seat pricing,
+personal sponsorship/credit transfer, different payer ownership and new access
+permissions remain separate business-policy decisions and are not implemented.
+
+Presentation changes use existing APIs only. account.workspaces.get supplies a
+verified kind and name, bound to principal, tenant and role. Failed or
+mismatched metadata cannot label another tenant as Personal or disclose its
+name. Members see organization coverage and an owner/administrator contact path
+rather than purchase buttons. Billing managers still require server canCheckout,
+canManage and canPurchase flags. Top-up and plan cards distinguish personal from
+shared organization credits. Usage labels the selected pool and links to Plans &
+billing. Existing current-plan reads can show independent trial/complimentary
+access without claiming a paid subscription; paid conversion or account
+unavailability withholds stale independent-access presentation.
+
+The initial three owning web suites passed all 43 cases in 18.87s before this
+change. Nine cases were added in the existing billing suite: editor/viewer
+coverage and purchase suppression (criticality 9), active trial/expired
+trial/complimentary access distinctions (9), and tenant/principal/role metadata
+or current-plan binding rejection (9). Existing personal-scope, switching,
+revocation and late-response cases were extended. No test was removed, skipped
+or given a broader timeout/retry allowance. The permission-loss case now proves
+that a revoked billing capability hides Checkout and cannot issue a second
+request while its late first response is discarded.
+
+All 52 selected web cases have passing final evidence: the complete selection
+passed in 23.00s (4.27s test bodies, versus 3.04s before). A later
+pending-payment fixture refinement initially used an invalid top-up ID, which
+strict parsing rejected; after correcting only the fixture to the existing
+contract, all 33 billing cases passed in 7.86s. The other 19 owning cases retain
+their passing results. There are no new production financial or authorization
+rules. The 57 existing billing/commercial API cases passed in 6.22s, and the 60
+existing app-level cases passed in 32.45s. This yields 169 distinct passing
+Vitest cases across six suites; the timings are receipts, not a controlled
+performance comparison.
+
+Three existing synthetic Playwright journeys passed in 33.5s: credit-source
+balance/expiry/denied refresh, and original-session preservation through
+separate Checkout and Portal windows. They used an isolated loopback Vite port
+and mocked APIs/payment documents. The initial sandbox listen EACCES was an OS
+access error, not an approval denial; the supported approved run passed without
+changing deadlines, assertions or retry policy. Its temporary configuration was
+removed. Usage and billing screenshots were inspected; the current cards,
+spacing, typography and palettes remain. The popup fixture does not supply a
+successful top-up workspace response, so its top-up-unavailable notice is not
+evidence about deployed top-up configuration or payment acceptance. Member-role
+presentation has focused component evidence; deployed browser acceptance remains
+with QA.
+
+Web types, scoped lint, production web build (5.25s), formatting and diff checks
+passed. Security checks passed 12 control cases, static verification and secret
+scanning; dependency audit has nine moderate advisories and none at the
+configured high threshold. No dependencies or public contracts changed. Raw
+receipts and screenshots remain outside tracked source. No aggregate, CI,
+hosted/provider or live account run is started by this owner.
+
+Publication is coordinated with the release owner's single public UX batch
+(codex/public-ux-batch-20261030). The initial coordination send returned an app
+path error, and its outcome was checked read-only rather than blindly retried;
+the global UX owner received the scope and publication constraint. The release
+owner's recorded batch already includes this billing work. A reviewed feature
+branch push does not trigger these workflows (both push profiles select main;
+diagnostics are scheduled/manual), but an independent PR would start duplicate
+CI. Consolidated PR creation remains with the release owner. Source publication
+does not establish deployment or live acceptance.
+
+Focused commands:
+
+```powershell
+node node_modules/vitest/vitest.mjs run --project web apps/web/src/features/billing/BillingWorkspacePage.test.tsx apps/web/src/features/billing/CreditTopUpSection.test.tsx apps/web/src/features/billing/UsagePage.test.tsx --maxWorkers=1
+node node_modules/vitest/vitest.mjs run --project api apps/api/src/production-billing-workspace.test.ts apps/api/src/production-commercial-reads.test.ts --maxWorkers=1
+node node_modules/vitest/vitest.mjs run --project web apps/web/src/App.test.tsx --maxWorkers=1
+node node_modules/typescript/bin/tsc -p apps/web/tsconfig.json --noEmit
+pnpm security:check
+```
+
+The browser command used the existing typed-backend configuration with only a
+temporary loopback port/output override, selecting credit-overview.spec.ts and
+the two "keeps the original app session when returning" cases in
+typed-backend.spec.ts. No browser case or permanent configuration was added.
+
+No public API or database contract changes. The prior fresh-staff correction
+remains intact. Existing read and mutation authorization, recent sign-in,
+idempotency and provider checks remain authoritative. No live account, balance,
+grant, subscription or payment is read or changed for this pass.
 
 ## FRESH-STAFF-01 correction: local implementation
 
