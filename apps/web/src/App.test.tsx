@@ -372,7 +372,7 @@ describe("CloudMarkup application routes", () => {
     expect(
       await screen.findByRole("heading", {
         level: 2,
-        name: "Your workspaces",
+        name: "Choose where to work",
       }),
     ).toBeInTheDocument();
     const navigation = screen.getByRole("navigation", {
@@ -433,7 +433,10 @@ describe("CloudMarkup application routes", () => {
         "/organizations",
         width,
       );
-      await screen.findByRole("heading", { level: 1, name: "Workspaces" });
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "Personal & organizations",
+      });
       const openNavigation = async () => {
         if (width < 1280) {
           fireEvent.click(
@@ -468,10 +471,10 @@ describe("CloudMarkup application routes", () => {
       );
       const organizationsHeading = await screen.findByRole("heading", {
         level: 1,
-        name: "Workspaces",
+        name: "Personal & organizations",
       });
       await waitFor(() => expect(organizationsHeading).toHaveFocus());
-      expect(document.title).toBe("Workspaces");
+      expect(document.title).toBe("Personal & organizations");
       expect(
         screen.queryByRole("button", { name: "Project status" }),
       ).not.toBeInTheDocument();
