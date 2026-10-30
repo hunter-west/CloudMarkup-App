@@ -71,6 +71,58 @@ spending authorization and campaign/job identities belong in the separate
 private operational handoff, not this public source plan. This procedure cannot
 authorize inference from an account balance or AWS sign-in status.
 
+## October 30 recovery continuation
+
+The new audit starts from public main `d2dd7619`, which includes the prior
+creation proof correction. A newly reported hosted creation failure still needs
+its request reference or sanitized worker diagnostic to identify the precise
+failing stage. Public source qualification does not establish which source the
+hosted browser executed; the private operator handoff records the separate
+deployment observation and diagnostic access blocker. No inference request is
+used to discover availability.
+
+Two source-level recovery defects are reproducible independently of that
+incident. After a terminal failure, creation removed the prompt and allowed only
+an identical retry. After interrupted polling, transport errors lost the known
+request reference. Creation now retains the description and permits an explicit
+revision after a confirmed failed/canceled job. Uncertain outcomes keep it
+read-only. Both actions remain in the same saved project. Unexpected
+transport/response failures use fixed display copy and the bounded admitted
+reference, with the existing cancellation reconciliation and idempotency key.
+Known deadline, poll and result-binding failures also retain that reference.
+Provider, token, billing, graph-admission and timeout settings are unchanged.
+
+The owning setup retry case now covers terminal revision (8/10) and uncertain
+input retention (9/10); both assert a single project creation and the exact
+retry target/prompt. One new client case proves loss of both polling and
+cancellation connectivity followed by success with one simulated reservation
+key, original request bytes and a fixed safe reference (9/10). Existing success,
+v6 proof, cancellation, credit, admission-loss and reload tests are retained.
+The total case delta across these owning suites is two. An initial targeted
+pre-fix run failed all three selected recovery checks in 20.96 seconds. The
+first five-suite run passed 74 cases and failed the two new setup cases in 28.76
+seconds. It exposed a missing accessible name on the new recovery field, which
+is corrected with explicit label/help associations. A subsequent setup run
+exposed a test assertion aimed at the outer mutation's prompt instead of the
+serialized request's requirements; only that assertion was corrected. The final
+setup suite passes 15/15 in 28.17 seconds, and the final client suite passes
+26/26 in 7.86 seconds. The other three owning suites passed all 35 cases in the
+first focused run. These are 76 passing cases across focused runs, not a passing
+full web gate. Timeouts, retries and existing negative checks remain. The final
+deadline assertion also passes independently in 8.46 seconds.
+
+Web types and changed-file lint pass. One lint correction replaces an untyped
+test matcher with the existing fixed safe message. The initial direct Vite build
+failed because this checkout retained older API-contract build output; the
+missing staff schemas exist in current source. Running the normal
+dependency-aware `pnpm build:web` rebuilds those prerequisites and passes all 15
+tasks (11 cached) in 33.55 seconds, with the final Vite build in 2.70 seconds.
+Security checks pass: 12 policy cases, static verification, secret scan and
+registry audit with nine moderate and no high/critical advisories. No
+dependency, workflow, API, metering or provider activation change is included.
+Integrated public/private gates and browser acceptance remain with the release
+owner; no new broad suite or CI was started by this workstream.
+
 ## Constraints
 
 - One provider attempt, existing token/deadline limits, unchanged funding
@@ -193,10 +245,12 @@ never guess the rejected content or report a passing matrix.
 
 ## Handoff
 
-The initial implementation is merged in public PR #5; deployment/live proof
-remain separate. The resumed creation-proof correction is local and passed
-focused qualification. The release owner owns its integrated public/private
-gates and delivery; the designated Chrome owner owns source-bound live testing
-after parent budget coordination. No new full suite runs independently on the
-shared PC. Application generation remains a separate handoff; its default
-unavailable stages are not activated by this work.
+The initial implementation and creation-proof correction are merged in public
+main `d2dd7619`; deployment/live proof remain separate. The October 30 recovery
+correction is prepared as a separate candidate. The release owner owns the
+consolidated public/private gates and delivery; the designated Chrome owner owns
+source-bound live testing after parent budget coordination. The latest hosted
+failure's exact diagnostic remains required before claiming its cause or a live
+fix. No new full suite runs independently on the shared PC. Application
+generation remains a separate handoff; its default unavailable stages are not
+activated by this work.
