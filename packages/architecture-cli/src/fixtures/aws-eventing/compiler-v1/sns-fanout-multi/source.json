@@ -17,9 +17,7 @@
         "displayName": "Curated event behavior",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -51,9 +49,7 @@
         "displayName": "Curated event envelope",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -79,9 +75,7 @@
         "displayName": "Curated event payload",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -115,15 +109,11 @@
             "indexId": "index_event_sns_fanout_consumer_primary_primary",
             "name": "primary",
             "kind": "primary",
-            "partitionFields": [
-              "eventId"
-            ],
+            "partitionFields": ["eventId"],
             "sortFields": []
           }
         ],
-        "supportedOperations": [
-          "consume"
-        ]
+        "supportedOperations": ["consume"]
       },
       {
         "contractId": "contracts.sns-fanout-consumer.primary.test.contract",
@@ -131,9 +121,7 @@
         "displayName": "contract event contract test",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -171,9 +159,7 @@
         "displayName": "unit event contract test",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -216,9 +202,7 @@
         "displayName": "Curated event behavior",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -250,9 +234,7 @@
         "displayName": "Curated event envelope",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -278,9 +260,7 @@
         "displayName": "Curated event payload",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -314,15 +294,11 @@
             "indexId": "index_event_sns_fanout_consumer_secondary_primary",
             "name": "primary",
             "kind": "primary",
-            "partitionFields": [
-              "eventId"
-            ],
+            "partitionFields": ["eventId"],
             "sortFields": []
           }
         ],
-        "supportedOperations": [
-          "consume"
-        ]
+        "supportedOperations": ["consume"]
       },
       {
         "contractId": "contracts.sns-fanout-consumer.secondary.test.contract",
@@ -330,9 +306,7 @@
         "displayName": "contract event contract test",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -370,9 +344,7 @@
         "displayName": "unit event contract test",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -474,9 +446,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_event_logs_sns_fanout_multi_1",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_event_logs_sns_fanout_multi_1"
-              ]
+              "dependentEdgeIds": ["edge_event_logs_sns_fanout_multi_1"]
             }
           }
         },
@@ -500,10 +470,7 @@
             "values": {
               "actions": {
                 "kind": "string-list",
-                "value": [
-                  "logs:CreateLogStream",
-                  "logs:PutLogEvents"
-                ]
+                "value": ["logs:CreateLogStream", "logs:PutLogEvents"]
               },
               "effect": {
                 "kind": "string",
@@ -536,9 +503,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_event_logs_sns_fanout_multi_1",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_event_logs_sns_fanout_multi_1"
-              ]
+              "dependentEdgeIds": ["edge_event_logs_sns_fanout_multi_1"]
             }
           }
         },
@@ -579,9 +544,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_event_logs_sns_fanout_multi_2",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_event_logs_sns_fanout_multi_2"
-              ]
+              "dependentEdgeIds": ["edge_event_logs_sns_fanout_multi_2"]
             }
           }
         },
@@ -605,10 +568,7 @@
             "values": {
               "actions": {
                 "kind": "string-list",
-                "value": [
-                  "logs:CreateLogStream",
-                  "logs:PutLogEvents"
-                ]
+                "value": ["logs:CreateLogStream", "logs:PutLogEvents"]
               },
               "effect": {
                 "kind": "string",
@@ -641,9 +601,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_event_logs_sns_fanout_multi_2",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_event_logs_sns_fanout_multi_2"
-              ]
+              "dependentEdgeIds": ["edge_event_logs_sns_fanout_multi_2"]
             }
           }
         },
@@ -868,9 +826,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_primary_lambda"
-              ]
+              "dependentEdgeIds": ["edge_primary_lambda"]
             }
           }
         },
@@ -894,9 +850,7 @@
             "values": {
               "actions": {
                 "kind": "string-list",
-                "value": [
-                  "lambda:InvokeFunction"
-                ]
+                "value": ["lambda:InvokeFunction"]
               },
               "effect": {
                 "kind": "string",
@@ -908,9 +862,7 @@
               },
               "principals": {
                 "kind": "string-list",
-                "value": [
-                  "sns.amazonaws.com"
-                ]
+                "value": ["sns.amazonaws.com"]
               },
               "resourceExpressions": {
                 "kind": "string-list",
@@ -931,9 +883,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_primary_lambda"
-              ]
+              "dependentEdgeIds": ["edge_primary_lambda"]
             }
           }
         },
@@ -1150,9 +1100,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_secondary_lambda"
-              ]
+              "dependentEdgeIds": ["edge_secondary_lambda"]
             }
           }
         },
@@ -1176,9 +1124,7 @@
             "values": {
               "actions": {
                 "kind": "string-list",
-                "value": [
-                  "lambda:InvokeFunction"
-                ]
+                "value": ["lambda:InvokeFunction"]
               },
               "effect": {
                 "kind": "string",
@@ -1190,9 +1136,7 @@
               },
               "principals": {
                 "kind": "string-list",
-                "value": [
-                  "sns.amazonaws.com"
-                ]
+                "value": ["sns.amazonaws.com"]
               },
               "resourceExpressions": {
                 "kind": "string-list",
@@ -1213,9 +1157,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_secondary_lambda"
-              ]
+              "dependentEdgeIds": ["edge_secondary_lambda"]
             }
           }
         },
@@ -1309,9 +1251,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_secondary_role"
-              ]
+              "dependentEdgeIds": ["edge_secondary_role"]
             }
           }
         },
@@ -1335,9 +1275,7 @@
             "values": {
               "actions": {
                 "kind": "string-list",
-                "value": [
-                  "sts:AssumeRole"
-                ]
+                "value": ["sts:AssumeRole"]
               },
               "effect": {
                 "kind": "string",
@@ -1349,9 +1287,7 @@
               },
               "principals": {
                 "kind": "string-list",
-                "value": [
-                  "lambda.amazonaws.com"
-                ]
+                "value": ["lambda.amazonaws.com"]
               },
               "resourceExpressions": {
                 "kind": "string-list",
@@ -1372,9 +1308,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_secondary_role"
-              ]
+              "dependentEdgeIds": ["edge_secondary_role"]
             }
           }
         },
@@ -1415,9 +1349,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_role_lambda"
-              ]
+              "dependentEdgeIds": ["edge_role_lambda"]
             }
           }
         },
@@ -1441,9 +1373,7 @@
             "values": {
               "actions": {
                 "kind": "string-list",
-                "value": [
-                  "sts:AssumeRole"
-                ]
+                "value": ["sts:AssumeRole"]
               },
               "effect": {
                 "kind": "string",
@@ -1455,9 +1385,7 @@
               },
               "principals": {
                 "kind": "string-list",
-                "value": [
-                  "lambda.amazonaws.com"
-                ]
+                "value": ["lambda.amazonaws.com"]
               },
               "resourceExpressions": {
                 "kind": "string-list",
@@ -1478,9 +1406,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_role_lambda"
-              ]
+              "dependentEdgeIds": ["edge_role_lambda"]
             }
           }
         },
@@ -2054,9 +1980,7 @@
           "displayName": "Curated event behavior",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -2088,9 +2012,7 @@
           "displayName": "Curated event envelope",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -2116,9 +2038,7 @@
           "displayName": "Curated event payload",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -2152,15 +2072,11 @@
               "indexId": "index_event_sns_fanout_consumer_primary_primary",
               "name": "primary",
               "kind": "primary",
-              "partitionFields": [
-                "eventId"
-              ],
+              "partitionFields": ["eventId"],
               "sortFields": []
             }
           ],
-          "supportedOperations": [
-            "consume"
-          ]
+          "supportedOperations": ["consume"]
         },
         {
           "contractId": "contracts.sns-fanout-consumer.primary.test.contract",
@@ -2168,9 +2084,7 @@
           "displayName": "contract event contract test",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -2208,9 +2122,7 @@
           "displayName": "unit event contract test",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -2253,9 +2165,7 @@
           "displayName": "Curated event behavior",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -2287,9 +2197,7 @@
           "displayName": "Curated event envelope",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -2315,9 +2223,7 @@
           "displayName": "Curated event payload",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -2351,15 +2257,11 @@
               "indexId": "index_event_sns_fanout_consumer_secondary_primary",
               "name": "primary",
               "kind": "primary",
-              "partitionFields": [
-                "eventId"
-              ],
+              "partitionFields": ["eventId"],
               "sortFields": []
             }
           ],
-          "supportedOperations": [
-            "consume"
-          ]
+          "supportedOperations": ["consume"]
         },
         {
           "contractId": "contracts.sns-fanout-consumer.secondary.test.contract",
@@ -2367,9 +2269,7 @@
           "displayName": "contract event contract test",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -2407,9 +2307,7 @@
           "displayName": "unit event contract test",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -2574,15 +2472,11 @@
             {
               "policyId": "idempotency_event_sns_fanout_consumer_primary",
               "mode": "not-required",
-              "operationIds": [
-                "operation_event_sns_fanout_consumer_primary"
-              ]
+              "operationIds": ["operation_event_sns_fanout_consumer_primary"]
             }
           ],
           "observability": {
-            "signals": [
-              "logs"
-            ],
+            "signals": ["logs"],
             "healthChecks": [],
             "smokeTests": []
           },
@@ -2629,10 +2523,7 @@
               "extensionPointId": "application.sns-fanout-consumer.primary.extensions",
               "path": "application/src/functions/event_sns_fanout_consumer_primary/extensions/custom.ts",
               "kind": "module",
-              "permittedOwnership": [
-                "approved-extension",
-                "user-owned"
-              ],
+              "permittedOwnership": ["approved-extension", "user-owned"],
               "conflictBehavior": "require-reviewed-resolution"
             }
           ],
@@ -2769,15 +2660,11 @@
             {
               "policyId": "idempotency_event_sns_fanout_consumer_secondary",
               "mode": "not-required",
-              "operationIds": [
-                "operation_event_sns_fanout_consumer_secondary"
-              ]
+              "operationIds": ["operation_event_sns_fanout_consumer_secondary"]
             }
           ],
           "observability": {
-            "signals": [
-              "logs"
-            ],
+            "signals": ["logs"],
             "healthChecks": [],
             "smokeTests": []
           },
@@ -2824,10 +2711,7 @@
               "extensionPointId": "application.sns-fanout-consumer.secondary.extensions",
               "path": "application/src/functions/event_sns_fanout_consumer_secondary/extensions/custom.ts",
               "kind": "module",
-              "permittedOwnership": [
-                "approved-extension",
-                "user-owned"
-              ],
+              "permittedOwnership": ["approved-extension", "user-owned"],
               "conflictBehavior": "require-reviewed-resolution"
             }
           ],
@@ -3073,15 +2957,11 @@
           {
             "policyId": "idempotency_event_sns_fanout_consumer_primary",
             "mode": "not-required",
-            "operationIds": [
-              "operation_event_sns_fanout_consumer_primary"
-            ]
+            "operationIds": ["operation_event_sns_fanout_consumer_primary"]
           }
         ],
         "observability": {
-          "signals": [
-            "logs"
-          ],
+          "signals": ["logs"],
           "healthChecks": [],
           "smokeTests": []
         },
@@ -3128,10 +3008,7 @@
             "extensionPointId": "application.sns-fanout-consumer.primary.extensions",
             "path": "application/src/functions/event_sns_fanout_consumer_primary/extensions/custom.ts",
             "kind": "module",
-            "permittedOwnership": [
-              "approved-extension",
-              "user-owned"
-            ],
+            "permittedOwnership": ["approved-extension", "user-owned"],
             "conflictBehavior": "require-reviewed-resolution"
           }
         ],
@@ -3268,15 +3145,11 @@
           {
             "policyId": "idempotency_event_sns_fanout_consumer_secondary",
             "mode": "not-required",
-            "operationIds": [
-              "operation_event_sns_fanout_consumer_secondary"
-            ]
+            "operationIds": ["operation_event_sns_fanout_consumer_secondary"]
           }
         ],
         "observability": {
-          "signals": [
-            "logs"
-          ],
+          "signals": ["logs"],
           "healthChecks": [],
           "smokeTests": []
         },
@@ -3323,10 +3196,7 @@
             "extensionPointId": "application.sns-fanout-consumer.secondary.extensions",
             "path": "application/src/functions/event_sns_fanout_consumer_secondary/extensions/custom.ts",
             "kind": "module",
-            "permittedOwnership": [
-              "approved-extension",
-              "user-owned"
-            ],
+            "permittedOwnership": ["approved-extension", "user-owned"],
             "conflictBehavior": "require-reviewed-resolution"
           }
         ],

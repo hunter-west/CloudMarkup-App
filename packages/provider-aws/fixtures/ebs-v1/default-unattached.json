@@ -491,9 +491,7 @@
           "values": {
             "actions": {
               "kind": "string-list",
-              "value": [
-                "sts:AssumeRole"
-              ]
+              "value": ["sts:AssumeRole"]
             },
             "effect": {
               "kind": "string",
@@ -505,9 +503,7 @@
             },
             "principals": {
               "kind": "string-list",
-              "value": [
-                "ec2.amazonaws.com"
-              ]
+              "value": ["ec2.amazonaws.com"]
             },
             "resourceExpressions": {
               "kind": "string-list",

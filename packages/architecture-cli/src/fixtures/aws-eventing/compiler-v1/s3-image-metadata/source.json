@@ -17,9 +17,7 @@
         "displayName": "Curated event behavior",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -51,9 +49,7 @@
         "displayName": "Curated event envelope",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -79,9 +75,7 @@
         "displayName": "Curated event payload",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -155,16 +149,11 @@
             "indexId": "index_event_s3_image_metadata_primary",
             "name": "primary",
             "kind": "primary",
-            "partitionFields": [
-              "key"
-            ],
+            "partitionFields": ["key"],
             "sortFields": []
           }
         ],
-        "supportedOperations": [
-          "consume",
-          "create"
-        ]
+        "supportedOperations": ["consume", "create"]
       },
       {
         "contractId": "contracts.s3-image-metadata.test.contract",
@@ -172,9 +161,7 @@
         "displayName": "contract event contract test",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -212,9 +199,7 @@
         "displayName": "unit event contract test",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -316,9 +301,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_event_logs_s3_image_metadata",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_event_logs_s3_image_metadata"
-              ]
+              "dependentEdgeIds": ["edge_event_logs_s3_image_metadata"]
             }
           }
         },
@@ -342,10 +325,7 @@
             "values": {
               "actions": {
                 "kind": "string-list",
-                "value": [
-                  "logs:CreateLogStream",
-                  "logs:PutLogEvents"
-                ]
+                "value": ["logs:CreateLogStream", "logs:PutLogEvents"]
               },
               "effect": {
                 "kind": "string",
@@ -378,9 +358,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_event_logs_s3_image_metadata",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_event_logs_s3_image_metadata"
-              ]
+              "dependentEdgeIds": ["edge_event_logs_s3_image_metadata"]
             }
           }
         },
@@ -572,9 +550,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_metadata_write"
-              ]
+              "dependentEdgeIds": ["edge_metadata_write"]
             }
           }
         },
@@ -635,9 +611,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_metadata_write"
-              ]
+              "dependentEdgeIds": ["edge_metadata_write"]
             }
           }
         },
@@ -711,9 +685,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_upload_notification"
-              ]
+              "dependentEdgeIds": ["edge_upload_notification"]
             }
           }
         },
@@ -737,9 +709,7 @@
             "values": {
               "actions": {
                 "kind": "string-list",
-                "value": [
-                  "lambda:InvokeFunction"
-                ]
+                "value": ["lambda:InvokeFunction"]
               },
               "effect": {
                 "kind": "string",
@@ -751,9 +721,7 @@
               },
               "principals": {
                 "kind": "string-list",
-                "value": [
-                  "s3.amazonaws.com"
-                ]
+                "value": ["s3.amazonaws.com"]
               },
               "resourceExpressions": {
                 "kind": "string-list",
@@ -774,9 +742,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_upload_notification"
-              ]
+              "dependentEdgeIds": ["edge_upload_notification"]
             }
           }
         },
@@ -817,9 +783,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_role_lambda"
-              ]
+              "dependentEdgeIds": ["edge_role_lambda"]
             }
           }
         },
@@ -843,9 +807,7 @@
             "values": {
               "actions": {
                 "kind": "string-list",
-                "value": [
-                  "sts:AssumeRole"
-                ]
+                "value": ["sts:AssumeRole"]
               },
               "effect": {
                 "kind": "string",
@@ -857,9 +819,7 @@
               },
               "principals": {
                 "kind": "string-list",
-                "value": [
-                  "lambda.amazonaws.com"
-                ]
+                "value": ["lambda.amazonaws.com"]
               },
               "resourceExpressions": {
                 "kind": "string-list",
@@ -880,9 +840,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_role_lambda"
-              ]
+              "dependentEdgeIds": ["edge_role_lambda"]
             }
           }
         },
@@ -1323,9 +1281,7 @@
           "displayName": "Curated event behavior",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -1357,9 +1313,7 @@
           "displayName": "Curated event envelope",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -1385,9 +1339,7 @@
           "displayName": "Curated event payload",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -1461,16 +1413,11 @@
               "indexId": "index_event_s3_image_metadata_primary",
               "name": "primary",
               "kind": "primary",
-              "partitionFields": [
-                "key"
-              ],
+              "partitionFields": ["key"],
               "sortFields": []
             }
           ],
-          "supportedOperations": [
-            "consume",
-            "create"
-          ]
+          "supportedOperations": ["consume", "create"]
         },
         {
           "contractId": "contracts.s3-image-metadata.test.contract",
@@ -1478,9 +1425,7 @@
           "displayName": "contract event contract test",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -1518,9 +1463,7 @@
           "displayName": "unit event contract test",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -1713,15 +1656,11 @@
             {
               "policyId": "idempotency_event_s3_image_metadata",
               "mode": "not-required",
-              "operationIds": [
-                "operation_event_s3_image_metadata"
-              ]
+              "operationIds": ["operation_event_s3_image_metadata"]
             }
           ],
           "observability": {
-            "signals": [
-              "logs"
-            ],
+            "signals": ["logs"],
             "healthChecks": [],
             "smokeTests": []
           },
@@ -1768,10 +1707,7 @@
               "extensionPointId": "application.s3-image-metadata.extensions",
               "path": "application/src/functions/event_s3_image_metadata/extensions/custom.ts",
               "kind": "module",
-              "permittedOwnership": [
-                "approved-extension",
-                "user-owned"
-              ],
+              "permittedOwnership": ["approved-extension", "user-owned"],
               "conflictBehavior": "require-reviewed-resolution"
             }
           ],
@@ -2040,15 +1976,11 @@
           {
             "policyId": "idempotency_event_s3_image_metadata",
             "mode": "not-required",
-            "operationIds": [
-              "operation_event_s3_image_metadata"
-            ]
+            "operationIds": ["operation_event_s3_image_metadata"]
           }
         ],
         "observability": {
-          "signals": [
-            "logs"
-          ],
+          "signals": ["logs"],
           "healthChecks": [],
           "smokeTests": []
         },
@@ -2095,10 +2027,7 @@
             "extensionPointId": "application.s3-image-metadata.extensions",
             "path": "application/src/functions/event_s3_image_metadata/extensions/custom.ts",
             "kind": "module",
-            "permittedOwnership": [
-              "approved-extension",
-              "user-owned"
-            ],
+            "permittedOwnership": ["approved-extension", "user-owned"],
             "conflictBehavior": "require-reviewed-resolution"
           }
         ],

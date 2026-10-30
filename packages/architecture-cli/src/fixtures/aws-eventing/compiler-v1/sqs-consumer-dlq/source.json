@@ -17,9 +17,7 @@
         "displayName": "Curated event behavior",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -51,9 +49,7 @@
         "displayName": "Curated event envelope",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -79,9 +75,7 @@
         "displayName": "Curated event payload",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -115,15 +109,11 @@
             "indexId": "index_event_sqs_consumer_dlq_primary",
             "name": "primary",
             "kind": "primary",
-            "partitionFields": [
-              "eventId"
-            ],
+            "partitionFields": ["eventId"],
             "sortFields": []
           }
         ],
-        "supportedOperations": [
-          "consume"
-        ]
+        "supportedOperations": ["consume"]
       },
       {
         "contractId": "contracts.sqs-consumer-dlq.test.contract",
@@ -131,9 +121,7 @@
         "displayName": "contract event contract test",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -171,9 +159,7 @@
         "displayName": "unit event contract test",
         "provenance": {
           "source": "designed",
-          "sourceReferenceIds": [
-            "requirement_notes_api"
-          ],
+          "sourceReferenceIds": ["requirement_notes_api"],
           "recordedAt": "2026-08-17T12:00:00Z",
           "recordedBy": "actor_fixture"
         },
@@ -275,9 +261,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_event_logs_sqs_consumer_dlq",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_event_logs_sqs_consumer_dlq"
-              ]
+              "dependentEdgeIds": ["edge_event_logs_sqs_consumer_dlq"]
             }
           }
         },
@@ -301,10 +285,7 @@
             "values": {
               "actions": {
                 "kind": "string-list",
-                "value": [
-                  "logs:CreateLogStream",
-                  "logs:PutLogEvents"
-                ]
+                "value": ["logs:CreateLogStream", "logs:PutLogEvents"]
               },
               "effect": {
                 "kind": "string",
@@ -337,9 +318,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_event_logs_sqs_consumer_dlq",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_event_logs_sqs_consumer_dlq"
-              ]
+              "dependentEdgeIds": ["edge_event_logs_sqs_consumer_dlq"]
             }
           }
         },
@@ -478,9 +457,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_queue_consumer"
-              ]
+              "dependentEdgeIds": ["edge_queue_consumer"]
             }
           }
         },
@@ -541,9 +518,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_queue_consumer"
-              ]
+              "dependentEdgeIds": ["edge_queue_consumer"]
             }
           }
         },
@@ -731,9 +706,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_role_lambda"
-              ]
+              "dependentEdgeIds": ["edge_role_lambda"]
             }
           }
         },
@@ -757,9 +730,7 @@
             "values": {
               "actions": {
                 "kind": "string-list",
-                "value": [
-                  "sts:AssumeRole"
-                ]
+                "value": ["sts:AssumeRole"]
               },
               "effect": {
                 "kind": "string",
@@ -771,9 +742,7 @@
               },
               "principals": {
                 "kind": "string-list",
-                "value": [
-                  "lambda.amazonaws.com"
-                ]
+                "value": ["lambda.amazonaws.com"]
               },
               "resourceExpressions": {
                 "kind": "string-list",
@@ -794,9 +763,7 @@
               "generatorVersion": "1.0.0",
               "operationId": "operation_fixture",
               "dependentNodeIds": [],
-              "dependentEdgeIds": [
-                "edge_role_lambda"
-              ]
+              "dependentEdgeIds": ["edge_role_lambda"]
             }
           }
         },
@@ -1155,9 +1122,7 @@
           "displayName": "Curated event behavior",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -1189,9 +1154,7 @@
           "displayName": "Curated event envelope",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -1217,9 +1180,7 @@
           "displayName": "Curated event payload",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -1253,15 +1214,11 @@
               "indexId": "index_event_sqs_consumer_dlq_primary",
               "name": "primary",
               "kind": "primary",
-              "partitionFields": [
-                "eventId"
-              ],
+              "partitionFields": ["eventId"],
               "sortFields": []
             }
           ],
-          "supportedOperations": [
-            "consume"
-          ]
+          "supportedOperations": ["consume"]
         },
         {
           "contractId": "contracts.sqs-consumer-dlq.test.contract",
@@ -1269,9 +1226,7 @@
           "displayName": "contract event contract test",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -1309,9 +1264,7 @@
           "displayName": "unit event contract test",
           "provenance": {
             "source": "designed",
-            "sourceReferenceIds": [
-              "requirement_notes_api"
-            ],
+            "sourceReferenceIds": ["requirement_notes_api"],
             "recordedAt": "2026-08-17T12:00:00Z",
             "recordedBy": "actor_fixture"
           },
@@ -1476,15 +1429,11 @@
             {
               "policyId": "idempotency_event_sqs_consumer_dlq",
               "mode": "not-required",
-              "operationIds": [
-                "operation_event_sqs_consumer_dlq"
-              ]
+              "operationIds": ["operation_event_sqs_consumer_dlq"]
             }
           ],
           "observability": {
-            "signals": [
-              "logs"
-            ],
+            "signals": ["logs"],
             "healthChecks": [],
             "smokeTests": []
           },
@@ -1531,10 +1480,7 @@
               "extensionPointId": "application.sqs-consumer-dlq.extensions",
               "path": "application/src/functions/event_sqs_consumer_dlq/extensions/custom.ts",
               "kind": "module",
-              "permittedOwnership": [
-                "approved-extension",
-                "user-owned"
-              ],
+              "permittedOwnership": ["approved-extension", "user-owned"],
               "conflictBehavior": "require-reviewed-resolution"
             }
           ],
@@ -1775,15 +1721,11 @@
           {
             "policyId": "idempotency_event_sqs_consumer_dlq",
             "mode": "not-required",
-            "operationIds": [
-              "operation_event_sqs_consumer_dlq"
-            ]
+            "operationIds": ["operation_event_sqs_consumer_dlq"]
           }
         ],
         "observability": {
-          "signals": [
-            "logs"
-          ],
+          "signals": ["logs"],
           "healthChecks": [],
           "smokeTests": []
         },
@@ -1830,10 +1772,7 @@
             "extensionPointId": "application.sqs-consumer-dlq.extensions",
             "path": "application/src/functions/event_sqs_consumer_dlq/extensions/custom.ts",
             "kind": "module",
-            "permittedOwnership": [
-              "approved-extension",
-              "user-owned"
-            ],
+            "permittedOwnership": ["approved-extension", "user-owned"],
             "conflictBehavior": "require-reviewed-resolution"
           }
         ],

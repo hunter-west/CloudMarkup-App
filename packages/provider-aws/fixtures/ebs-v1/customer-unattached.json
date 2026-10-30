@@ -671,9 +671,7 @@
           "values": {
             "actions": {
               "kind": "string-list",
-              "value": [
-                "sts:AssumeRole"
-              ]
+              "value": ["sts:AssumeRole"]
             },
             "effect": {
               "kind": "string",
@@ -685,9 +683,7 @@
             },
             "principals": {
               "kind": "string-list",
-              "value": [
-                "ec2.amazonaws.com"
-              ]
+              "value": ["ec2.amazonaws.com"]
             },
             "resourceExpressions": {
               "kind": "string-list",
@@ -906,9 +902,7 @@
             },
             "principals": {
               "kind": "string-list",
-              "value": [
-                "arn:aws:iam::000000000000:role/synthetic-key-admin"
-              ]
+              "value": ["arn:aws:iam::000000000000:role/synthetic-key-admin"]
             },
             "resourceExpressions": {
               "kind": "string-list",

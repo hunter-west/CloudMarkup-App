@@ -1905,9 +1905,7 @@
           "values": {
             "actions": {
               "kind": "string-list",
-              "value": [
-                "sts:AssumeRole"
-              ]
+              "value": ["sts:AssumeRole"]
             },
             "effect": {
               "kind": "string",
@@ -1919,9 +1917,7 @@
             },
             "principals": {
               "kind": "string-list",
-              "value": [
-                "ecs-tasks.amazonaws.com"
-              ]
+              "value": ["ecs-tasks.amazonaws.com"]
             },
             "resourceExpressions": {
               "kind": "string-list",
@@ -2371,9 +2367,7 @@
           "values": {
             "actions": {
               "kind": "string-list",
-              "value": [
-                "sts:AssumeRole"
-              ]
+              "value": ["sts:AssumeRole"]
             },
             "effect": {
               "kind": "string",
@@ -2385,9 +2379,7 @@
             },
             "principals": {
               "kind": "string-list",
-              "value": [
-                "ecs-tasks.amazonaws.com"
-              ]
+              "value": ["ecs-tasks.amazonaws.com"]
             },
             "resourceExpressions": {
               "kind": "string-list",
@@ -2829,9 +2821,7 @@
           "values": {
             "actions": {
               "kind": "string-list",
-              "value": [
-                "secretsmanager:GetSecretValue"
-              ]
+              "value": ["secretsmanager:GetSecretValue"]
             },
             "effect": {
               "kind": "string",

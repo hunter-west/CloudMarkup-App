@@ -17,13 +17,8 @@
           "application-build-and-tests",
           "application-security-checks"
         ],
-        "representedOperationIds": [
-          "operation_create_note"
-        ],
-        "representedTestIds": [
-          "test_no_content_0",
-          "test_no_content_1"
-        ],
+        "representedOperationIds": ["operation_create_note"],
+        "representedTestIds": ["test_no_content_0", "test_no_content_1"],
         "sourceFilePaths": [
           "application/README.md",
           "application/build-contracts/workload_notes_api.json",
