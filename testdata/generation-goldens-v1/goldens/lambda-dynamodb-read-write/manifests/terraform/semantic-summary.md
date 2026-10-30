@@ -1,6 +1,6 @@
 # Terraform semantic summary: lambda-dynamodb-read-write
 
-- Artifact digest: `sha256:bb1a6093d0ee9c72cda76e8aa882eb060a2655a75c648dfc899033ad024b26dd`
+- Artifact digest: `sha256:5c3e87143a401ba63d9d506a51cf923afd178fdf226462b322aad80d3f3f0ed3`
 - Generated files: 14
 - Resources: 5
 - Application artifact contracts: 1

@@ -14,14 +14,14 @@
     "trademarkUseAcknowledgment": "Product-owner approval for AWS service/resource identification only; not Cloud Markup branding, AWS endorsement, or outside-counsel advice."
   },
   "assetSet": {
-    "digest": "sha256:a6781643b5d9278430e9e510d0f082f01fc89fdce9f838d85d6b6bb24f7c98b0",
+    "digest": "sha256:6d4246caba52b2dd2535e675f44afb4eb452ed7bbc0a4a6a9e7f68c660272651",
     "id": "aws.cloudmarkup.provider-icons",
     "providerId": "aws.cloudmarkup",
-    "version": "1.22.0"
+    "version": "1.22.1"
   },
   "catalogs": [
     {
-      "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
+      "digest": "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619",
       "id": "aws.cloudmarkup.notes-api-catalog",
       "version": "0.30.0"
     }

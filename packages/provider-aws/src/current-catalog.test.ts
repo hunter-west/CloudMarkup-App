@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { awsCatalogV1 } from "./catalog-v1-accessors.js";
 import {
   AWS_FROZEN_MODEL_CATALOG_BINDING_V1,
+  AWS_FROZEN_WAF_MODEL_CATALOG_BINDING_V1,
   resolveAwsModelCatalogV1,
 } from "./model-evaluation-catalog.js";
 import {
@@ -46,38 +47,42 @@ describe("installed current AWS catalog", () => {
     ).toThrow("review catalog compatibility");
   });
   it("keeps the exact historical model context separate from current catalog admission", () => {
-    const historical = resolveAwsModelCatalogV1(
-      AWS_FROZEN_MODEL_CATALOG_BINDING_V1,
-    );
-    expect(historical.catalog.listServices()).toHaveLength(71);
-    expect(historical.catalog.listConnectionRules()).toHaveLength(137);
-    expect(historical.catalog.listValidationRules()).toHaveLength(33);
-    expect(historical.catalog.getService("aws.wafv2.web-acl")).toBeUndefined();
-    expect(historical.serviceExtension.artifact.catalog).toEqual(
-      AWS_FROZEN_MODEL_CATALOG_BINDING_V1,
-    );
-    for (const artifact of [
-      historical.catalog.artifact,
-      historical.serviceExtension.artifact,
-    ]) {
-      const { digest, ...content } = artifact;
-      expect(digestCanonicalValue(content)).toBe(digest);
+    for (const [binding, counts] of [
+      [AWS_FROZEN_MODEL_CATALOG_BINDING_V1, [71, 137, 33]],
+      [AWS_FROZEN_WAF_MODEL_CATALOG_BINDING_V1, [73, 139, 34]],
+    ] as const) {
+      const historical = resolveAwsModelCatalogV1(binding);
+      expect(resolveAwsModelCatalogV1(binding)).toBe(historical);
+      expect(historical.catalog.listServices()).toHaveLength(counts[0]);
+      expect(historical.catalog.listConnectionRules()).toHaveLength(counts[1]);
+      expect(historical.catalog.listValidationRules()).toHaveLength(counts[2]);
+      expect(
+        historical.catalog.getService("aws.wafv2.web-acl") === undefined,
+      ).toBe(counts[0] === 71);
+      expect(historical.serviceExtension.artifact.catalog).toEqual(binding);
+      for (const artifact of [
+        historical.catalog.artifact,
+        historical.serviceExtension.artifact,
+      ]) {
+        const { digest, ...content } = artifact;
+        expect(digestCanonicalValue(content)).toBe(digest);
+      }
+      expect(historical.catalog.artifact.digest).not.toBe(
+        AWS_CURRENT_CATALOG_BINDING_V1.digest,
+      );
+      expect(() => resolveAwsCurrentCatalogV1(binding)).toThrow(
+        "review catalog compatibility",
+      );
+      for (const change of [
+        { id: "other" },
+        { version: "0.29.0" },
+        { digest: "sha256:" + "f".repeat(64) },
+      ])
+        expect(() =>
+          resolveAwsModelCatalogV1({ ...binding, ...change }),
+        ).toThrow("unsupported AWS catalog");
     }
     expect(resolveAwsModelCatalogV1().catalog).toBe(awsCatalogV1);
-    expect(() =>
-      resolveAwsCurrentCatalogV1(AWS_FROZEN_MODEL_CATALOG_BINDING_V1),
-    ).toThrow("review catalog compatibility");
-    for (const change of [
-      { id: "other" },
-      { version: "0.29.0" },
-      { digest: "sha256:" + "f".repeat(64) },
-    ])
-      expect(() =>
-        resolveAwsModelCatalogV1({
-          ...AWS_FROZEN_MODEL_CATALOG_BINDING_V1,
-          ...change,
-        }),
-      ).toThrow("unsupported AWS catalog");
   });
   it("uses only frozen descriptors for historical model assessment while retaining current rules", () => {
     const historical = resolveAwsModelCatalogV1(

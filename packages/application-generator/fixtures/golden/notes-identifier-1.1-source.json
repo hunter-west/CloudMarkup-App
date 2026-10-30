@@ -1,7 +1,7 @@
 {
-  "artifactDigest": "sha256:d556d6194edae5b5f5f030f6dde19154849ec7a0e6fc2fded410a6a52098db81",
+  "artifactDigest": "sha256:69961de77b13a4e90095273cd696730145b598b5e4237fad9fbae27ae9843118",
   "coverageDigest": "sha256:efbbd35f3d05f3130e83f2244871a40ad1732a6fe2b7478ccdf362b71a2525ba",
-  "sourceManifestDigest": "sha256:a3b7ad36676f02da43c7d481db3febe86714cc992f50aa5b032660873c187eff",
+  "sourceManifestDigest": "sha256:aa4322167f9ff3d4bcc7386e9b252a36df50896cd6e7c7aad85c57621aafab9e",
   "coverage": {
     "contractVersion": 1,
     "missingRequirements": [],
@@ -71,7 +71,7 @@
   "buildContracts": [
     {
       "workloadId": "workload_notes_api",
-      "contractDigest": "sha256:110e4c4fa466f57fece1d53d0fad7e56047bbf702f9103726cbc05cb53a9adcf",
+      "contractDigest": "sha256:2057f614a5053090a6e0fdaef55fcb33cab781c5dbf889185888edb773fc0581",
       "entrypoint": "application/src/functions/notes_handler/index.ts",
       "artifactPath": "application/artifacts/workload_notes_api/function.zip"
     }
@@ -79,16 +79,16 @@
   "files": [
     {
       "path": "application/README.md",
-      "checksum": "sha256:9df922ed9faa3bc8936c31def3608f311b4af16fcf90a177b6ba166c6a561741",
-      "semanticChecksum": "sha256:9df922ed9faa3bc8936c31def3608f311b4af16fcf90a177b6ba166c6a561741",
+      "checksum": "sha256:e54d5ea23dd00d55bf28b4d2e0d7306802182e1bb8d4b75589ca2d5383ffd7d7",
+      "semanticChecksum": "sha256:e54d5ea23dd00d55bf28b4d2e0d7306802182e1bb8d4b75589ca2d5383ffd7d7",
       "sizeBytes": 1674,
       "ownership": "generated",
       "disposition": "create"
     },
     {
       "path": "application/build-contracts/workload_notes_api.json",
-      "checksum": "sha256:40c4b75f7cc540e5a20f8ca413c6669b4d526a8ba1fc42725a357912cbc7a0cc",
-      "semanticChecksum": "sha256:40c4b75f7cc540e5a20f8ca413c6669b4d526a8ba1fc42725a357912cbc7a0cc",
+      "checksum": "sha256:db4a75fe93901c9b42fe4a3ec1308775190b34605bd294285c359daec925283d",
+      "semanticChecksum": "sha256:db4a75fe93901c9b42fe4a3ec1308775190b34605bd294285c359daec925283d",
       "sizeBytes": 12307,
       "ownership": "generated",
       "disposition": "create"

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 import {
   existingApplicationFileV1Schema,
@@ -124,7 +124,7 @@ describe("curated event application generator", () => {
       id: "aws.cloudmarkup.notes-api-catalog",
       version: "0.30.0",
       digest:
-        "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
+        "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619",
     });
   });
 
@@ -562,20 +562,10 @@ describe("curated event application generator", () => {
   });
 
   it("matches the checked event source checksum golden", () => {
-    const golden = JSON.parse(
-      readFileSync(
-        new URL("../fixtures/event-source-golden.json", import.meta.url),
-        "utf8",
-      ),
-    ) as Record<
-      EventFixturePattern,
-      {
-        readonly artifactDigest: string;
-        readonly buildContractDigest: string;
-        readonly fixtureChecksum: string;
-        readonly handlerChecksum: string;
-      }
-    >;
+    const goldenPath = new URL(
+      "../fixtures/event-source-golden.json",
+      import.meta.url,
+    );
     const actual = Object.fromEntries(
       patterns.map((pattern) => {
         const result = generate(pattern);
@@ -594,6 +584,19 @@ describe("curated event application generator", () => {
         ];
       }),
     );
+    if (process.env["CLOUDMARKUP_GENERATION_GOLDEN_CATEGORY"] === "manifests") {
+      if (
+        process.env["CLOUDMARKUP_GENERATION_GOLDEN_CONFIRM"] !==
+          "UPDATE_REVIEWED_GENERATION_GOLDENS" ||
+        (process.env["CLOUDMARKUP_GENERATION_GOLDEN_SUMMARY"] ?? "").trim()
+          .length < 12
+      )
+        throw new Error(
+          "Event golden update requires the reviewed manifests token and summary.",
+        );
+      writeFileSync(goldenPath, JSON.stringify(actual, null, 2) + "\n");
+    }
+    const golden: unknown = JSON.parse(readFileSync(goldenPath, "utf8"));
     expect(actual).toEqual(golden);
   });
 });

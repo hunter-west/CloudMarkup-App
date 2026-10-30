@@ -15,7 +15,7 @@
   "architectureId": "architecture_representative_v2",
   "assumptions": [],
   "catalog": {
-    "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
+    "digest": "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619",
     "id": "aws.cloudmarkup.notes-api-catalog",
     "version": "0.30.0"
   },
@@ -582,7 +582,9 @@
           "values": {
             "actions": {
               "kind": "string-list",
-              "value": ["sts:AssumeRole"]
+              "value": [
+                "sts:AssumeRole"
+              ]
             },
             "effect": {
               "kind": "string",
@@ -594,7 +596,9 @@
             },
             "principals": {
               "kind": "string-list",
-              "value": ["ec2.amazonaws.com"]
+              "value": [
+                "ec2.amazonaws.com"
+              ]
             },
             "resourceExpressions": {
               "kind": "string-list",

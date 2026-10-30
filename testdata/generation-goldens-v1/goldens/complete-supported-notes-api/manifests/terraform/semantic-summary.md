@@ -1,6 +1,6 @@
 # Terraform semantic summary: complete-supported-notes-api
 
-- Artifact digest: `sha256:4a85f046157a492bebfbf09659b2381adf329f1ddf22bff5f1f1515ea96ee555`
+- Artifact digest: `sha256:2d9ad975a950ac21a3648a4888dbab6bec91543b59b3a8c9920738cf00ba4762`
 - Generated files: 14
 - Resources: 18
 - Application artifact contracts: 1
