@@ -103,6 +103,8 @@ test("public source checks retain SQL/SDK contracts and bounded browser failure 
     "test-results/editor-networking*/**/*.png",
     "test-results/editor-validation*/**/*.png",
     "test-results/editor-validation*/**/error-context.md",
+    "test-results/typed-backend/desktop-dashboard-*/**/*.png",
+    "test-results/typed-backend/desktop-dashboard-*/**/error-context.md",
   ]);
   assert.equal(browserFailures.with["retention-days"], 1);
   assert.ok(scripts["check:public:quality"].includes("pnpm security:audit"));

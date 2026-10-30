@@ -588,17 +588,19 @@ for (const theme of ["light", "dark"]) {
         "Organization",
         "Personal account",
       ]);
-      const accountNavigation = groups.filter({
+      const workspaceNavigation = groups.filter({
         has: page.getByRole("heading", { name: "Organization", exact: true }),
       });
       await expect(
-        accountNavigation.getByRole("link", { name: "Usage", exact: true }),
+        workspaceNavigation.getByRole("link", { name: "Usage", exact: true }),
       ).toHaveAttribute("href", root + "/usage");
       await expect(
-        accountNavigation.getByRole("link", { name: "Plans & billing" }),
+        workspaceNavigation.getByRole("link", { name: "Plans & billing" }),
       ).toHaveAttribute("href", root + "/billing");
       const tour = page.getByRole("complementary", { name: "Workspace tour" });
       await expect(tour).toBeVisible();
+      await expect(tour).toHaveAttribute("data-step", "workspace");
+      await expect(groups.first()).toHaveAttribute("data-tour-target", "true");
       await expect
         .poll(async () => {
           const target = await groups.first().boundingBox();
@@ -613,9 +615,32 @@ for (const theme of ["light", "dark"]) {
         "blur(4px) saturate(1.15)",
       );
       await tour.getByRole("button", { name: "Next", exact: true }).click();
-      await expect(groups.filter({ hasText: "Personal security" })).toHaveCSS(
-        "outline-width",
-        "4px",
+      await expect(tour).toHaveAttribute("data-step", "organization");
+      await expect(
+        tour.getByRole("heading", { name: "Your selected workspace" }),
+      ).toBeVisible();
+      await expect(workspaceNavigation).toHaveAttribute(
+        "data-tour-target",
+        "true",
+      );
+      await expect(workspaceNavigation).toHaveCSS("outline-width", "4px");
+      await expect(groups.first()).not.toHaveAttribute(
+        "data-tour-target",
+        "true",
+      );
+      await tour.getByRole("button", { name: "Next", exact: true }).click();
+      await expect(tour).toHaveAttribute("data-step", "account");
+      const personalNavigation = groups.filter({
+        hasText: "Personal security",
+      });
+      await expect(personalNavigation).toHaveAttribute(
+        "data-tour-target",
+        "true",
+      );
+      await expect(personalNavigation).toHaveCSS("outline-width", "4px");
+      await expect(workspaceNavigation).not.toHaveAttribute(
+        "data-tour-target",
+        "true",
       );
       await tour
         .getByRole("button", { name: "Dismiss workspace tour" })
