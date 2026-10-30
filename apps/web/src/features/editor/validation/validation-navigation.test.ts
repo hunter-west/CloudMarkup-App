@@ -145,6 +145,10 @@ describe("validation finding navigation", () => {
       navigate();
       vi.runAllTimers();
       expect(globalThis.document.activeElement).toBe(fallback);
+      const fixed = globalThis.document.createElement("output");
+      fixed.id = control.id;
+      fixed.textContent = "true";
+      control.replaceWith(fixed);
       const dialog = globalThis.document.createElement("div");
       dialog.setAttribute("data-cm-modal-drawer", "");
       dialog.setAttribute("aria-modal", "true");
@@ -163,6 +167,16 @@ describe("validation finding navigation", () => {
       );
       expect(store.getState().validationAnnouncement).toBe(
         "Validation complete.",
+      );
+      dialog.removeAttribute("data-cm-modal-drawer");
+      dialog.removeAttribute("aria-modal");
+      dialog.setAttribute("data-cm-modeless-drawer", "");
+      fallback.focus();
+      navigate();
+      vi.runAllTimers();
+      expect(globalThis.document.activeElement).toBe(title);
+      expect(store.getState().liveAnnouncement).toContain(
+        "Focused the configuration panel instead.",
       );
       navigate();
       store.getState().setValidationFocus(null);

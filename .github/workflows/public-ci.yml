@@ -98,12 +98,16 @@ jobs:
             mcr.microsoft.com/playwright@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48 \
             bash -lc 'corepack enable && pnpm exec playwright test --config config/playwright/default.config.ts apps/web/e2e/editor-networking.visual.spec.ts'
 
-      - name: Retain synthetic networking screenshots on browser failure
+      - name:
+          Retain synthetic browser failure screenshots and validation context
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4.6.2
         with:
-          name: public-networking-browser-failures
-          path: test-results/editor-networking*/**/*.png
+          name: public-browser-failures
+          path: |
+            test-results/editor-networking*/**/*.png
+            test-results/editor-validation*/**/*.png
+            test-results/editor-validation*/**/error-context.md
           if-no-files-found: warn
           retention-days: 1
           compression-level: 0
