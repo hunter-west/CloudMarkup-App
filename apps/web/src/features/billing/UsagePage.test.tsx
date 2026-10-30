@@ -123,6 +123,17 @@ function fixture(
   let failure: Error | undefined;
   const request = vi.fn((operation: string) => {
     if (failure) return Promise.reject(failure);
+    if (operation === "account.workspaces.get")
+      return Promise.resolve({
+        data: {
+          contractVersion: 1,
+          principalId: principal.id,
+          id: "org_usage",
+          kind: "organization",
+          displayName: "Research Team",
+          role: "viewer",
+        },
+      });
     if (operation === "commercial.credit-overview.get")
       return (
         options.delayed ??
@@ -175,13 +186,20 @@ describe("authenticated credit Usage page", () => {
         /existing permissions to read projects or edit manually/u,
       ),
     ).toBeVisible();
-    expect(screen.getByRole("link", { name: "View billing" })).toHaveAttribute(
-      "href",
-      "/organizations/org_usage/billing",
-    );
+    expect(
+      screen.getByRole("link", { name: "Plans & billing" }),
+    ).toHaveAttribute("href", "/organizations/org_usage/billing");
     expect(f.request.mock.calls.map(([operation]) => operation).sort()).toEqual(
-      ["billing.workspace.get", "commercial.credit-overview.get"],
+      [
+        "account.workspaces.get",
+        "billing.workspace.get",
+        "commercial.credit-overview.get",
+      ],
     );
+    expect(await screen.findByText("Organization credits")).toBeVisible();
+    expect(
+      screen.getByText(/not a separate allowance for each member/u),
+    ).toBeVisible();
     expect(
       screen.queryByRole("button", { name: /Checkout|Buy|Generate/u }),
     ).not.toBeInTheDocument();
