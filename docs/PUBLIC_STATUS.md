@@ -52,11 +52,24 @@ The
 [catalog, canvas and tutorial audit](roadmap/plans/catalog-canvas-tutorial-20261029.md)
 records source-matched local feature evidence, a workspace-tour restart/resume
 repair, focused responsive/tutorial test corrections and exact live acceptance
-scenarios. Integrated release admission and live verification remain separate;
-exact editor-tour step resume after remount and ten definition-level icon
-placeholders remain follow-up work.
+scenarios. Integrated release admission and live verification remain separate.
+
+The [separate follow-on](roadmap/plans/catalog-tutorial-followon-20261029.md)
+implements exact editor-tour step resume after remount with local focused proof.
+Hunter West approved the ten definition-level icon replacements on October
+29, 2026. Asset set 1.22.0 promotes those official service-family mappings: all
+55 icon-backed definitions now have approved artwork from 41 canonical SVGs.
+Local admission and live acceptance evidence remain separately recorded in the
+follow-on plan.
 
 ## Repository identities
+
+The
+[catalog/configuration audit](roadmap/plans/catalog-configuration-audit-20261030.md)
+records the 73-definition inventory, EC2 source and native-export evidence,
+required/optional/fixed form grouping, compact blank-canvas message and
+remaining support limitations. Integrated release admission and live
+verification remain separate from its local results.
 
 The public application source destination is
 [`hunter-west/CloudMarkup-App`](https://github.com/hunter-west/CloudMarkup-App).

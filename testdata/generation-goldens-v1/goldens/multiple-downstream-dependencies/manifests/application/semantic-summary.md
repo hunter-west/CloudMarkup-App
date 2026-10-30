@@ -1,6 +1,6 @@
 # Application semantic summary: multiple-downstream-dependencies
 
-- Artifact digest: `sha256:ba735dc3a37c72519826c6a947ed863bf47ff5b78b0f5c19c6403ac68aac8e5f`
+- Artifact digest: `sha256:a1e2b9d3f2ed812d42e691b10f34c5e8af133d39b0d3c500b40f96e6ee63fd92`
 - Coverage: `complete-supported-pattern`
 - Generated file records: 23
 - Build contracts: 1

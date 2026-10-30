@@ -152,14 +152,8 @@ function ServiceSetupForm({
       model.initialValues,
     ) as MutableConfigurationFormValues,
   });
-  // Required settings belong in the first view even when the inspector groups
-  // them under Advanced after the service has been configured.
-  const requiredFields = model.fields.filter(
-    ({ field }) => field.required || !field.advanced,
-  );
-  const optionalFields = model.fields.filter(
-    ({ field }) => !field.required && field.advanced,
-  );
+  const requiredFields = model.recommendedFields;
+  const optionalFields = model.advancedFields;
 
   function submit(values: MutableConfigurationFormValues): void {
     form.clearErrors();
@@ -337,6 +331,15 @@ function ServiceSetupForm({
             fields={optionalFields}
             form={form}
             model={model}
+          />
+        ) : null}
+        {model.fixedFields.length > 0 ? (
+          <AdvancedConfigurationFields
+            disclosureId={`${id}-fixed`}
+            fields={model.fixedFields}
+            form={form}
+            model={model}
+            label="Fixed settings"
           />
         ) : null}
         {error === "" ? null : <p role="alert">{error}</p>}

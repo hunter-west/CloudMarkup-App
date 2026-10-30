@@ -16,7 +16,7 @@ assertRegionalWafEvaluationCatalogV1(
   JSON.parse(
     await readFile(
       new URL(
-        "../../packages/provider-aws/src/compiled/catalog-v1.json",
+        "../../packages/provider-aws/src/model-evaluation-source/catalog-73-v1.json",
         import.meta.url,
       ),
       "utf8",

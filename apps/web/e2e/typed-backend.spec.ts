@@ -576,15 +576,15 @@ for (const width of [1440, 390]) {
     await (
       await openNavigation()
     )
-      .getByRole("link", { name: "Organizations" })
+      .getByRole("link", { name: "Personal & organizations" })
       .press("Enter");
     await expect(
-      page.getByRole("heading", { level: 1, name: "Workspaces" }),
+      page.getByRole("heading", { level: 1, name: "Personal & organizations" }),
     ).toBeFocused();
-    await expect(page).toHaveTitle("Workspaces");
+    await expect(page).toHaveTitle("Personal & organizations");
     await expect(
       page.getByText(
-        "Open your personal workspace or choose an organization to collaborate.",
+        "Use your personal workspace for private projects, or choose an organization for shared projects.",
       ),
     ).toBeVisible();
     await page.screenshot({
@@ -628,7 +628,7 @@ for (const width of [1440, 390]) {
     await preferencesLink.scrollIntoViewIfNeeded();
     await expect(preferencesLink).toBeInViewport({ ratio: 1 });
     await settingsNavigation
-      .getByRole("link", { name: "Organizations", exact: true })
+      .getByRole("link", { name: "Personal & organizations", exact: true })
       .press("Enter");
     await page.getByRole("link", { name: "Open dashboard" }).press("Enter");
     const navigation = await openNavigation();
@@ -653,7 +653,7 @@ for (const width of [1440, 390]) {
     await (
       await openNavigation()
     )
-      .getByRole("link", { name: "Billing" })
+      .getByRole("link", { name: "Plans & billing" })
       .press("Enter");
     await expect(
       page.getByRole("group", { name: "Monthly plans" }),

@@ -7,7 +7,7 @@ import {
 import serviceExtensionArtifactJson from "./compiled/service-extension-v1.json" with { type: "json" };
 
 export const AWS_SERVICE_EXTENSION_DIGEST_V1 =
-  "sha256:f6e84fdf8253117361ba1ca6dcd18f7183f2cdbf693b5ea95d7b0c562337b5e1" as const;
+  "sha256:fcefabdc7d7e01342389b603f5b7096d2f47a08ecae1e81ed4197a11c4ba7dfa" as const;
 
 export const awsServiceExtensionArtifactV1 =
   providerServiceExtensionArtifactV1Schema.parse(serviceExtensionArtifactJson);

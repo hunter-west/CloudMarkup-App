@@ -203,10 +203,14 @@ export function ConfigurationInput({
         htmlFor={inputId}
         information={information}
         label={field.label}
-        required={field.required}
+        required={fieldModel.fixed ? false : field.required}
         tone={field.securityImpact === "none" ? "warning" : "security"}
       >
-        <Input id={inputId} readOnly value={visibleValue} />
+        {fieldModel.fixed ? (
+          <output id={inputId}>{visibleValue}</output>
+        ) : (
+          <Input id={inputId} readOnly value={visibleValue} />
+        )}
       </FormField>
     );
   }
@@ -446,11 +450,13 @@ export function AdvancedConfigurationFields({
   fields,
   form,
   model,
+  label = "Optional settings",
 }: {
   readonly disclosureId: string;
   readonly fields: readonly ConfigurationFormFieldModel[];
   readonly form: ReturnType<typeof useForm<MutableConfigurationFormValues>>;
   readonly model: ReturnType<typeof createConfigurationFormModel>;
+  readonly label?: string;
 }) {
   const [isOpen, setOpen] = useState(false);
   const validationFocus = useEditorSessionState(
@@ -490,8 +496,8 @@ export function AdvancedConfigurationFields({
   }).length;
 
   const summary = [
-    `Advanced fields (${String(fields.length)})`,
-    configuredOrChangedCount === 0
+    `${label} (${String(fields.length)})`,
+    configuredOrChangedCount === 0 || label === "Fixed settings"
       ? undefined
       : `${String(configuredOrChangedCount)} configured or changed`,
     errorCount === 0 ? undefined : `${String(errorCount)} with errors`,

@@ -32,6 +32,15 @@ const historicalCatalog: unknown = JSON.parse(
     "utf8",
   ),
 );
+const historicalWafCatalog: unknown = JSON.parse(
+  readFileSync(
+    new URL(
+      "../../provider-aws/src/model-evaluation-source/catalog-73-v1.json",
+      import.meta.url,
+    ),
+    "utf8",
+  ),
+);
 describe("frozen full beta evaluation source", () => {
   it("keeps the checked source mirror byte-derived from canonical metadata", () => {
     const mirrored: unknown = JSON.parse(
@@ -87,13 +96,16 @@ describe("frozen full beta evaluation source", () => {
       ),
     ).toBe(true);
   });
-  it("preserves the historical 71-service input and binds the current 73-service artifact separately", () => {
+  it("preserves both historical evaluation inputs without admitting the changed installed catalog", () => {
     expect(() => {
       assertFullBetaEvaluationCatalogV1(historicalCatalog);
     }).not.toThrow();
     expect(() => {
-      assertRegionalWafEvaluationCatalogV1(catalog);
+      assertRegionalWafEvaluationCatalogV1(historicalWafCatalog);
     }).not.toThrow();
+    expect(() => {
+      assertRegionalWafEvaluationCatalogV1(catalog);
+    }).toThrow();
     expect(() => {
       assertFullBetaEvaluationCatalogV1(catalog);
     }).toThrow();
@@ -126,7 +138,7 @@ describe("frozen full beta evaluation source", () => {
     "rehashed-schema",
   ])("rejects %s drift before source preparation", (change) => {
     for (const [source, assertCatalog] of [
-      [catalog, assertRegionalWafEvaluationCatalogV1],
+      [historicalWafCatalog, assertRegionalWafEvaluationCatalogV1],
       [historicalCatalog, assertFullBetaEvaluationCatalogV1],
     ] as const) {
       const modified = JSON.parse(JSON.stringify(source)) as {

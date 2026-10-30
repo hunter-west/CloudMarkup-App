@@ -124,6 +124,9 @@ function updateCategory(category, summary) {
         "run",
         "--project=application-generator",
         "packages/application-generator/src/generation-conformance.test.ts",
+        ...(category === "manifests"
+          ? ["packages/application-generator/src/generate.event.test.ts"]
+          : []),
       ],
       environment,
     );

@@ -1,6 +1,6 @@
 # Terraform semantic summary: api-gateway-lambda
 
-- Artifact digest: `sha256:241c92c49c4aa6aebeaffb0eb6068d5da79fddf99c84b13d8bcf753122e9b6d5`
+- Artifact digest: `sha256:9abb08d19feae884b702e52eafc00d24497d17fc38ecfe543f1d00c447f82658`
 - Generated files: 14
 - Resources: 10
 - Application artifact contracts: 1

@@ -271,7 +271,7 @@ export const ec2Instance = defineProviderServiceV1({
       id: "aws.ec2.instance.unsupported.launch-modes",
       title: "Other launch and storage modes",
       explanation:
-        "Windows, Spot/fleets, imports, existing ENIs, IPv6/public addresses, launch templates, Auto Scaling, data disks, non-root image mappings and alternate gp3 performance are unsupported.",
+        "Windows, Spot/fleets, imports, existing ENIs, IPv6/public addresses, launch templates, Auto Scaling, inline data-disk mappings, non-root AMI mappings and alternate root gp3 performance are unsupported. Separate encrypted gp3 data volumes and up to four same-AZ attachments are supported through the EBS volume and attachment resources.",
     },
     {
       id: "aws.ec2.instance.unsupported.application",

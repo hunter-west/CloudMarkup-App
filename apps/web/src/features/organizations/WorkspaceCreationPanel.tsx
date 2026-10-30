@@ -93,11 +93,11 @@ export function WorkspaceCreationPanel({
             ["authentication_required", "access_denied"].includes(
               cause.envelope.error.code,
             )
-            ? "Sign in again before creating a workspace."
+            ? "Sign in again before creating a personal workspace or organization."
             : cause instanceof ApiClientError &&
                 cause.envelope.error.code === "conflict"
               ? cause.envelope.error.message
-              : "Workspace creation could not be confirmed. Retry the same request.",
+              : "Creation could not be confirmed. Retry the same request.",
         );
     } finally {
       pending.current = false;
@@ -111,8 +111,8 @@ export function WorkspaceCreationPanel({
     >
       <h2 id="workspace-create-title">Create an organization</h2>
       <p>
-        Collaborate in a separate workspace. Your personal projects,
-        subscriptions and credits stay in your personal account.
+        Collaborate in an organization. Your personal projects, subscriptions
+        and credits stay in your personal account.
       </p>
       <form
         onSubmit={(event) => {
@@ -138,14 +138,14 @@ export function WorkspaceCreationPanel({
           className="button button--primary"
           disabled={disabled || busy || name.trim().length === 0}
         >
-          {busy ? "Creating workspace…" : "Create organization"}
+          {busy ? "Creating…" : "Create organization"}
         </button>
       </form>
       {!hasPersonal && (
         <div>
           <p>
-            Your current workspaces stay available. Create a separate personal
-            workspace for projects only you can access.
+            Use a personal workspace for projects only you can access. You do
+            not need to create or join an organization.
           </p>
           <button
             className="button button--secondary"

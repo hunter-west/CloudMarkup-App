@@ -184,8 +184,15 @@ describe("backend response cache binding", () => {
         "organization_expected",
       ),
     });
-    expect(billingQueries).toHaveLength(1);
-    expect(billingQueries[0]?.state.data).toBeUndefined();
+    expect(billingQueries).toHaveLength(2);
+    expect(billingQueries.map((query) => query.queryKey.at(-2))).toEqual([
+      "billing-workspace",
+      "current-plan",
+    ]);
+    for (const query of billingQueries)
+      expect(query.state.data).toBeUndefined();
+    expect(billingQueries[0]?.state.status).toBe("error");
+    expect(billingQueries[1]?.state.fetchStatus).toBe("idle");
   });
 
   it("rejects and does not cache a revision list from another project", async () => {

@@ -1,6 +1,6 @@
 # Frozen AWS model-input catalog
 
-These two artifacts are copied byte-for-byte from public commit
+The original 71-definition artifacts are copied byte-for-byte from public commit
 `2cd491bd8c33bf75031aa0a5533687b12f4f635f`:
 
 | Retained file                  | Original path                                                  | Canonical body SHA-256                                             |
@@ -13,7 +13,20 @@ rules, including their original schemas, ports and readiness metadata. The
 current 73-definition catalog also changes ALB and existing validation rules;
 removing WAF identities cannot reproduce these historical inputs.
 
-`resolveAwsModelCatalogV1` verifies both complete canonical artifact bodies and
+The separately frozen regional WAF evaluation input 1.8.0 retains these exact
+73-definition artifacts from local checkpoint
+`07715a4b2d505b1873cfa24e05218f662e8f4ccb`:
+
+| Retained file                  | Original path                                                  | Canonical body SHA-256                                             |
+| ------------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `catalog-73-v1.json`           | `packages/provider-aws/src/compiled/catalog-v1.json`           | `8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94` |
+| `service-extension-73-v1.json` | `packages/provider-aws/src/compiled/service-extension-v1.json` | `f6e84fdf8253117361ba1ca6dcd18f7183f2cdbf693b5ea95d7b0c562337b5e1` |
+
+They contain 73 definitions, 139 relationships and 34 validation rules. The
+current EC2/EBS capability wording correction changes the installed digest; it
+does not rewrite this frozen input or its source/dataset/mirror commitments.
+
+`resolveAwsModelCatalogV1` verifies each complete canonical artifact body and
 their exact bindings, then lazily constructs immutable read-only accessors. The
 historical model-input generator verifies this catalog independently of the
 current structural source. The original evaluation sources, mirrors, policies

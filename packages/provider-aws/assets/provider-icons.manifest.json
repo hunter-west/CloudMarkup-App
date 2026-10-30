@@ -1,27 +1,27 @@
 {
   "approval": {
     "accessibilityContract": "supplementary-icon-with-visible-name-v1",
-    "approvalDate": "2026-10-06",
+    "approvalDate": "2026-10-29",
     "approvedSurfaces": [
       "diagram-export",
       "documentation",
       "product-ui"
     ],
-    "recordId": "CC-AWS-ICONS-OWNER-APPROVAL-2026-10-06",
+    "recordId": "CC-AWS-ICONS-OWNER-APPROVAL-2026-10-29",
     "reviewerName": "Hunter West",
     "reviewerRelationship": "Product owner states he is an AWS Partner",
     "reviewerRole": "Cloud Markup product owner",
     "trademarkUseAcknowledgment": "Product-owner approval for AWS service/resource identification only; not Cloud Markup branding, AWS endorsement, or outside-counsel advice."
   },
   "assetSet": {
-    "digest": "sha256:71f743c499e2d6bba4b3390c3e2da324870ec372f6c2a747b63f1a0cfc055b9c",
+    "digest": "sha256:6d4246caba52b2dd2535e675f44afb4eb452ed7bbc0a4a6a9e7f68c660272651",
     "id": "aws.cloudmarkup.provider-icons",
     "providerId": "aws.cloudmarkup",
-    "version": "1.21.0"
+    "version": "1.22.1"
   },
   "catalogs": [
     {
-      "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
+      "digest": "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619",
       "id": "aws.cloudmarkup.notes-api-catalog",
       "version": "0.30.0"
     }
@@ -327,39 +327,119 @@
       "viewBox": "0 0 48 48"
     },
     {
-      "file": null,
+      "automatedSecurityResult": "passed",
+      "awsServiceFamily": "Amazon EC2",
+      "destinationAssetId": "aws.cloudmarkup.provider-icons.asset.ec2",
+      "file": "ec2.svg",
       "iconId": "aws.cloudmarkup.icons.ec2-instance",
-      "placeholderReason": "missing",
+      "mappingType": "service-family",
+      "mediaType": "image/svg+xml",
+      "normalizedBytes": 1668,
+      "normalizedSha256": "sha256:5617ccf35cd915cb3c6d241ef27fbbc2c22de3bd08dfa70465d18fc8403861f7",
       "serviceName": "EC2 instance",
-      "state": "placeholder"
+      "sourceBytes": 1749,
+      "sourceMember": "Architecture-Service-Icons_04302026/Arch_Compute/48/Arch_Amazon-EC2_48.svg",
+      "sourceSha256": "sha256:099dff32b3f795f3fa8ed97f0466708502a7fd6500136679899a0cec5a5a2473",
+      "state": "approved",
+      "transformationSteps": [
+        "remove-unused-root-xlink-namespace-v1",
+        "validate-svg-v2",
+        "normalize-svg-text-v1",
+        "verify-selected-source-v1"
+      ],
+      "viewBox": "0 0 64 64"
     },
     {
-      "file": null,
+      "automatedSecurityResult": "passed",
+      "awsServiceFamily": "Amazon Elastic Container Registry",
+      "destinationAssetId": "aws.cloudmarkup.provider-icons.asset.ecr",
+      "file": "ecr.svg",
       "iconId": "aws.cloudmarkup.icons.ecr-repository",
-      "placeholderReason": "missing",
+      "mappingType": "service-family",
+      "mediaType": "image/svg+xml",
+      "normalizedBytes": 2019,
+      "normalizedSha256": "sha256:622e1c2193c03bc7e99047ccb9564daa8200becfd40f5355290153b8ea252694",
       "serviceName": "ECR repository",
-      "state": "placeholder"
+      "sourceBytes": 2100,
+      "sourceMember": "Architecture-Service-Icons_04302026/Arch_Containers/48/Arch_Amazon-Elastic-Container-Registry_48.svg",
+      "sourceSha256": "sha256:bf829eab882165f4fb850bab032e5c81312cb579e2ad880372f206936db4a2be",
+      "state": "approved",
+      "transformationSteps": [
+        "remove-unused-root-xlink-namespace-v1",
+        "validate-svg-v2",
+        "normalize-svg-text-v1",
+        "verify-selected-source-v1"
+      ],
+      "viewBox": "0 0 64 64"
     },
     {
-      "file": null,
+      "automatedSecurityResult": "passed",
+      "awsServiceFamily": "Amazon Elastic Container Service",
+      "destinationAssetId": "aws.cloudmarkup.provider-icons.asset.ecs",
+      "file": "ecs.svg",
       "iconId": "aws.cloudmarkup.icons.ecs-cluster",
-      "placeholderReason": "missing",
+      "mappingType": "service-family",
+      "mediaType": "image/svg+xml",
+      "normalizedBytes": 2322,
+      "normalizedSha256": "sha256:70b30f3bc7bf3248779b742955f1568f1da7204e257a53ec7560d41ccab38ee1",
       "serviceName": "ECS cluster",
-      "state": "placeholder"
+      "sourceBytes": 2403,
+      "sourceMember": "Architecture-Service-Icons_04302026/Arch_Containers/48/Arch_Amazon-Elastic-Container-Service_48.svg",
+      "sourceSha256": "sha256:7f8b2883cd6171a42bdcafab2d20d17c3cf886d306c62846c6c555ad26463b04",
+      "state": "approved",
+      "transformationSteps": [
+        "remove-unused-root-xlink-namespace-v1",
+        "validate-svg-v2",
+        "normalize-svg-text-v1",
+        "verify-selected-source-v1"
+      ],
+      "viewBox": "0 0 64 64"
     },
     {
-      "file": null,
+      "automatedSecurityResult": "passed",
+      "awsServiceFamily": "AWS Fargate",
+      "destinationAssetId": "aws.cloudmarkup.provider-icons.asset.fargate",
+      "file": "fargate.svg",
       "iconId": "aws.cloudmarkup.icons.ecs-service",
-      "placeholderReason": "missing",
+      "mappingType": "service-family",
+      "mediaType": "image/svg+xml",
+      "normalizedBytes": 3980,
+      "normalizedSha256": "sha256:568303f87d6ea62b5b4672077e27694b2ee2bdbcf0a6aad5422d76e838d90382",
       "serviceName": "Fargate service",
-      "state": "placeholder"
+      "sourceBytes": 4061,
+      "sourceMember": "Architecture-Service-Icons_04302026/Arch_Containers/48/Arch_AWS-Fargate_48.svg",
+      "sourceSha256": "sha256:2b1b00e6e702e9bd1a1cc8bba077e05f214889c145186b9a44c28a74943b38ce",
+      "state": "approved",
+      "transformationSteps": [
+        "remove-unused-root-xlink-namespace-v1",
+        "validate-svg-v2",
+        "normalize-svg-text-v1",
+        "verify-selected-source-v1"
+      ],
+      "viewBox": "0 0 64 64"
     },
     {
-      "file": null,
+      "automatedSecurityResult": "passed",
+      "awsServiceFamily": "AWS Fargate",
+      "destinationAssetId": "aws.cloudmarkup.provider-icons.asset.fargate",
+      "file": "fargate.svg",
       "iconId": "aws.cloudmarkup.icons.ecs-task-definition",
-      "placeholderReason": "missing",
+      "mappingType": "service-family",
+      "mediaType": "image/svg+xml",
+      "normalizedBytes": 3980,
+      "normalizedSha256": "sha256:568303f87d6ea62b5b4672077e27694b2ee2bdbcf0a6aad5422d76e838d90382",
       "serviceName": "Fargate task definition",
-      "state": "placeholder"
+      "sourceBytes": 4061,
+      "sourceMember": "Architecture-Service-Icons_04302026/Arch_Containers/48/Arch_AWS-Fargate_48.svg",
+      "sourceSha256": "sha256:2b1b00e6e702e9bd1a1cc8bba077e05f214889c145186b9a44c28a74943b38ce",
+      "state": "approved",
+      "transformationSteps": [
+        "remove-unused-root-xlink-namespace-v1",
+        "validate-svg-v2",
+        "normalize-svg-text-v1",
+        "verify-selected-source-v1"
+      ],
+      "viewBox": "0 0 64 64"
     },
     {
       "automatedSecurityResult": "passed",
@@ -569,11 +649,27 @@
       "viewBox": "0 0 48 48"
     },
     {
-      "file": null,
+      "automatedSecurityResult": "passed",
+      "awsServiceFamily": "AWS Identity and Access Management",
+      "destinationAssetId": "aws.cloudmarkup.provider-icons.asset.iam",
+      "file": "iam.svg",
       "iconId": "aws.cloudmarkup.icons.iam-instance-profile",
-      "placeholderReason": "missing",
+      "mappingType": "service-family",
+      "mediaType": "image/svg+xml",
+      "normalizedBytes": 2067,
+      "normalizedSha256": "sha256:51290231062315c93a9125030858a3a1f06037f1c0ccc8beb02dc5b57fe09443",
       "serviceName": "IAM instance profile",
-      "state": "placeholder"
+      "sourceBytes": 2148,
+      "sourceMember": "Architecture-Service-Icons_04302026/Arch_Security-Identity/48/Arch_AWS-Identity-and-Access-Management_48.svg",
+      "sourceSha256": "sha256:81954dcfb86d5f410f7084345e459cd5c7ca1d76032d34f771ad379c94e062b6",
+      "state": "approved",
+      "transformationSteps": [
+        "remove-unused-root-xlink-namespace-v1",
+        "validate-svg-v2",
+        "normalize-svg-text-v1",
+        "verify-selected-source-v1"
+      ],
+      "viewBox": "0 0 64 64"
     },
     {
       "automatedSecurityResult": "passed",
@@ -645,11 +741,27 @@
       "viewBox": "0 0 48 48"
     },
     {
-      "file": null,
+      "automatedSecurityResult": "passed",
+      "awsServiceFamily": "AWS Key Management Service",
+      "destinationAssetId": "aws.cloudmarkup.provider-icons.asset.kms",
+      "file": "kms.svg",
       "iconId": "aws.cloudmarkup.icons.kms-key",
-      "placeholderReason": "missing",
+      "mappingType": "service-family",
+      "mediaType": "image/svg+xml",
+      "normalizedBytes": 5430,
+      "normalizedSha256": "sha256:5072efaa270c8a7b2cb592d3c6bcfa3e509087c8fd38ea65f76f6e720fcf2b1e",
       "serviceName": "KMS symmetric encryption key",
-      "state": "placeholder"
+      "sourceBytes": 5511,
+      "sourceMember": "Architecture-Service-Icons_04302026/Arch_Security-Identity/48/Arch_AWS-Key-Management-Service_48.svg",
+      "sourceSha256": "sha256:5655b1815bdfe9ea75a26c702efaac8d884884cccb3b306f75e54d6f542a325e",
+      "state": "approved",
+      "transformationSteps": [
+        "remove-unused-root-xlink-namespace-v1",
+        "validate-svg-v2",
+        "normalize-svg-text-v1",
+        "verify-selected-source-v1"
+      ],
+      "viewBox": "0 0 64 64"
     },
     {
       "automatedSecurityResult": "passed",
@@ -859,11 +971,27 @@
       "viewBox": "0 0 48 48"
     },
     {
-      "file": null,
+      "automatedSecurityResult": "passed",
+      "awsServiceFamily": "AWS Secrets Manager",
+      "destinationAssetId": "aws.cloudmarkup.provider-icons.asset.secrets-manager",
+      "file": "secrets-manager.svg",
       "iconId": "aws.cloudmarkup.icons.secretsmanager-secret",
-      "placeholderReason": "missing",
+      "mappingType": "service-family",
+      "mediaType": "image/svg+xml",
+      "normalizedBytes": 2822,
+      "normalizedSha256": "sha256:b5f04580a7d878516254964ac2c2140ec82bdc4a2189c5908d5801635694000c",
       "serviceName": "Secrets Manager secret",
-      "state": "placeholder"
+      "sourceBytes": 2903,
+      "sourceMember": "Architecture-Service-Icons_04302026/Arch_Security-Identity/48/Arch_AWS-Secrets-Manager_48.svg",
+      "sourceSha256": "sha256:0258cbde7033b45683db4e814980f5871d3e88fd8490ad9e9f3f531049fffe40",
+      "state": "approved",
+      "transformationSteps": [
+        "remove-unused-root-xlink-namespace-v1",
+        "validate-svg-v2",
+        "normalize-svg-text-v1",
+        "verify-selected-source-v1"
+      ],
+      "viewBox": "0 0 64 64"
     },
     {
       "automatedSecurityResult": "passed",
@@ -1119,18 +1247,50 @@
       "viewBox": "0 0 64 64"
     },
     {
-      "file": null,
+      "automatedSecurityResult": "passed",
+      "awsServiceFamily": "AWS WAF",
+      "destinationAssetId": "aws.cloudmarkup.provider-icons.asset.waf",
+      "file": "waf.svg",
       "iconId": "aws.wafv2.alb-association.icon",
-      "placeholderReason": "missing",
+      "mappingType": "service-family",
+      "mediaType": "image/svg+xml",
+      "normalizedBytes": 3589,
+      "normalizedSha256": "sha256:4cf9e420de32db9a1636fa81ecffb00018fd3c6f6bbb1034358c8e1497b7b604",
       "serviceName": "WAF ALB association (proof)",
-      "state": "placeholder"
+      "sourceBytes": 3670,
+      "sourceMember": "Architecture-Service-Icons_04302026/Arch_Security-Identity/48/Arch_AWS-WAF_48.svg",
+      "sourceSha256": "sha256:e67f918f21cf5fab0846faea3dfa703c9f167275da408c3b4e5f423e3e4ec24a",
+      "state": "approved",
+      "transformationSteps": [
+        "remove-unused-root-xlink-namespace-v1",
+        "validate-svg-v2",
+        "normalize-svg-text-v1",
+        "verify-selected-source-v1"
+      ],
+      "viewBox": "0 0 64 64"
     },
     {
-      "file": null,
+      "automatedSecurityResult": "passed",
+      "awsServiceFamily": "AWS WAF",
+      "destinationAssetId": "aws.cloudmarkup.provider-icons.asset.waf",
+      "file": "waf.svg",
       "iconId": "aws.wafv2.web-acl.icon",
-      "placeholderReason": "missing",
+      "mappingType": "service-family",
+      "mediaType": "image/svg+xml",
+      "normalizedBytes": 3589,
+      "normalizedSha256": "sha256:4cf9e420de32db9a1636fa81ecffb00018fd3c6f6bbb1034358c8e1497b7b604",
       "serviceName": "Regional WAF Web ACL (proof)",
-      "state": "placeholder"
+      "sourceBytes": 3670,
+      "sourceMember": "Architecture-Service-Icons_04302026/Arch_Security-Identity/48/Arch_AWS-WAF_48.svg",
+      "sourceSha256": "sha256:e67f918f21cf5fab0846faea3dfa703c9f167275da408c3b4e5f423e3e4ec24a",
+      "state": "approved",
+      "transformationSteps": [
+        "remove-unused-root-xlink-namespace-v1",
+        "validate-svg-v2",
+        "normalize-svg-text-v1",
+        "verify-selected-source-v1"
+      ],
+      "viewBox": "0 0 64 64"
     }
   ],
   "kind": "cloudmarkup.provider-icon-asset-set",

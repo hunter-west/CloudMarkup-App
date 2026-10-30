@@ -95,10 +95,21 @@ export class SolutionExportWorkerAuthority implements SqlDatabase {
     return Promise.resolve();
   }
   async authorize(tx: SqlExecutor): Promise<AuthorizedOrganizationScope> {
+    return (await this.lookup(tx)).scope;
+  }
+  /** Read exact-owner metadata with the same current worker/tenant/lease query.
+   * No authorization or object result is retained across boundaries. */
+  objectMetadata(
+    objectId: string,
+  ): Promise<{ scope: AuthorizedOrganizationScope; row: SqlRow | null }> {
+    return this.lookup(this.database, objectId);
+  }
+  private async lookup(
+    tx: SqlExecutor,
+    objectId?: string,
+  ): Promise<{ scope: AuthorizedOrganizationScope; row: SqlRow | null }> {
     const id = this.identity;
-    const result = await tx.query(
-      sql(
-        `SELECT m.membership_id,m.role_key,to_json(r.capabilities)::text AS capabilities_json,
+    const authorization = `SELECT m.membership_id,m.role_key,to_json(r.capabilities)::text AS capabilities_json,
       j.correlation_id,j.lifecycle_status AS root_state,a.lifecycle_status AS attempt_state,
       a.lease_expires_at > clock_timestamp() AS lease_current,
       (j.expires_at IS NULL OR j.expires_at > clock_timestamp()) AS job_current,
@@ -119,7 +130,15 @@ export class SolutionExportWorkerAuthority implements SqlDatabase {
         AND a.attempt_id=$6 AND a.attempt_number=$7 AND a.worker_reference=$8
         AND a.attempt_number=(SELECT max(current_attempt.attempt_number) FROM async_job_attempts current_attempt
           WHERE current_attempt.organization_id=j.organization_id AND current_attempt.job_id=j.job_id)
-      FOR SHARE OF p,actor,m,o,r`,
+      FOR SHARE OF p,actor,m,o,r`;
+    const result = await tx.query(
+      sql(
+        objectId === undefined
+          ? authorization
+          : `WITH authorized_execution AS MATERIALIZED (${authorization})
+      SELECT e.*, CASE WHEN s.object_id IS NULL THEN NULL ELSE row_to_json(s)::text END AS object_json
+      FROM authorized_execution e LEFT JOIN stored_objects s
+        ON s.organization_id=$1 AND s.project_id=$2 AND s.object_id=$9`,
         [
           id.organizationId,
           id.projectId,
@@ -129,6 +148,7 @@ export class SolutionExportWorkerAuthority implements SqlDatabase {
           id.attemptId,
           id.attemptNumber,
           id.workerId,
+          ...(objectId === undefined ? [] : [objectId]),
         ],
       ),
     );
@@ -184,14 +204,31 @@ export class SolutionExportWorkerAuthority implements SqlDatabase {
         "conflict",
         "The export execution is no longer current.",
       );
+    let object: unknown = null;
+    if (objectId !== undefined && row?.["object_json"] != null) {
+      try {
+        object = JSON.parse(exportRunText(row["object_json"])) as unknown;
+      } catch {
+        return exportRunUnavailable();
+      }
+      if (
+        object === null ||
+        typeof object !== "object" ||
+        Array.isArray(object)
+      )
+        return exportRunUnavailable();
+    }
     return {
-      organizationId: id.organizationId,
-      principalId: id.actorId,
-      sessionId: `worker.${id.attemptId}`,
-      correlationId: exportRunText(row?.["correlation_id"]),
-      membershipId: exportRunText(row?.["membership_id"]),
-      roleKey: role,
-      capabilities: permissionsForRole(role),
+      scope: {
+        organizationId: id.organizationId,
+        principalId: id.actorId,
+        sessionId: `worker.${id.attemptId}`,
+        correlationId: exportRunText(row?.["correlation_id"]),
+        membershipId: exportRunText(row?.["membership_id"]),
+        roleKey: role,
+        capabilities: permissionsForRole(role),
+      },
+      row: object as SqlRow | null,
     };
   }
   transaction<T>(work: (tx: SqlExecutor) => Promise<T>): Promise<T> {

@@ -9,7 +9,7 @@ This source tree was generated deterministically from an immutable Solution Revi
 - Template: `cloudmarkup.template.aws-lambda-notes-typescript@1.0.0` (`sha256:c7721961d935faa1e0c87b7356bc6d90112a02f3c7f716be33a648bf99740604`)
 - Pattern: `cloudmarkup.pattern.aws-lambda-authenticated-notes@1.0.0` (`sha256:cbe772e0adee53da524110278fe908d726a3e8f600588364bef33ba2fa900571`)
 - Runtime: `cloudmarkup.runtime.aws-lambda-nodejs24-typescript@1.0.0` (`sha256:6970ac7820ced534953ee1cda1b7fc083ab73fdb75e8c95c3c09967f4d3ff81a`)
-- Catalog: `aws.cloudmarkup.notes-api-catalog@0.30.0` (`sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94`)
+- Catalog: `aws.cloudmarkup.notes-api-catalog@0.30.0` (`sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619`)
 
 ## Workloads
 

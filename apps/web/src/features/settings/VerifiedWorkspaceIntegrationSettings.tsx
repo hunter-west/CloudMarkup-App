@@ -10,6 +10,7 @@ import {
 } from "../../api/index.js";
 import { GitHubIntegrationSettings } from "./GitHubIntegrationSettings.js";
 import { GitLabIntegrationSettings } from "./GitLabIntegrationSettings.js";
+import { BitbucketIntegrationPlaceholder } from "./BitbucketIntegrationPlaceholder.js";
 
 class WorkspaceBindingError extends Error {}
 
@@ -57,7 +58,7 @@ export function VerifiedWorkspaceIntegrationSettings({
       <p role="alert">Sign in with permission to view these integrations.</p>
     );
   if (scope.isPending)
-    return <p role="status">Checking integration workspace.</p>;
+    return <p role="status">Checking your integration access.</p>;
   const workspace = scope.data;
   async function reload() {
     await runtime.queryClient.invalidateQueries({
@@ -75,7 +76,7 @@ export function VerifiedWorkspaceIntegrationSettings({
       <section className="state-card">
         <p role="alert">
           {scope.error instanceof WorkspaceBindingError || !scope.isError
-            ? "The integration workspace could not be verified. Reload before connecting."
+            ? "Your personal workspace or organization could not be verified. Reload before connecting."
             : mapApiError(scope.error).message}
         </p>
         <button
@@ -83,17 +84,35 @@ export function VerifiedWorkspaceIntegrationSettings({
           type="button"
           onClick={() => void reload()}
         >
-          Reload integration workspace
+          Reload integration access
         </button>
       </section>
     );
   const binding = JSON.stringify([principal.id, workspace.id, context]);
   return (
     <div className="section-stack">
-      <p>
-        {workspace.kind === "personal" ? "Personal workspace" : "Organization"}:{" "}
-        {workspace.displayName}
-      </p>
+      <section className="state-card">
+        <h2>
+          {workspace.kind === "personal"
+            ? "Personal integrations"
+            : "Organization integrations"}
+        </h2>
+        <p>
+          {workspace.kind === "personal"
+            ? "Personal workspace"
+            : "Organization"}
+          : {workspace.displayName}
+        </p>
+        <p>
+          {workspace.kind === "personal"
+            ? "These connections are for your personal projects. Manage connections for shared projects in the organization's integration settings."
+            : "Manage repository connections for this organization's projects. Your personal integrations stay separate."}
+        </p>
+        <p>
+          Connect GitHub or GitLab when available for your account. Bitbucket is
+          coming soon. Other repository providers cannot be added.
+        </p>
+      </section>
       <GitHubIntegrationSettings
         key={binding + ":github"}
         runtime={runtime}
@@ -108,6 +127,7 @@ export function VerifiedWorkspaceIntegrationSettings({
         organizationId={workspace.id}
         workspaceKind={workspace.kind}
       />
+      <BitbucketIntegrationPlaceholder workspaceKind={workspace.kind} />
     </div>
   );
 }

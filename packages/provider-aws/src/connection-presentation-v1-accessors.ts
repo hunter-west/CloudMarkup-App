@@ -7,7 +7,7 @@ import {
 import presentationArtifactJson from "./compiled/connection-presentation-v1.json" with { type: "json" };
 
 export const AWS_CONNECTION_PRESENTATION_DIGEST_V1 =
-  "sha256:ee9c7035fd964e251adeca448c64bef518eda05f14bd5312083fb7aa9f96435c" as const;
+  "sha256:2dd5a3e04041d9b25b0137df13f8f58be146231f599873a7a263ee72576764b9" as const;
 
 export const awsConnectionPresentationArtifactV1 =
   providerConnectionPresentationArtifactV1Schema.parse(

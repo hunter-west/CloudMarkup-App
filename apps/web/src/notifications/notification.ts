@@ -14,13 +14,19 @@ export interface NotificationItem {
   readonly kind: NotificationKind;
   readonly toast: boolean;
   readonly dismissed: boolean;
+  readonly seen: boolean;
+  readonly read: boolean;
 }
 
 export interface Notifications {
   readonly history: readonly NotificationItem[];
   readonly activeToasts: readonly NotificationItem[];
+  readonly unseenCount: number;
+  readonly unreadCount: number;
   readonly addNotification: (draft: NotificationDraft) => string;
   readonly dismissNotification: (id: string) => void;
+  readonly markNotificationsSeen: (ids: readonly string[]) => void;
+  readonly markNotificationsRead: (ids: readonly string[]) => void;
 }
 
 export const MAX_NOTIFICATION_TITLE_LENGTH = 120;

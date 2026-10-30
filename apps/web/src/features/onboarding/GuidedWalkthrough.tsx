@@ -8,6 +8,7 @@ import { useUsabilityEvents } from "../../instrumentation/usability-events.js";
 import {
   useExperiencePreference,
   useModePreference,
+  type EditorWalkthroughStepId,
 } from "../../preferences/index.js";
 import {
   focusWorkspaceShellTarget,
@@ -27,17 +28,7 @@ interface GuidedWalkthroughProps {
 
 interface WalkthroughStep {
   readonly description: string;
-  readonly id:
-    | "add"
-    | "learn"
-    | "import"
-    | "configure"
-    | "connect"
-    | "permissions"
-    | "assistant"
-    | "validation"
-    | "revision"
-    | "export";
+  readonly id: EditorWalkthroughStepId;
   readonly title: string;
   readonly why: string;
 }
@@ -172,7 +163,12 @@ export function GuidedWalkthrough({
   const { mode } = useModePreference();
   const preference = useExperiencePreference();
   const usabilityEvents = useUsabilityEvents();
-  const [stepIndex, setStepIndex] = useState(0);
+  const [stepIndex, setStepIndex] = useState(() =>
+    Math.max(
+      0,
+      steps.findIndex((step) => step.id === preference.editorWalkthroughStep),
+    ),
+  );
   const started = useRef(false);
   const focusStepAfterChange = useRef(false);
   const stepHeading = useRef<HTMLHeadingElement>(null);
@@ -396,7 +392,10 @@ export function GuidedWalkthrough({
     const nextIndex = Math.max(0, Math.min(steps.length - 1, nextStepIndex));
     setStepIndex(nextIndex);
     const nextStep = steps[nextIndex];
-    if (nextStep !== undefined) showCurrentStep(nextStep, false);
+    if (nextStep !== undefined) {
+      preference.setEditorWalkthroughStep(nextStep.id);
+      showCurrentStep(nextStep, false);
+    }
   }
 
   function restoreProductivityFocus(message: string) {

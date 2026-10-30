@@ -1,6 +1,6 @@
 # Application semantic summary: user-provided-lambda-artifact
 
-- Artifact digest: `sha256:a2f4184e345cb6a1e140b373a9af88f4cb2b01157b0ce03b77adc54d7a25c4a8`
+- Artifact digest: `sha256:0e5c722272d7eba0574edfc7f6f88bbe6420a5e78dbeb63ec59532bbcffa193d`
 - Coverage: `custom-implementation-required`
 - Generated file records: 0
 - Build contracts: 0

@@ -4,7 +4,7 @@
   "Metadata": {
     "CloudMarkup": {
       "ArchitectureRevisionId": "revision_regional_waf_1",
-      "CatalogDigest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
+      "CatalogDigest": "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619",
       "CatalogVersion": "0.30.0",
       "Compiler": "cloudmarkup.iac-compiler@1.2.1",
       "SolutionRevisionId": ""

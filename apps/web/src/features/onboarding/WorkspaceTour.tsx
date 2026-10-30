@@ -8,21 +8,21 @@ import "./workspace-tour.css";
 const steps = [
   {
     key: "workspace",
-    title: "Your workspace",
+    title: "Project work",
     description:
       "Dashboard is your starting point. Open recent projects, create with AI, or explore templates.",
   },
   {
-    key: "account",
-    title: "Your account",
+    key: "organization",
+    title: "Your selected workspace",
     description:
-      "Manage your profile, appearance preferences and personal security here.",
+      "The Personal workspace or Organization section shows the selected workspace's name. Review its usage, plans and billing, and the settings your role permits.",
   },
   {
-    key: "organization",
-    title: "Your team and its resources",
+    key: "account",
+    title: "Personal account",
     description:
-      "Switch organizations, review shared usage and billing, and manage organization settings.",
+      "Manage your profile, personal security and preferences here. Personal & organizations opens the directory for switching between your personal workspace and organizations.",
   },
   {
     key: "profile",

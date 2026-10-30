@@ -290,6 +290,11 @@ const navigationGroups = [
         path: "/organizations/local-org/templates",
         routeIds: ["templates", "template-detail"],
       },
+    ],
+  },
+  {
+    label: "Organization",
+    links: [
       {
         label: "Usage",
         path: "/organizations/local-org/usage",
@@ -299,46 +304,6 @@ const navigationGroups = [
         label: "Plans & billing",
         path: "/organizations/local-org/billing",
         routeIds: ["billing"],
-      },
-    ],
-  },
-  {
-    label: "Account",
-    links: [
-      {
-        label: "Profile",
-        path: "/settings/profile",
-        routeIds: ["profile-settings"],
-      },
-      {
-        label: "Invitations",
-        path: "/settings/invitations",
-        routeIds: ["account-invitations"],
-      },
-      {
-        label: "Preferences",
-        path: "/settings/preferences",
-        routeIds: ["preference-settings"],
-      },
-      {
-        label: "Personal security",
-        path: "/settings/security",
-        routeIds: ["personal-security-settings"],
-      },
-      {
-        label: "Personal integrations",
-        path: "/settings/integrations",
-        routeIds: ["personal-integration-settings"],
-      },
-    ],
-  },
-  {
-    label: "Organization",
-    links: [
-      {
-        label: "Organizations",
-        path: "/organizations",
-        routeIds: ["organizations"],
       },
       {
         label: "Organization settings",
@@ -365,6 +330,41 @@ const navigationGroups = [
       },
     ],
   },
+  {
+    label: "Account",
+    links: [
+      {
+        label: "Personal & organizations",
+        path: "/organizations",
+        routeIds: ["organizations"],
+      },
+      {
+        label: "Profile",
+        path: "/settings/profile",
+        routeIds: ["profile-settings"],
+      },
+      {
+        label: "Personal security",
+        path: "/settings/security",
+        routeIds: ["personal-security-settings"],
+      },
+      {
+        label: "Preferences",
+        path: "/settings/preferences",
+        routeIds: ["preference-settings"],
+      },
+      {
+        label: "Personal integrations",
+        path: "/settings/integrations",
+        routeIds: ["personal-integration-settings"],
+      },
+      {
+        label: "Invitations",
+        path: "/settings/invitations",
+        routeIds: ["account-invitations"],
+      },
+    ],
+  },
 ] as const;
 
 export function AppShell({
@@ -380,7 +380,14 @@ export function AppShell({
   const posture = viewport.posture;
   const isOnline = useOnlineStatus();
   const { announcement, storageStatus } = useModePreference();
-  const { activeToasts, dismissNotification, history } = useNotifications();
+  const {
+    activeToasts,
+    dismissNotification,
+    history,
+    markNotificationsRead,
+    markNotificationsSeen,
+    unseenCount,
+  } = useNotifications();
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [leftExpanded, setLeftExpanded] = useState(true);
   const navigationPreference = useNavigationPreference(identity.actorId);
@@ -941,8 +948,9 @@ export function AppShell({
           <TopApplicationBar
             editorActions={workspace?.header}
             identity={identity}
-            notificationCount={history.length}
+            notificationCount={unseenCount}
             onOpenAccount={() => {
+              markNotificationsSeen(history.map((item) => item.id));
               openOverlay("account");
             }}
             onOpenNavigation={() => {
@@ -1062,6 +1070,7 @@ export function AppShell({
             <StandardShell
               capabilities={identity.organization?.capabilities}
               workspaceKind={identity.organization?.kind}
+              organizationName={identity.organization?.name}
               organizationId={selectedNavigationOrganizationId}
               leftExpanded={navigationPreference.expanded}
               leftWidth={leftWidth}
@@ -1108,6 +1117,7 @@ export function AppShell({
             overlay={overlay}
             onResetWorkspaceLayout={resetWorkspaceLayout}
             onOpenNotifications={() => {
+              markNotificationsRead(history.map((item) => item.id));
               setOverlay("notifications");
             }}
             posture={posture}
@@ -1264,7 +1274,7 @@ function TopApplicationBar({
         <span
           aria-label={
             identity.organization === null
-              ? "Account workspace"
+              ? "Personal account"
               : `${identity.organization.kind === "personal" ? "Personal workspace" : "Organization " + identity.organization.name}${
                   project === undefined ? "" : `, project ${project.name}`
                 }`
@@ -1272,7 +1282,11 @@ function TopApplicationBar({
           className="organization-context"
           role="group"
         >
-          <span>{identity.organization?.name ?? "Account workspace"}</span>
+          <span>
+            {identity.organization?.kind === "personal"
+              ? "Personal workspace"
+              : (identity.organization?.name ?? "Personal account")}
+          </span>
           {project === undefined ? null : (
             <>
               <span aria-hidden="true">/</span>
@@ -1320,7 +1334,8 @@ function TopApplicationBar({
           </span>
           {notificationCount > 0 ? (
             <span className="visually-hidden" id="profile-notification-count">
-              {notificationCount} notifications
+              {notificationCount} new{" "}
+              {notificationCount === 1 ? "notification" : "notifications"}
             </span>
           ) : null}
           <span aria-hidden="true" className="compact-mock-label">
@@ -1348,6 +1363,7 @@ function TopApplicationBar({
 function StandardShell({
   capabilities,
   workspaceKind,
+  organizationName,
   children,
   organizationId,
   leftExpanded,
@@ -1359,6 +1375,7 @@ function StandardShell({
   readonly capabilities?: readonly string[] | undefined;
   readonly workspaceKind?:
     "personal" | "organization" | "unavailable" | undefined;
+  readonly organizationName?: string | undefined;
   readonly children: ReactNode;
   readonly organizationId: string | null;
   readonly leftExpanded: boolean;
@@ -1397,6 +1414,7 @@ function StandardShell({
                 capabilities={capabilities}
                 id="application-navigation"
                 organizationId={organizationId}
+                organizationName={organizationName}
                 workspaceKind={workspaceKind}
               />
             ) : (
@@ -1405,6 +1423,7 @@ function StandardShell({
                 collapsed
                 id="application-navigation"
                 organizationId={organizationId}
+                organizationName={organizationName}
                 workspaceKind={workspaceKind}
               />
             )}
@@ -1736,7 +1755,7 @@ const navigationIcons: Record<string, LucideIcon> = {
   "Personal security": ShieldCheck,
   Usage: Gauge,
   "Plans & billing": CreditCard,
-  Organizations: Building2,
+  "Personal & organizations": Building2,
   "Organization settings": Settings2,
   "Personal integrations": Cable,
   "Members & roles": UsersRound,
@@ -1750,6 +1769,7 @@ function PrimaryNavigation({
   id,
   onNavigate,
   organizationId,
+  organizationName,
 }: {
   readonly capabilities?: readonly string[] | undefined;
   readonly workspaceKind?:
@@ -1758,6 +1778,7 @@ function PrimaryNavigation({
   readonly id?: string;
   readonly onNavigate?: () => void;
   readonly organizationId: string | null;
+  readonly organizationName?: string | undefined;
 }) {
   const route = useRouteMatch();
 
@@ -1770,28 +1791,30 @@ function PrimaryNavigation({
       id={id}
     >
       {organizationId === null ? (
-        <section className="navigation-group">
+        <section className="navigation-group" data-navigation-group="Workspace">
           <h2 className={collapsed ? "visually-hidden" : undefined}>
-            Workspace
+            Project work
           </h2>
           <p
             className={
               collapsed ? "visually-hidden" : "navigation-workspace-note"
             }
           >
-            Choose a workspace to open Dashboard, Projects, Usage, and billing.
+            Choose your personal workspace or an organization to open Dashboard,
+            Projects, Usage, and billing.
           </p>
           <ul>
             <li>
               <AppLink
-                aria-label={collapsed ? "Choose workspace" : undefined}
-                title={collapsed ? "Choose workspace" : undefined}
+                aria-current={route.id === "organizations" ? "page" : undefined}
+                aria-label={collapsed ? "Personal & organizations" : undefined}
+                title={collapsed ? "Personal & organizations" : undefined}
                 onClick={onNavigate}
                 to="/organizations"
               >
                 <MenuIcon size={18} aria-hidden="true" />
                 <span className={collapsed ? "visually-hidden" : undefined}>
-                  Choose workspace
+                  Personal & organizations
                 </span>
               </AppLink>
             </li>
@@ -1799,9 +1822,7 @@ function PrimaryNavigation({
         </section>
       ) : null}
       {navigationGroups
-        .filter(
-          (group) => organizationId !== null || group.label !== "Workspace",
-        )
+        .filter((group) => organizationId !== null || group.label === "Account")
         .map((group) => (
           <section
             className="navigation-group"
@@ -1809,18 +1830,36 @@ function PrimaryNavigation({
             key={group.label}
           >
             <h2 className={collapsed ? "visually-hidden" : undefined}>
-              {group.label}
+              {group.label === "Workspace"
+                ? "Project work"
+                : group.label === "Account"
+                  ? "Personal account"
+                  : workspaceKind === "personal"
+                    ? "Personal workspace"
+                    : workspaceKind === "organization"
+                      ? "Organization"
+                      : "Selected workspace"}
             </h2>
+            {group.label === "Organization" ? (
+              <p
+                className={
+                  collapsed ? "visually-hidden" : "navigation-workspace-note"
+                }
+              >
+                {organizationName ??
+                  "Selected personal workspace or organization"}
+              </p>
+            ) : null}
             <ul>
               {group.links
                 .filter(
                   (link) =>
                     (organizationId !== null ||
+                      link.path !== "/organizations") &&
+                    (organizationId !== null ||
                       !link.path.includes("/local-org/")) &&
-                    (!(
-                      workspaceKind === "personal" ||
-                      workspaceKind === "unavailable"
-                    ) ||
+                    ((workspaceKind !== "personal" &&
+                      workspaceKind !== "unavailable") ||
                       group.label !== "Organization" ||
                       !link.path.includes("/settings/")) &&
                     (!("capability" in link) ||
@@ -2000,7 +2039,7 @@ function ShellOverlay({
   readonly returnFocusRef: RefObject<HTMLElement | null>;
   readonly workspaceTab: WorkspaceTab;
 }) {
-  const { history } = useNotifications();
+  const { history, markNotificationsRead, unreadCount } = useNotifications();
   const route = useRouteMatch();
   const requestedOverlay =
     posture === "desktop" && (overlay === "catalog" || overlay === "navigation")
@@ -2088,6 +2127,7 @@ function ShellOverlay({
           id="application-navigation"
           onNavigate={onClose}
           organizationId={navigationOrganizationId}
+          organizationName={identity.organization?.name}
           workspaceKind={identity.organization?.kind}
         />
       </ResponsiveShellSurface>
@@ -2315,30 +2355,47 @@ function ShellOverlay({
         posture={posture}
         returnFocusRef={returnFocusRef}
         title="Notifications"
+        description="Notifications from this tab. Opening this list marks them as read."
       >
         {history.length === 0 ? (
           <div className="drawer-empty" role="status">
-            <h3>No local notifications</h3>
+            <h3>No notifications in this tab</h3>
             <p>
-              Consequential outcomes will remain available here in addition to
-              transient announcements.
+              Activity stays here while this tab is open. A reload starts a new
+              history.
             </p>
           </div>
         ) : (
-          <ol className="notification-history">
-            {history.map((notification) => (
-              <li key={notification.id}>
-                <StatusBadge
-                  label={notification.kind}
-                  tone={notification.kind}
-                />
-                <strong>{notification.title}</strong>
-                {notification.message === undefined ? null : (
-                  <p>{notification.message}</p>
-                )}
-              </li>
-            ))}
-          </ol>
+          <>
+            {unreadCount > 0 ? (
+              <Button
+                variant="quiet"
+                onClick={() => {
+                  markNotificationsRead(history.map((item) => item.id));
+                }}
+              >
+                Mark all as read
+              </Button>
+            ) : null}
+            <ol
+              className="notification-history"
+              aria-label="Notification history"
+            >
+              {history.map((notification) => (
+                <li key={notification.id}>
+                  <StatusBadge
+                    label={notification.kind}
+                    tone={notification.kind}
+                  />
+                  <strong>{notification.title}</strong>
+                  <span>{notification.read ? "Read" : "Unread"}</span>
+                  {notification.message === undefined ? null : (
+                    <p>{notification.message}</p>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </>
         )}
       </ResponsiveShellSurface>
     );

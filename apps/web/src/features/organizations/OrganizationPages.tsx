@@ -236,9 +236,9 @@ function AuthenticatedOrganizationsPage({
   );
   return (
     <RoutePage
-      title="Workspaces"
+      title="Personal & organizations"
       eyebrow="Account"
-      description="Open your personal workspace or choose an organization to collaborate."
+      description="Use your personal workspace for private projects, or choose an organization for shared projects."
       routeKey={`organizations-${principal.id}`}
     >
       <div className="organizations-index">
@@ -267,7 +267,7 @@ function AuthenticatedOrganizationsPage({
         ) : organizations.length === 0 ? (
           <section className="state-card" role="status">
             <p className="status-label">Get started</p>
-            <h2>Create your first workspace</h2>
+            <h2>Choose how to get started</h2>
             <p>
               Create a personal workspace below for your own projects, or create
               an organization to collaborate.
@@ -280,8 +280,8 @@ function AuthenticatedOrganizationsPage({
           >
             <div className="organizations-index__heading">
               <div>
-                <p className="status-label">Workspace directory</p>
-                <h2 id="organization-list-title">Your workspaces</h2>
+                <p className="status-label">Personal & organizations</p>
+                <h2 id="organization-list-title">Choose where to work</h2>
               </div>
               <StatusBadge
                 label={`${String(shared.length)} ${shared.length === 1 ? "organization" : "organizations"} shown`}
@@ -290,7 +290,7 @@ function AuthenticatedOrganizationsPage({
             </div>
             <ul
               className="organizations-index__grid"
-              aria-label="Your workspaces"
+              aria-label="Personal workspace and organizations"
             >
               {[...personal, ...shared].map((organization) => (
                 <OrganizationCard
@@ -371,8 +371,10 @@ function OrganizationCard({
         {active
           ? kind === "personal"
             ? "Your personal projects and credits belong to your independent account."
-            : "Projects in this workspace are shared with authorized organization members."
-          : "Workspace access is unavailable while this organization is not active."}
+            : "Projects in this organization are shared with authorized members."
+          : kind === "personal"
+            ? "Your personal workspace is currently inactive."
+            : "This organization is currently inactive."}
       </p>
       <div className="organization-card__actions">
         {mayReadProjects ? (
