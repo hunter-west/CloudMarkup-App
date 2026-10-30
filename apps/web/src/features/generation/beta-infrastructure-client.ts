@@ -174,12 +174,16 @@ function pause(milliseconds: number, signal: AbortSignal) {
     signal.addEventListener("abort", cancelled, { once: true });
   });
 }
-function proposalDeadlineError() {
-  return new BetaInfrastructureRequestError("ai.deadline");
+function proposalDeadlineError(jobId: string) {
+  return new BetaInfrastructureRequestError("ai.deadline", jobId);
 }
-function waitForVisibleDocument(signal: AbortSignal, deadline: number) {
+function waitForVisibleDocument(
+  signal: AbortSignal,
+  deadline: number,
+  jobId: string,
+) {
   signal.throwIfAborted();
-  if (Date.now() >= deadline) throw proposalDeadlineError();
+  if (Date.now() >= deadline) throw proposalDeadlineError(jobId);
   if (document.visibilityState !== "hidden") return;
   return new Promise<void>((resolve, reject) => {
     const cleanup = () => {
@@ -190,7 +194,7 @@ function waitForVisibleDocument(signal: AbortSignal, deadline: number) {
     const visible = () => {
       if (document.visibilityState === "hidden") return;
       cleanup();
-      if (Date.now() >= deadline) reject(proposalDeadlineError());
+      if (Date.now() >= deadline) reject(proposalDeadlineError(jobId));
       else resolve();
     };
     const cancelled = () => {
@@ -199,7 +203,7 @@ function waitForVisibleDocument(signal: AbortSignal, deadline: number) {
     };
     const timer = setTimeout(() => {
       cleanup();
-      reject(proposalDeadlineError());
+      reject(proposalDeadlineError(jobId));
     }, deadline - Date.now());
     document.addEventListener("visibilitychange", visible);
     signal.addEventListener("abort", cancelled, { once: true });
@@ -292,7 +296,7 @@ export async function requestBetaInfrastructureProposal(input: {
     let completedPolls = 0;
     while (job.state === "queued" || job.state === "running") {
       input.signal.throwIfAborted();
-      if (Date.now() >= deadline) throw proposalDeadlineError();
+      if (Date.now() >= deadline) throw proposalDeadlineError(job.id);
       input.onProgress(
         job.state === "queued"
           ? "Proposal queued…"
@@ -302,7 +306,7 @@ export async function requestBetaInfrastructureProposal(input: {
       await pause(completedPolls < 2 ? 2000 : 5000, input.signal);
       // The durable worker continues while this tab is hidden. Resume status
       // reads on return, preserving cancellation and the ten-minute deadline.
-      await waitForVisibleDocument(input.signal, deadline);
+      await waitForVisibleDocument(input.signal, deadline, job.id);
       const poll = await fetch(`${url}/${encodeURIComponent(job.id)}`, {
         signal: input.signal,
         cache: "no-store",
@@ -314,6 +318,7 @@ export async function requestBetaInfrastructureProposal(input: {
           poll.status === 401
             ? "ai.sign-in-required"
             : "ai.proposal-unavailable",
+          jobId,
         );
       const next = betaInfrastructureJobResponseV1Schema.parse(
         await poll.json(),
@@ -322,7 +327,7 @@ export async function requestBetaInfrastructureProposal(input: {
         next.id !== jobId ||
         next.architectureDigest !== job.architectureDigest
       )
-        throw new BetaInfrastructureRequestError("ai.job-mismatch");
+        throw new BetaInfrastructureRequestError("ai.job-mismatch", jobId);
       job = next;
       completedPolls += 1;
     }
@@ -341,10 +346,20 @@ export async function requestBetaInfrastructureProposal(input: {
       (input.request.proposalVersion === 6 &&
         job.result.proposal.contractVersion !== 6)
     )
-      throw new BetaInfrastructureRequestError("ai.result-mismatch");
+      throw new BetaInfrastructureRequestError("ai.result-mismatch", jobId);
     succeeded = true;
     forgetAdmission(admissionIdentity);
     return job.result;
+  } catch (error) {
+    if (
+      error instanceof BetaInfrastructureRequestError ||
+      input.signal.aborted ||
+      (error instanceof Error && error.name === "AbortError")
+    )
+      throw error;
+    // Transport and malformed-response details are not user-facing copy. Keep
+    // the admitted reference and recovery key until reconciliation is known.
+    throw new BetaInfrastructureRequestError("ai.queue-unconfirmed", jobId);
   } finally {
     if (jobId && !succeeded) {
       try {

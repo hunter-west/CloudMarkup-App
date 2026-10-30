@@ -233,9 +233,11 @@ it("keeps the ten-minute deadline while hidden and cancels without another statu
     .mockResolvedValueOnce(response("canceled"));
   vi.stubGlobal("fetch", fetcher);
   const pending = requestBetaInfrastructureProposal(args());
-  const rejected = expect(pending).rejects.toThrow(
-    "taking longer than expected",
-  );
+  const rejected = expect(pending).rejects.toMatchObject({
+    code: "ai.deadline",
+    safeMessage: new BetaInfrastructureRequestError("ai.deadline", "job_test")
+      .safeMessage,
+  });
   await vi.advanceTimersByTimeAsync(599_999);
   expect(fetcher).toHaveBeenCalledOnce();
   await vi.advanceTimersByTimeAsync(1);
@@ -328,15 +330,55 @@ it("reuses admission identity after an uncertain POST response", async () => {
   vi.stubGlobal("fetch", fetch);
   const input = args();
   input.request.requirements = "Synthetic uncertain admission retry";
-  await expect(requestBetaInfrastructureProposal(input)).rejects.toThrow(
-    "Connection lost",
-  );
+  await expect(requestBetaInfrastructureProposal(input)).rejects.toMatchObject({
+    code: "ai.queue-unconfirmed",
+  });
   await expect(requestBetaInfrastructureProposal(input)).resolves.toEqual(
     result,
   );
   expect(
     new Headers(fetch.mock.calls[0]?.[1]?.headers).get("idempotency-key"),
   ).toBe(new Headers(fetch.mock.calls[1]?.[1]?.headers).get("idempotency-key"));
+});
+
+it("retains a safe request reference and the same reservation after polling and cancellation lose connectivity", async () => {
+  vi.useFakeTimers();
+  const fetcher = vi
+    .fn<typeof fetch>()
+    .mockResolvedValueOnce(response("running"))
+    .mockRejectedValueOnce(new TypeError("private network details"))
+    .mockRejectedValueOnce(new TypeError("private cancellation details"))
+    .mockResolvedValueOnce(response("succeeded"));
+  vi.stubGlobal("fetch", fetcher);
+  const input = args();
+  const pending = requestBetaInfrastructureProposal(input);
+  const rejected = expect(pending).rejects.toMatchObject({
+    code: "ai.queue-unconfirmed",
+    safeMessage: new BetaInfrastructureRequestError(
+      "ai.queue-unconfirmed",
+      "job_test",
+    ).safeMessage,
+  });
+  await Promise.all([vi.advanceTimersByTimeAsync(2000), rejected]);
+  expect(fetcher.mock.calls[2]?.[1]?.method).toBe("DELETE");
+  await expect(requestBetaInfrastructureProposal(input)).resolves.toEqual(
+    result,
+  );
+  const admissions = fetcher.mock.calls.filter(
+    ([, init]) => init?.method === "POST",
+  );
+  expect(admissions).toHaveLength(2);
+  expect(
+    new Set(
+      admissions.map(([, init]) =>
+        new Headers(init?.headers).get("idempotency-key"),
+      ),
+    ).size,
+  ).toBe(1);
+  expect(admissions.map(([, init]) => parsedBody(init?.body))).toEqual([
+    input.request,
+    input.request,
+  ]);
 });
 
 it("recovers the same pending admission after module reload without storing prompt, canvas or access token", async () => {
@@ -347,9 +389,9 @@ it("recovers the same pending admission after module reload without storing prom
     .mockRejectedValueOnce(new TypeError("Response lost after admission"))
     .mockResolvedValueOnce(response("succeeded"));
   vi.stubGlobal("fetch", fetch);
-  await expect(requestBetaInfrastructureProposal(input)).rejects.toThrow(
-    "Response lost",
-  );
+  await expect(requestBetaInfrastructureProposal(input)).rejects.toMatchObject({
+    code: "ai.queue-unconfirmed",
+  });
   const retained =
     sessionStorage.getItem("cloudmarkup.beta-ai.pending-admissions.v1") ?? "";
   expect(retained).not.toContain(input.request.requirements);
@@ -380,13 +422,13 @@ it("keeps deliberate completed requests distinct and binds changed pending reque
     new Headers(fetch.mock.calls[1]?.[1]?.headers).get("idempotency-key"),
   );
   fetch.mockRejectedValue(new TypeError("Uncertain response"));
-  await expect(requestBetaInfrastructureProposal(input)).rejects.toThrow(
-    "Uncertain response",
-  );
+  await expect(requestBetaInfrastructureProposal(input)).rejects.toMatchObject({
+    code: "ai.queue-unconfirmed",
+  });
   input.request.requirements = "Create a deliberately different private bucket";
-  await expect(requestBetaInfrastructureProposal(input)).rejects.toThrow(
-    "Uncertain response",
-  );
+  await expect(requestBetaInfrastructureProposal(input)).rejects.toMatchObject({
+    code: "ai.queue-unconfirmed",
+  });
   expect(
     new Headers(fetch.mock.calls[2]?.[1]?.headers).get("idempotency-key"),
   ).not.toBe(
@@ -527,9 +569,9 @@ it("reuses an exact v6 admission after a lost response with one simulated reserv
     );
   });
   vi.stubGlobal("fetch", fetcher);
-  await expect(requestBetaInfrastructureProposal(input)).rejects.toThrow(
-    "Lost response",
-  );
+  await expect(requestBetaInfrastructureProposal(input)).rejects.toMatchObject({
+    code: "ai.queue-unconfirmed",
+  });
   await expect(requestBetaInfrastructureProposal(input)).resolves.toEqual(
     v6Result,
   );
