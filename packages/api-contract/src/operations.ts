@@ -1,7 +1,9 @@
 import {
   staffAccessResponseV1Schema,
+  staffAccountListResponseSchema,
   staffAccountListResponseV1Schema,
   staffAccountSearchV1Schema,
+  staffAccountDetailResponseSchema,
   staffAccountDetailResponseV1Schema,
   staffAccountActionV1Schema,
   staffActionReceiptResponseV1Schema,
@@ -602,6 +604,46 @@ const staffOperation2: StaffAccountsGetOperationV1 = defineOperation({
   summary: "Read account credits and staff action history",
   tag: "Staff",
 });
+export interface StaffWorkspacesListOperationV2 extends ApiOperationDefinition {
+  readonly method: "GET";
+  readonly path: "/v1/staff/workspaces";
+  readonly security: "principal";
+  readonly successStatus: 200;
+  readonly querySchema: typeof staffAccountSearchV1Schema;
+  readonly responseSchema: typeof staffAccountListResponseSchema;
+}
+const staffWorkspacesListOperation: StaffWorkspacesListOperationV2 =
+  defineOperation({
+    method: "GET",
+    path: "/v1/staff/workspaces",
+    querySchema: staffAccountSearchV1Schema,
+    responseSchema: staffAccountListResponseSchema,
+    security: "principal",
+    successStatus: 200,
+    summary: "Search staff workspace previews including unprovisioned billing",
+    tag: "Staff",
+  });
+export interface StaffWorkspacesGetOperationV2 extends ApiOperationDefinition {
+  readonly method: "GET";
+  readonly path: "/v1/staff/workspaces/:organizationId";
+  readonly security: "principal";
+  readonly successStatus: 200;
+  readonly pathSchema: typeof organizationPathV1Schema;
+  readonly responseSchema: typeof staffAccountDetailResponseSchema;
+}
+const staffWorkspacesGetOperation: StaffWorkspacesGetOperationV2 =
+  defineOperation({
+    method: "GET",
+    path: "/v1/staff/workspaces/:organizationId",
+    pathSchema: organizationPathV1Schema,
+    responseSchema: staffAccountDetailResponseSchema,
+    etagResponse: true,
+    security: "principal",
+    successStatus: 200,
+    summary:
+      "Review an account or an unprovisioned staff workspace without writes",
+    tag: "Staff",
+  });
 export interface StaffAccountsActOperationV1 extends ApiOperationDefinition {
   readonly method: "POST";
   readonly path: "/v1/staff/accounts/:organizationId/actions";
@@ -928,6 +970,8 @@ export const apiOperationsV1 = {
   "staff.accounts.list": staffOperation1,
   "staff.accounts.get": staffOperation2,
   "staff.accounts.act": staffOperation3,
+  "staff.workspaces.list": staffWorkspacesListOperation,
+  "staff.workspaces.get": staffWorkspacesGetOperation,
   "account.authenticator.get": accountAuthenticatorGetOperation,
   "account.authenticator.start": accountAuthenticatorStartOperation,
   "account.authenticator.change": accountAuthenticatorChangeOperation,

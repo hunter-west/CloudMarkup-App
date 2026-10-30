@@ -48,6 +48,14 @@ approval records. Hosted delivery, paid/provider integrations and external
 security intake require separate operator configuration and qualification.
 Proposed ADRs remain proposals until their decisions are accepted.
 
+The
+[catalog, canvas and tutorial audit](roadmap/plans/catalog-canvas-tutorial-20261029.md)
+records source-matched local feature evidence, a workspace-tour restart/resume
+repair, focused responsive/tutorial test corrections and exact live acceptance
+scenarios. Integrated release admission and live verification remain separate;
+exact editor-tour step resume after remount and ten definition-level icon
+placeholders remain follow-up work.
+
 ## Repository identities
 
 The public application source destination is

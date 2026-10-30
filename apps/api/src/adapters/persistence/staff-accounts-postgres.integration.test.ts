@@ -31,6 +31,7 @@ import { fileURLToPath } from "node:url";
 import { beforeAll, afterAll, describe, it, expect } from "vitest";
 import type { PrincipalContext } from "../../application/ports.js";
 import { PostgresStaffAccounts } from "./staff-accounts.js";
+import { PostgresAccountWorkspaces } from "./account-workspaces.js";
 import { PostgresAccountCredentialAudit } from "./account-credential-audit.js";
 import { PostgresDatabase } from "./postgres-driver.js";
 import { runMigrations } from "./migrations.js";
@@ -168,6 +169,42 @@ suite("platform staff authority and accounting on PostgreSQL", () => {
     }
     return { organizationId, billingAccountId };
   }
+  async function freshTarget(staff: PrincipalContext) {
+    const customer = await actor(false);
+    const workspace = await new PostgresAccountWorkspaces(typed).createPersonal(
+      customer,
+    );
+    const before = await app.get(staff, workspace.id, "2");
+    expect(before.value.account).toMatchObject({
+      contractVersion: 2,
+      billingState: "unprovisioned",
+      version: 0,
+    });
+    return {
+      customer,
+      organizationId: workspace.id,
+      billingAccountId: before.value.account.billingAccountId,
+      before,
+    };
+  }
+  async function expectUnprovisioned(organizationId: string) {
+    for (const table of [
+      "organization_billing_accounts",
+      "organization_subscription_projections",
+      "organization_entitlement_snapshots",
+      "credit_grants",
+      "platform_staff_account_actions",
+    ])
+      expect(
+        (
+          await typed.query(
+            sql(`SELECT 1 FROM ${table} WHERE organization_id=$1`, [
+              organizationId,
+            ]),
+          )
+        ).rows,
+      ).toEqual([]);
+  }
   async function expectCustomerCredits(
     organizationId: string,
     available: number,
@@ -247,11 +284,24 @@ suite("platform staff authority and accounting on PostgreSQL", () => {
       await projection.readContact(customer),
       { subject, email },
     );
+    const fresh = await new PostgresAccountWorkspaces(typed).createPersonal(
+      customer,
+    );
+    const legacy = await app.search(staff, { q: email.toUpperCase() });
+    expect(legacy.contractVersion).toBe(1);
+    expect(legacy.items.map((item) => item.organizationId)).toEqual([
+      t.organizationId,
+    ]);
+    const found = await app.search(staff, { q: email.toUpperCase() }, "2");
+    expect(found.items.map((item) => item.organizationId).sort()).toEqual(
+      [t.organizationId, fresh.id].sort(),
+    );
+    expect(found.contractVersion).toBe(2);
     expect(
-      (await app.search(staff, { q: email.toUpperCase() })).items.map(
-        (item) => item.organizationId,
-      ),
-    ).toEqual([t.organizationId]);
+      found.items.find((item) => item.organizationId === fresh.id),
+    ).toMatchObject({ contractVersion: 2, billingState: "unprovisioned" });
+    await app.get(staff, fresh.id, "2");
+    await expectUnprovisioned(fresh.id);
     await expect(app.search(customer, { q: email })).rejects.toMatchObject({
       code: "access_denied",
     });
@@ -264,6 +314,287 @@ suite("platform staff authority and accounting on PostgreSQL", () => {
       },
     );
     expect((await app.search(staff, { q: email })).items).toEqual([]);
+  });
+  it("initializes a fresh personal workspace only with its reviewed exactly-once grant", async () => {
+    const p = await actor(),
+      t = await freshTarget(p);
+    await expectUnprovisioned(t.organizationId);
+    const input = grant(t.billingAccountId),
+      key = "fresh-grant-" + suffix();
+    const [one, two] = await Promise.all([
+      app.act(p, t.organizationId, input, t.before.etag, key),
+      app.act(p, t.organizationId, input, t.before.etag, key),
+    ]);
+    expect(one).toEqual(two);
+    const after = await app.get(p, t.organizationId);
+    expect(after.value.account).toMatchObject({
+      contractVersion: 1,
+      billingState: "active",
+      version: 2,
+      subscriptionState: "not-subscribed",
+    });
+    expect(after.value.availableCreditUnits).toBe("350");
+    expect(after.value.history).toEqual([one]);
+    expect(
+      (
+        await typed.query(
+          sql(
+            "SELECT billing_account_id FROM organization_billing_accounts WHERE organization_id=$1",
+            [t.organizationId],
+          ),
+        )
+      ).rows,
+    ).toEqual([{ billing_account_id: t.billingAccountId }]);
+    expect(
+      (
+        await typed.query(
+          sql(
+            "SELECT 1 FROM organization_subscription_projections WHERE organization_id=$1",
+            [t.organizationId],
+          ),
+        )
+      ).rows,
+    ).toEqual([]);
+    expect(
+      (
+        await typed.query(
+          sql("SELECT 1 FROM platform_staff_trials WHERE organization_id=$1", [
+            t.organizationId,
+          ]),
+        )
+      ).rows,
+    ).toEqual([]);
+    expect(
+      await app.act(p, t.organizationId, input, t.before.etag, key),
+    ).toEqual(one);
+    const overview = await createProductionCommercialReads({
+      database: typed,
+    }).getCreditOverview(t.customer, t.organizationId);
+    expect(overview.balance.availableCreditUnits).toBe(350);
+    expect(overview.availableByKind).toEqual({
+      monthly: 0,
+      purchased: 0,
+      other: 350,
+    });
+  });
+  it("keeps fresh workspace reads and rejected staff actions free of billing writes", async () => {
+    const p = await actor(),
+      t = await freshTarget(p),
+      readOnly = await actor();
+    await typed.query(
+      sql(
+        "UPDATE platform_staff_authorizations SET permissions=ARRAY['accounts.read','operations.manage'] WHERE principal_id=$1",
+        [readOnly.principalId],
+      ),
+    );
+    await expect(app.get(p, t.organizationId)).rejects.toMatchObject({
+      code: "not_found",
+    });
+    expect((await app.search(p, { q: t.organizationId })).items).toEqual([]);
+    expect(
+      (await app.search(p, { q: t.organizationId }, "2")).items,
+    ).toHaveLength(1);
+    await expect(
+      app.act(
+        t.customer,
+        t.organizationId,
+        grant(t.billingAccountId),
+        t.before.etag,
+        "fresh-owner-" + suffix(),
+      ),
+    ).rejects.toMatchObject({ code: "access_denied" });
+    await expect(
+      app.act(
+        readOnly,
+        t.organizationId,
+        grant(t.billingAccountId),
+        t.before.etag,
+        "fresh-read-" + suffix(),
+      ),
+    ).rejects.toMatchObject({ code: "access_denied" });
+    await expect(
+      app.act(
+        readOnly,
+        t.organizationId,
+        {
+          contractVersion: 1,
+          action: "set-operations",
+          enabled: true,
+          confirmBillingAccountId: t.billingAccountId,
+          reason: "Synthetic operation check",
+        },
+        t.before.etag,
+        "fresh-ops-" + suffix(),
+      ),
+    ).rejects.toMatchObject({ code: "conflict" });
+    await expect(
+      app.act(
+        { ...p, authenticatedAt: new Date(Date.now() - 3600000).toISOString() },
+        t.organizationId,
+        grant(t.billingAccountId),
+        t.before.etag,
+        "fresh-stale-auth-" + suffix(),
+      ),
+    ).rejects.toMatchObject({ code: "access_denied" });
+    await expect(
+      app.act(
+        p,
+        t.organizationId,
+        grant("billing_other"),
+        t.before.etag,
+        "fresh-wrong-target-" + suffix(),
+      ),
+    ).rejects.toMatchObject({ code: "invalid_request" });
+    await expect(
+      app.act(
+        p,
+        t.organizationId,
+        grant(t.billingAccountId),
+        '"staff-account:stale:0"',
+        "fresh-stale-" + suffix(),
+      ),
+    ).rejects.toMatchObject({ code: "precondition_failed" });
+    await expect(
+      app.act(
+        p,
+        t.organizationId,
+        {
+          contractVersion: 1,
+          action: "grant-trial",
+          confirmBillingAccountId: t.billingAccountId,
+          creditUnits: 100,
+          expiresInDays: 14,
+          reason: "Synthetic unauthorized trial",
+        },
+        t.before.etag,
+        "fresh-trial-denied-" + suffix(),
+      ),
+    ).rejects.toMatchObject({ code: "access_denied" });
+    const suspendedOrganizationId = "org_suspended_" + suffix();
+    await typed.query(
+      sql(
+        "INSERT INTO organizations(organization_id,display_name,slug,lifecycle_status) VALUES($1,'Synthetic suspended workspace',$2,'suspended')",
+        [suspendedOrganizationId, "suspended-" + suffix()],
+      ),
+    );
+    const suspended = await app.get(p, suspendedOrganizationId, "2");
+    await expect(
+      app.act(
+        p,
+        suspendedOrganizationId,
+        grant(suspended.value.account.billingAccountId),
+        suspended.etag,
+        "fresh-suspended-" + suffix(),
+      ),
+    ).rejects.toMatchObject({ code: "conflict" });
+    await expectUnprovisioned(suspendedOrganizationId);
+    await expectUnprovisioned(t.organizationId);
+  });
+  it("serializes different staff initializations so the losing preview cannot issue another grant", async () => {
+    const p = await actor(),
+      other = await actor(),
+      t = await freshTarget(p);
+    const outcomes = await Promise.allSettled([
+      app.act(
+        p,
+        t.organizationId,
+        grant(t.billingAccountId),
+        t.before.etag,
+        "fresh-race-a-" + suffix(),
+      ),
+      app.act(
+        other,
+        t.organizationId,
+        grant(t.billingAccountId),
+        t.before.etag,
+        "fresh-race-b-" + suffix(),
+      ),
+    ]);
+    expect(
+      outcomes.filter((result) => result.status === "fulfilled"),
+    ).toHaveLength(1);
+    const rejected = outcomes.find((result) => result.status === "rejected");
+    expect(
+      rejected?.status === "rejected" ? rejected.reason : null,
+    ).toMatchObject({ code: "precondition_failed" });
+    const after = await app.get(p, t.organizationId);
+    expect(after.value.availableCreditUnits).toBe("350");
+    expect(after.value.history).toHaveLength(1);
+    expect(after.value.grants).toHaveLength(1);
+  });
+  it("rolls back first-account materialization if the immutable grant receipt cannot commit", async () => {
+    const p = await actor(),
+      t = await freshTarget(p);
+    const failing = new PostgresStaffAccounts({
+      ...typed,
+      transaction: (work) =>
+        typed.transaction((tx) =>
+          work({
+            query: <TRow extends SqlRow>(statement: SqlStatement) => {
+              if (
+                statement.text.includes(
+                  "INSERT INTO platform_staff_account_actions",
+                )
+              )
+                throw Error("Synthetic audit failure");
+              return tx.query<TRow>(statement);
+            },
+          }),
+        ),
+    });
+    await expect(
+      failing.act(
+        p,
+        t.organizationId,
+        grant(t.billingAccountId),
+        t.before.etag,
+        "fresh-audit-" + suffix(),
+      ),
+    ).rejects.toMatchObject({ code: "service_unavailable" });
+    await expectUnprovisioned(t.organizationId);
+    expect((await app.get(p, t.organizationId, "2")).etag).toBe(t.before.etag);
+  });
+  it("initializes a fresh workspace for its separately authorized trial without a subscription", async () => {
+    const p = await actor();
+    await typed.query(
+      sql(
+        "UPDATE platform_staff_authorizations SET permissions=ARRAY['accounts.read','trials.grant'] WHERE principal_id=$1",
+        [p.principalId],
+      ),
+    );
+    const t = await freshTarget(p),
+      key = "fresh-trial-" + suffix();
+    const input = {
+      contractVersion: 1 as const,
+      action: "grant-trial" as const,
+      confirmBillingAccountId: t.billingAccountId,
+      creditUnits: 100,
+      expiresInDays: 14,
+      reason: "Synthetic first evaluation",
+    };
+    const [one, two] = await Promise.all([
+      app.act(p, t.organizationId, input, t.before.etag, key),
+      app.act(p, t.organizationId, input, t.before.etag, key),
+    ]);
+    expect(one).toEqual(two);
+    const after = await app.get(p, t.organizationId);
+    expect(after.value.trial).toMatchObject({
+      state: "active",
+      creditUnits: "100",
+    });
+    expect(after.value.account.subscriptionState).toBe("not-subscribed");
+    expect(after.value.availableCreditUnits).toBe("100");
+    expect(after.value.history).toEqual([one]);
+    expect(
+      (
+        await typed.query(
+          sql(
+            "SELECT 1 FROM organization_subscription_projections WHERE organization_id=$1",
+            [t.organizationId],
+          ),
+        )
+      ).rows,
+    ).toEqual([]);
   });
   it("issues exactly once for concurrent retries with immutable audit and a visible expiring balance", async () => {
     const p = await actor(),

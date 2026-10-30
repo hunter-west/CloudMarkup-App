@@ -1,0 +1,92 @@
+name: Public application coverage diagnostics
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    name: Complete public application coverage
+    if:
+      github.repository == 'hunter-west/CloudMarkup-App' && github.ref ==
+      'refs/heads/main' && (github.event_name == 'schedule' || github.event_name
+      == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CI: "true"
+      GOTOOLCHAIN: local
+      TURBO_TELEMETRY_DISABLED: "1"
+      NODE_OPTIONS: --max-old-space-size=4096
+      CLOUDMARKUP_TEST_DATABASE_URL: postgresql://cloudmarkup:cloudmarkup-local-only@127.0.0.1:55432/cloudmarkup
+    services:
+      postgres:
+        image: postgres@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73
+        env:
+          POSTGRES_DB: cloudmarkup
+          POSTGRES_USER: cloudmarkup
+          POSTGRES_PASSWORD: cloudmarkup-local-only
+        ports:
+          - 127.0.0.1:55432:5432
+        options: >-
+          --health-cmd "pg_isready -U cloudmarkup -d cloudmarkup"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    steps:
+      - name: Check out the exact public revision
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - name: Install pinned pnpm
+        uses: pnpm/action-setup@d15e628ca66d93ee5f352c71671a7bc6a97af5c9
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version-file: .node-version
+      - name: Set up the pinned Go compiler
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
+        with:
+          go-version: 1.26.8
+          cache: false
+      - name: Install frozen public dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build and hash the local compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          compiler="$RUNNER_TEMP/cloudmarkup-test-compiler"
+          go -C services/iac-compiler build -trimpath -o "$compiler" ./cmd/cloudmarkup-iac
+          compiler_sha="$(sha256sum "$compiler" | cut -d ' ' -f 1)"
+          printf 'CLOUDMARKUP_TEST_COMPILER_EXECUTABLE=%s\n' "$compiler" >> "$GITHUB_ENV"
+          printf 'CLOUDMARKUP_TEST_COMPILER_SHA256=%s\n' "$compiler_sha" >> "$GITHUB_ENV"
+      - name: Run the complete public coverage profile
+        id: coverage
+        run: pnpm test:public:coverage
+      - name: Bind diagnostic identity and outcome
+        if: always()
+        env:
+          SOURCE_REVISION: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          COVERAGE_OUTCOME: ${{ steps.coverage.outcome }}
+        run: |
+          node --input-type=module -e 'import{mkdir,readFile,writeFile}from"node:fs/promises";import{createHash}from"node:crypto";let reportSha256=null;try{const bytes=await readFile("coverage/coverage-summary.json");if(!JSON.parse(bytes).total)throw Error("Coverage totals missing");reportSha256=createHash("sha256").update(bytes).digest("hex");}catch(error){if(process.env.COVERAGE_OUTCOME==="success")throw error;}await mkdir("coverage",{recursive:true});await writeFile("coverage/SOURCE.json",JSON.stringify({format:"cloudmarkup-public-coverage-v1",sourceRevision:process.env.SOURCE_REVISION,runId:process.env.RUN_ID,runAttempt:process.env.RUN_ATTEMPT,outcome:process.env.COVERAGE_OUTCOME,reportSha256})+"\n");'
+      - name: Retain run-bound coverage diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name:
+            public-coverage-${{ github.sha }}-${{ github.run_id }}-${{
+            github.run_attempt }}
+          path: |
+            coverage/SOURCE.json
+            coverage/coverage-summary.json
+          if-no-files-found: error
+          retention-days: 7

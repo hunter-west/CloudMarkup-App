@@ -30,7 +30,7 @@ describe("workspace navigation tour", () => {
       localStorage.getItem("cloudmarkup.workspace-tour.v1.actor_tour"),
     ).toBe("complete");
     view.unmount();
-    render(
+    const restartedView = render(
       <RouterProvider>
         <WorkspaceTour actorId="actor_tour" onRevealNavigation={reveal} />
       </RouterProvider>,
@@ -42,5 +42,32 @@ describe("workspace navigation tour", () => {
     expect(
       screen.getByRole("heading", { name: "Your workspace" }),
     ).toBeVisible();
+    restartedView.unmount();
+    const resumedView = render(
+      <RouterProvider>
+        <WorkspaceTour actorId="actor_tour" onRevealNavigation={reveal} />
+      </RouterProvider>,
+    );
+    expect(
+      screen.getByRole("heading", { name: "Your workspace" }),
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    resumedView.unmount();
+    render(
+      <RouterProvider>
+        <WorkspaceTour actorId="actor_tour" onRevealNavigation={reveal} />
+      </RouterProvider>,
+    );
+    expect(screen.getByRole("heading", { name: "Your account" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(
+      screen.getByRole("heading", { name: "Your workspace" }),
+    ).toBeVisible();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Dismiss workspace tour" }),
+    );
+    expect(
+      localStorage.getItem("cloudmarkup.workspace-tour.v1.actor_tour"),
+    ).toBe("complete");
   });
 });

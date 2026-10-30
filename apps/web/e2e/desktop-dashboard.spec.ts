@@ -222,6 +222,33 @@ test("keeps settings sections beside the primary navigation with history and key
     name: "Primary navigation",
     exact: true,
   });
+  const sidebar = page.getByRole("complementary", {
+    name: "Application navigation region",
+  });
+  async function expectMenuScrollsWithinSidebar() {
+    const navigation = sidebar.getByRole("navigation");
+    for (const region of [sidebar, navigation]) {
+      expect(
+        await region.evaluate(
+          (element) => element.scrollWidth === element.clientWidth,
+        ),
+      ).toBe(true);
+    }
+    const geometry = await sidebar.evaluate((element) => ({
+      height: element.clientHeight,
+      scrollHeight: element.scrollHeight,
+      top: element.getBoundingClientRect().top,
+      navigationHeight: element.querySelector("nav")?.clientHeight,
+      navigationScrollHeight: element.querySelector("nav")?.scrollHeight,
+    }));
+    expect(geometry.scrollHeight, JSON.stringify(geometry)).toBe(
+      geometry.height,
+    );
+    await expect(
+      sidebar.getByRole("button", { name: /^(Hide|Show) Navigation$/u }),
+    ).toBeInViewport();
+  }
+  await expectMenuScrollsWithinSidebar();
   await expect(
     entryNavigation.getByRole("link", { name: "Dashboard", exact: true }),
   ).toHaveAttribute("href", root + "/dashboard");
@@ -385,6 +412,12 @@ test("keeps settings sections beside the primary navigation with history and key
     name: "Collapsed application navigation",
   });
   await expect(collapsed).toBeVisible();
+  await expectMenuScrollsWithinSidebar();
+  for (const link of await collapsed.getByRole("link").all()) {
+    await link.focus();
+    await expect(link).toBeInViewport();
+  }
+  await expectMenuScrollsWithinSidebar();
   await collapsed.getByRole("link", { name: "Projects", exact: true }).click();
   await expect(
     panel.getByRole("heading", { name: "Projects", level: 1, exact: true }),

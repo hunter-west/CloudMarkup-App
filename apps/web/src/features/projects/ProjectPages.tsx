@@ -656,6 +656,9 @@ function AuthenticatedNewProjectPage({
       rememberProjectCreationProposal(projectId, {
         architectureDigest: result.architectureDigest,
         proposal: betaInfrastructureProposalSchema.parse(result.proposal),
+        ...(result.applicability
+          ? { applicability: result.applicability }
+          : {}),
         credits,
       });
       return projectId;

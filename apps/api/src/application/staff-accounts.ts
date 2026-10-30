@@ -1,8 +1,8 @@
 import type {
   StaffAccessV1,
   StaffAccountActionV1,
-  StaffAccountDetailV1,
-  StaffAccountListV1,
+  StaffAccountDetail,
+  StaffAccountList,
   StaffActionReceiptV1,
 } from "@cloudmarkup/api-contract";
 import type { PrincipalContext, VersionedResult } from "./ports.js";
@@ -11,12 +11,17 @@ export interface StaffAccountsApplication {
   access(principal: PrincipalContext): Promise<StaffAccessV1>;
   search(
     principal: PrincipalContext,
-    input: { readonly q: string; readonly cursor?: string | undefined },
-  ): Promise<StaffAccountListV1>;
+    input: {
+      readonly q: string;
+      readonly cursor?: string | undefined;
+    },
+    previewVersion?: "2",
+  ): Promise<StaffAccountList>;
   get(
     principal: PrincipalContext,
     organizationId: string,
-  ): Promise<VersionedResult<StaffAccountDetailV1>>;
+    previewVersion?: "2",
+  ): Promise<VersionedResult<StaffAccountDetail>>;
   act(
     principal: PrincipalContext,
     organizationId: string,

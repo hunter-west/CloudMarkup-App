@@ -6,6 +6,7 @@ import {
 } from "../testing/in-memory-adapters.js";
 import { ApplicationError } from "../application/errors.js";
 import type { StaffAccountsApplication } from "../application/staff-accounts.js";
+import { staffUnprovisionedAccountV2Schema } from "@cloudmarkup/api-contract";
 const now = "2026-10-01T00:00:00.000Z",
   actor = {
     principalId: "principal_staff",
@@ -64,6 +65,74 @@ function fixture(configured = true) {
 }
 const endpoint = "/v1/staff/accounts/org_target/actions";
 describe("platform staff HTTP boundary", () => {
+  it("retains v1 reads and serves an explicit v2 preview without issuing an action", async () => {
+    const f = fixture();
+    const legacy = await f.app.request("/v1/staff/accounts?q=Synthetic", {
+      headers: { authorization: headers.authorization },
+    });
+    expect(legacy.status).toBe(200);
+    expect(await legacy.json()).toMatchObject({
+      data: { contractVersion: 1, items: [] },
+    });
+    expect(f.port.search).toHaveBeenLastCalledWith(
+      expect.objectContaining(actor) as unknown,
+      { q: "Synthetic" },
+    );
+    const preview = staffUnprovisionedAccountV2Schema.parse({
+      contractVersion: 2,
+      organizationId: "org_target",
+      billingAccountId: "billing_target",
+      displayName: "Fresh synthetic",
+      kind: "personal",
+      organizationState: "active",
+      billingState: "unprovisioned",
+      subscriptionState: "not-subscribed",
+      planDisplayName: null,
+      expensiveOperationsEnabled: false,
+      version: 0,
+      organizationVersion: 1,
+    });
+    f.port.search.mockResolvedValue({ contractVersion: 2, items: [preview] });
+    f.port.get.mockResolvedValue({
+      value: {
+        contractVersion: 2,
+        account: preview,
+        availableCreditUnits: "0",
+        reservedCreditUnits: "0",
+        grants: [],
+        history: [],
+      },
+      etag: '"staff-account:billing_target:unprovisioned:1"',
+    });
+    const list = await f.app.request("/v1/staff/workspaces?q=Fresh", {
+      headers: { authorization: headers.authorization },
+    });
+    expect(list.status).toBe(200);
+    expect(await list.json()).toMatchObject({
+      data: { contractVersion: 2, items: [preview] },
+    });
+    expect(f.port.search).toHaveBeenLastCalledWith(
+      expect.objectContaining(actor) as unknown,
+      { q: "Fresh" },
+      "2",
+    );
+    const detail = await f.app.request("/v1/staff/workspaces/org_target", {
+      headers: { authorization: headers.authorization },
+    });
+    expect(detail.status).toBe(200);
+    expect(detail.headers.get("etag")).toBe(
+      '"staff-account:billing_target:unprovisioned:1"',
+    );
+    expect(await detail.json()).toMatchObject({
+      data: { contractVersion: 2, availableCreditUnits: "0", account: preview },
+    });
+    expect(f.port.get).toHaveBeenLastCalledWith(
+      expect.objectContaining(actor) as unknown,
+      "org_target",
+      "2",
+    );
+    expect(f.port.act).not.toHaveBeenCalled();
+  });
   it("binds commands to the verified actor, exact target, precondition and stable retry key", async () => {
     const f = fixture();
     const r = await f.app.request(endpoint, {
@@ -133,6 +202,30 @@ describe("platform staff HTTP boundary", () => {
   });
   it("requires authentication and preserves service denial without leaking accounts", async () => {
     const f = fixture();
+    for (const path of [
+      "/v1/staff/workspaces?q=Synthetic",
+      "/v1/staff/workspaces/org_target",
+    ]) {
+      expect((await f.app.request(path)).status).toBe(401);
+    }
+    f.port.search.mockRejectedValue(
+      new ApplicationError(
+        "access_denied",
+        "Platform staff access is required.",
+      ),
+    );
+    f.port.get.mockRejectedValue(
+      new ApplicationError(
+        "access_denied",
+        "Platform staff access is required.",
+      ),
+    );
+    for (const path of [
+      "/v1/staff/workspaces?q=Synthetic",
+      "/v1/staff/workspaces/org_target",
+    ]) {
+      expect((await f.app.request(path, { headers })).status).toBe(403);
+    }
     expect(
       (
         await f.app.request(endpoint, {
@@ -182,6 +275,10 @@ describe("platform staff HTTP boundary", () => {
     "/v1/staff/access?role=admin",
     "/v1/staff/accounts?q=one&q=two",
     "/v1/staff/accounts?q=name&principalId=other",
+    "/v1/staff/accounts/org_target?previewVersion=2",
+    "/v1/staff/workspaces?q=one&q=two",
+    "/v1/staff/workspaces?q=name&principalId=other",
+    "/v1/staff/workspaces/org_target?principalId=other",
   ])("rejects selectors outside the public contract %s", async (path) => {
     const f = fixture();
     expect((await f.app.request(path, { headers })).status).toBe(400);

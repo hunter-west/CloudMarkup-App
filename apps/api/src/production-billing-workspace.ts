@@ -1,5 +1,6 @@
 import { createProductionCreditTopUps } from "./production-credit-top-ups.js";
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
+import { billingAccountIdForOrganization } from "./adapters/persistence/billing-account-identity.js";
 
 import {
   billingWorkspaceV1Schema,
@@ -259,10 +260,7 @@ export function createProductionBillingWorkspace(options: {
           `INSERT INTO organization_billing_accounts (billing_account_id, organization_id)
          VALUES ($1, $2) ON CONFLICT (organization_id) DO NOTHING`,
           [
-            "billing_" +
-              createHash("sha256")
-                .update("billing-account-v1\u0000" + database.organizationId)
-                .digest("hex"),
+            billingAccountIdForOrganization(database.organizationId),
             database.organizationId,
           ],
         ),

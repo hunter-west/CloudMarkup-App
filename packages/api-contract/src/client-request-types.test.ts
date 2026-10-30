@@ -1,5 +1,9 @@
 import { it, expectTypeOf } from "vitest";
 import type { ApiRequestV1, ApiResponseV1 } from "./client.js";
+import type {
+  StaffAccountDetailV1,
+  StaffAccountListV1,
+} from "./staff-accounts.js";
 it("keeps required fields and operation unions correlated", () => {
   expectTypeOf<ApiRequestV1<"account.authenticator.start">>().toExtend<{
     headers: { "x-cloudmarkup-account": string };
@@ -18,6 +22,18 @@ it("keeps required fields and operation unions correlated", () => {
       ? true
       : false
   >().toEqualTypeOf<false>();
+  expectTypeOf<
+    ApiRequestV1<"staff.accounts.get">["query"]
+  >().toEqualTypeOf<undefined>();
+  expectTypeOf<{ path: { organizationId: string } }>().toExtend<
+    ApiRequestV1<"staff.accounts.get">
+  >();
+  expectTypeOf<
+    ApiResponseV1<"staff.accounts.get">["data"]
+  >().toEqualTypeOf<StaffAccountDetailV1>();
+  expectTypeOf<
+    ApiResponseV1<"staff.accounts.list">["data"]
+  >().toEqualTypeOf<StaffAccountListV1>();
 });
 
 it("requires a repository discovery body and project path while preserving ID coercion", () => {

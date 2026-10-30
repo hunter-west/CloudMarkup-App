@@ -1005,117 +1005,150 @@ test("draft cost guards preserve ready events and the dependency-free failing ad
     "toJSON(github.event.pull_request.draft) == 'false'";
   assert.throws(() => assertPullRequestQualityGate(skippedGate, "ci.yml"));
   const coercedState = structuredClone(workflow);
-  coercedState.jobs.gate.steps[1].env.PULL_REQUEST_DRAFT = "false";
+  coercedState.jobs.gate.steps[0].env.DRAFT = "false";
   assert.throws(() => assertPullRequestQualityGate(coercedState, "ci.yml"));
+  const coercedResult = structuredClone(workflow);
+  coercedResult.jobs.gate.steps[0].env.VERIFICATION = "success";
+  assert.throws(() => assertPullRequestQualityGate(coercedResult, "ci.yml"));
 
   assert.equal(
-    workflow.jobs.gate.steps[1].run,
-    "node scripts/ci-change-scope.mjs gate",
+    workflow.jobs.gate.steps[0].run,
+    'test "$DRAFT" = "false"\ntest "$VERIFICATION" = "success"\n',
   );
   assert.equal(
-    workflow.jobs.gate.steps
-      .slice(0, 2)
-      .some((step) => /pnpm|npm install/u.test(step.run ?? "")),
+    workflow.jobs.gate.steps.some(
+      (step) => step.uses || /pnpm|npm install/u.test(step.run ?? ""),
+    ),
     false,
   );
 });
 
-test("quality build reuse rejects cross-run, skipped and unordered cache admission", async () => {
-  const { readFileSync } = await import("node:fs");
-  const { parse } = await import("yaml");
-  const { assertPullRequestQualityGate } =
-    await import("./validate-workflows.mjs");
-  const workflow = parse(readFileSync(".github/workflows/ci.yml", "utf8"));
-  assert.doesNotThrow(() => assertPullRequestQualityGate(workflow, "ci.yml"));
+test("release build provenance rejects cross-run, skipped and unordered artifact admission", async () => {
+  const { parse, stringify } = await import("yaml");
+  const {
+    assertPublishedApplicationChecks,
+    validateBetaDeploymentWorkflowText,
+  } = await import("./beta-deployment-workflow-policy.mjs");
+  const source = parse(readFileSync(".github/workflows/public-ci.yml", "utf8"));
+  const scripts = JSON.parse(
+    readFileSync(
+      ".cache/application-source-intake/source/package.json",
+      "utf8",
+    ),
+  ).scripts;
+  const diagnostics = parse(
+    readFileSync(".github/workflows/public-diagnostics.yml", "utf8"),
+  );
+  const operator = (workflow) =>
+    workflow.jobs.verify.steps.find(
+      (step) => step.run === "pnpm local:test && pnpm test:self-host:tooling",
+    );
+  assert.doesNotThrow(() =>
+    assertPublishedApplicationChecks(source, scripts, diagnostics),
+  );
+  // Operator coverage now runs in public CI, before its successful exact-source
+  // run may be admitted privately; retain omission, skip and partial-run refusal.
+  for (const mutate of [
+    (workflow) => {
+      const steps = workflow.jobs.verify.steps;
+      steps.splice(steps.indexOf(operator(workflow)), 1);
+    },
+    (workflow) => {
+      operator(workflow).if = "false";
+    },
+    (workflow) => {
+      operator(workflow).run = "node --test scripts/self-host/backup.test.mjs";
+    },
+  ]) {
+    const altered = structuredClone(source);
+    mutate(altered);
+    assert.throws(() =>
+      assertPublishedApplicationChecks(altered, scripts, diagnostics),
+    );
+  }
+
+  const workflow = parse(
+    readFileSync(".github/workflows/deploy-development.yml", "utf8"),
+  );
+  const validate = (value) =>
+    validateBetaDeploymentWorkflowText(stringify(value));
+  assert.deepEqual(validate(workflow), []);
+  const build = (job) => job.steps.find((step) => step.run === "pnpm build");
   const restore = (job) =>
-    job.steps.find(
-      (step) => step.name === "Restore only this run's build cache",
+    job.steps.find((step) =>
+      String(step.uses ?? "").startsWith("actions/download-artifact@"),
     );
-  const materialize = (job) =>
+  const admission = (job) =>
     job.steps.find(
-      (step) => step.name === "Materialize this run's production build outputs",
+      (step) => step.name === "Admit the exact commit-bound bundle",
     );
+  // Build fresh after source admission, then deploy only this run's bound bundle.
+  // Keep the former build/cache mutation boundaries against their current owners.
   const mutations = [
-    (job) => {
-      job.steps.splice(
-        job.steps.findIndex(
-          (step) => step.name === "Verify affected self-host operator tooling",
-        ),
-        1,
-      );
+    ({ prepare }) => {
+      prepare.steps.splice(3, 0, structuredClone(build(prepare)));
     },
-    (job) => {
-      job.steps.find(
-        (step) => step.name === "Verify affected self-host operator tooling",
-      ).if = "false";
+    ({ prepare }) => {
+      prepare.steps.splice(prepare.steps.indexOf(build(prepare)), 1);
     },
-    (job) => {
-      job.steps.find(
-        (step) => step.name === "Verify affected self-host operator tooling",
-      ).run = "node --test scripts/self-host/backup.test.mjs";
+    ({ prepare }) => {
+      build(prepare).if = "false";
     },
-    (job) => {
-      job.steps.splice(0, 0, structuredClone(materialize(job)));
+    ({ prepare }) => {
+      build(prepare)["continue-on-error"] = true;
     },
-    (job) => {
-      job.steps.splice(job.steps.indexOf(materialize(job)), 1);
-    },
-    (job) => {
-      materialize(job).if = "false";
-    },
-    (job) => {
-      materialize(job)["continue-on-error"] = true;
-    },
-    (job) => {
-      materialize(job).run =
+    ({ prepare }) => {
+      build(prepare).run =
         "pnpm exec turbo run build --filter='@cloudmarkup/web^...'";
     },
-    (job) => {
-      const index = job.steps.indexOf(materialize(job));
-      [job.steps[index], job.steps[index + 1]] = [
-        job.steps[index + 1],
-        job.steps[index],
+    ({ prepare }) => {
+      const index = prepare.steps.indexOf(build(prepare));
+      [prepare.steps[index], prepare.steps[index + 1]] = [
+        prepare.steps[index + 1],
+        prepare.steps[index],
       ];
     },
-    (job) => {
-      job.steps.splice(
-        job.steps.indexOf(restore(job)),
+    ({ deploy }) => {
+      deploy.steps.splice(
+        deploy.steps.indexOf(restore(deploy)),
         0,
-        structuredClone(restore(job)),
+        structuredClone(restore(deploy)),
       );
     },
-    (job) => {
-      job.needs = "changes";
+    ({ deploy }) => {
+      deploy.needs = "changes";
     },
-    (job) => {
-      restore(job).with["run-id"] = 123;
+    ({ deploy }) => {
+      restore(deploy).with["run-id"] = 123;
     },
-    (job) => {
-      restore(job).with.name = "previous-success";
+    ({ deploy }) => {
+      restore(deploy).with.name = "previous-success";
     },
-    (job) => {
-      restore(job).with.path = "dist/";
+    ({ deploy }) => {
+      restore(deploy).with.path = "dist/";
     },
-    (job) => {
-      restore(job).if = "false";
+    ({ deploy }) => {
+      restore(deploy).if = "false";
     },
-    (job) => {
-      restore(job)["continue-on-error"] = true;
+    ({ deploy }) => {
+      restore(deploy)["continue-on-error"] = true;
     },
-    (job) => {
-      job.steps.splice(job.steps.indexOf(restore(job)), 1);
+    ({ deploy }) => {
+      deploy.steps.splice(deploy.steps.indexOf(restore(deploy)), 1);
     },
-    (job) => {
-      const index = job.steps.indexOf(restore(job));
-      [job.steps[index], job.steps[index + 1]] = [
-        job.steps[index + 1],
-        job.steps[index],
-      ];
+    ({ deploy }) => {
+      const step = restore(deploy);
+      deploy.steps.splice(deploy.steps.indexOf(step), 1);
+      deploy.steps.splice(deploy.steps.indexOf(admission(deploy)) + 1, 0, step);
     },
   ];
-  for (const mutate of mutations) {
+  for (const [index, mutate] of mutations.entries()) {
     const altered = structuredClone(workflow);
-    mutate(altered.jobs.quality);
-    assert.throws(() => assertPullRequestQualityGate(altered, "ci.yml"));
+    mutate(altered.jobs);
+    assert.notDeepEqual(
+      validate(altered),
+      [],
+      `release provenance mutation ${index}`,
+    );
   }
 });

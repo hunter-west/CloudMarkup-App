@@ -1,7 +1,9 @@
 import {
   staffAccessResponseV1Schema,
+  staffAccountListResponseSchema,
   staffAccountListResponseV1Schema,
   staffAccountSearchV1Schema,
+  staffAccountDetailResponseSchema,
   staffAccountDetailResponseV1Schema,
   staffAccountActionV1Schema,
   staffActionReceiptResponseV1Schema,
@@ -58,12 +60,10 @@ export function registerStaffAccountRoutes(
   };
   const query = (context: ApiContext, search = false) => {
     const params = new URL(context.req.url).searchParams;
+    const allowed = search ? ["q", "cursor"] : [];
     if (
       [...params.keys()].some(
-        (key) =>
-          !search ||
-          !["q", "cursor"].includes(key) ||
-          params.getAll(key).length !== 1,
+        (key) => !allowed.includes(key) || params.getAll(key).length !== 1,
       )
     )
       throw new ApplicationError(
@@ -81,14 +81,10 @@ export function registerStaffAccountRoutes(
   });
   app.get("/v1/staff/accounts", async (context) => {
     query(context, true);
+    const input = parseQuery(context, staffAccountSearchV1Schema);
     return validatedJsonResponse(
       staffAccountListResponseV1Schema,
-      dataEnvelope(
-        await service().search(
-          context.get("principal"),
-          parseQuery(context, staffAccountSearchV1Schema),
-        ),
-      ),
+      dataEnvelope(await service().search(context.get("principal"), input)),
       200,
     );
   });
@@ -100,6 +96,31 @@ export function registerStaffAccountRoutes(
     );
     return validatedJsonResponse(
       staffAccountDetailResponseV1Schema,
+      dataEnvelope(result.value),
+      200,
+      { ETag: result.etag },
+    );
+  });
+  app.get("/v1/staff/workspaces", async (context) => {
+    query(context, true);
+    const input = parseQuery(context, staffAccountSearchV1Schema);
+    return validatedJsonResponse(
+      staffAccountListResponseSchema,
+      dataEnvelope(
+        await service().search(context.get("principal"), input, "2"),
+      ),
+      200,
+    );
+  });
+  app.get("/v1/staff/workspaces/:organizationId", async (context) => {
+    query(context);
+    const result = await service().get(
+      context.get("principal"),
+      context.req.param("organizationId"),
+      "2",
+    );
+    return validatedJsonResponse(
+      staffAccountDetailResponseSchema,
       dataEnvelope(result.value),
       200,
       { ETag: result.etag },

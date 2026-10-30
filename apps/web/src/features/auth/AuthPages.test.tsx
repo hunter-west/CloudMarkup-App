@@ -10,7 +10,10 @@ import {
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RouterProvider } from "../../routing/index.js";
-import { CloudMarkupQueryProvider } from "../../api/index.js";
+import {
+  CloudMarkupQueryProvider,
+  useOptionalCloudMarkupQueryRuntime,
+} from "../../api/index.js";
 import {
   AuthCallbackPage,
   SignInPage,
@@ -20,6 +23,15 @@ import type {
   CognitoBrowserAuthSession,
   ParsedCognitoCallback,
 } from "./cognito-browser-auth.js";
+
+function ExpireSessionFixture() {
+  const runtime = useOptionalCloudMarkupQueryRuntime();
+  return (
+    <button type="button" onClick={runtime?.expireSession}>
+      Expire fixture session
+    </button>
+  );
+}
 
 describe("browser authentication pages", () => {
   beforeEach(() => {
@@ -84,6 +96,71 @@ describe("browser authentication pages", () => {
       expect(window.location.pathname).toBe(path);
     });
     expect(startSignIn).toHaveBeenCalledOnce();
+  });
+
+  it("keeps an explicit sign-in active when an earlier restored-session landing arrives", async () => {
+    let resolveLanding: (value: unknown) => void = () => {
+      throw Error("Uninitialized landing");
+    };
+    const landing = new Promise<unknown>((resolve) => {
+      resolveLanding = resolve;
+    });
+    const request = vi
+      .fn()
+      .mockReturnValueOnce(landing)
+      .mockResolvedValue({
+        data: { organizationContexts: [{ organizationId: "current-account" }] },
+      });
+    const client = { request } as unknown as CloudMarkupClient;
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    let finishSignIn: () => void = () => {
+      throw Error("Uninitialized sign-in");
+    };
+    const signIn = new Promise<void>((resolve) => {
+      finishSignIn = resolve;
+    });
+    const startSignIn = vi
+      .fn<(signal: AbortSignal) => Promise<void>>()
+      .mockReturnValue(signIn);
+    render(
+      <CloudMarkupQueryProvider client={client} queryClient={queryClient}>
+        <RouterProvider>
+          <PublicEntrySessionBoundary
+            development={false}
+            readSession={() => Promise.resolve("verified-session")}
+          >
+            <SignInPage development={false} startSignIn={startSignIn} />
+          </PublicEntrySessionBoundary>
+        </RouterProvider>
+      </CloudMarkupQueryProvider>,
+    );
+    await waitFor(() => {
+      expect(request).toHaveBeenCalledExactlyOnceWith("principal.get", {});
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Sign in securely" }));
+    await act(async () => {
+      resolveLanding({
+        data: {
+          organizationContexts: [{ organizationId: "previous-account" }],
+        },
+      });
+      await landing;
+    });
+    expect(window.location.pathname).toBe("/sign-in");
+    expect(
+      screen.getByRole("button", { name: "Cancel sign-in" }),
+    ).toBeVisible();
+    expect(startSignIn.mock.calls[0]?.[0].aborted).toBe(false);
+    await act(async () => {
+      finishSignIn();
+      await signIn;
+    });
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(window.location.pathname).toBe(
+      "/organizations/current-account/dashboard",
+    );
   });
 
   it("starts production Cognito sign-in and navigates client-side after success", async () => {
@@ -283,37 +360,79 @@ describe("browser authentication pages", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("exchanges a matching direct callback once before client-side navigation", async () => {
-    const completeCallback = vi.fn().mockResolvedValue(undefined);
-    const authSession = {
-      completeCallback,
-      hasPendingAuthorization: vi.fn(() => true),
-    } as unknown as CognitoBrowserAuthSession;
-    const state = "a".repeat(43);
-    const relayCallback = vi
-      .fn<(callback: ParsedCognitoCallback) => Promise<void>>()
-      .mockResolvedValue(undefined);
-    window.history.replaceState(
-      null,
-      "",
-      `/auth/callback?code=authorization-code&state=${state}`,
-    );
+  it.each(["stay", "leave"])(
+    "exchanges an expired-session direct callback once and respects %s during the landing lookup",
+    async (action) => {
+      const completeCallback = vi.fn().mockResolvedValue(undefined);
+      const authSession = {
+        completeCallback,
+        hasPendingAuthorization: vi.fn(
+          () => completeCallback.mock.calls.length === 0,
+        ),
+      } as unknown as CognitoBrowserAuthSession;
+      const state = "a".repeat(43);
+      const relayCallback = vi
+        .fn<(callback: ParsedCognitoCallback) => Promise<void>>()
+        .mockRejectedValue(new Error("No original callback tab is available."));
+      window.history.replaceState(
+        null,
+        "",
+        `/auth/callback?code=authorization-code&state=${state}`,
+      );
 
-    render(
-      <RouterProvider>
-        <AuthCallbackPage
-          authSession={authSession}
-          development={false}
-          relayCallback={relayCallback}
-          search={`?code=authorization-code&state=${state}`}
-        />
-      </RouterProvider>,
-    );
-
-    await waitFor(() => {
-      expect(window.location.pathname).toBe("/settings/profile");
-    });
-    expect(completeCallback).toHaveBeenCalledOnce();
-    expect(relayCallback).not.toHaveBeenCalled();
-  });
+      let resolveLanding: (value: unknown) => void = () => {
+        throw Error("Uninitialized landing");
+      };
+      const landing = new Promise<unknown>((resolve) => {
+        resolveLanding = resolve;
+      });
+      const request = vi.fn().mockReturnValue(landing);
+      const client = { request } as unknown as CloudMarkupClient;
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
+      const view = render(
+        <CloudMarkupQueryProvider client={client} queryClient={queryClient}>
+          <ExpireSessionFixture />
+        </CloudMarkupQueryProvider>,
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: "Expire fixture session" }),
+      );
+      view.rerender(
+        <CloudMarkupQueryProvider client={client} queryClient={queryClient}>
+          <RouterProvider>
+            <AuthCallbackPage
+              authSession={authSession}
+              development={false}
+              relayCallback={relayCallback}
+              search={`?code=authorization-code&state=${state}`}
+            />
+          </RouterProvider>
+        </CloudMarkupQueryProvider>,
+      );
+      await waitFor(() => {
+        expect(request).toHaveBeenCalledExactlyOnceWith("principal.get", {});
+      });
+      if (action === "leave") {
+        view.unmount();
+        window.history.replaceState(null, "", "/login");
+      }
+      await act(async () => {
+        resolveLanding({
+          data: {
+            organizationContexts: [{ organizationId: "verified-workspace" }],
+          },
+        });
+        await landing;
+      });
+      expect(window.location.pathname).toBe(
+        action === "leave"
+          ? "/login"
+          : "/organizations/verified-workspace/dashboard",
+      );
+      expect(completeCallback).toHaveBeenCalledOnce();
+      expect(relayCallback).not.toHaveBeenCalled();
+    },
+  );
 });

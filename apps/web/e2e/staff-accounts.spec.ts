@@ -56,9 +56,9 @@ for (const [theme, trial] of [
               ...(trial ? ["trials.grant", "trials.revoke"] : []),
             ],
           };
-        else if (path === "/staff/accounts")
+        else if (path === "/staff/workspaces")
           data = { contractVersion: 1, items: [account] };
-        else if (path === "/staff/accounts/org_test_support") {
+        else if (path === "/staff/workspaces/org_test_support") {
           data = {
             contractVersion: 1,
             account,
