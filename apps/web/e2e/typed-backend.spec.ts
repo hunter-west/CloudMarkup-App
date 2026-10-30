@@ -576,7 +576,7 @@ for (const width of [1440, 390]) {
     await (
       await openNavigation()
     )
-      .getByRole("link", { name: "Organizations" })
+      .getByRole("link", { name: "Personal & organizations" })
       .press("Enter");
     await expect(
       page.getByRole("heading", { level: 1, name: "Workspaces" }),
@@ -628,7 +628,7 @@ for (const width of [1440, 390]) {
     await preferencesLink.scrollIntoViewIfNeeded();
     await expect(preferencesLink).toBeInViewport({ ratio: 1 });
     await settingsNavigation
-      .getByRole("link", { name: "Organizations", exact: true })
+      .getByRole("link", { name: "Personal & organizations", exact: true })
       .press("Enter");
     await page.getByRole("link", { name: "Open dashboard" }).press("Enter");
     const navigation = await openNavigation();

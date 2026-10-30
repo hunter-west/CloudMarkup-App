@@ -168,16 +168,32 @@ loading shell.
 
 ### Organization navigation
 
-Navigation groups are ordered **Workspace** (Dashboard, Projects, Templates),
-**Account** (Profile, Preferences, Personal security), and **Organization**
-(Organizations, Usage, Plans & billing, Organization settings). Billing appears
-only when the actor may view billing context; its management actions
-additionally require the accepted owner-only rule. Hiding an unauthorized
-navigation item is not the authorization control.
+Navigation groups are ordered **Project work** (Dashboard, Projects, Templates),
+the selected **Personal workspace** or **Organization** (Usage, Plans & billing,
+and authorized organization settings), then **Personal account** (Profile,
+Personal security, Preferences, Personal integrations and Invitations).
+**Personal & organizations** opens the directory containing both personal and
+organization destinations. The selected scope's name accompanies its settings;
+an account page with only a remembered selector uses a neutral **Selected
+workspace** label rather than inferring ownership. Billing appears only when the
+actor may view billing context; its management actions additionally require the
+existing billing-management permissions. Hiding an unauthorized navigation item
+is not the authorization control.
 
 Settings navigation exposes only implemented and authorized sections. A deep
 link to another section still receives a server-side permission check and a safe
 denied response.
+
+The profile badge counts new tab-local notifications, rather than retained
+history. Opening the profile menu acknowledges those existing items; their
+unread count remains beside Notifications until the history is opened. Opening
+Notifications marks its existing items read. A later arrival remains new and
+unread, with an explicit Mark all as read action available in an open history.
+Reading and toast dismissal never resolve errors, delete activity, or alter
+authoritative project, billing or security state. History and acknowledgements
+survive route/view changes within the current presentation session. They are
+memory-only: reloading, ending the session or opening another tab starts an
+independent history; no browser-storage or cross-session read sync is implied.
 
 ### Project navigation
 
