@@ -1040,6 +1040,47 @@ suite(
         solutionExportExecutionIdentity(running),
       );
       expect((await worker.scope()).principalId).toBe(f.principal.principalId);
+      const metadata = await worker.objectMetadata(
+        f.prepared.snapshot.objectId,
+      );
+      expect(metadata.scope.principalId).toBe(f.principal.principalId);
+      expect(metadata.row?.["object_id"]).toBe(f.prepared.snapshot.objectId);
+      expect(metadata.row?.["organization_id"]).toBe(f.record.organizationId);
+      const foreign = await fixture();
+      expect(
+        (await worker.objectMetadata(foreign.prepared.snapshot.objectId)).row,
+      ).toBeNull();
+      await database.query(
+        sql(
+          "UPDATE memberships SET lifecycle_status='suspended' WHERE membership_id=$1",
+          [f.membershipId],
+        ),
+      );
+      await expect(
+        worker.objectMetadata(f.prepared.snapshot.objectId),
+      ).rejects.toMatchObject({ code: "not_found" });
+      await database.query(
+        sql(
+          "UPDATE memberships SET lifecycle_status='active' WHERE membership_id=$1",
+          [f.membershipId],
+        ),
+      );
+      const cancelable = await foreign.startRoot();
+      const canceledWorker = new SolutionExportWorkerAuthority(
+        database,
+        solutionExportExecutionIdentity(cancelable),
+      );
+      await foreign.cancelRoot();
+      await expect(
+        canceledWorker.objectMetadata(foreign.prepared.snapshot.objectId),
+      ).rejects.toMatchObject({ code: "conflict" });
+      const expired = await expiredExecution();
+      await expect(
+        new SolutionExportWorkerAuthority(
+          database,
+          expired.identity,
+        ).objectMetadata(expired.prepared.snapshot.objectId),
+      ).rejects.toMatchObject({ code: "conflict" });
       expect(await state(f.root.jobId)).toEqual(before);
       expect(before?.["attempts"]).toBe("1");
     });
