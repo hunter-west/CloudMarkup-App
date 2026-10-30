@@ -42,8 +42,8 @@ function setOnlineStatus(isOnline: boolean) {
   });
 }
 
-async function renderRoute(path: string, width = 1440) {
-  setViewport(width);
+async function renderRoute(path: string, width = 1440, height = 900) {
+  setViewport(width, height);
   window.history.replaceState(null, "", path);
   const result = render(<App />);
   await act(async () => {
@@ -1650,13 +1650,11 @@ describe("shell behavior and presentation modes", () => {
   });
 
   it("resets popup presentation state without changing architecture", async () => {
-    setViewport(1440, 600);
-    window.history.replaceState(
-      null,
-      "",
+    await renderRoute(
       "/organizations/local-org/projects/field-notes/editor",
+      1440,
+      600,
     );
-    render(<App />);
 
     const editor = document.querySelector<HTMLElement>(".architecture-editor");
     if (editor === null) {
@@ -1670,6 +1668,13 @@ describe("shell behavior and presentation modes", () => {
     const workspaceTools = screen.getByRole("navigation", {
       name: "Workspace tools",
     });
+    const applicationHeader = screen.getByRole("banner", {
+      name: "Application header",
+    });
+    const openAccount = within(applicationHeader).getByRole("button", {
+      name: "Open local mock account",
+    });
+    const hideCatalog = screen.getByRole("button", { name: "Hide Catalog" });
 
     fireEvent.click(
       within(workspaceTools).getByRole("button", { name: "Activity" }),
@@ -1683,12 +1688,13 @@ describe("shell behavior and presentation modes", () => {
     expect(
       await screen.findByRole("dialog", { name: "Learn inspector" }),
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Hide Catalog" }));
+    fireEvent.click(hideCatalog);
+    fireEvent.click(openAccount);
+    const account = await screen.findByRole("dialog", {
+      name: "Local mock account",
+    });
     fireEvent.click(
-      screen.getByRole("button", { name: "Open local mock account" }),
-    );
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Reset workspace layout" }),
+      within(account).getByRole("button", { name: "Reset workspace layout" }),
     );
 
     expect(
