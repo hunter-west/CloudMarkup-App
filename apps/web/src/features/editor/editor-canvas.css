@@ -1646,6 +1646,26 @@ button.architecture-tree__button:hover {
   transition: inset var(--cm-duration-standard) var(--cm-ease-standard);
 }
 
+.architecture-empty-message {
+  inline-size: fit-content;
+  max-inline-size: 24rem;
+  padding: var(--cm-space-3);
+  gap: var(--cm-space-2);
+}
+
+.architecture-empty-message .cm-state-panel__title {
+  font-size: var(--cm-font-size-2);
+}
+
+.architecture-empty-message .cm-state-panel__description {
+  font-size: var(--cm-font-size-1);
+}
+
+.architecture-empty-message .cm-state-panel__symbol {
+  block-size: 24px;
+  inline-size: 24px;
+}
+
 .architecture-live-region,
 .architecture-validation-live-region {
   position: absolute;

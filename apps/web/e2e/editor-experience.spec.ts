@@ -373,6 +373,7 @@ test.describe("Prompt 20A product experience", () => {
     expect(afterAdd.content).not.toBe(initialHashes.content);
 
     const inspector = page.locator("#selected-resource-inspector");
+    await inspector.getByText(/^Optional settings \(/u).click();
     const functionName = inspector.getByLabel(/^Function name/u);
     const preview = inspector.getByRole("button", { name: "Review changes" });
     await functionName.fill("invalid function name!");

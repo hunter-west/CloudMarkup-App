@@ -1174,7 +1174,8 @@ function ReadyArchitectureCanvas({
               {model.nodes.length === 0 ? (
                 <div className="architecture-empty-state architecture-empty-state--canvas">
                   <EmptyState
-                    description="Search the service catalog and use Add, keyboard activation, or drag a service here. No canvas element is inferred."
+                    className="architecture-empty-message"
+                    description="Add a service from Catalog or drag one here."
                     title="This architecture has no elements"
                   />
                 </div>

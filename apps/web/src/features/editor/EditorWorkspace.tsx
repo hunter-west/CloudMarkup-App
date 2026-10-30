@@ -389,6 +389,7 @@ function ReadyEditorMain({
             </p>
             {phoneModel.nodes.length === 0 && phoneModel.edges.length === 0 ? (
               <EmptyState
+                className="architecture-empty-message"
                 description="Open Catalog to add your first service."
                 title="This architecture has no elements"
               />

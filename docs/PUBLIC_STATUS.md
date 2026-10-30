@@ -58,6 +58,13 @@ placeholders remain follow-up work.
 
 ## Repository identities
 
+The
+[catalog/configuration audit](roadmap/plans/catalog-configuration-audit-20261030.md)
+records the 73-definition inventory, EC2 source and native-export evidence,
+required/optional/fixed form grouping, compact blank-canvas message and
+remaining support limitations. Integrated release admission and live
+verification remain separate from its local results.
+
 The public application source destination is
 [`hunter-west/CloudMarkup-App`](https://github.com/hunter-west/CloudMarkup-App).
 Its initial repository creation and publication are separate owner actions.
