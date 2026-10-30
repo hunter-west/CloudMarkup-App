@@ -187,18 +187,38 @@ describe("selected-resource configuration form model", () => {
       "tracingEnabled",
       "reservedConcurrency",
     ]);
-    expect(model.recommendedFields.map(({ field }) => field.property)).toEqual([
-      "functionName",
-      "runtime",
-      "timeoutSeconds",
-      "memoryMegabytes",
-    ]);
+    expect(model.recommendedFields).toEqual([]);
     expect(model.advancedFields.map(({ field }) => field.property)).toEqual([
+      "functionName",
       "architecture",
       "handler",
+      "timeoutSeconds",
+      "memoryMegabytes",
       "tracingEnabled",
       "reservedConcurrency",
     ]);
+    expect(model.fixedFields.map(({ field }) => field.property)).toEqual([
+      "runtime",
+    ]);
+    expect(model.fixedFields[0]?.editable).toBe(false);
+    const runtime = model.fixedFields[0]?.field;
+    if (runtime === undefined) throw new Error("Expected fixed runtime");
+    const optionalModel = createConfigurationFormModel(
+      document,
+      lambdaInspectorModel(
+        document,
+        extendLambdaCatalog({
+          ...runtime,
+          property: "optionalRuntime",
+          required: false,
+        }),
+      ),
+    );
+    expect(
+      optionalModel.advancedFields.find(
+        ({ field }) => field.property === "optionalRuntime",
+      )?.editable,
+    ).toBe(true);
     expect(model.initialValues).toMatchObject({
       functionName: "notes-api-handler",
       memoryMegabytes: "256",
@@ -206,6 +226,16 @@ describe("selected-resource configuration form model", () => {
       timeoutSeconds: "10",
       tracingEnabled: true,
     });
+    const converted = convertConfigurationFormValues(model, {
+      ...model.initialValues,
+      runtime: "not-a-supported-runtime",
+    });
+    expect(converted.success).toBe(true);
+    if (converted.success)
+      expect(converted.edits["runtime"]).toEqual({
+        kind: "string",
+        value: "nodejs24.x",
+      });
   });
 
   it("returns field-addressable catalog validation errors for invalid values", () => {

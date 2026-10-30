@@ -1748,7 +1748,9 @@ describe("manual architecture editor", () => {
         name: "This architecture has no elements",
       }),
     ).toBeVisible();
-    expect(screen.getByText(/no canvas element is inferred/iu)).toBeVisible();
+    expect(
+      screen.getByText("Add a service from Catalog or drag one here."),
+    ).toBeVisible();
   });
 
   it("keeps the explicit fixture warning in the phone review posture", async () => {
