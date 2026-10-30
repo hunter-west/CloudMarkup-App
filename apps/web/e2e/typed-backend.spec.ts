@@ -579,12 +579,12 @@ for (const width of [1440, 390]) {
       .getByRole("link", { name: "Personal & organizations" })
       .press("Enter");
     await expect(
-      page.getByRole("heading", { level: 1, name: "Workspaces" }),
+      page.getByRole("heading", { level: 1, name: "Personal & organizations" }),
     ).toBeFocused();
-    await expect(page).toHaveTitle("Workspaces");
+    await expect(page).toHaveTitle("Personal & organizations");
     await expect(
       page.getByText(
-        "Open your personal workspace or choose an organization to collaborate.",
+        "Use your personal workspace for private projects, or choose an organization for shared projects.",
       ),
     ).toBeVisible();
     await page.screenshot({
@@ -653,7 +653,7 @@ for (const width of [1440, 390]) {
     await (
       await openNavigation()
     )
-      .getByRole("link", { name: "Billing" })
+      .getByRole("link", { name: "Plans & billing" })
       .press("Enter");
     await expect(
       page.getByRole("group", { name: "Monthly plans" }),

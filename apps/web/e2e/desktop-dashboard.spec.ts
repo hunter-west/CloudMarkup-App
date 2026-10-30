@@ -284,7 +284,10 @@ test("keeps settings sections beside the primary navigation with history and key
   );
   await page.goto("/organizations");
   await expect(
-    page.getByRole("heading", { name: "Workspaces", exact: true }),
+    page.getByRole("heading", {
+      name: "Personal & organizations",
+      exact: true,
+    }),
   ).toBeVisible();
   const entryNavigation = page.getByRole("navigation", {
     name: "Primary navigation",
@@ -368,7 +371,7 @@ test("keeps settings sections beside the primary navigation with history and key
     throw new Error("Primary navigation is not visible.");
   for (const [label, path, title] of [
     ["Usage", root + "/usage", "Usage"],
-    ["Plans & billing", root + "/billing", "Billing"],
+    ["Plans & billing", root + "/billing", "Plans & billing"],
     [
       "Organization settings",
       root + "/settings/general",
@@ -391,7 +394,7 @@ test("keeps settings sections beside the primary navigation with history and key
       "/settings/integrations",
       "Personal integrations",
     ],
-    ["Personal & organizations", "/organizations", "Workspaces"],
+    ["Personal & organizations", "/organizations", "Personal & organizations"],
   ] as const) {
     const link = navigation.getByRole("link", { name: label, exact: true });
     await link.focus();
@@ -461,11 +464,17 @@ test("keeps settings sections beside the primary navigation with history and key
   }
   await page.goto("/organizations");
   await expect(
-    page.getByRole("heading", { name: "Workspaces", exact: true }),
+    page.getByRole("heading", {
+      name: "Personal & organizations",
+      exact: true,
+    }),
   ).toBeVisible();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Workspaces", exact: true }),
+    page.getByRole("heading", {
+      name: "Personal & organizations",
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
     navigation.getByRole("link", { name: "Dashboard", exact: true }),

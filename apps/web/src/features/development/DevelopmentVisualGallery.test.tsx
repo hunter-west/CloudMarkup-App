@@ -239,19 +239,6 @@ describe("DevelopmentVisualGallery", () => {
   });
 
   it("composes the development page from the public AWS catalog and approved registry", () => {
-    const unavailableArtworkServiceIds = new Set([
-      "aws.ec2.instance",
-      "aws.ecr.repository",
-      "aws.ecs.cluster",
-      "aws.ecs.service",
-      "aws.ecs.task-definition",
-      "aws.iam.instance-profile",
-      "aws.kms.key",
-      "aws.secretsmanager.secret",
-      "aws.wafv2.alb-association",
-      "aws.wafv2.web-acl",
-    ]);
-
     render(<CloudMarkupDevelopmentGallery />);
 
     const iconBearingServices = awsCatalogV1
@@ -270,24 +257,15 @@ describe("DevelopmentVisualGallery", () => {
       expect(heading).toBeInTheDocument();
       const sample = heading.closest("li");
       if (sample === null) throw new Error("Expected the catalog icon sample.");
-      if (unavailableArtworkServiceIds.has(service.id)) {
-        expect(within(sample).getByText("Icon unavailable")).toBeVisible();
-        expect(
-          within(sample).queryByText("Approved local icon"),
-        ).not.toBeInTheDocument();
-      } else {
-        expect(within(sample).getByText("Approved local icon")).toBeVisible();
-        expect(
-          within(sample).queryByText("Icon unavailable"),
-        ).not.toBeInTheDocument();
-      }
+      expect(within(sample).getByText("Approved local icon")).toBeVisible();
+      expect(
+        within(sample).queryByText("Icon unavailable"),
+      ).not.toBeInTheDocument();
     }
     expect(screen.getAllByText("Approved local icon")).toHaveLength(
-      iconBearingServices.length - unavailableArtworkServiceIds.size,
+      iconBearingServices.length,
     );
-    expect(screen.getAllByText("Icon unavailable")).toHaveLength(
-      unavailableArtworkServiceIds.size,
-    );
+    expect(screen.queryByText("Icon unavailable")).not.toBeInTheDocument();
     expect(screen.queryByText("Icon pending approval")).not.toBeInTheDocument();
     expect(
       screen.queryByText("Icon integrity check failed"),
