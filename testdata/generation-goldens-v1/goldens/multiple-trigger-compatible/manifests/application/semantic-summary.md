@@ -1,6 +1,6 @@
 # Application semantic summary: multiple-trigger-compatible
 
-- Artifact digest: `sha256:fbeced7889f6a1344bd1dbe638f60a6916e51a26d7e6bef7a1ca6ccd5f8d2796`
+- Artifact digest: `sha256:36cbb41608584889a063eb5be17212bbc61e92e6a15052dc8f7ad5f96280a596`
 - Coverage: `complete-supported-pattern`
 - Generated file records: 23
 - Build contracts: 1

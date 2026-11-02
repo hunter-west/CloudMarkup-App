@@ -12,11 +12,11 @@ This file is the authoritative owner evidence for the checked provider-icon mani
 
 ## Product-owner approval
 
-- recordId: "CC-AWS-ICONS-OWNER-APPROVAL-2026-10-06"
+- recordId: "CC-AWS-ICONS-OWNER-APPROVAL-2026-10-29"
 - reviewerName: "Hunter West"
 - reviewerRole: "Cloud Markup product owner"
 - reviewerRelationship: "Product owner states he is an AWS Partner"
-- approvalDate: "2026-10-06"
+- approvalDate: "2026-10-29"
 - approvedSurfaces: ["diagram-export","documentation","product-ui"]
 - trademarkUseAcknowledgment: "Product-owner approval for AWS service/resource identification only; not Cloud Markup branding, AWS endorsement, or outside-counsel advice."
 - accessibilityContract: "supplementary-icon-with-visible-name-v1"

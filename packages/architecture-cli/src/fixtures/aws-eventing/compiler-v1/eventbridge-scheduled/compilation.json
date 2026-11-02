@@ -18,8 +18,8 @@
       "architectureDocumentId": "document_event_eventbridge_scheduled",
       "architectureId": "architecture_event_eventbridge_scheduled",
       "architectureRevisionId": "revision_event_eventbridge_scheduled_1",
-      "architectureContentHash": "sha256:052ff90e3a79342310d26265e2f0fee7b76aa68427065a51da61dca8c5cc89cb",
-      "architectureDocumentHash": "sha256:2056172cc2d4dfcb40fb81f6b826317f9b74ec9a75457466e6d5964a5a27d099",
+      "architectureContentHash": "sha256:d1b6575e78a5f07cdee6d686ac6e8066e55059ba15cf98f75467c0c6ba9b855d",
+      "architectureDocumentHash": "sha256:5c475d40698f372aeaad01b79780ae7dbbe8eeca695e3b5d17969cc95edfb422",
       "architectureVisualHash": "sha256:326e24dc73b2d7925fbada77cb36cdff12821c0a0380ae4e0ec73d78a61298c3",
       "workloadContentHash": "sha256:24dce40638ef9fd36bdfcf09674a3ef79c6f13cc883786b8be5dc0e18895bf16",
       "solutionRevisionId": "solution_notes_revision_1",
@@ -28,7 +28,7 @@
       "catalog": {
         "id": "aws.cloudmarkup.notes-api-catalog",
         "version": "0.30.0",
-        "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94"
+        "digest": "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619"
       }
     },
     "resources": [
@@ -1488,8 +1488,8 @@
       "architectureDocumentId": "document_event_eventbridge_scheduled",
       "architectureId": "architecture_event_eventbridge_scheduled",
       "architectureRevisionId": "revision_event_eventbridge_scheduled_1",
-      "architectureContentHash": "sha256:052ff90e3a79342310d26265e2f0fee7b76aa68427065a51da61dca8c5cc89cb",
-      "architectureDocumentHash": "sha256:2056172cc2d4dfcb40fb81f6b826317f9b74ec9a75457466e6d5964a5a27d099",
+      "architectureContentHash": "sha256:d1b6575e78a5f07cdee6d686ac6e8066e55059ba15cf98f75467c0c6ba9b855d",
+      "architectureDocumentHash": "sha256:5c475d40698f372aeaad01b79780ae7dbbe8eeca695e3b5d17969cc95edfb422",
       "architectureVisualHash": "sha256:326e24dc73b2d7925fbada77cb36cdff12821c0a0380ae4e0ec73d78a61298c3",
       "workloadContentHash": "sha256:24dce40638ef9fd36bdfcf09674a3ef79c6f13cc883786b8be5dc0e18895bf16",
       "solutionRevisionId": "solution_notes_revision_1",
@@ -1498,7 +1498,7 @@
       "catalog": {
         "id": "aws.cloudmarkup.notes-api-catalog",
         "version": "0.30.0",
-        "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94"
+        "digest": "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619"
       }
     },
     "metadata": {
@@ -1607,8 +1607,8 @@
         "path": "infrastructure/README.md",
         "mediaType": "text/markdown",
         "ownership": "generated",
-        "content": "# Cloud Markup deterministic Terraform\n\nThis directory was generated from immutable Architecture and Workload contracts. It does not build application source, run Terraform, or deploy.\n\n## Compatibility\n\n- Compiler: `cloudmarkup.iac-compiler@1.2.1`\n- Catalog: `aws.cloudmarkup.notes-api-catalog@0.30.0` (`sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94`)\n- Target format: `1.0.0`\n- Terraform: `\u003e= 1.5.0, \u003c 2.0.0`\n- AWS provider: `hashicorp/aws` (`\u003e= 6.55.0, \u003c 7.0.0`)\n- Architecture revision: `revision_event_eventbridge_scheduled_1`\n- Solution Revision: `solution_notes_revision_1`\n\n## Application artifacts\n\n- `workload_event_eventbridge_scheduled` (complete-supported-pattern): deterministic-relative-package at `../application/artifacts/workload_event_eventbridge_scheduled/function.zip`.\n\nCopy `terraform.tfvars.example` to a separately protected input file and replace every placeholder. Never put credentials or secret values in committed Terraform files. Review the complete diff, initialize from an approved provider mirror, validate, plan, and deploy only in customer-owned CI/CD with customer approval.\n",
-        "digest": "sha256:53d498a7814189ad6af57093301a0566578210bc4d2515b3e11b7741b4f4235c"
+        "content": "# Cloud Markup deterministic Terraform\n\nThis directory was generated from immutable Architecture and Workload contracts. It does not build application source, run Terraform, or deploy.\n\n## Compatibility\n\n- Compiler: `cloudmarkup.iac-compiler@1.2.1`\n- Catalog: `aws.cloudmarkup.notes-api-catalog@0.30.0` (`sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619`)\n- Target format: `1.0.0`\n- Terraform: `\u003e= 1.5.0, \u003c 2.0.0`\n- AWS provider: `hashicorp/aws` (`\u003e= 6.55.0, \u003c 7.0.0`)\n- Architecture revision: `revision_event_eventbridge_scheduled_1`\n- Solution Revision: `solution_notes_revision_1`\n\n## Application artifacts\n\n- `workload_event_eventbridge_scheduled` (complete-supported-pattern): deterministic-relative-package at `../application/artifacts/workload_event_eventbridge_scheduled/function.zip`.\n\nCopy `terraform.tfvars.example` to a separately protected input file and replace every placeholder. Never put credentials or secret values in committed Terraform files. Review the complete diff, initialize from an approved provider mirror, validate, plan, and deploy only in customer-owned CI/CD with customer approval.\n",
+        "digest": "sha256:377e3b36cc53bdd361edace61eaad66a4795328140ae2a9c3c34fd0b62b9b458"
       }
     ],
     "applicationArtifacts": [
@@ -1714,7 +1714,7 @@
         }
       }
     ],
-    "digest": "sha256:83c6d08837e59544cec3c8bd9d0565493d87e090836103712c442debeba4d2d0"
+    "digest": "sha256:88adaf0788c8d8831b0f3b14e4aa5632e7d9781a529fa5c9e926c14cc2fed20a"
   },
   "diagnostics": [
     {

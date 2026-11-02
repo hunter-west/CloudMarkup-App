@@ -30,7 +30,10 @@ interface CatalogInput {
 }
 const catalog = JSON.parse(
   readFileSync(
-    new URL("../../provider-aws/src/compiled/catalog-v1.json", import.meta.url),
+    new URL(
+      "../../provider-aws/src/model-evaluation-source/catalog-73-v1.json",
+      import.meta.url,
+    ),
     "utf8",
   ),
 ) as CatalogInput;

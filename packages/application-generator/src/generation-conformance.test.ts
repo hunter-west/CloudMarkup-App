@@ -27,6 +27,7 @@ import {
   type ContractGoldenIdentity,
 } from "./contract-golden-paths.js";
 import {
+  createHttpNoContentFixture,
   createNotesGenerationRequest,
   type NotesRequestOptions,
 } from "./test-fixtures.js";
@@ -1112,22 +1113,48 @@ describe.skipIf(isRepositoryCoverage)(
     );
 
     it("refreshes the legacy source inventory only with the manifests update gate", async () => {
-      const result = generateApplication(createNotesGenerationRequest());
-      const projection = legacyGoldenProjection(result);
       const update = updateMode();
       if (update.update && update.category !== "manifests") {
         return;
       }
-      if (update.update && update.category === "manifests") {
-        await writeFile(
-          legacyGoldenPath,
-          `${JSON.stringify(projection, undefined, 2)}\n`,
-          "utf8",
+      const sources = [
+        [legacyGoldenPath, createNotesGenerationRequest()],
+        [
+          fileURLToPath(
+            new URL(
+              "../fixtures/golden/http-no-content-1.0-source.json",
+              import.meta.url,
+            ),
+          ),
+          createHttpNoContentFixture(),
+        ],
+        [
+          fileURLToPath(
+            new URL(
+              "../fixtures/golden/notes-identifier-1.1-source.json",
+              import.meta.url,
+            ),
+          ),
+          createNotesGenerationRequest({
+            identifierSafeGenerator: true,
+            entityContractId: "contracts.repair-seed.entity",
+            operations: ["create", "read", "update", "delete"],
+          }),
+        ],
+      ] as const;
+      for (const [sourcePath, request] of sources) {
+        const projection = legacyGoldenProjection(generateApplication(request));
+        if (update.update && update.category === "manifests") {
+          await writeFile(
+            sourcePath,
+            `${JSON.stringify(projection, undefined, 2)}\n`,
+            "utf8",
+          );
+        }
+        expect(projection).toEqual(
+          JSON.parse(await readFile(sourcePath, "utf8")) as unknown,
         );
       }
-      expect(projection).toEqual(
-        JSON.parse(await readFile(legacyGoldenPath, "utf8")) as unknown,
-      );
     }, 30_000);
   },
 );

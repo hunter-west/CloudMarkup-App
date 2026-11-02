@@ -973,7 +973,7 @@ describe("SelectedResourceInspector", () => {
     const guidedTabSize = inspectorTabList()
       .closest(".cm-tabs")
       ?.getAttribute("data-size");
-    const advancedSummary = screen.getByText(/^Advanced fields \(4\)/u, {
+    const advancedSummary = screen.getByText(/^Optional settings \(7\)/u, {
       selector: "summary",
     });
     const advanced = advancedSummary.closest("details");
@@ -1003,7 +1003,7 @@ describe("SelectedResourceInspector", () => {
       "notes-api-handler-edited",
     );
     const professionalAdvancedSummary = screen.getByText(
-      /^Advanced fields \(4\)/u,
+      /^Optional settings \(7\)/u,
       { selector: "summary" },
     );
     expect(professionalAdvancedSummary).toBe(advancedSummary);
@@ -1015,7 +1015,7 @@ describe("SelectedResourceInspector", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Guided" }));
     expect(
-      screen.getByText(/^Advanced fields \(4\)/u, {
+      screen.getByText(/^Optional settings \(7\)/u, {
         selector: "summary",
       }),
     ).toBe(advancedSummary);
@@ -1274,7 +1274,7 @@ describe("SelectedResourceInspector", () => {
     renderInspector();
     selectLambda();
     const advanced = screen
-      .getByText(/^Advanced fields \(4\)/u, { selector: "summary" })
+      .getByText(/^Optional settings \(7\)/u, { selector: "summary" })
       .closest("details");
     expect(advanced).not.toHaveAttribute("open");
 

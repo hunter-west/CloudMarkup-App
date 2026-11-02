@@ -73,7 +73,7 @@
       "buildContracts": [],
       "contractVersion": 1,
       "catalog": {
-        "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
+        "digest": "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619",
         "id": "aws.cloudmarkup.notes-api-catalog",
         "version": "0.30.0"
       },
@@ -87,9 +87,9 @@
       "kind": "cloudmarkup.application-source-manifest",
       "inputDigests": {
         "applicationContracts": "sha256:7df95bf4b42a5a32bdc2e6d72e9e3050b07bd653845b6ed3d9509f383f0bcd04",
-        "architectureDocument": "sha256:f7111e0c9df33cf3df9a3e72030a94fb328c2eec16836a1d069ca34afb2713cc",
-        "normalizedSolution": "sha256:86c3febc3efc43682ea076f22d41ac9400d4281eb7fee91b27d108aa55b24771",
-        "solutionRevision": "sha256:cd5645153724d1e4e8cd8a5d6bd79baadff979b9b3fae1cb4f5c017b39202f04",
+        "architectureDocument": "sha256:861a8575d701e3c34aa10cad4f239f38991a8d4f32280f0c03bcf087267485d2",
+        "normalizedSolution": "sha256:6c1e64a3aee11f0d06f7d2dbb6db4de89b65648017ff42cc38c19fee77f687a3",
+        "solutionRevision": "sha256:6590c3c1864cddbfce57f5dbfbf7482eaa7f67c362fae74fe13fbbc478e87412",
         "workloadBehavior": "sha256:408e29202608d59fe13bb3f1a7f9352de9d81b841559c1763d0af4f9ab59ba69"
       },
       "manifestPath": "application/manifest.json",
@@ -115,7 +115,7 @@
         "version": "1.0.0"
       }
     },
-    "sourceManifestDigest": "sha256:7f784e6dbe0e6502cc51c63ea8ea61fa3229ea8fe4caffbcd478debd1dcbfe94",
+    "sourceManifestDigest": "sha256:d34e7ad847f2a5e4e876abd6f49bf00ded62cf26d19ad39aa46b20584d845c53",
     "template": {
       "digest": "sha256:c7721961d935faa1e0c87b7356bc6d90112a02f3c7f716be33a648bf99740604",
       "id": "cloudmarkup.template.aws-lambda-notes-typescript",
@@ -139,5 +139,5 @@
       }
     ]
   },
-  "artifactDigest": "sha256:a2f4184e345cb6a1e140b373a9af88f4cb2b01157b0ce03b77adc54d7a25c4a8"
+  "artifactDigest": "sha256:0e5c722272d7eba0574edfc7f6f88bbe6420a5e78dbeb63ec59532bbcffa193d"
 }

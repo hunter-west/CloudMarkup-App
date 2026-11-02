@@ -73,11 +73,54 @@ for (const [theme, width] of [
     const trigger = page.getByRole("button", {
       name: "Open authenticated account",
     });
+    const checkNotifications = width === 320 || width === 1440;
+    if (checkNotifications) {
+      if (width === 320) {
+        await trigger.click();
+        await page
+          .getByRole("dialog", { name: "Authenticated account" })
+          .getByRole("link", { name: "Preferences", exact: true })
+          .click();
+        await expect(
+          page.getByRole("heading", {
+            name: "Experience preferences",
+            exact: true,
+          }),
+        ).toBeVisible();
+        await page
+          .getByRole("main")
+          .getByRole("button", { name: "Professional", exact: true })
+          .click();
+        await page
+          .getByRole("button", { name: "Open application navigation" })
+          .click();
+        await page
+          .getByRole("navigation", { name: "Primary navigation" })
+          .getByRole("link", { name: "Dashboard", exact: true })
+          .click();
+        await expect(
+          page.getByRole("heading", { name: "Dashboard", exact: true }),
+        ).toBeVisible();
+      } else {
+        await page
+          .getByRole("banner", { name: "Application header" })
+          .getByRole("button", { name: "Professional", exact: true })
+          .click();
+      }
+      await expect(trigger).toHaveAccessibleDescription("1 new notification");
+    }
     await trigger.click();
     const account = page.getByRole("dialog", {
       name: "Authenticated account",
     });
     await expect(account).toBeVisible();
+    if (checkNotifications) {
+      if (width === 1440)
+        await expect(trigger).not.toHaveAttribute("aria-describedby");
+      await expect(
+        account.getByRole("button", { name: "Notifications (1 unread)" }),
+      ).toBeVisible();
+    }
     const background = await account.evaluate(
       (element) => getComputedStyle(element).backgroundColor,
     );
@@ -152,6 +195,31 @@ for (const [theme, width] of [
     await page.keyboard.press("Escape");
     await expect(account).toBeHidden();
     await expect(trigger).toBeFocused();
+    if (checkNotifications) {
+      await expect(trigger).not.toHaveAttribute("aria-describedby");
+      await trigger.click();
+      await account
+        .getByRole("button", { name: "Notifications (1 unread)" })
+        .click();
+      const notifications = page.getByRole("dialog", {
+        name: "Notifications",
+        exact: true,
+      });
+      await expect(
+        notifications.getByRole("list", { name: "Notification history" }),
+      ).toContainText("Professional presentation enabled");
+      await expect(
+        notifications.getByText("Read", { exact: true }),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(trigger).toBeFocused();
+      await expect(trigger).not.toHaveAttribute("aria-describedby");
+      await trigger.click();
+      await expect(
+        account.getByRole("button", { name: "Notifications", exact: true }),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+    }
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
@@ -216,7 +284,10 @@ test("keeps settings sections beside the primary navigation with history and key
   );
   await page.goto("/organizations");
   await expect(
-    page.getByRole("heading", { name: "Workspaces", exact: true }),
+    page.getByRole("heading", {
+      name: "Personal & organizations",
+      exact: true,
+    }),
   ).toBeVisible();
   const entryNavigation = page.getByRole("navigation", {
     name: "Primary navigation",
@@ -300,7 +371,7 @@ test("keeps settings sections beside the primary navigation with history and key
     throw new Error("Primary navigation is not visible.");
   for (const [label, path, title] of [
     ["Usage", root + "/usage", "Usage"],
-    ["Plans & billing", root + "/billing", "Billing"],
+    ["Plans & billing", root + "/billing", "Plans & billing"],
     [
       "Organization settings",
       root + "/settings/general",
@@ -323,7 +394,7 @@ test("keeps settings sections beside the primary navigation with history and key
       "/settings/integrations",
       "Personal integrations",
     ],
-    ["Organizations", "/organizations", "Workspaces"],
+    ["Personal & organizations", "/organizations", "Personal & organizations"],
   ] as const) {
     const link = navigation.getByRole("link", { name: label, exact: true });
     await link.focus();
@@ -393,11 +464,17 @@ test("keeps settings sections beside the primary navigation with history and key
   }
   await page.goto("/organizations");
   await expect(
-    page.getByRole("heading", { name: "Workspaces", exact: true }),
+    page.getByRole("heading", {
+      name: "Personal & organizations",
+      exact: true,
+    }),
   ).toBeVisible();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Workspaces", exact: true }),
+    page.getByRole("heading", {
+      name: "Personal & organizations",
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
     navigation.getByRole("link", { name: "Dashboard", exact: true }),
@@ -507,21 +584,23 @@ for (const theme of ["light", "dark"]) {
         ".primary-navigation [data-navigation-group]",
       );
       await expect(groups.locator("h2")).toHaveText([
-        "Workspace",
-        "Account",
+        "Project work",
         "Organization",
+        "Personal account",
       ]);
-      const accountNavigation = groups.filter({
-        has: page.getByRole("heading", { name: "Workspace", exact: true }),
+      const workspaceNavigation = groups.filter({
+        has: page.getByRole("heading", { name: "Organization", exact: true }),
       });
       await expect(
-        accountNavigation.getByRole("link", { name: "Usage", exact: true }),
+        workspaceNavigation.getByRole("link", { name: "Usage", exact: true }),
       ).toHaveAttribute("href", root + "/usage");
       await expect(
-        accountNavigation.getByRole("link", { name: "Plans & billing" }),
+        workspaceNavigation.getByRole("link", { name: "Plans & billing" }),
       ).toHaveAttribute("href", root + "/billing");
       const tour = page.getByRole("complementary", { name: "Workspace tour" });
       await expect(tour).toBeVisible();
+      await expect(tour).toHaveAttribute("data-step", "workspace");
+      await expect(groups.first()).toHaveAttribute("data-tour-target", "true");
       await expect
         .poll(async () => {
           const target = await groups.first().boundingBox();
@@ -536,9 +615,32 @@ for (const theme of ["light", "dark"]) {
         "blur(4px) saturate(1.15)",
       );
       await tour.getByRole("button", { name: "Next", exact: true }).click();
-      await expect(groups.filter({ hasText: "Personal security" })).toHaveCSS(
-        "outline-width",
-        "4px",
+      await expect(tour).toHaveAttribute("data-step", "organization");
+      await expect(
+        tour.getByRole("heading", { name: "Your selected workspace" }),
+      ).toBeVisible();
+      await expect(workspaceNavigation).toHaveAttribute(
+        "data-tour-target",
+        "true",
+      );
+      await expect(workspaceNavigation).toHaveCSS("outline-width", "4px");
+      await expect(groups.first()).not.toHaveAttribute(
+        "data-tour-target",
+        "true",
+      );
+      await tour.getByRole("button", { name: "Next", exact: true }).click();
+      await expect(tour).toHaveAttribute("data-step", "account");
+      const personalNavigation = groups.filter({
+        hasText: "Personal security",
+      });
+      await expect(personalNavigation).toHaveAttribute(
+        "data-tour-target",
+        "true",
+      );
+      await expect(personalNavigation).toHaveCSS("outline-width", "4px");
+      await expect(workspaceNavigation).not.toHaveAttribute(
+        "data-tour-target",
+        "true",
       );
       await tour
         .getByRole("button", { name: "Dismiss workspace tour" })
@@ -1122,7 +1224,7 @@ for (const theme of ["light"] as const) {
       ).toHaveCount(0);
       await page
         .getByRole("navigation", { name: "Primary navigation" })
-        .getByRole("link", { name: "Organizations", exact: true })
+        .getByRole("link", { name: "Personal & organizations", exact: true })
         .click();
       const form = page.getByRole("region", { name: "Create an organization" });
       await form.getByLabel("Organization name").fill("Browser organization");

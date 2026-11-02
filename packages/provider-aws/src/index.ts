@@ -56,5 +56,6 @@ export {
 
 export {
   AWS_FROZEN_MODEL_CATALOG_BINDING_V1,
+  AWS_FROZEN_WAF_MODEL_CATALOG_BINDING_V1,
   resolveAwsModelCatalogV1,
 } from "./model-evaluation-catalog.js";

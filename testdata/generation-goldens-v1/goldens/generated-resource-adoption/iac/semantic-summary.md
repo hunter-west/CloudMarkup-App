@@ -1,6 +1,6 @@
 # Terraform semantic summary: generated-resource-adoption
 
-- Artifact digest: `sha256:4dbbc2355e104a5de400850b3dd7062e26cbc5d1969a0dab1b890bbcc45e1d92`
+- Artifact digest: `sha256:ae1073849613bf1ca5aee71f080e14dd39a003fbc316ae56b41e84268c73c1e6`
 - Generated files: 14
 - Resources: 18
 - Application artifact contracts: 1

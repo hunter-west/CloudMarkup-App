@@ -1,6 +1,7 @@
 import {
   ApiClientError,
   type BillingWorkspaceV1,
+  type CurrentPlanEntitlementsV1,
   type CurrentPrincipalV1,
 } from "@cloudmarkup/api-contract";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -128,6 +129,70 @@ function hosted(
   };
 }
 
+function member(role: "editor" | "viewer"): CurrentPrincipalV1 {
+  return {
+    ...principal,
+    id: "principal_member",
+    organizationContexts: [
+      {
+        organizationId: "org_billing",
+        membershipId: "membership_member",
+        role,
+        isOwner: false,
+        capabilities: ["organizations.read", "commercial.summary.read"],
+      },
+    ],
+  };
+}
+
+function independentAccess(
+  kind: "staff-trial" | "staff-credits" | "expired-trial",
+): CurrentPlanEntitlementsV1 {
+  const trial = kind !== "staff-credits";
+  return {
+    contractVersion: 1,
+    organizationId: "org_billing",
+    asOf: new Date().toISOString(),
+    organizationState: "active",
+    billingAccountState: "active",
+    expensiveOperationsEnabled: kind !== "expired-trial",
+    entitlements: [],
+    limits: [],
+    subscription: { state: "not-subscribed" },
+    plan: {
+      commercialStatus: "proposed",
+      displayName: trial ? "Evaluation" : "Credits only",
+      effectiveFrom: "2026-10-01T00:00:00.000Z",
+      id: trial ? "plan_staff_trial" : "plan_staff_credits",
+      key: trial ? "staff-trial" : "staff-credits",
+      version: 1,
+      versionId: trial
+        ? "planver_staff_trial_2026_10_06_v1"
+        : "planver_staff_credits_2026_10_15_v1",
+      price: {
+        amountMicros: "0",
+        billingInterval: "month",
+        currency: "USD",
+        status: "proposed",
+      },
+    },
+    ...(trial
+      ? {
+          trial: {
+            id: "trial_evaluation",
+            state:
+              kind === "expired-trial"
+                ? ("expired" as const)
+                : ("active" as const),
+            expiresAt: new Date(
+              Date.now() + (kind === "expired-trial" ? -1 : 14) * 86400000,
+            ).toISOString(),
+          },
+        }
+      : {}),
+  };
+}
+
 function deferred() {
   let resolve!: (value: unknown) => void;
   let reject!: (reason: Error) => void;
@@ -152,9 +217,14 @@ function checkoutConflict() {
 function renderBilling(
   options: {
     readonly value?: BillingWorkspaceV1;
+    readonly actor?: CurrentPrincipalV1;
+    readonly scope?: unknown;
+    readonly plan?: unknown;
+    readonly topUp?: unknown;
     readonly action?: () => Promise<unknown>;
   } = {},
 ) {
+  let selectedActor = options.actor ?? principal;
   const action = vi.fn(options.action ?? (() => Promise.resolve(hosted())));
   const request = vi.fn(
     (
@@ -165,8 +235,39 @@ function renderBilling(
         readonly body?: unknown;
       },
     ) => {
+      if (operation === "account.workspaces.get")
+        return Promise.resolve({
+          data: options.scope ?? {
+            contractVersion: 1,
+            principalId: selectedActor.id,
+            id: input.path.organizationId,
+            kind:
+              selectedActor.organizationContexts.find(
+                (entry) => entry.organizationId === input.path.organizationId,
+              )?.role === "owner" && input.path.organizationId === "org_billing"
+                ? "personal"
+                : "organization",
+            displayName:
+              input.path.organizationId === "org_billing" &&
+              selectedActor.id === principal.id
+                ? "Personal projects"
+                : "Research Team",
+            role:
+              selectedActor.organizationContexts.find(
+                (entry) => entry.organizationId === input.path.organizationId,
+              )?.role ?? "viewer",
+          },
+        });
+      if (operation === "commercial.current-plan.get")
+        return options.plan
+          ? Promise.resolve({ data: options.plan })
+          : Promise.reject(new Error("No current access projection"));
       if (operation === "billing.top-ups.get")
-        return Promise.resolve(topUps(input.path.organizationId));
+        return Promise.resolve(
+          options.topUp
+            ? { data: options.topUp }
+            : topUps(input.path.organizationId),
+        );
       if (operation === "billing.workspace.get")
         return Promise.resolve({
           data: options.value ?? workspace(input.path.organizationId),
@@ -184,19 +285,22 @@ function renderBilling(
   const openHosted = vi.fn();
   const content = (
     organizationId = "org_billing",
-    selectedPrincipal = principal,
-  ) => (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider>
-        <BillingWorkspacePage
-          organizationId={organizationId}
-          principal={selectedPrincipal}
-          runtime={runtime}
-          openHosted={openHosted}
-        />
-      </RouterProvider>
-    </QueryClientProvider>
-  );
+    selectedPrincipal = options.actor ?? principal,
+  ) => {
+    selectedActor = selectedPrincipal;
+    return (
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider>
+          <BillingWorkspacePage
+            organizationId={organizationId}
+            principal={selectedPrincipal}
+            runtime={runtime}
+            openHosted={openHosted}
+          />
+        </RouterProvider>
+      </QueryClientProvider>
+    );
+  };
   const view = render(content());
   return {
     ...view,
@@ -204,7 +308,10 @@ function renderBilling(
     request,
     openHosted,
     queryClient,
-    changeScope: (organizationId: string, selectedPrincipal = principal) => {
+    changeScope: (
+      organizationId: string,
+      selectedPrincipal = options.actor ?? principal,
+    ) => {
       view.rerender(content(organizationId, selectedPrincipal));
     },
   };
@@ -217,11 +324,148 @@ afterEach(() => {
 });
 
 describe("hosted billing workspace", () => {
+  it.each(["editor", "viewer"] as const)(
+    "shows organization coverage to a %s without personal purchase prompts",
+    async (role) => {
+      const view = renderBilling({
+        actor: member(role),
+        topUp: {
+          ...topUps().data,
+          mode: "stripe-sandbox",
+          canPurchase: true,
+          latestPurchase: {
+            id: "topup_" + "a".repeat(32),
+            packKey: "small",
+            state: "pending",
+            needsReview: false,
+          },
+        },
+        value: {
+          ...workspace(),
+          subscriptionState: "active",
+          currentPlanKey: "pro",
+          canCheckout: false,
+          canManage: true,
+        },
+      });
+      expect(await screen.findByText("Organization billing")).toBeVisible();
+      expect(
+        screen.getByText(/Research Team.*Plans and credits apply only here/u),
+      ).toBeVisible();
+      expect(
+        screen.getByText(/You do not need a separate personal subscription/u),
+      ).toBeVisible();
+      expect(
+        screen.getByText(/Your personal plan and credits stay separate/u),
+      ).toBeVisible();
+      expect(
+        screen.getByRole("region", { name: "Current subscription" }),
+      ).toHaveTextContent("Professional");
+      expect(
+        screen.getByText(
+          /An organization owner or administrator manages payments/u,
+        ),
+      ).toBeVisible();
+      expect(
+        await screen.findByText(
+          /A personal credit purchase does not add to this shared balance/u,
+        ),
+      ).toBeVisible();
+      expect(
+        screen.getByText(/Organization payment is pending/u),
+      ).toBeVisible();
+      expect(
+        screen.queryByText(/Resume Checkout or refresh/u),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", {
+          name: /Continue with|Manage billing|Buy \d/u,
+        }),
+      ).not.toBeInTheDocument();
+      expect(view.action).not.toHaveBeenCalled();
+      expect(view.openHosted).not.toHaveBeenCalled();
+    },
+  );
+  it.each(["staff-trial", "staff-credits", "expired-trial"] as const)(
+    "distinguishes %s access from a paid subscription for a member",
+    async (kind) => {
+      const view = renderBilling({
+        actor: member("editor"),
+        value: { ...workspace(), canCheckout: false },
+        plan: independentAccess(kind),
+      });
+      expect(
+        await screen.findByText(
+          kind === "staff-credits"
+            ? /Complimentary credit access is recorded/u
+            : kind === "expired-trial"
+              ? /Trial access ended/u
+              : /Trial access recorded/u,
+        ),
+      ).toBeVisible();
+      expect(
+        screen.getByRole("heading", { name: "No paid subscription" }),
+      ).toBeVisible();
+      expect(
+        screen.queryByText(/You do not need a separate personal subscription/u),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", {
+          name: /Continue with|Manage billing|Buy \d/u,
+        }),
+      ).not.toBeInTheDocument();
+      expect(view.action).not.toHaveBeenCalled();
+    },
+  );
+  it.each([
+    "identity-tenant",
+    "identity-principal",
+    "identity-role",
+    "access-tenant",
+  ] as const)("withholds unbound %s presentation", async (which) => {
+    const plan = independentAccess("staff-trial");
+    const view = renderBilling({
+      actor: member("editor"),
+      value: { ...workspace(), canCheckout: false },
+      ...(which === "access-tenant"
+        ? { plan: { ...plan, organizationId: "org_other" } }
+        : {
+            scope: {
+              contractVersion: 1,
+              id: which === "identity-tenant" ? "org_other" : "org_billing",
+              principalId:
+                which === "identity-principal"
+                  ? "principal_other"
+                  : "principal_member",
+              kind: "organization",
+              displayName: "Confidential other team",
+              role: which === "identity-role" ? "owner" : "editor",
+            },
+          }),
+    });
+    await screen.findByRole("heading", { name: "No paid subscription" });
+    await waitFor(() => {
+      expect(view.queryClient.isFetching()).toBe(0);
+    });
+    expect(
+      screen.queryByText(/Confidential other team|Trial access recorded/u),
+    ).not.toBeInTheDocument();
+    expect(view.action).not.toHaveBeenCalled();
+  });
   it("shows readable plan previews without offering unavailable hosted actions", async () => {
     const view = renderBilling({
       value: { ...workspace(), mode: "disabled", canCheckout: false },
     });
     const plans = await screen.findByRole("group", { name: "Monthly plans" });
+    expect(await screen.findByText("Personal workspace billing")).toBeVisible();
+    expect(
+      screen.getByText(
+        /Work in an organization uses that organization's plan and shared credits/u,
+      ),
+    ).toBeVisible();
+    expect(
+      within(plans).getByText(/100 personal workspace AI credits/u),
+    ).toBeVisible();
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Monthly plans", level: 2 }),
@@ -273,7 +517,7 @@ describe("hosted billing workspace", () => {
     });
     expect(view.openHosted).toHaveBeenCalledExactlyOnceWith(hosted().data.url);
     expect(
-      screen.getByRole("heading", { name: "Not subscribed" }),
+      screen.getByRole("heading", { name: "No paid subscription" }),
     ).toBeVisible();
   });
 
@@ -385,23 +629,32 @@ describe("hosted billing workspace", () => {
             : {}),
         },
       );
-      expect(
-        await screen.findByRole("button", { name: "Continue with Starter" }),
-      ).toBeEnabled();
+      if (change === "permissions") {
+        await screen.findByRole("heading", { name: "No paid subscription" });
+        expect(
+          screen.queryByRole("button", { name: "Continue with Starter" }),
+        ).not.toBeInTheDocument();
+      } else {
+        expect(
+          await screen.findByRole("button", { name: "Continue with Starter" }),
+        ).toBeEnabled();
+      }
       await act(async () => {
         response.resolve(hosted());
         await response.promise;
       });
       expect(view.openHosted).not.toHaveBeenCalled();
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      fireEvent.click(
-        screen.getByRole("button", { name: "Continue with Starter" }),
-      );
+      if (change !== "permissions")
+        fireEvent.click(
+          screen.getByRole("button", { name: "Continue with Starter" }),
+        );
       const attempts = view.request.mock.calls.filter(
         ([operation]) => operation === "billing.checkout.create",
       );
-      expect(attempts).toHaveLength(2);
-      expect(attempts[0]?.[1]).not.toEqual(attempts[1]?.[1]);
+      expect(attempts).toHaveLength(change === "permissions" ? 1 : 2);
+      if (change !== "permissions")
+        expect(attempts[0]?.[1]).not.toEqual(attempts[1]?.[1]);
     },
   );
 
@@ -433,7 +686,7 @@ describe("hosted billing workspace", () => {
       await vi.advanceTimersByTimeAsync(10);
     });
     expect(
-      screen.getByRole("heading", { name: "Not subscribed" }),
+      screen.getByRole("heading", { name: "No paid subscription" }),
     ).toBeVisible();
     for (let i = 0; i < 12; i += 1)
       await act(async () => {
@@ -455,7 +708,7 @@ describe("hosted billing workspace", () => {
     expect(view.action).not.toHaveBeenCalled();
     expect(view.openHosted).not.toHaveBeenCalled();
     expect(
-      screen.getByRole("heading", { name: "Not subscribed" }),
+      screen.getByRole("heading", { name: "No paid subscription" }),
     ).toBeVisible();
   });
 
@@ -590,7 +843,7 @@ describe("hosted billing workspace", () => {
         hosted().data.url,
       );
       expect(
-        screen.getByRole("heading", { name: "Not subscribed" }),
+        screen.getByRole("heading", { name: "No paid subscription" }),
       ).toBeVisible();
     },
   );
@@ -721,6 +974,8 @@ describe("hosted billing workspace", () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(view.action).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText("Organization billing")).toBeVisible();
+    expect(screen.queryByText(/Personal projects/u)).not.toBeInTheDocument();
   });
 
   it.each([

@@ -256,6 +256,22 @@ describe("ServiceCatalogPanel", () => {
       }),
     );
     const dialog = screen.getByRole("dialog", { name: "Set up EC2 instance" });
+    const optional = within(dialog)
+      .getByText(/^Optional settings \(/u, { selector: "summary" })
+      .closest("details");
+    const fixed = within(dialog)
+      .getByText(/^Fixed settings \(/u, { selector: "summary" })
+      .closest("details");
+    expect(optional).not.toHaveAttribute("open");
+    expect(fixed).not.toHaveAttribute("open");
+    expect(
+      within(dialog).queryByRole("combobox", { name: /Tenancy/u }),
+    ).toBeNull();
+    expect(
+      within(dialog).getByLabelText(/^Root throughput/u, {
+        selector: "output",
+      }),
+    ).toHaveTextContent("125");
     const labels = [
       /AMI ID/u,
       /AMI Region/u,
@@ -270,6 +286,7 @@ describe("ServiceCatalogPanel", () => {
         selector: "input,select",
       });
       expect(field).toHaveProperty("value", "");
+      expect(field).toBeVisible();
       if (field instanceof HTMLSelectElement) {
         expect(field.selectedOptions[0]).toHaveTextContent("Choose a value");
       }
@@ -315,6 +332,12 @@ describe("ServiceCatalogPanel", () => {
     controls.forEach((field, index) =>
       fireEvent.change(field, { target: { value: values[index] } }),
     );
+    fireEvent.click(
+      within(dialog).getByText(/^Optional settings \(/u, {
+        selector: "summary",
+      }),
+    );
+    fireEvent.click(within(dialog).getByLabelText(/^Detailed monitoring/u));
     fireEvent.click(add);
     await waitFor(() => {
       expect(
@@ -329,6 +352,10 @@ describe("ServiceCatalogPanel", () => {
         rootEncrypted: { kind: "boolean", value: true },
         metadataAuthentication: { kind: "string", value: "required" },
         rootDeleteOnTermination: { kind: "boolean", value: false },
+        detailedMonitoring: { kind: "boolean", value: true },
+        rootIops: { kind: "integer", value: 3000 },
+        rootThroughputMiBps: { kind: "integer", value: 125 },
+        imageOperatingSystem: { kind: "string", value: "linux" },
       },
     ]);
   });
@@ -467,17 +494,19 @@ describe("ServiceCatalogPanel", () => {
     expect(name).toBeEnabled();
     expect(name).toHaveValue("");
     expect(
-      within(dialog).getByRole("combobox", { name: /Value source/u }),
-    ).toHaveValue("external-population");
+      within(dialog).getByLabelText(/Value source/u, { selector: "output" }),
+    ).toHaveTextContent("external-population");
+    fireEvent.click(
+      within(dialog).getByText(/^Optional settings \(/u, {
+        selector: "summary",
+      }),
+    );
     expect(
       within(dialog).getByRole("combobox", { name: /Encryption key/u }),
     ).toHaveValue("aws-managed");
     expect(
-      within(dialog).getByRole("textbox", { name: /Retain secret/u }),
-    ).toHaveValue("true");
-    expect(
-      within(dialog).getByRole("textbox", { name: /Retain secret/u }),
-    ).toHaveAttribute("readonly");
+      within(dialog).getByLabelText(/Retain secret/u, { selector: "output" }),
+    ).toHaveTextContent("true");
     expect(
       within(dialog).queryByLabelText(/Secret value|Secret string|Password/u),
     ).toBeNull();

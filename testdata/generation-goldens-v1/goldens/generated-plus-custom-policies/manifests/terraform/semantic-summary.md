@@ -1,6 +1,6 @@
 # Terraform semantic summary: generated-plus-custom-policies
 
-- Artifact digest: `sha256:f6746509ffae5ad6bbdadf74f3fe43b0edbc2078ace0f4eb08ecf5cad2ceea29`
+- Artifact digest: `sha256:44fe4a618654045af1beb7941c96d938f5e5b5c8f6ade62d7be0ab0fcf38eae3`
 - Generated files: 14
 - Resources: 5
 - Application artifact contracts: 1

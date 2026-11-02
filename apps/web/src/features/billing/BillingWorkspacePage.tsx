@@ -2,6 +2,7 @@ import { CreditTopUpSection } from "./CreditTopUpSection.js";
 import {
   ApiClientError,
   billingWorkspaceV1Schema,
+  currentPlanEntitlementsV1Schema,
   hostedBillingSessionV1Schema,
   type CurrentPrincipalV1,
 } from "@cloudmarkup/api-contract";
@@ -22,6 +23,7 @@ import {
   type HostedBillingWindow,
 } from "./billing-hosted-window.js";
 import "./billing-workspace.css";
+import { useBillingScope } from "./use-billing-scope.js";
 
 type CheckoutPlan = "starter" | "pro";
 type BillingAction = "portal" | CheckoutPlan;
@@ -33,7 +35,7 @@ function message(error: unknown, action?: BillingAction): string {
       case "authentication_required":
         return "Your session expired. Sign in again to continue.";
       case "access_denied":
-        return "An owner or administrator with a recent sign-in is required. Sign in again if you manage this organization.";
+        return "An owner or administrator with a recent sign-in is required. Sign in again if you manage billing here.";
       case "conflict":
         return action === "portal"
           ? "Billing management could not be opened. Refresh status and try again."
@@ -80,6 +82,13 @@ function ScopedBillingWorkspacePage({
   organizationId,
   openHosted,
 }: BillingWorkspacePageProps & { readonly authorizationScope: string }) {
+  const context = principal.organizationContexts.find(
+    (entry) => entry.organizationId === organizationId,
+  );
+  const managesBilling =
+    context?.capabilities.includes("billing.manage") === true;
+  const scopeQuery = useBillingScope(runtime, principal, organizationId);
+  const scope = scopeQuery.isError ? undefined : scopeQuery.data;
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const reservedWindow = useRef<HostedBillingWindow | null>(null);
@@ -116,6 +125,33 @@ function ScopedBillingWorkspacePage({
       return billingWorkspaceV1Schema.parse(response.data);
     },
     retry: false,
+    refetchOnWindowFocus: true,
+  });
+  const readsIndependentAccess =
+    workspace.isSuccess &&
+    workspace.data.accountState === "active" &&
+    workspace.data.subscriptionState !== "active";
+  const access = useQuery({
+    queryKey: [
+      ...cloudMarkupQueryKeys.commercialSummary(principal.id, organizationId),
+      "current-plan",
+      authorizationScope,
+    ],
+    enabled: readsIndependentAccess,
+    queryFn: async () => {
+      const response = await runtime.client.request(
+        "commercial.current-plan.get",
+        {
+          path: { organizationId },
+        },
+      );
+      const value = currentPlanEntitlementsV1Schema.parse(response.data);
+      if (value.organizationId !== organizationId)
+        throw Error("Plan scope mismatch.");
+      return value;
+    },
+    retry: false,
+    gcTime: 0,
     refetchOnWindowFocus: true,
   });
 
@@ -176,6 +212,7 @@ function ScopedBillingWorkspacePage({
     if (
       busy.current ||
       !isActiveScope() ||
+      !managesBilling ||
       !workspace.data ||
       (kind === "portal"
         ? !workspace.data.canManage
@@ -253,12 +290,36 @@ function ScopedBillingWorkspacePage({
     }
   }
 
-  const value = workspace.data;
+  const value = workspace.isError ? undefined : workspace.data;
+  const verifiedAccess =
+    readsIndependentAccess && !access.isError ? access.data : undefined;
+  const personal = scope?.kind === "personal";
+  const scopeLabel = personal
+    ? "Personal workspace"
+    : scope?.kind === "organization"
+      ? "Organization"
+      : "Selected workspace";
+  const independentAccessRecorded =
+    verifiedAccess?.trial?.state === "active" ||
+    verifiedAccess?.plan.key === "staff-credits";
+  const unsubscribedMessage = managesBilling
+    ? value?.canCheckout
+      ? "Choose a plan below to continue to secure Checkout."
+      : "Plan previews are available below."
+    : personal
+      ? "Billing management is unavailable for your personal workspace. Sign in again if you manage billing here."
+      : independentAccessRecorded
+        ? "Existing organization access is shown below. An owner or administrator handles any billing changes."
+        : "Ask an organization owner or administrator about this organization's plan. A personal subscription does not fund it.";
   return (
     <RoutePage
-      title="Billing"
-      eyebrow="Workspace billing"
-      description="Choose a plan or manage your subscription securely with Stripe."
+      title="Plans & billing"
+      eyebrow={`${scopeLabel} billing`}
+      description={
+        scope
+          ? `${scope.displayName} · Plans and credits apply only here.`
+          : "Plans and credits for the selected workspace."
+      }
       routeKey={`billing-${organizationId}`}
     >
       <div className="settings-content billing-workspace">
@@ -286,6 +347,33 @@ function ScopedBillingWorkspacePage({
           value && (
             <>
               <section
+                className="billing-availability"
+                aria-label="Billing scope"
+              >
+                <p>
+                  {personal
+                    ? "This plan and these credits belong to your personal workspace. Work in an organization uses that organization's plan and shared credits."
+                    : scope?.kind === "organization"
+                      ? "This organization's plan and credits are shared for work here. Your personal plan and credits stay separate."
+                      : "Plans and credits stay with the workspace they belong to. They are not combined across memberships."}
+                </p>
+                {!managesBilling && (
+                  <p>
+                    {personal
+                      ? "Billing management is unavailable for your personal workspace."
+                      : "An organization owner or administrator manages payments."}{" "}
+                    Your role controls which features you can use; viewing a
+                    plan does not change your permissions.
+                  </p>
+                )}
+                {scopeQuery.isError && (
+                  <p>
+                    Workspace details could not be verified. Refresh status to
+                    try again.
+                  </p>
+                )}
+              </section>
+              <section
                 className="billing-current"
                 aria-label="Current subscription"
               >
@@ -293,29 +381,76 @@ function ScopedBillingWorkspacePage({
                   <p className="status-label">Current subscription</p>
                   <h2>
                     {value.subscriptionState === "not-subscribed"
-                      ? "Not subscribed"
+                      ? "No paid subscription"
                       : (value.plans.find(
                           (plan) => plan.key === value.currentPlanKey,
                         )?.displayName ?? "Subscription pending")}
                   </h2>
                   <p>
                     {value.subscriptionState === "not-subscribed"
-                      ? value.canCheckout
-                        ? "Choose a plan below to continue to secure Checkout."
-                        : "Plan previews are available below."
+                      ? unsubscribedMessage
                       : value.subscriptionState.replaceAll("-", " ")}
                   </p>
+                  {scope?.kind === "organization" &&
+                    value.accountState === "active" &&
+                    value.subscriptionState === "active" && (
+                      <p>
+                        Work in this organization uses its subscription and
+                        shared credits, subject to your role and available
+                        credits. You do not need a separate personal
+                        subscription for features covered here.
+                      </p>
+                    )}
+                  {verifiedAccess?.trial ? (
+                    <p>
+                      {verifiedAccess.trial.state === "active"
+                        ? "Trial access recorded"
+                        : "Trial access ended"}
+                      . This verified summary is separate from a paid
+                      subscription. Trial access expires on{" "}
+                      <time dateTime={verifiedAccess.trial.expiresAt}>
+                        {new Intl.DateTimeFormat(undefined, {
+                          dateStyle: "medium",
+                        }).format(new Date(verifiedAccess.trial.expiresAt))}
+                      </time>
+                      . Your role and current service availability still apply.
+                    </p>
+                  ) : verifiedAccess?.plan.key === "staff-credits" ? (
+                    <p>
+                      Complimentary credit access is recorded for this{" "}
+                      {personal
+                        ? "personal workspace"
+                        : scope?.kind === "organization"
+                          ? "organization"
+                          : "workspace"}
+                      . Available funds can support AI; they do not include a
+                      subscription or export access.
+                    </p>
+                  ) : value.subscriptionState === "not-subscribed" ? (
+                    <p>
+                      Any recorded credits or separately granted trial are
+                      independent of paid subscription status.
+                    </p>
+                  ) : null}
                 </div>
                 <div className="billing-actions">
                   <button
                     type="button"
                     className="button button--secondary"
                     disabled={pending !== null || workspace.isFetching}
-                    onClick={() => void workspace.refetch()}
+                    onClick={() => {
+                      void workspace.refetch();
+                      void scopeQuery.refetch();
+                      if (
+                        value.accountState === "active" &&
+                        value.subscriptionState !== "active"
+                      )
+                        void access.refetch();
+                    }}
                   >
                     Refresh status
                   </button>
-                  {value.canManage && (
+                  {managesBilling && value.canManage && (
                     <button
                       type="button"
                       className="button button--secondary"
@@ -336,6 +471,7 @@ function ScopedBillingWorkspacePage({
                 </p>
               )}
               {value.mode !== "disabled" &&
+                managesBilling &&
                 !value.canCheckout &&
                 !value.canManage && (
                   <p className="billing-availability">
@@ -382,27 +518,34 @@ function ScopedBillingWorkspacePage({
                         <span>/ month</span>
                       </p>
                       <p>
-                        {plan.monthlyCreditUnits.toLocaleString()} shared
-                        organization AI credits per paid month.
+                        {plan.monthlyCreditUnits.toLocaleString()}{" "}
+                        {personal
+                          ? "personal workspace"
+                          : scope?.kind === "organization"
+                            ? "shared organization"
+                            : "workspace"}{" "}
+                        AI credits per paid month.
                       </p>
                       <p className="billing-plan-description">
                         {plan.key === "starter"
                           ? "For individual architecture projects."
                           : "For larger projects and reviewed repository export."}
                       </p>
-                      <button
-                        type="button"
-                        className={`button ${plan.key === "pro" ? "button--primary" : "button--secondary"}`}
-                        disabled={!value.canCheckout || pending !== null}
-                        onClick={() => void start(plan.key)}
-                      >
-                        {pending === plan.key
-                          ? "Opening Stripe…"
-                          : value.currentPlanKey === plan.key &&
-                              value.subscriptionState !== "canceled"
-                            ? "Current plan"
-                            : `Continue with ${plan.displayName}`}
-                      </button>
+                      {managesBilling && (
+                        <button
+                          type="button"
+                          className={`button ${plan.key === "pro" ? "button--primary" : "button--secondary"}`}
+                          disabled={!value.canCheckout || pending !== null}
+                          onClick={() => void start(plan.key)}
+                        >
+                          {pending === plan.key
+                            ? "Opening Stripe…"
+                            : value.currentPlanKey === plan.key &&
+                                value.subscriptionState !== "canceled"
+                              ? "Current plan"
+                              : `Continue with ${plan.displayName}`}
+                        </button>
+                      )}
                     </section>
                   ))}
                 </div>
@@ -412,6 +555,8 @@ function ScopedBillingWorkspacePage({
                 principalId={principal.id}
                 organizationId={organizationId}
                 authorizationScope={authorizationScope}
+                canManageBilling={managesBilling}
+                workspaceKind={scope?.kind}
                 disabled={pending !== null}
                 openHosted={openHosted}
               />
@@ -423,13 +568,17 @@ function ScopedBillingWorkspacePage({
                   processing.
                 </p>
                 <p>
-                  Credits are shared by this organization. AI and export actions
-                  still require an enabled service and the applicable plan
-                  permissions. A subscription does not enable an unfinished
-                  integration or deploy customer infrastructure.
+                  {personal
+                    ? "Credits belong to your personal workspace."
+                    : scope?.kind === "organization"
+                      ? "Credits are shared within this organization."
+                      : "Credits stay within the selected workspace."}{" "}
+                  AI and export actions still require an enabled service and the
+                  applicable plan permissions. A subscription does not enable an
+                  unfinished integration or deploy customer infrastructure.
                 </p>
                 <p>
-                  No automatic overages or trial periods.{" "}
+                  No automatic overages or signup trials.{" "}
                   {value.mode === "stripe-live"
                     ? "Paid plans renew monthly until canceled. Credit packs are one-time purchases."
                     : "Live charges are not enabled in this environment."}

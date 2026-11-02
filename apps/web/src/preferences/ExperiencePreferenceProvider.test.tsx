@@ -5,6 +5,7 @@ import {
   EXPERIENCE_PREFERENCE_MAX_SERIALIZED_LENGTH,
   EXPERIENCE_PREFERENCE_SCHEMA_VERSION,
   getExperiencePreferenceStorageKey,
+  getEditorWalkthroughStepStorageKey,
   type ExperiencePreferenceStorage,
   normalizeDefaultRegion,
 } from "./experience-preference.js";
@@ -27,6 +28,17 @@ function PreferenceProbe() {
           storageStatus: preference.storageStatus,
         })}
       </output>
+      <output data-testid="tour-step">
+        {preference.editorWalkthroughStep}
+      </output>
+      <button
+        type="button"
+        onClick={() => {
+          preference.setEditorWalkthroughStep("connect");
+        }}
+      >
+        Remember connection step
+      </button>
       <button
         onClick={() => {
           preference.completeFirstUse({
@@ -154,12 +166,37 @@ describe("ExperiencePreferenceProvider", () => {
     });
 
     firstRender.unmount();
-    renderPreference({ actorId });
+    const restored = renderPreference({ actorId });
     expect(readProbe()).toMatchObject({
       defaultRegion: "us-east-1",
       firstUseStatus: "completed",
       startChoice: "template",
       storageStatus: "available",
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remember connection step" }),
+    );
+    expect(screen.getByTestId("tour-step")).toHaveTextContent("connect");
+    window.localStorage.setItem(
+      getEditorWalkthroughStepStorageKey("other-actor"),
+      "unsupported-step",
+    );
+    restored.rerender(
+      <ExperiencePreferenceProvider actorId="other-actor">
+        <PreferenceProbe />
+      </ExperiencePreferenceProvider>,
+    );
+    expect(screen.getByTestId("tour-step")).toHaveTextContent("add");
+    expect(readProbe()).toMatchObject({ firstUseStatus: "pending" });
+    restored.rerender(
+      <ExperiencePreferenceProvider actorId={actorId}>
+        <PreferenceProbe />
+      </ExperiencePreferenceProvider>,
+    );
+    expect(screen.getByTestId("tour-step")).toHaveTextContent("connect");
+    expect(readProbe()).toMatchObject({
+      firstUseStatus: "completed",
+      startChoice: "template",
     });
   });
 
@@ -182,7 +219,13 @@ describe("ExperiencePreferenceProvider", () => {
   });
 
   it("persists teaching and walkthrough lifecycle independently", () => {
+    const view = renderPreference();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remember connection step" }),
+    );
+    view.unmount();
     renderPreference();
+    expect(screen.getByTestId("tour-step")).toHaveTextContent("connect");
     fireEvent.click(screen.getByRole("button", { name: "Disable teaching" }));
     fireEvent.click(
       screen.getByRole("button", { name: "Dismiss walkthrough" }),
@@ -192,6 +235,7 @@ describe("ExperiencePreferenceProvider", () => {
       firstUseStatus: "pending",
       notesApiWalkthrough: "dismissed",
     });
+    expect(screen.getByTestId("tour-step")).toHaveTextContent("add");
 
     fireEvent.click(
       screen.getByRole("button", { name: "Complete walkthrough" }),
@@ -199,12 +243,16 @@ describe("ExperiencePreferenceProvider", () => {
     expect(readProbe()).toMatchObject({ notesApiWalkthrough: "completed" });
 
     fireEvent.click(
+      screen.getByRole("button", { name: "Remember connection step" }),
+    );
+    fireEvent.click(
       screen.getByRole("button", { name: "Restart walkthrough" }),
     );
     expect(readProbe()).toMatchObject({
       contextualTeachingEnabled: false,
       notesApiWalkthrough: "not-started",
     });
+    expect(screen.getByTestId("tour-step")).toHaveTextContent("add");
   });
 
   it.each([
@@ -293,6 +341,10 @@ describe("ExperiencePreferenceProvider", () => {
       startChoice: "template",
       storageStatus: "write-failed",
     });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Remember connection step" }),
+    );
+    expect(screen.getByTestId("tour-step")).toHaveTextContent("connect");
   });
 
   it("falls back safely when storage cannot be read", () => {

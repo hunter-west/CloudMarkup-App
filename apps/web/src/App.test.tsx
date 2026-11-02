@@ -42,8 +42,8 @@ function setOnlineStatus(isOnline: boolean) {
   });
 }
 
-async function renderRoute(path: string, width = 1440) {
-  setViewport(width);
+async function renderRoute(path: string, width = 1440, height = 900) {
+  setViewport(width, height);
   window.history.replaceState(null, "", path);
   const result = render(<App />);
   await act(async () => {
@@ -372,14 +372,16 @@ describe("CloudMarkup application routes", () => {
     expect(
       await screen.findByRole("heading", {
         level: 2,
-        name: "Your workspaces",
+        name: "Choose where to work",
       }),
     ).toBeInTheDocument();
     const navigation = screen.getByRole("navigation", {
       name: "Primary navigation",
     });
     expect(
-      within(navigation).getByRole("link", { name: "Organizations" }),
+      within(navigation).getByRole("link", {
+        name: "Personal & organizations",
+      }),
     ).toHaveAttribute("aria-current", "page");
     expect(
       within(navigation).getByRole("link", { name: "Preferences" }),
@@ -388,14 +390,20 @@ describe("CloudMarkup application routes", () => {
       within(navigation).queryByRole("link", { name: "Projects" }),
     ).not.toBeInTheDocument();
     expect(
-      within(navigation).getByRole("link", { name: "Choose workspace" }),
+      within(navigation).getByRole("link", {
+        name: "Personal & organizations",
+      }),
     ).toHaveAttribute("href", "/organizations");
     expect(
       within(navigation).getByText(
-        /Choose a workspace to open Dashboard, Projects/u,
+        /Choose your personal workspace or an organization to open Dashboard/u,
       ),
     ).toBeVisible();
-    expect(screen.getByText("Account workspace")).toBeVisible();
+    expect(
+      screen.getByText("Personal account", {
+        selector: ".organization-context span",
+      }),
+    ).toBeVisible();
     fireEvent.click(
       screen.getByRole("button", { name: "Open authenticated account" }),
     );
@@ -425,7 +433,10 @@ describe("CloudMarkup application routes", () => {
         "/organizations",
         width,
       );
-      await screen.findByRole("heading", { level: 1, name: "Workspaces" });
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "Personal & organizations",
+      });
       const openNavigation = async () => {
         if (width < 1280) {
           fireEvent.click(
@@ -455,15 +466,15 @@ describe("CloudMarkup application routes", () => {
       ).not.toBeInTheDocument();
       fireEvent.click(
         within(workspaceNavigation).getByRole("link", {
-          name: "Organizations",
+          name: "Personal & organizations",
         }),
       );
       const organizationsHeading = await screen.findByRole("heading", {
         level: 1,
-        name: "Workspaces",
+        name: "Personal & organizations",
       });
       await waitFor(() => expect(organizationsHeading).toHaveFocus());
-      expect(document.title).toBe("Workspaces");
+      expect(document.title).toBe("Personal & organizations");
       expect(
         screen.queryByRole("button", { name: "Project status" }),
       ).not.toBeInTheDocument();
@@ -518,7 +529,9 @@ describe("CloudMarkup application routes", () => {
       name: "Primary navigation",
     });
     expect(
-      within(navigation).getByRole("link", { name: "Organizations" }),
+      within(navigation).getByRole("link", {
+        name: "Personal & organizations",
+      }),
     ).toHaveAttribute("href", "/organizations");
     expect(
       within(navigation).getByRole("link", { name: "Projects" }),
@@ -581,7 +594,7 @@ describe("CloudMarkup application routes", () => {
       ).not.toBeInTheDocument(),
     );
     expect(
-      screen.getByRole("link", { name: "Choose workspace" }),
+      screen.getByRole("link", { name: "Personal & organizations" }),
     ).toBeVisible();
     act(() => {
       queryClient.setQueryData(cloudMarkupQueryKeys.currentPrincipal(), {
@@ -773,7 +786,11 @@ describe("CloudMarkup application routes", () => {
         name: "Profile settings",
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Account workspace")).toBeVisible();
+    expect(
+      screen.getByText("Personal account", {
+        selector: ".organization-context span",
+      }),
+    ).toBeVisible();
     expect(screen.getByText("Verified account")).toBeVisible();
     expect(screen.getByText("morgan.account@example.com")).toBeVisible();
     expect(
@@ -1024,14 +1041,30 @@ describe("shell behavior and presentation modes", () => {
       ),
     ).toBeInTheDocument();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Open local mock account" }),
-    );
+    const profile = screen.getByRole("button", {
+      name: "Open local mock account",
+    });
+    expect(profile).toHaveAccessibleDescription("1 new notification");
+    profile.focus();
+    fireEvent.click(profile);
     const account = await screen.findByRole("dialog", {
       name: "Local mock account",
     });
+    expect(profile).not.toHaveAttribute("aria-describedby");
+    expect(
+      within(account).getByRole("region", { name: "Personal account" }),
+    ).toBeVisible();
+    fireEvent.keyDown(account, { key: "Escape" });
+    await waitFor(() => expect(profile).toHaveFocus());
+    fireEvent.click(profile);
+    const reopened = await screen.findByRole("dialog", {
+      name: "Local mock account",
+    });
+    expect(profile).not.toHaveAttribute("aria-describedby");
     fireEvent.click(
-      within(account).getByRole("button", { name: "Notifications (1)" }),
+      within(reopened).getByRole("button", {
+        name: "Notifications (1 unread)",
+      }),
     );
     const notifications = await screen.findByRole("dialog", {
       name: "Notifications",
@@ -1043,6 +1076,52 @@ describe("shell behavior and presentation modes", () => {
       within(notifications).getByText(
         /architecture data and editing capabilities did not change/iu,
       ),
+    ).toBeVisible();
+    expect(
+      within(notifications).getByText("Read", { exact: true }),
+    ).toBeVisible();
+    fireEvent.keyDown(notifications, { key: "Escape" });
+    await waitFor(() => expect(profile).toHaveFocus());
+    fireEvent.click(profile);
+    const readAccount = await screen.findByRole("dialog", {
+      name: "Local mock account",
+    });
+    expect(
+      within(readAccount).getByRole("button", {
+        name: "Notifications",
+      }),
+    ).toBeVisible();
+    fireEvent.click(within(readAccount).getByRole("link", { name: "Profile" }));
+    await screen.findByRole("heading", { name: "Profile settings", level: 1 });
+    expect(
+      screen.getByRole("button", { name: "Open local mock account" }),
+    ).not.toHaveAttribute("aria-describedby");
+    fireEvent.click(screen.getByRole("button", { name: "Guided" }));
+    expect(
+      screen.getByRole("button", { name: "Open local mock account" }),
+    ).toHaveAccessibleDescription("1 new notification");
+    const currentProfile = screen.getByRole("button", {
+      name: "Open local mock account",
+    });
+    currentProfile.focus();
+    fireEvent.click(currentProfile);
+    const nextAccount = await screen.findByRole("dialog", {
+      name: "Local mock account",
+    });
+    fireEvent.click(
+      within(nextAccount).getByRole("button", {
+        name: "Notifications (1 unread)",
+      }),
+    );
+    const retainedHistory = within(
+      await screen.findByRole("dialog", { name: "Notifications" }),
+    ).getByRole("list", { name: "Notification history" });
+    expect(within(retainedHistory).getAllByRole("listitem")).toHaveLength(2);
+    expect(
+      within(retainedHistory).getByText("Professional presentation enabled"),
+    ).toBeVisible();
+    expect(
+      within(retainedHistory).getByText("Guided presentation enabled"),
     ).toBeVisible();
   });
 
@@ -1571,13 +1650,11 @@ describe("shell behavior and presentation modes", () => {
   });
 
   it("resets popup presentation state without changing architecture", async () => {
-    setViewport(1440, 600);
-    window.history.replaceState(
-      null,
-      "",
+    await renderRoute(
       "/organizations/local-org/projects/field-notes/editor",
+      1440,
+      600,
     );
-    render(<App />);
 
     const editor = document.querySelector<HTMLElement>(".architecture-editor");
     if (editor === null) {
@@ -1591,6 +1668,13 @@ describe("shell behavior and presentation modes", () => {
     const workspaceTools = screen.getByRole("navigation", {
       name: "Workspace tools",
     });
+    const applicationHeader = screen.getByRole("banner", {
+      name: "Application header",
+    });
+    const openAccount = within(applicationHeader).getByRole("button", {
+      name: "Open local mock account",
+    });
+    const hideCatalog = screen.getByRole("button", { name: "Hide Catalog" });
 
     fireEvent.click(
       within(workspaceTools).getByRole("button", { name: "Activity" }),
@@ -1604,12 +1688,13 @@ describe("shell behavior and presentation modes", () => {
     expect(
       await screen.findByRole("dialog", { name: "Learn inspector" }),
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Hide Catalog" }));
+    fireEvent.click(hideCatalog);
+    fireEvent.click(openAccount);
+    const account = await screen.findByRole("dialog", {
+      name: "Local mock account",
+    });
     fireEvent.click(
-      screen.getByRole("button", { name: "Open local mock account" }),
-    );
-    fireEvent.click(
-      await screen.findByRole("button", { name: "Reset workspace layout" }),
+      within(account).getByRole("button", { name: "Reset workspace layout" }),
     );
 
     expect(

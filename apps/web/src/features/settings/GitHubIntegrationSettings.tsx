@@ -215,9 +215,7 @@ export function GitHubIntegrationSettings({
 
   if (!canRead || runtime.sessionExpired)
     return (
-      <p role="alert">
-        You do not have permission to view organization integrations.
-      </p>
+      <p role="alert">You do not have permission to view these integrations.</p>
     );
 
   return (

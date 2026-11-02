@@ -1,12 +1,12 @@
 {
   "canonicalization": "cloudmarkup.provider-connection-presentation.canonical-json.v1",
   "catalog": {
-    "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
+    "digest": "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619",
     "id": "aws.cloudmarkup.notes-api-catalog",
     "version": "0.30.0"
   },
   "contractVersion": 1,
-  "digest": "sha256:ee9c7035fd964e251adeca448c64bef518eda05f14bd5312083fb7aa9f96435c",
+  "digest": "sha256:2dd5a3e04041d9b25b0137df13f8f58be146231f599873a7a263ee72576764b9",
   "kind": "cloudmarkup.provider-connection-presentation",
   "relationshipLabels": [
     {

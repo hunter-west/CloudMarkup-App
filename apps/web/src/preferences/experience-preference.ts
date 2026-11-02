@@ -16,6 +16,30 @@ export type ProjectStartChoice = "prompt" | "template" | "blank";
 export type NotesApiWalkthroughStatus =
   "not-started" | "dismissed" | "completed";
 
+const editorWalkthroughSteps = [
+  "add",
+  "configure",
+  "learn",
+  "connect",
+  "permissions",
+  "assistant",
+  "validation",
+  "revision",
+  "import",
+  "export",
+] as const;
+export type EditorWalkthroughStepId = (typeof editorWalkthroughSteps)[number];
+
+export function parseEditorWalkthroughStep(
+  value: string | null,
+): EditorWalkthroughStepId {
+  return editorWalkthroughSteps.find((step) => step === value) ?? "add";
+}
+
+export function getEditorWalkthroughStepStorageKey(actorId?: string): string {
+  return `${getExperiencePreferenceStorageKey(actorId)}:editor-tour-step.v1`;
+}
+
 export type ExperiencePreferenceStorageStatus =
   "available" | "read-failed" | "write-failed";
 
@@ -46,6 +70,7 @@ export interface CompleteFirstUseInput {
 
 export interface ExperiencePreference extends ExperiencePreferenceState {
   readonly storageStatus: ExperiencePreferenceStorageStatus;
+  readonly editorWalkthroughStep: EditorWalkthroughStepId;
   completeFirstUse(
     input: CompleteFirstUseInput,
   ): ExperiencePreferenceStorageStatus;
@@ -53,6 +78,7 @@ export interface ExperiencePreference extends ExperiencePreferenceState {
   restartWalkthrough(): void;
   setContextualTeachingEnabled(enabled: boolean): void;
   setWalkthroughStatus(status: NotesApiWalkthroughStatus): void;
+  setEditorWalkthroughStep(step: EditorWalkthroughStepId): void;
   skipFirstUse(): ExperiencePreferenceStorageStatus;
 }
 

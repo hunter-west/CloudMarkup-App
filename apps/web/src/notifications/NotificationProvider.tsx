@@ -42,6 +42,8 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       kind: draft.kind ?? "info",
       toast: draft.toast ?? true,
       dismissed: false,
+      seen: false,
+      read: false,
       ...(message === "" ? {} : { message }),
     };
 
@@ -70,6 +72,28 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     });
   }, []);
 
+  const markNotificationsSeen = useCallback((ids: readonly string[]) => {
+    const seenIds = new Set(ids);
+    setHistory((currentHistory) => {
+      if (!currentHistory.some((item) => !item.seen && seenIds.has(item.id)))
+        return currentHistory;
+      return currentHistory.map((item) =>
+        seenIds.has(item.id) ? { ...item, seen: true } : item,
+      );
+    });
+  }, []);
+
+  const markNotificationsRead = useCallback((ids: readonly string[]) => {
+    const readIds = new Set(ids);
+    setHistory((currentHistory) => {
+      if (!currentHistory.some((item) => !item.read && readIds.has(item.id)))
+        return currentHistory;
+      return currentHistory.map((item) =>
+        readIds.has(item.id) ? { ...item, seen: true, read: true } : item,
+      );
+    });
+  }, []);
+
   const activeToasts = useMemo(
     () =>
       history.filter(
@@ -82,10 +106,21 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     () => ({
       history,
       activeToasts,
+      unseenCount: history.filter((item) => !item.seen).length,
+      unreadCount: history.filter((item) => !item.read).length,
       addNotification,
       dismissNotification,
+      markNotificationsSeen,
+      markNotificationsRead,
     }),
-    [activeToasts, addNotification, dismissNotification, history],
+    [
+      activeToasts,
+      addNotification,
+      dismissNotification,
+      history,
+      markNotificationsRead,
+      markNotificationsSeen,
+    ],
   );
 
   return (

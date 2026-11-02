@@ -21,6 +21,8 @@ export function CreditTopUpSection({
   principalId,
   organizationId,
   authorizationScope,
+  canManageBilling = true,
+  workspaceKind,
   disabled,
   openHosted,
 }: {
@@ -28,6 +30,8 @@ export function CreditTopUpSection({
   readonly principalId: string;
   readonly organizationId: string;
   readonly authorizationScope: string;
+  readonly canManageBilling?: boolean;
+  readonly workspaceKind?: "personal" | "organization" | undefined;
   readonly disabled: boolean;
   readonly openHosted?: ((url: string) => void) | undefined;
 }) {
@@ -103,6 +107,7 @@ export function CreditTopUpSection({
   async function purchase(packKey: PackKey) {
     if (
       disabled ||
+      !canManageBilling ||
       busy.current ||
       !active.current ||
       !workspace.data?.canPurchase
@@ -170,7 +175,15 @@ export function CreditTopUpSection({
       <div className="billing-current">
         <div>
           <h2 id="credit-top-ups-title">Credit top-ups</h2>
-          <p>Extra credits for your account. Purchased credits never expire.</p>
+          <p>
+            Extra credits for{" "}
+            {workspaceKind === "personal"
+              ? "your personal workspace"
+              : workspaceKind === "organization"
+                ? "this organization"
+                : "this workspace"}
+            . Purchased credits never expire.
+          </p>
         </div>
         <button
           type="button"
@@ -194,16 +207,28 @@ export function CreditTopUpSection({
               <strong>
                 {BigInt(value.availableCreditUnits).toLocaleString()}
               </strong>{" "}
-              credits available in this workspace.
+              credits available{" "}
+              {workspaceKind === "organization"
+                ? "to share in this organization"
+                : workspaceKind === "personal"
+                  ? "in your personal workspace"
+                  : "in this workspace"}
+              .
             </p>
-            {value.mode === "disabled" ? (
+            {!canManageBilling ? (
+              <p className="billing-availability">
+                {workspaceKind === "personal"
+                  ? "Credit purchases are unavailable for your personal workspace. Sign in again if you manage billing here."
+                  : "An organization owner or administrator buys credits for this organization. A personal credit purchase does not add to this shared balance."}
+              </p>
+            ) : value.mode === "disabled" ? (
               <p className="billing-availability">
                 Credit purchases are not enabled yet.
               </p>
             ) : !value.canPurchase ? (
               <p className="billing-availability">
-                An active subscription and an owner or administrator account are
-                required to buy credits.
+                An active subscription and enabled billing are required to buy
+                credits here.
               </p>
             ) : null}
             {latest?.needsReview ? (
@@ -217,58 +242,63 @@ export function CreditTopUpSection({
               </p>
             ) : latest?.state === "pending" || latest?.state === "created" ? (
               <p role="status">
-                Payment has not been confirmed yet. Resume Checkout or refresh
-                credit status.
+                {canManageBilling
+                  ? "Payment has not been confirmed yet. Resume Checkout or refresh credit status."
+                  : "Organization payment is pending. An owner or administrator can follow up; credits are added only after payment verification."}
               </p>
             ) : latest?.state === "expired" ? (
               <p role="status">
-                The previous Checkout expired. You can start a new purchase.
+                {canManageBilling
+                  ? "The previous Checkout expired. You can start a new purchase."
+                  : "The previous organization Checkout expired. An owner or administrator can start a new purchase."}
               </p>
             ) : null}
             {error && <p role="alert">{error}</p>}
-            <div
-              className="billing-plan-grid billing-top-up-grid"
-              role="group"
-              aria-label="Credit packs"
-            >
-              {value.packs.map((pack) => (
-                <section className="billing-plan" key={pack.key}>
-                  <h3>{pack.creditUnits.toLocaleString()} credits</h3>
-                  <p className="billing-plan-price">
-                    <strong>
-                      {new Intl.NumberFormat(undefined, {
-                        style: "currency",
-                        currency: pack.currency,
-                        maximumFractionDigits: 0,
-                      }).format(Number(pack.priceMicros) / 1000000)}
-                    </strong>
-                    <span>one time</span>
-                  </p>
-                  <p>No expiration</p>
-                  <button
-                    type="button"
-                    className="button button--secondary"
-                    disabled={
-                      disabled ||
-                      !value.canPurchase ||
-                      pending !== null ||
-                      ((latest?.state === "pending" ||
-                        latest?.state === "created") &&
-                        latest.packKey !== pack.key)
-                    }
-                    onClick={() => void purchase(pack.key)}
-                  >
-                    {pending === pack.key
-                      ? "Opening Stripe…"
-                      : (latest?.state === "pending" ||
-                            latest?.state === "created") &&
-                          latest.packKey === pack.key
-                        ? "Resume Checkout"
-                        : `Buy ${pack.creditUnits.toLocaleString()} credits`}
-                  </button>
-                </section>
-              ))}
-            </div>
+            {canManageBilling && (
+              <div
+                className="billing-plan-grid billing-top-up-grid"
+                role="group"
+                aria-label="Credit packs"
+              >
+                {value.packs.map((pack) => (
+                  <section className="billing-plan" key={pack.key}>
+                    <h3>{pack.creditUnits.toLocaleString()} credits</h3>
+                    <p className="billing-plan-price">
+                      <strong>
+                        {new Intl.NumberFormat(undefined, {
+                          style: "currency",
+                          currency: pack.currency,
+                          maximumFractionDigits: 0,
+                        }).format(Number(pack.priceMicros) / 1000000)}
+                      </strong>
+                      <span>one time</span>
+                    </p>
+                    <p>No expiration</p>
+                    <button
+                      type="button"
+                      className="button button--secondary"
+                      disabled={
+                        disabled ||
+                        !value.canPurchase ||
+                        pending !== null ||
+                        ((latest?.state === "pending" ||
+                          latest?.state === "created") &&
+                          latest.packKey !== pack.key)
+                      }
+                      onClick={() => void purchase(pack.key)}
+                    >
+                      {pending === pack.key
+                        ? "Opening Stripe…"
+                        : (latest?.state === "pending" ||
+                              latest?.state === "created") &&
+                            latest.packKey === pack.key
+                          ? "Resume Checkout"
+                          : `Buy ${pack.creditUnits.toLocaleString()} credits`}
+                    </button>
+                  </section>
+                ))}
+              </div>
+            )}
             <p className="billing-availability">
               Monthly credits expire at the end of the billing period. Top-up
               credits remain until used. Credits are added only after payment

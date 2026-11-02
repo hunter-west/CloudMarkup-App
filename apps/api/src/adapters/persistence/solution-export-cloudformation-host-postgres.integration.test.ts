@@ -1078,14 +1078,15 @@ suite(
             ).rows[0],
           ).toEqual({ reservations: 0, ledger: 0 });
           expect(await readdir(temporaryRoot)).toEqual([]);
+          // The complete worker/download path previously made over 10,000
+          // round trips. Keep current checks while bounding metadata overhead.
+          expect(roundTrips.length).toBeLessThanOrEqual(7_500);
         } finally {
           send.mockReset();
           client.destroy();
         }
       },
-      // The native save, recovery, compile, render and download path approaches
-      // one minute on Windows. Keep CI's Linux bound and all runtime limits.
-      process.platform === "win32" ? 120_000 : 60_000,
+      60_000,
     );
 
     it("executes real compilation and download with the production settings and current successor Pro policy", async () => {

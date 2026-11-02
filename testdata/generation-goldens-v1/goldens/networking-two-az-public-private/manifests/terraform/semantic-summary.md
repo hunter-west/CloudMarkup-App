@@ -1,6 +1,6 @@
 # Terraform semantic summary: networking-two-az-public-private
 
-- Artifact digest: `sha256:c2844e02b26960aa598bd3b3c56253dac27207f1c4157cb68c63da162080cd6c`
+- Artifact digest: `sha256:550f896720a4981ba973cc4f1f78204e3f8af17edf1ea7e9a72c6fb44410c8f5`
 - Generated files: 14
 - Resources: 25
 - Application artifact contracts: 1

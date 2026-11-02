@@ -492,18 +492,30 @@ test("puts commands in Help and notifications and appearance in the profile", as
     name: "Open local mock account",
   });
   await expect(profile.locator(".profile-notification-badge")).toHaveText("1");
-  await expect(profile).toHaveAccessibleDescription("1 notifications");
+  await expect(profile).toHaveAccessibleDescription("1 new notification");
   await profile.click();
+  await expect(profile.locator(".profile-notification-badge")).toHaveCount(0);
   const account = page.getByRole("dialog", { name: "Local mock account" });
   await expect(
     account.getByRole("link", { name: "Preferences" }),
   ).toBeVisible();
-  await account.getByRole("button", { name: "Notifications (1)" }).click();
+  await account
+    .getByRole("button", { name: "Notifications (1 unread)" })
+    .click();
   await expect(
     page.getByRole("dialog", { name: "Notifications" }),
   ).toContainText("Guided presentation enabled");
   await page.keyboard.press("Escape");
   await expect(profile).toBeFocused();
+  await profile.click();
+  await expect(
+    account.getByRole("button", { name: "Notifications", exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await header
+    .getByRole("button", { name: "Professional", exact: true })
+    .click();
+  await expect(profile).toHaveAccessibleDescription("1 new notification");
   await page.screenshot({ path: ".cache/desktop-ui/profile-badge.png" });
 });
 

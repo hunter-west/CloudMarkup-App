@@ -173,11 +173,11 @@ export function navigateToValidationFinding({
         );
       return;
     }
-    const modals = document.querySelectorAll<HTMLElement>(
-      "[data-cm-modal-drawer][aria-modal='true']",
+    const panels = document.querySelectorAll<HTMLElement>(
+      "[data-cm-modal-drawer][aria-modal='true'], [data-cm-modeless-drawer]",
     );
-    const modal = [...modals].at(-1);
-    const titleId = modal?.getAttribute("aria-labelledby");
+    const panel = [...panels].at(-1);
+    const titleId = panel?.getAttribute("aria-labelledby");
     const title =
       titleId === null || titleId === undefined
         ? null

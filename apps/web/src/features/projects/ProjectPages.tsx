@@ -749,6 +749,9 @@ function AuthenticatedNewProjectPage({
   }
 
   const root = organizationRoot(context.organizationId);
+  const canReviseFailedPrompt =
+    generateDiagram.error instanceof BetaInfrastructureRequestError &&
+    ["ai.failed", "ai.cancelled"].includes(generateDiagram.error.code);
   return (
     <RoutePage
       title="Create a project"
@@ -1061,6 +1064,30 @@ function AuthenticatedNewProjectPage({
             </div>
           ) : null}
           {aiCreditMessage ? <p aria-live="polite">{aiCreditMessage}</p> : null}
+          {generateDiagram.isError ? (
+            <label className="field">
+              <span id="project-ai-retry-prompt-label">
+                What would you like to build?
+              </span>
+              <textarea
+                aria-labelledby="project-ai-retry-prompt-label"
+                aria-describedby="project-ai-retry-prompt-help"
+                rows={5}
+                maxLength={8000}
+                value={aiPrompt}
+                readOnly={!canReviseFailedPrompt}
+                onChange={(event) => {
+                  if (canReviseFailedPrompt)
+                    setAiPrompt(event.currentTarget.value);
+                }}
+              />
+              <small id="project-ai-retry-prompt-help">
+                {canReviseFailedPrompt
+                  ? "You can simplify or clarify the description before retrying in this saved project. Retrying may use credits; the estimate appears while generating."
+                  : "Keep the original description until this request is confirmed. Check Usage before retrying."}
+              </small>
+            </label>
+          ) : null}
           {generateDiagram.isPending ? (
             <>
               <progress aria-label="Generating project diagram" />
@@ -1080,6 +1107,7 @@ function AuthenticatedNewProjectPage({
               <button
                 type="button"
                 className="button button--primary"
+                disabled={aiPrompt.trim().length < 5}
                 onClick={() => {
                   generateDiagram.mutate({
                     projectId: createdProjectId,

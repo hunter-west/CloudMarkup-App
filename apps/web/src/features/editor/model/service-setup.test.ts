@@ -138,20 +138,35 @@ describe("customer service setup", () => {
       form.fields
         .filter((field) => !field.editable)
         .map(({ field }) => field.property),
-    ).toEqual(["preventDestroy"]);
+    ).toEqual(["valueMode", "preventDestroy"]);
     const converted = convertConfigurationFormValues(form, {
       ...form.initialValues,
       description: "Synthetic service credential purpose",
       recoveryWindowDays: "7",
       encryptionMode: "customer-managed",
+      valueMode: "unsupported-inline-value",
+      preventDestroy: false,
     });
     if (!converted.success) throw Error("Metadata edit rejected");
+    expect(converted.edits["valueMode"]).toEqual({
+      kind: "string",
+      value: "external-population",
+    });
+    expect(converted.edits["preventDestroy"]).toEqual({
+      kind: "boolean",
+      value: true,
+    });
     const prepared = prepareConfigurationCommand({
       ...input,
       document: created.document,
       edits: converted.edits,
       target: { kind: "node", id: created.nodeId },
     });
+    expect(prepared.changes.map(({ property }) => property)).toEqual([
+      "description",
+      "encryptionMode",
+      "recoveryWindowDays",
+    ]);
     expect(
       prepared.previewDocument.nodes.find((node) => node.id === created.nodeId)
         ?.semantic.configuration.values,

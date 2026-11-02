@@ -102,7 +102,7 @@ describe("application deferred routes", () => {
     fireEvent.click(
       within(
         screen.getByRole("navigation", { name: "Primary navigation" }),
-      ).getByRole("link", { name: "Organizations" }),
+      ).getByRole("link", { name: "Personal & organizations" }),
     );
     expect(
       await screen.findByRole("heading", { name: "Organizations" }),

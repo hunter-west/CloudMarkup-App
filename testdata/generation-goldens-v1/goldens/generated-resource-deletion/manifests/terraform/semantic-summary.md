@@ -1,6 +1,6 @@
 # Terraform semantic summary: generated-resource-deletion
 
-- Artifact digest: `sha256:6325b884f69aedf41e75f405b702a95eef5c6d7c850e98b00d2e2d109443c4c1`
+- Artifact digest: `sha256:a392897eb45c663aa83a94b15458739aacc34de7163f731bc46ed84b8e17b17c`
 - Generated files: 14
 - Resources: 17
 - Application artifact contracts: 1

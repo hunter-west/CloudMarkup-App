@@ -423,48 +423,83 @@ it.each(["unsupported", "availability-error", "publication-pending"] as const)(
   },
 );
 
-it("retries generation in the already-created project without creating another project", async () => {
-  ai.request.mockReset();
-  ai.draft.mockReset();
-  const request = renderSetup("new");
-  const architectureDocument = loadBlankAwsEditorArchitectureDocument();
-  request.mockResolvedValue({
-    data: { project: { id: "project_ai_retry", organizationId: "org_setup" } },
-  });
-  ai.draft.mockResolvedValue({
-    data: { data: { projectId: "project_ai_retry", architectureDocument } },
-    metadata: { etag: '"draft-1"' },
-  });
-  ai.request.mockRejectedValue(
-    new BetaInfrastructureRequestError("ai.failed", "job_setup_test"),
-  );
-  fireEvent.click(screen.getByRole("radio", { name: /^Describe with AI/u }));
-  fireEvent.change(screen.getByRole("textbox", { name: /^Project name/u }), {
-    target: { value: "AI application" },
-  });
-  fireEvent.change(
-    screen.getByRole("textbox", { name: "What would you like to build?" }),
-    { target: { value: "An S3 bucket for uploads" } },
-  );
-  fireEvent.click(screen.getByRole("button", { name: "Create project" }));
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Request reference: job_setup_test.",
-  );
-  expect(screen.getByRole("alert")).toHaveTextContent(
-    "continue editing manually",
-  );
-  fireEvent.click(screen.getByRole("button", { name: "Retry diagram" }));
-  await waitFor(() => {
-    expect(ai.request).toHaveBeenCalledTimes(2);
-  });
-  expect(request).toHaveBeenCalledOnce();
-  expect(
-    screen.getByRole("link", { name: "Open saved project" }),
-  ).toHaveAttribute(
-    "href",
-    "/organizations/org_setup/projects/project_ai_retry/editor",
-  );
-});
+it.each([true, false])(
+  "retries in the saved project and permits description changes only after confirmed failure (terminal: %s)",
+  async (terminal) => {
+    ai.request.mockReset();
+    ai.draft.mockReset();
+    const request = renderSetup("new");
+    const architectureDocument = loadBlankAwsEditorArchitectureDocument();
+    request.mockResolvedValue({
+      data: {
+        project: { id: "project_ai_retry", organizationId: "org_setup" },
+      },
+    });
+    ai.draft.mockResolvedValue({
+      data: { data: { projectId: "project_ai_retry", architectureDocument } },
+      metadata: { etag: '"draft-1"' },
+    });
+    ai.request.mockRejectedValue(
+      new BetaInfrastructureRequestError(
+        terminal ? "ai.failed" : "ai.queue-unconfirmed",
+        "job_setup_test",
+      ),
+    );
+    fireEvent.click(screen.getByRole("radio", { name: /^Describe with AI/u }));
+    fireEvent.change(screen.getByRole("textbox", { name: /^Project name/u }), {
+      target: { value: "AI application" },
+    });
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "What would you like to build?" }),
+      { target: { value: "An S3 bucket for uploads" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Create project" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Request reference: job_setup_test.",
+    );
+    const description = screen.getByRole("textbox", {
+      name: "What would you like to build?",
+    });
+    expect(description).toHaveValue("An S3 bucket for uploads");
+    if (terminal) {
+      expect(description).not.toHaveAttribute("readonly");
+      fireEvent.change(description, { target: { value: "" } });
+      expect(
+        screen.getByRole("button", { name: "Retry diagram" }),
+      ).toBeDisabled();
+      fireEvent.change(description, {
+        target: { value: "One private S3 upload bucket" },
+      });
+    } else {
+      expect(description).toHaveAttribute("readonly");
+      expect(
+        screen.getByText(
+          /Keep the original description until this request is confirmed/u,
+        ),
+      ).toBeVisible();
+    }
+    fireEvent.click(screen.getByRole("button", { name: "Retry diagram" }));
+    await waitFor(() => {
+      expect(ai.request).toHaveBeenCalledTimes(2);
+    });
+    expect(request).toHaveBeenCalledOnce();
+    expect(ai.request.mock.calls[1]?.[0]).toMatchObject({
+      projectId: "project_ai_retry",
+      request: {
+        proposalVersion: 6,
+        requirements: terminal
+          ? "One private S3 upload bucket"
+          : "An S3 bucket for uploads",
+      },
+    });
+    expect(
+      screen.getByRole("link", { name: "Open saved project" }),
+    ).toHaveAttribute(
+      "href",
+      "/organizations/org_setup/projects/project_ai_retry/editor",
+    );
+  },
+);
 
 it.each([false, true])(
   "provides scoped billing and permitted usage recovery after AI denial (usage access: %s)",

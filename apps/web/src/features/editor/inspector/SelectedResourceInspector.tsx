@@ -1474,6 +1474,15 @@ function ConfigurePanel({
             model={formModel}
           />
         )}
+        {formModel.fixedFields.length === 0 ? null : (
+          <AdvancedConfigurationFields
+            disclosureId={`${advancedDisclosureId}-fixed`}
+            fields={formModel.fixedFields}
+            form={form}
+            model={formModel}
+            label="Fixed settings"
+          />
+        )}
         <div className="selected-inspector__actions">
           <Button type="submit" variant="primary">
             Review changes

@@ -126,6 +126,15 @@ export class SolutionExportWorkflowStorage {
   async metadata(
     objectId: string,
   ): Promise<{ reference: StoredObjectReference; state: string } | null> {
+    if (this.authority.objectMetadata !== undefined) {
+      const { row } = await this.authority.objectMetadata(objectId);
+      return row === null
+        ? null
+        : {
+            reference: exportStoredObject(row),
+            state: exportRunText(row["lifecycle_state"]),
+          };
+    }
     const found = await this.authority.query(
       sql(
         "SELECT * FROM stored_objects WHERE organization_id=$1 AND project_id=$2 AND object_id=$3",

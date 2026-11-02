@@ -1,6 +1,6 @@
 # Terraform semantic summary: multiple-downstream-dependencies
 
-- Artifact digest: `sha256:051df3076a813c19ec15995ba2d145f2226bc1cefa2623145baf04cd20e96e31`
+- Artifact digest: `sha256:e375687a4a148cba004564ab1f8785b5144df7305f3a311720084e53b025d728`
 - Generated files: 14
 - Resources: 6
 - Application artifact contracts: 1

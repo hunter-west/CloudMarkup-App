@@ -29,6 +29,7 @@ export type ConfigurationFormValues = Readonly<
 export interface ConfigurationFormFieldModel {
   readonly compatibleVariables: ArchitectureDocument["variables"];
   readonly editable: boolean;
+  readonly fixed: boolean;
   readonly field: EditorCatalogConfigurationField;
   readonly inputId: string;
   readonly reason?: string;
@@ -41,6 +42,7 @@ export interface ConfigurationFormModel {
   >;
   readonly document: ArchitectureDocument;
   readonly fields: readonly ConfigurationFormFieldModel[];
+  readonly fixedFields: readonly ConfigurationFormFieldModel[];
   readonly initialValues: ConfigurationFormValues;
   readonly recommendedFields: readonly ConfigurationFormFieldModel[];
   readonly selected: ConfigurationFormSubject;
@@ -98,6 +100,7 @@ export function isCredentialConfigurationField(
 
 function fieldEditability(
   field: EditorCatalogConfigurationField,
+  fixed: boolean,
 ): Pick<ConfigurationFormFieldModel, "editable" | "reason"> {
   if (isCredentialConfigurationField(field)) {
     return {
@@ -120,17 +123,31 @@ function fieldEditability(
         "This catalog version does not declare safe node and attribute choices for this reference.",
     };
   }
-  if (
-    field.schema.kind === "boolean" &&
-    field.schema.const !== undefined &&
-    field.schema.default !== undefined
-  ) {
+  if (fixed) {
     return {
       editable: false,
-      reason: `The catalog fixes this value to ${String(field.schema.const)}.`,
+      reason: "This catalog variant fixes this setting.",
     };
   }
   return { editable: true };
+}
+
+function isFixedConfigurationField(
+  field: EditorCatalogConfigurationField,
+): boolean {
+  if (field.valueSource !== "literal" || field.schema.default === undefined)
+    return false;
+  // A required attestation without a default still requires an explicit choice.
+  // A one-item list enum restricts its members, not the list's cardinality.
+  if (field.schema.kind === "boolean") return field.schema.const !== undefined;
+  return (
+    field.required &&
+    (field.schema.kind === "string" ||
+      field.schema.kind === "number" ||
+      field.schema.kind === "integer") &&
+    field.schema.enum?.length === 1 &&
+    field.schema.enum[0] === field.schema.default
+  );
 }
 
 function safeInitialValue(
@@ -222,9 +239,17 @@ export function createConfigurationFormModel(
     Record<string, Readonly<ConfigurationValue>>
   >;
   const fields = selected.configuration.fields.map((field) => {
-    const editability = fieldEditability(field);
+    const current = valueAt(currentValues, field.property);
+    const fixed =
+      isFixedConfigurationField(field) &&
+      (current === undefined ||
+        ("value" in current &&
+          current.kind === field.schema.kind &&
+          current.value === field.schema.default));
+    const editability = fieldEditability(field, fixed);
     return {
       ...editability,
+      fixed,
       compatibleVariables:
         field.valueSource === "sensitive-variable-reference"
           ? document.variables.filter(
@@ -242,14 +267,23 @@ export function createConfigurationFormModel(
       safeInitialValue(field, valueAt(currentValues, field.property)),
     ]),
   );
+  const recommendedFields = fields.filter(
+    ({ field, fixed }) =>
+      !fixed &&
+      field.required &&
+      (field.schema.default === undefined || isFixedConfigurationField(field)),
+  );
 
   return {
-    advancedFields: fields.filter(({ field }) => field.advanced),
+    advancedFields: fields.filter(
+      (field) => !field.fixed && !recommendedFields.includes(field),
+    ),
     currentValues,
     document,
     fields,
+    fixedFields: fields.filter(({ fixed }) => fixed),
     initialValues,
-    recommendedFields: fields.filter(({ field }) => !field.advanced),
+    recommendedFields,
     selected,
   };
 }

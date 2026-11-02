@@ -5,7 +5,7 @@ This directory was generated from immutable Architecture and Workload contracts.
 ## Compatibility
 
 - Compiler: `cloudmarkup.iac-compiler@1.2.1`
-- Catalog: `aws.cloudmarkup.notes-api-catalog@0.30.0` (`sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94`)
+- Catalog: `aws.cloudmarkup.notes-api-catalog@0.30.0` (`sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619`)
 - Target format: `1.0.0`
 - Terraform: `>= 1.5.0, < 2.0.0`
 - AWS provider: `hashicorp/aws` (`>= 6.55.0, < 7.0.0`)

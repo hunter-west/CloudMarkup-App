@@ -156,7 +156,7 @@ describe("organization chooser", () => {
     expect(
       await screen.findByRole("heading", {
         level: 2,
-        name: "Your workspaces",
+        name: "Choose where to work",
       }),
     ).toBeInTheDocument();
     const primaryCard = screen
@@ -166,7 +166,7 @@ describe("organization chooser", () => {
     expect(within(primaryCard).getByText("Owner access")).toBeInTheDocument();
     expect(
       within(primaryCard).getByText(
-        "Projects in this workspace are shared with authorized organization members.",
+        "Projects in this organization are shared with authorized members.",
       ),
     ).toBeVisible();
     fireEvent.click(within(primaryCard).getByText("Organization details"));
@@ -186,7 +186,7 @@ describe("organization chooser", () => {
     expect(screen.getByText("Viewer access")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Open your personal workspace or choose an organization to collaborate.",
+        "Use your personal workspace for private projects, or choose an organization for shared projects.",
       ),
     ).toBeVisible();
     expect(

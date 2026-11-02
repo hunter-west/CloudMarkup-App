@@ -18,8 +18,8 @@
       "architectureDocumentId": "document_event_multi",
       "architectureId": "architecture_event_multi",
       "architectureRevisionId": "revision_event_sns_fanout_consumer_primary_1",
-      "architectureContentHash": "sha256:e87ab31c06e961e53a65315474c50153fd6c553d1eeda482e89d4ebe2c23c344",
-      "architectureDocumentHash": "sha256:05fbd928909f964f1afa779c9dd2800e1c71b4d17668503d478e2c2f8a9b82dd",
+      "architectureContentHash": "sha256:239372b718801a5bb394bb9e87dd1491850ddc35ecf054239c213862eed62cbe",
+      "architectureDocumentHash": "sha256:950b721aabea065994d6eb4daeb84dce73036cb1c497ae89b61adf9232f62653",
       "architectureVisualHash": "sha256:c139d36ddce7505892967e359fb8f7425af77b2b42033ba57c2a6a81986fd43e",
       "workloadContentHash": "sha256:9a3486918f64576f540c075c1cb24693c5f65275801ed8dfc277cfa82ba5f69b",
       "solutionRevisionId": "solution_event_multi_revision_1",
@@ -28,7 +28,7 @@
       "catalog": {
         "id": "aws.cloudmarkup.notes-api-catalog",
         "version": "0.30.0",
-        "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94"
+        "digest": "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619"
       }
     },
     "resources": [
@@ -2718,8 +2718,8 @@
       "architectureDocumentId": "document_event_multi",
       "architectureId": "architecture_event_multi",
       "architectureRevisionId": "revision_event_sns_fanout_consumer_primary_1",
-      "architectureContentHash": "sha256:e87ab31c06e961e53a65315474c50153fd6c553d1eeda482e89d4ebe2c23c344",
-      "architectureDocumentHash": "sha256:05fbd928909f964f1afa779c9dd2800e1c71b4d17668503d478e2c2f8a9b82dd",
+      "architectureContentHash": "sha256:239372b718801a5bb394bb9e87dd1491850ddc35ecf054239c213862eed62cbe",
+      "architectureDocumentHash": "sha256:950b721aabea065994d6eb4daeb84dce73036cb1c497ae89b61adf9232f62653",
       "architectureVisualHash": "sha256:c139d36ddce7505892967e359fb8f7425af77b2b42033ba57c2a6a81986fd43e",
       "workloadContentHash": "sha256:9a3486918f64576f540c075c1cb24693c5f65275801ed8dfc277cfa82ba5f69b",
       "solutionRevisionId": "solution_event_multi_revision_1",
@@ -2728,7 +2728,7 @@
       "catalog": {
         "id": "aws.cloudmarkup.notes-api-catalog",
         "version": "0.30.0",
-        "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94"
+        "digest": "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619"
       }
     },
     "metadata": {
@@ -2837,8 +2837,8 @@
         "path": "infrastructure/README.md",
         "mediaType": "text/markdown",
         "ownership": "generated",
-        "content": "# Cloud Markup deterministic Terraform\n\nThis directory was generated from immutable Architecture and Workload contracts. It does not build application source, run Terraform, or deploy.\n\n## Compatibility\n\n- Compiler: `cloudmarkup.iac-compiler@1.2.1`\n- Catalog: `aws.cloudmarkup.notes-api-catalog@0.30.0` (`sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94`)\n- Target format: `1.0.0`\n- Terraform: `\u003e= 1.5.0, \u003c 2.0.0`\n- AWS provider: `hashicorp/aws` (`\u003e= 6.55.0, \u003c 7.0.0`)\n- Architecture revision: `revision_event_sns_fanout_consumer_primary_1`\n- Solution Revision: `solution_event_multi_revision_1`\n\n## Application artifacts\n\n- `workload_event_sns_fanout_consumer_primary` (complete-supported-pattern): deterministic-relative-package at `../application/artifacts/workload_event_sns_fanout_consumer_primary/function.zip`.\n- `workload_event_sns_fanout_consumer_secondary` (complete-supported-pattern): deterministic-relative-package at `../application/artifacts/workload_event_sns_fanout_consumer_secondary/function.zip`.\n\nCopy `terraform.tfvars.example` to a separately protected input file and replace every placeholder. Never put credentials or secret values in committed Terraform files. Review the complete diff, initialize from an approved provider mirror, validate, plan, and deploy only in customer-owned CI/CD with customer approval.\n",
-        "digest": "sha256:5f74545e127641f614e3ab5eb6db97f55c18301e88084e53b7359258fa35b881"
+        "content": "# Cloud Markup deterministic Terraform\n\nThis directory was generated from immutable Architecture and Workload contracts. It does not build application source, run Terraform, or deploy.\n\n## Compatibility\n\n- Compiler: `cloudmarkup.iac-compiler@1.2.1`\n- Catalog: `aws.cloudmarkup.notes-api-catalog@0.30.0` (`sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619`)\n- Target format: `1.0.0`\n- Terraform: `\u003e= 1.5.0, \u003c 2.0.0`\n- AWS provider: `hashicorp/aws` (`\u003e= 6.55.0, \u003c 7.0.0`)\n- Architecture revision: `revision_event_sns_fanout_consumer_primary_1`\n- Solution Revision: `solution_event_multi_revision_1`\n\n## Application artifacts\n\n- `workload_event_sns_fanout_consumer_primary` (complete-supported-pattern): deterministic-relative-package at `../application/artifacts/workload_event_sns_fanout_consumer_primary/function.zip`.\n- `workload_event_sns_fanout_consumer_secondary` (complete-supported-pattern): deterministic-relative-package at `../application/artifacts/workload_event_sns_fanout_consumer_secondary/function.zip`.\n\nCopy `terraform.tfvars.example` to a separately protected input file and replace every placeholder. Never put credentials or secret values in committed Terraform files. Review the complete diff, initialize from an approved provider mirror, validate, plan, and deploy only in customer-owned CI/CD with customer approval.\n",
+        "digest": "sha256:92c94131c7ac1e1aefd01b0f636f07a93205a2e37def413ac7b696bef3e54332"
       }
     ],
     "applicationArtifacts": [
@@ -3043,7 +3043,7 @@
         }
       }
     ],
-    "digest": "sha256:561586c9c327eacc6f992fe8d615cdf512f6759c167848bade425531686a8631"
+    "digest": "sha256:b2b0ed9faaf3f8270d81144c1252c7e45ad0655f57631a58eead0f0183ed826d"
   },
   "diagnostics": [
     {

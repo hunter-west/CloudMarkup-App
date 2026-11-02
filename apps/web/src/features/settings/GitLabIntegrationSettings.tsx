@@ -40,7 +40,7 @@ function errorMessage(error: unknown): string {
   if (code === "service_unavailable")
     return "GitLab connections are unavailable in this deployment.";
   if (code === "access_denied" || code === "authentication_required")
-    return "Sign in again and check your workspace permissions before managing GitLab.";
+    return "Sign in again and check your integration permissions before managing GitLab.";
   return "The GitLab request could not be confirmed. Reload your connection status before trying again.";
 }
 
@@ -223,9 +223,7 @@ export function GitLabIntegrationSettings({
   }, [canConnect, completeLink, intent, organizationId, principal.id]);
   if (!canRead || runtime.sessionExpired)
     return (
-      <p role="alert">
-        You do not have permission to view workspace integrations.
-      </p>
+      <p role="alert">You do not have permission to view these integrations.</p>
     );
   return (
     <section
@@ -240,8 +238,10 @@ export function GitLabIntegrationSettings({
       </header>
       <p className="integration-settings__description">
         {connections.isSuccess
-          ? "Connect your GitLab.com account for this workspace. Your connection belongs to you and is not shared with other members."
-          : "GitLab availability must be confirmed before you can connect. Download an available bundle or use GitHub when your account and workspace permit it."}
+          ? workspaceKind === "personal"
+            ? "Connect your GitLab.com account for your personal projects."
+            : "Connect your GitLab.com account for this organization's projects. Your connection belongs to you and is not shared with other members."
+          : "GitLab availability must be confirmed before you can connect. Download an available bundle or use GitHub when available for your account."}
       </p>
       <p>
         {workspaceKind === "personal"
@@ -267,7 +267,11 @@ export function GitLabIntegrationSettings({
       ) : (
         <>
           {list.length === 0 ? (
-            <p>You have no GitLab connections in this workspace.</p>
+            <p>
+              {workspaceKind === "personal"
+                ? "You have no GitLab connections in your personal workspace."
+                : "You have no GitLab connections in this organization."}
+            </p>
           ) : (
             <ul className="integration-settings__connections">
               {list.map((item) => (

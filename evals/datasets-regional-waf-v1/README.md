@@ -23,7 +23,7 @@ node evals/datasets-regional-waf-v1/generate.mjs --check
 pnpm exec vitest run --project=model-gateway packages/model-gateway/src/regional-waf-evaluation-source.test.ts
 ```
 
-The generator rehashes the complete actual installed catalog and compares its
+The generator rehashes the complete retained original catalog and compares its
 exact identity plus every service configuration schema/key to the frozen
 projection. `--write` regenerates this source's JSON mirror only; it does not
 update the reviewed projection, old inputs, an evaluation policy or a report.
@@ -31,12 +31,13 @@ The source test rejects altered artifacts even when the caller supplies a newly
 computed digest.
 
 The historical source generator verifies the retained exact 71-definition
-artifact. This successor generator and its source tests verify the installed
-73-definition artifact. Both reject a substituted catalog, including changes to
-existing definitions or validation rules. Historical model grounding resolves
-only the original exact binding; current grounding defaults to the installed
-catalog. The explicitly current-only resolver and native compiler do not admit
-the historical artifact.
+artifact. This successor generator and its source tests verify the exact
+73-definition artifact retained in
+`packages/provider-aws/src/model-evaluation-source/catalog-73-v1.json`. Both
+reject a substituted catalog, including changes to existing definitions or
+validation rules. Historical model grounding resolves only the original exact
+binding; current grounding defaults to the installed catalog. The explicitly
+current-only resolver and native compiler do not admit the historical artifact.
 
 Deterministic configuration, connection validation and native CloudFormation
 export admission use these structural checks and their owning tests. Model

@@ -33,6 +33,7 @@ export type {
   ExperiencePreferenceState,
   FirstUseStatus,
   NotesApiWalkthroughStatus,
+  EditorWalkthroughStepId,
   ProjectStartChoice,
   ExperiencePreferenceStorageStatus,
 } from "./experience-preference.js";

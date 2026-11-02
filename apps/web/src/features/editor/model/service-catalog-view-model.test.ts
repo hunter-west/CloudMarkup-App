@@ -57,6 +57,13 @@ describe("createServiceCatalogViewModel", () => {
 
     expect(serviceIds(byName)).toContain("aws.dynamodb.table");
     expect(serviceIds(byCapability)).toContain("aws.lambda.function");
+    const ec2 = createViewModel("EC2 instance");
+    expect(serviceIds(ec2)).toContain("aws.ec2.instance");
+    const instance = ec2.categories
+      .flatMap((category) => category.items)
+      .find((item) => item.serviceId === "aws.ec2.instance");
+    expect(instance?.service.catalogVisibility).not.toBe("configuration");
+    expect(instance?.mappingLabel).toContain("implemented");
 
     const imageSearch = createViewModel("Published image identity");
     expect(serviceIds(imageSearch)).toEqual(["aws.ecr.repository"]);

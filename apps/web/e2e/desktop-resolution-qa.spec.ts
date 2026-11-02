@@ -415,12 +415,14 @@ test("production workspace, overlays, catalog, inspector and return paths fit", 
     await withinViewport(inspector, page);
     if (attempt === 0) {
       await capture(page, testInfo, "editor-inspector");
+      await inspector.getByText(/^Optional settings \(/u).click();
       const functionName = inspector.getByLabel(/^Function name/u);
       await usableControl(functionName, page);
       await expect(functionName).toHaveValue("notes-api-handler");
+      await inspector.getByText(/^Fixed settings \(/u).click();
       const runtime = inspector.getByLabel(/^Runtime/u);
-      await usableControl(runtime, page);
-      await expect(runtime).toHaveValue("nodejs24.x");
+      await expect(runtime).toBeVisible();
+      await expect(runtime).toHaveText("nodejs24.x");
       await capture(page, testInfo, "inspector-scrolled");
     }
     await page.keyboard.press("Escape");

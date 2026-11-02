@@ -9,6 +9,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -116,6 +117,17 @@ describe("verified personal integration settings", () => {
     expect(
       screen.getByText("GitLab scope: org_personal_fixture"),
     ).toBeVisible();
+    const bitbucket = screen.getByRole("region", { name: "Bitbucket" });
+    expect(within(bitbucket).getByText("Coming soon")).toBeVisible();
+    expect(within(bitbucket).getByText(/personal projects/)).toBeVisible();
+    const connect = within(bitbucket).getByRole("button", {
+      name: "Connect Bitbucket",
+    });
+    expect(connect).toBeDisabled();
+    fireEvent.click(connect);
+    expect(request.mock.calls.some(([op]) => op.startsWith("bitbucket"))).toBe(
+      false,
+    );
     expect(request).toHaveBeenCalledWith("account.workspaces.get", {
       path: { organizationId: workspace.id },
     });
@@ -131,6 +143,9 @@ describe("verified personal integration settings", () => {
       await screen.findByRole("button", { name: "Create personal workspace" }),
     ).toBeVisible();
     expect(screen.queryByText(/GitHub scope:/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "Bitbucket" }),
+    ).not.toBeInTheDocument();
     expect(request).toHaveBeenCalledTimes(1);
   });
 
@@ -190,6 +205,9 @@ describe("verified personal integration settings", () => {
       /could not be verified/,
     );
     expect(screen.queryByText(/GitHub scope:/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "Bitbucket" }),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Create personal workspace" }),
     ).not.toBeInTheDocument();

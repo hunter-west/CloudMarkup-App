@@ -235,3 +235,83 @@ changes. CSS bounds and link wrapping are verified in a browser; the existing
 desktop navigation case additionally keeps page content actions reachable. No
 new full suite was launched from this lane. `check:web`, integrated browser
 admission and private hosted release admission remain with the release owner.
+
+### Account menus and notification acknowledgement
+
+This follow-up starts at public main `d2dd761903b192d3691c5601948a10b28df38d3f`
+on `fix/account-menu-notifications`. It owns shared shell navigation and
+tab-local notifications; organization/provider, billing, AI and catalog screens
+retain their specialist owners. Preserve current styling, routes, permissions
+and deployment safeguards.
+
+The navigation map is **Project work** (Dashboard, Projects, Templates),
+selected **Personal workspace** or **Organization** (Usage, Plans & billing,
+authorized organization settings/member/integration links), then **Personal
+account** (personal settings, invitations and **Personal & organizations**). The
+directory switch includes both personal and organization destinations. Current
+scope names are shown where verified; remembered selectors on account pages
+receive a neutral **Selected workspace** label. Existing tour anchor keys remain
+stable. The duplicate directory action is removed when no workspace has been
+selected. Authorized staff account support is grouped with Help & support;
+shared-device recovery stays with sign-out actions instead of personal settings.
+
+The previous profile badge counted all retained history. It now counts unseen
+items. Opening the profile acknowledges its existing badge items while leaving
+Notifications' unread count intact. Opening Notifications marks its existing
+history read; later arrivals remain new/unread and can be acknowledged with
+**Mark all as read**. Explicit captured IDs prevent a concurrent arrival from
+being consumed by an earlier acknowledgement. Toast dismissal, read state and
+required actions remain independent; reading never deletes history or resolves
+an error or other authoritative state.
+
+This is an in-memory presentation contract only. History and acknowledgements
+survive view/route remounts within their provider session. Reloads/new tabs have
+independent histories, and existing actor-bound presentation providers reset on
+identity changes. No content or read markers are written to browser storage, no
+cross-session synchronization is claimed, and no backend/database migration is
+needed. Reverting the web source restores the earlier presentation without
+changing account or project data.
+
+Acceptance requires retained unread/read distinctions, badge clearing on profile
+opening, fresh badges for later arrivals, preserved error/toast records,
+independent sessions, and accessible desktop/mobile dismissal and focus.
+
+Focused evidence on this isolated source:
+
+- Frozen installation used pinned Node 24.18.0 and pnpm 11.16.0. All 14 web
+  dependency build tasks passed in 1m33.895s. The production Vite build passed
+  in 2.66s, retaining its existing IIFE-name and large-chunk warnings.
+- The four owning React suites passed all 68 cases in 52.23s: App, deferred
+  routes, NotificationProvider and WorkspaceTour. The final additional
+  route-retention assertion passed in the existing App scenario (20.26s focused
+  run). NotificationProvider adds one case for captured-ID concurrency, retained
+  error/toast records and independent sessions; the existing dismissal case now
+  covers unseen versus unread state. This is criticality 8 protection for the
+  reported persistent-badge regression. Browser executable case count is
+  unchanged; existing cases cover the real modal/focus boundary rather than
+  duplicating provider-state permutations. A same-command pre-change runtime was
+  not measured.
+- Nine selected browser cases passed across focused runs: desktop readability,
+  navigation/history/overflow/keyboard access, both dashboard palettes,
+  personal-to-organization navigation, desktop and phone account navigation, the
+  320-pixel modal notification journey (27.1s) and the existing editor
+  profile/notification/new-event regression (49.0s). No retries or assertion
+  deadlines were increased. The mobile setup was corrected to navigate from
+  account settings via primary navigation and to assert background controls
+  after closing the modal, when they are accessible.
+- Changed-file lint and formatting, web and browser-test types, documentation
+  links and `git diff --check` passed. Their separate timings are unmeasured.
+  Screenshots and diagnostic configuration remain ignored outside source.
+- `security:check` passed its 12 policy/secret-scanner tests, static checks,
+  content scan and registry audit. The unchanged dependency set has nine
+  moderate advisories and none at the high-severity failure threshold.
+
+Restricted test startup first failed before assertions on a Windows temporary
+rename; a task-local temp directory resolved it. Loopback sockets required the
+normal reviewed execution context for synthetic browser tests. These are
+environment limits, not product failures or changes to security/access policy.
+
+Implementation is ready for integration. The sole release owner owns the
+combined `check:web`, selected browser profiles and `check:public` on the frozen
+batch. Publication, merge, deployment and live acceptance remain separate; this
+lane launches no PR/CI or AWS deployment independently.

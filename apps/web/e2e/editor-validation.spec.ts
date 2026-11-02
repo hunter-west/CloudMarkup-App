@@ -213,6 +213,13 @@ async function configureNode(
   });
   await expect(configureInspector).toBeVisible();
   const field = configureInspector.getByLabel(input.fieldName);
+  if (!(await field.isVisible())) {
+    await configureInspector
+      .locator("summary")
+      .filter({ hasText: /^Optional settings \(/u })
+      .click();
+  }
+  await expect(field).toBeVisible();
   await field.fill(input.value);
   await configureInspector
     .getByRole("button", { name: "Review changes" })
@@ -768,7 +775,14 @@ test.describe("Prompt 20 manual editor milestone", () => {
       .getByRole("button", { name: /^Go to .+ · Server-side encryption/u })
       .click();
     const encryptionField = page.getByLabel(/^Server-side encryption/u);
-    await expect(encryptionField).toBeFocused();
+    await expect(encryptionField).toBeVisible();
+    await expect(encryptionField).toHaveJSProperty("tagName", "OUTPUT");
+    await expect(encryptionField).toHaveText("true");
+    await expect(
+      page
+        .getByRole("dialog", { name: "Configure inspector" })
+        .getByRole("heading", { name: "Configure inspector", exact: true }),
+    ).toBeFocused();
     await expect(
       encryptionField.locator(
         "xpath=ancestor::*[@data-validation-highlight='true']",

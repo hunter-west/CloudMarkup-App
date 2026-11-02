@@ -12101,7 +12101,7 @@
     }
   ],
   "contractVersion": 1,
-  "digest": "sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94",
+  "digest": "sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619",
   "kind": "cloudmarkup.provider-catalog",
   "migrations": [],
   "provider": {
@@ -18261,7 +18261,7 @@
           "title": "Bootstrap and application execution"
         },
         {
-          "explanation": "Windows, Spot/fleets, imports, existing ENIs, IPv6/public addresses, launch templates, Auto Scaling, data disks, non-root image mappings and alternate gp3 performance are unsupported.",
+          "explanation": "Windows, Spot/fleets, imports, existing ENIs, IPv6/public addresses, launch templates, Auto Scaling, inline data-disk mappings, non-root AMI mappings and alternate root gp3 performance are unsupported. Separate encrypted gp3 data volumes and up to four same-AZ attachments are supported through the EBS volume and attachment resources.",
           "id": "aws.ec2.instance.unsupported.launch-modes",
           "title": "Other launch and storage modes"
         }

@@ -159,6 +159,42 @@ describe("guided onboarding and professional productivity", () => {
     );
   });
 
+  it("resumes an interrupted tour step across remount and preserves dismissal", async () => {
+    let view = await renderEditor("template", 900);
+    const contentHash = editorRoot().dataset["contentHash"];
+    const tour = screen.getByTestId("guided-walkthrough");
+    fireEvent.click(within(tour).getByRole("button", { name: "Next" }));
+    fireEvent.click(within(tour).getByRole("button", { name: "Next" }));
+    expect(
+      within(tour).getByRole("heading", { name: "Connect services" }),
+    ).toBeVisible();
+    view.unmount();
+
+    view = await renderEditor("template", 900);
+    const resumed = screen.getByTestId("guided-walkthrough");
+    expect(
+      within(resumed).getByRole("heading", { name: "Connect services" }),
+    ).toBeVisible();
+    expect(resumed).toHaveTextContent("Step 3 of 7");
+    expect(editorRoot()).toHaveAttribute("data-content-hash", contentHash);
+    const header = screen.getByRole("banner", { name: "Application header" });
+    fireEvent.click(
+      within(header).getByRole("button", { name: "Professional" }),
+    );
+    expect(screen.queryByTestId("guided-walkthrough")).not.toBeInTheDocument();
+    fireEvent.click(within(header).getByRole("button", { name: "Guided" }));
+    const restored = screen.getByTestId("guided-walkthrough");
+    expect(
+      within(restored).getByRole("heading", { name: "Connect services" }),
+    ).toBeVisible();
+    fireEvent.click(within(restored).getByRole("button", { name: "Dismiss" }));
+    view.unmount();
+
+    await renderEditor("template", 900);
+    expect(screen.queryByTestId("guided-walkthrough")).not.toBeInTheDocument();
+    expect(editorRoot()).toHaveAttribute("data-content-hash", contentHash);
+  });
+
   it("keeps permission teaching truthful and exposes the revision placeholder from Project status", async () => {
     await renderEditor("template");
 

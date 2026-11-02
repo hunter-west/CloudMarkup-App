@@ -25,7 +25,11 @@ Provider-specific facts cannot move into `@cloudmarkup/domain`.
 
 The installed catalog source contains 73 definitions, 139 connections and 34
 validators. Its exact digest is
-`sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94`.
+`sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619`. The
+October 30 metadata correction distinguishes unsupported inline/AMI disk
+mappings from supported separate EBS volumes and attachments. Configuration,
+ports, validation and native projection semantics are unchanged. Frozen model
+evaluation inputs retain their separately checked original catalog bodies.
 Current services, configurations, validators and export mappings retain the
 prepared 0.29.0 behavior. Removing historical migration metadata changes the
 artifact identity, so 0.30.0 has a new version and digest.

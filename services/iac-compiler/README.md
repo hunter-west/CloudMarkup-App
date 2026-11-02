@@ -21,7 +21,7 @@ support. Unsupported or metadata-only mappings never become executable by
 implication.
 
 The default registry installs one exact AWS catalog: 0.30.0, with digest
-`sha256:8e9b1b23bbcdf723352044baddd8e79468d70ed5a719af914036992daf91fb94`. Older
+`sha256:5dc9603e3df5a09835946dd11554aae5ece39803f12aee118f1227e9a591f619`. Older
 immutable AWS bindings are rejected. Mutable drafts may use the editor's
 lossless catalog-opening review before a new immutable freeze; old revisions and
 evidence remain unchanged. Historical catalog dispatch, replay tuples and

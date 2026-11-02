@@ -11,8 +11,10 @@ import { useOptionalPresentationPreferencesRemote } from "../api/index.js";
 import {
   DEFAULT_EXPERIENCE_PREFERENCE,
   getExperiencePreferenceStorageKey,
+  getEditorWalkthroughStepStorageKey,
   normalizeDefaultRegion,
   parseStoredExperiencePreference,
+  parseEditorWalkthroughStep,
   serializeExperiencePreference,
   type CompleteFirstUseInput,
   type ExperiencePreference,
@@ -20,6 +22,7 @@ import {
   type ExperiencePreferenceStorage,
   type ExperiencePreferenceStorageStatus,
   type NotesApiWalkthroughStatus,
+  type EditorWalkthroughStepId,
 } from "./experience-preference.js";
 import { LOCAL_MOCK_ACTOR_ID } from "./mode-preference.js";
 import { ExperiencePreferenceContext } from "./experience-preference-context.js";
@@ -129,6 +132,27 @@ function ExperiencePreferenceScope({
     readStoredPreference(storage, storageKey),
   );
   const storedStateReference = useRef(storedState);
+  const stepStorageKey = getEditorWalkthroughStepStorageKey(actorId);
+  const [editorWalkthroughStep, setEditorStep] = useState(() => {
+    try {
+      return parseEditorWalkthroughStep(
+        storage?.getItem(stepStorageKey) ?? null,
+      );
+    } catch {
+      return "add" as const;
+    }
+  });
+  const setEditorWalkthroughStep = useCallback(
+    (step: EditorWalkthroughStepId) => {
+      setEditorStep(step);
+      try {
+        storage?.setItem(stepStorageKey, step);
+      } catch {
+        // Tour progress remains available in this session when local storage fails.
+      }
+    },
+    [storage, stepStorageKey],
+  );
   const explicitContextVersion = useRef(0);
   const pendingRemoteContext = useRef<boolean | null>(null);
 
@@ -282,22 +306,26 @@ function ExperiencePreferenceScope({
         ...current,
         notesApiWalkthrough: status,
       }));
+      if (status !== "not-started") setEditorWalkthroughStep("add");
     },
-    [updatePreference],
+    [updatePreference, setEditorWalkthroughStep],
   );
 
   const restartWalkthrough = useCallback(() => {
     setWalkthroughStatus("not-started");
-  }, [setWalkthroughStatus]);
+    setEditorWalkthroughStep("add");
+  }, [setWalkthroughStatus, setEditorWalkthroughStep]);
 
   const value = useMemo<ExperiencePreference>(
     () => ({
       ...storedState.preference,
+      editorWalkthroughStep,
       completeFirstUse,
       restartFirstUse,
       restartWalkthrough,
       setContextualTeachingEnabled,
       setWalkthroughStatus,
+      setEditorWalkthroughStep,
       skipFirstUse,
       storageStatus: storedState.storageStatus,
     }),
@@ -309,6 +337,8 @@ function ExperiencePreferenceScope({
       setWalkthroughStatus,
       skipFirstUse,
       storedState,
+      editorWalkthroughStep,
+      setEditorWalkthroughStep,
     ],
   );
 

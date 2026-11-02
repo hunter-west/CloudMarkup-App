@@ -75,6 +75,12 @@ and command admission.
 
 ## Feature matrix
 
+This matrix records the initial `07ebcc3` audit baseline. The
+[separate follow-on](catalog-tutorial-followon-20261029.md) implements exact
+editor-tour step resume and, after Hunter West's October 29 approval, replaces
+the ten missing icon mappings with admitted official service-family artwork. Its
+local verification and remaining live acceptance are recorded separately.
+
 | Area                                | Source implementation                                                                                                   | Local evidence                                                                    | Live acceptance                                                    |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | Catalog search and standalone cards | Implemented; owner settings and variants stay under Configure/Set up                                                    | Source-matched release suite: catalog/model suites passed                         | Unverified                                                         |

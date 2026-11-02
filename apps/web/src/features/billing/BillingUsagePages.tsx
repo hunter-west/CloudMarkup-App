@@ -24,6 +24,7 @@ import { RoutePage } from "../../shell/RoutePage.js";
 import "../settings/settings.css";
 import { useOptionalLocalOwnerSession } from "../auth/local-owner-session.js";
 import { BillingWorkspacePage } from "./BillingWorkspacePage.js";
+import { useBillingScope } from "./use-billing-scope.js";
 
 type OrganizationContext = CurrentPrincipalV1["organizationContexts"][number];
 
@@ -282,6 +283,13 @@ function AuthenticatedUsagePage({
 }: {
   readonly context: VerifiedCommercialContext;
 }) {
+  const scopeQuery = useBillingScope(
+    context.runtime,
+    context.principal,
+    context.organizationId,
+  );
+  const scope = scopeQuery.isError ? undefined : scopeQuery.data;
+  const personal = scope?.kind === "personal";
   const authorizationScope = JSON.stringify(context.organization);
   const queryKey = useMemo(
     () =>
@@ -338,8 +346,18 @@ function AuthenticatedUsagePage({
   return (
     <RoutePage
       title="Usage"
-      eyebrow="Workspace credits"
-      description="Your monthly allowance, purchased credits and recorded usage."
+      eyebrow={
+        personal
+          ? "Personal workspace credits"
+          : scope?.kind === "organization"
+            ? "Organization credits"
+            : "Selected workspace credits"
+      }
+      description={
+        scope
+          ? `${scope.displayName} · Monthly allowance, purchased credits and recorded usage.`
+          : "Monthly allowance, purchased credits and recorded usage for the selected workspace."
+      }
       routeKey={`usage-${context.organizationId}`}
     >
       <div className="settings-content usage-content">
@@ -364,6 +382,13 @@ function AuthenticatedUsagePage({
         ) : (
           value && (
             <>
+              <p>
+                {personal
+                  ? "These credits belong to your personal workspace. Organization work uses that organization's shared credits."
+                  : scope?.kind === "organization"
+                    ? "This is the organization's shared credit balance, not a separate allowance for each member. Your personal credits stay separate."
+                    : "Credits stay with the workspace they belong to and are not combined across memberships."}
+              </p>
               <section className="usage-overview" role="status">
                 <div className="usage-overview__summary">
                   <p className="status-label">
@@ -392,7 +417,7 @@ function AuthenticatedUsagePage({
                     className="button button--secondary"
                     to={`/organizations/${encodeRouteSelector(context.organizationId)}/billing`}
                   >
-                    View billing
+                    Plans &amp; billing
                   </AppLink>
                   <button
                     className="button button--secondary"

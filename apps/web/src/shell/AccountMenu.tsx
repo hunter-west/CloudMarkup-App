@@ -88,7 +88,7 @@ export function AccountMenu({
   const cognitoSignOut = useOptionalCognitoSignOut();
   const localOwner = useOptionalLocalOwnerSession();
   const runtime = useOptionalCloudMarkupQueryRuntime();
-  const { addNotification, history } = useNotifications();
+  const { addNotification, unreadCount } = useNotifications();
   const route = useRouteMatch();
   const organizationPath =
     organizationId === null
@@ -117,7 +117,11 @@ export function AccountMenu({
         />
         <div>
           <strong>{identity.displayName}</strong>
-          <p>{identity.organization?.name ?? "Account workspace"}</p>
+          <p>
+            {identity.organization?.kind === "personal"
+              ? "Personal workspace"
+              : (identity.organization?.name ?? "Personal account")}
+          </p>
           {identity.kind === "local-mock" ? (
             <StatusBadge label="Local mock - not verified" tone="incomplete" />
           ) : null}
@@ -128,29 +132,29 @@ export function AccountMenu({
           <button
             className="account-menu-link"
             aria-label={
-              history.length === 0
+              unreadCount === 0
                 ? "Notifications"
-                : `Notifications (${String(history.length)})`
+                : `Notifications (${String(unreadCount)} unread)`
             }
             type="button"
             onClick={onOpenNotifications}
           >
             <Bell size={18} aria-hidden="true" />
             <span>Notifications</span>
-            {history.length > 0 ? (
+            {unreadCount > 0 ? (
               <span className="account-notifications__count">
-                {history.length > 99 ? "99+" : history.length}
+                {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             ) : null}
           </button>
           {link(
             "/organizations",
-            "Switch organization",
+            "Personal & organizations",
             <Building2 size={18} aria-hidden="true" />,
           )}
         </div>
         <MenuGroup
-          label="Account"
+          label="Personal account"
           icon={<UserRound size={18} aria-hidden="true" />}
         >
           {link(
@@ -169,15 +173,107 @@ export function AccountMenu({
             <SlidersHorizontal size={18} aria-hidden="true" />,
           )}
           {link(
-            "/settings/invitations",
-            "Invitations",
-            <Mail size={18} aria-hidden="true" />,
-          )}
-          {link(
             "/settings/integrations",
             "Personal integrations",
             <Cable size={18} aria-hidden="true" />,
           )}
+          {link(
+            "/settings/invitations",
+            "Invitations",
+            <Mail size={18} aria-hidden="true" />,
+          )}
+        </MenuGroup>
+        {organizationPath === null ? null : (
+          <MenuGroup
+            label={
+              identity.organization?.kind === "personal"
+                ? "Personal workspace"
+                : identity.organization === null
+                  ? "Selected workspace"
+                  : "Organization"
+            }
+            icon={<Building2 size={18} aria-hidden="true" />}
+          >
+            <p className="account-menu-group__context">
+              {identity.organization?.name ??
+                "Usage and billing for your selected personal workspace or organization."}
+            </p>
+            {localOwner === null
+              ? link(
+                  `${organizationPath}/usage`,
+                  "Usage",
+                  <Gauge size={18} aria-hidden="true" />,
+                )
+              : null}
+            {localOwner === null
+              ? link(
+                  `${organizationPath}/billing`,
+                  "Plans & billing",
+                  <CreditCard size={18} aria-hidden="true" />,
+                )
+              : null}
+            {identity.organization?.kind !== "organization" &&
+            identity.kind !== "local-mock"
+              ? null
+              : link(
+                  `${organizationPath}/settings/general`,
+                  "Organization settings",
+                  <Settings2 size={18} aria-hidden="true" />,
+                )}
+          </MenuGroup>
+        )}
+        <MenuGroup
+          label="Help & support"
+          icon={<BookOpen size={18} aria-hidden="true" />}
+        >
+          <a
+            className="account-menu-link"
+            aria-label="Help center (opens in a new tab)"
+            href="https://support.cloudmarkup.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+          >
+            <BookOpen size={18} aria-hidden="true" />
+            <span>Help center</span>
+          </a>
+          <a
+            className="account-menu-link"
+            aria-label="Contact support (opens in a new tab)"
+            href="https://support.cloudmarkup.com/new-ticket/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+          >
+            <MessageCircle size={18} aria-hidden="true" />
+            <span>Contact support</span>
+          </a>
+          {identity.kind === "verified" &&
+          runtime !== null &&
+          localOwner === null ? (
+            <AuthorizedStaffLink
+              key={identity.actorId}
+              runtime={runtime}
+              principalId={identity.actorId}
+              onClose={onClose}
+            />
+          ) : null}
+          <p className="account-menu-group__context">
+            Guides are public. Support requests use a separate support account.
+            You can also email{" "}
+            <a href="mailto:support@cloudmarkup.com">support@cloudmarkup.com</a>
+            .
+          </p>
+        </MenuGroup>
+        <div className="account-menu-appearance">
+          <ThemeSwitch settings />
+          {hasWorkspace ? (
+            <Button onClick={onResetWorkspaceLayout} variant="quiet">
+              Reset workspace layout
+            </Button>
+          ) : null}
+        </div>
+        <div className="account-menu__sign-out">
           {identity.kind === "verified" && cognitoSignOut !== null ? (
             <details className="account-recovery-action">
               <summary>Shared device options</summary>
@@ -215,95 +311,6 @@ export function AccountMenu({
               </Button>
             </details>
           ) : null}
-        </MenuGroup>
-        {organizationPath === null ? null : (
-          <MenuGroup
-            label={
-              identity.organization?.kind === "personal"
-                ? "Workspace"
-                : "Organization"
-            }
-            icon={<Building2 size={18} aria-hidden="true" />}
-          >
-            <p className="account-menu-group__context">
-              {identity.organization?.name ?? "Current workspace"}
-            </p>
-            {localOwner === null
-              ? link(
-                  `${organizationPath}/usage`,
-                  "Usage",
-                  <Gauge size={18} aria-hidden="true" />,
-                )
-              : null}
-            {localOwner === null
-              ? link(
-                  `${organizationPath}/billing`,
-                  "Plans & billing",
-                  <CreditCard size={18} aria-hidden="true" />,
-                )
-              : null}
-            {identity.organization?.kind === "personal" ||
-            identity.organization?.kind === "unavailable"
-              ? null
-              : link(
-                  `${organizationPath}/settings/general`,
-                  "Organization settings",
-                  <Settings2 size={18} aria-hidden="true" />,
-                )}
-          </MenuGroup>
-        )}
-        <MenuGroup
-          label="Help & support"
-          icon={<BookOpen size={18} aria-hidden="true" />}
-        >
-          <a
-            className="account-menu-link"
-            aria-label="Help center (opens in a new tab)"
-            href="https://support.cloudmarkup.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onClose}
-          >
-            <BookOpen size={18} aria-hidden="true" />
-            <span>Help center</span>
-          </a>
-          <a
-            className="account-menu-link"
-            aria-label="Contact support (opens in a new tab)"
-            href="https://support.cloudmarkup.com/new-ticket/"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onClose}
-          >
-            <MessageCircle size={18} aria-hidden="true" />
-            <span>Contact support</span>
-          </a>
-          <p className="account-menu-group__context">
-            Guides are public. Support requests use a separate support account.
-            You can also email{" "}
-            <a href="mailto:support@cloudmarkup.com">support@cloudmarkup.com</a>
-            .
-          </p>
-        </MenuGroup>
-        <div className="account-menu-appearance">
-          <ThemeSwitch settings />
-          {hasWorkspace ? (
-            <Button onClick={onResetWorkspaceLayout} variant="quiet">
-              Reset workspace layout
-            </Button>
-          ) : null}
-        </div>
-        {identity.kind === "verified" &&
-        runtime !== null &&
-        localOwner === null ? (
-          <AuthorizedStaffLink
-            key={identity.actorId}
-            runtime={runtime}
-            principalId={identity.actorId}
-            onClose={onClose}
-          />
-        ) : null}
-        <div className="account-menu__sign-out">
           {identity.kind === "verified" && localOwner !== null ? (
             <button
               className="account-menu-link"
