@@ -375,7 +375,11 @@ The fixture also waits for the initial client document before route assertions,
 instead of starting them at response commit during cold module loading.
 
 The two existing viewport cases are retained; no case, assertion deadline or
-test timeout is removed or increased.
+test timeout is removed or increased. Both passed locally in 83.776 seconds
+including fixture startup. A comparable successful pre-change focused timing was
+not recorded. CI retains this synthetic file's failure screenshots and context
+for one day, with the strict path list, read-only permissions and pinned actions
+preserved; raw traces are not uploaded.
 [PR #8](https://github.com/hunter-west/CloudMarkup-App/pull/8) records focused
 timings and exact-head integrated admission. These test-only corrections do not
 change application behavior or establish live acceptance.
