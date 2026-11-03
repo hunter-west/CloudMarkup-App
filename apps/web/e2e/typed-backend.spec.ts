@@ -51,7 +51,7 @@ function revisionPath(projectId: string): string {
 }
 
 async function goto(page: Page, path: string): Promise<void> {
-  await page.goto(path, { waitUntil: "commit" });
+  await page.goto(path, { waitUntil: "domcontentloaded" });
 }
 
 async function installApi(
