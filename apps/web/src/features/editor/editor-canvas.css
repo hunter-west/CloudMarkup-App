@@ -1866,13 +1866,41 @@ button.architecture-tree__button:hover {
 }
 
 .selected-inspector__advanced {
-  background: var(--cm-color-surface);
+  min-inline-size: 0;
+  border: 0;
+  border-block-start: 1px solid var(--cm-color-border);
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.selected-inspector__advanced > .cm-disclosure__summary {
+  padding-inline: var(--cm-space-1);
+  background: transparent;
+  overflow-wrap: anywhere;
 }
 
 .selected-inspector__advanced > .cm-disclosure__content {
   display: grid;
   gap: var(--cm-space-2);
-  padding: var(--cm-space-2);
+  padding: var(--cm-space-2) 0;
+}
+
+.selected-inspector__fixed-field {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--cm-space-2);
+}
+
+.selected-inspector__fixed-field > .cm-form-field__control {
+  grid-column: 2;
+  grid-row: 1;
+  overflow-wrap: anywhere;
+}
+
+.selected-inspector__fixed-field
+  > :is(.cm-form-field__description, .cm-form-field__error) {
+  grid-column: 1 / -1;
 }
 
 .selected-inspector__error-summary {

@@ -293,6 +293,41 @@ const navigationGroups = [
     ],
   },
   {
+    label: "Account",
+    links: [
+      {
+        label: "Personal & organizations",
+        path: "/organizations",
+        routeIds: ["organizations"],
+      },
+      {
+        label: "Profile",
+        path: "/settings/profile",
+        routeIds: ["profile-settings"],
+      },
+      {
+        label: "Personal security",
+        path: "/settings/security",
+        routeIds: ["personal-security-settings"],
+      },
+      {
+        label: "Preferences",
+        path: "/settings/preferences",
+        routeIds: ["preference-settings"],
+      },
+      {
+        label: "Personal integrations",
+        path: "/settings/integrations",
+        routeIds: ["personal-integration-settings"],
+      },
+      {
+        label: "Invitations",
+        path: "/settings/invitations",
+        routeIds: ["account-invitations"],
+      },
+    ],
+  },
+  {
     label: "Organization",
     links: [
       {
@@ -327,41 +362,6 @@ const navigationGroups = [
         path: "/organizations/local-org/settings/integrations",
         routeIds: ["organization-integration-settings"],
         capability: "integrations.read",
-      },
-    ],
-  },
-  {
-    label: "Account",
-    links: [
-      {
-        label: "Personal & organizations",
-        path: "/organizations",
-        routeIds: ["organizations"],
-      },
-      {
-        label: "Profile",
-        path: "/settings/profile",
-        routeIds: ["profile-settings"],
-      },
-      {
-        label: "Personal security",
-        path: "/settings/security",
-        routeIds: ["personal-security-settings"],
-      },
-      {
-        label: "Preferences",
-        path: "/settings/preferences",
-        routeIds: ["preference-settings"],
-      },
-      {
-        label: "Personal integrations",
-        path: "/settings/integrations",
-        routeIds: ["personal-integration-settings"],
-      },
-      {
-        label: "Invitations",
-        path: "/settings/invitations",
-        routeIds: ["account-invitations"],
       },
     ],
   },
@@ -1762,6 +1762,55 @@ const navigationIcons: Record<string, LucideIcon> = {
   "Organization integrations": Cable,
 };
 
+function NavigationSection({
+  active,
+  children,
+  collapsed,
+  label,
+  name,
+}: {
+  readonly active: boolean;
+  readonly children: ReactNode;
+  readonly collapsed: boolean;
+  readonly label: string;
+  readonly name: string;
+}) {
+  const [expanded, setExpanded] = useState(active);
+  const heading = (
+    <h2 className={collapsed ? "visually-hidden" : undefined}>{label}</h2>
+  );
+  const Icon = name === "Account" ? UserRound : Building2;
+
+  return (
+    <section className="navigation-group" data-navigation-group={name}>
+      {collapsed || name === "Workspace" ? (
+        <>
+          {heading}
+          {children}
+        </>
+      ) : (
+        <details
+          open={expanded}
+          onToggle={(event) => {
+            setExpanded(event.currentTarget.open);
+          }}
+        >
+          <summary>
+            <Icon size={18} aria-hidden="true" />
+            {heading}
+            <ChevronDown
+              className="navigation-group__chevron"
+              size={16}
+              aria-hidden="true"
+            />
+          </summary>
+          {children}
+        </details>
+      )}
+    </section>
+  );
+}
+
 function PrimaryNavigation({
   capabilities,
   collapsed = false,
@@ -1824,13 +1873,16 @@ function PrimaryNavigation({
       {navigationGroups
         .filter((group) => organizationId !== null || group.label === "Account")
         .map((group) => (
-          <section
-            className="navigation-group"
-            data-navigation-group={group.label}
-            key={group.label}
-          >
-            <h2 className={collapsed ? "visually-hidden" : undefined}>
-              {group.label === "Workspace"
+          <NavigationSection
+            active={group.links.some((link) =>
+              link.routeIds.some((routeId) => routeId === route.id),
+            )}
+            collapsed={collapsed}
+            // A new route opens its current section and resets other disclosures.
+            key={`${group.label}:${route.id}`}
+            name={group.label}
+            label={
+              group.label === "Workspace"
                 ? "Project work"
                 : group.label === "Account"
                   ? "Personal account"
@@ -1838,8 +1890,9 @@ function PrimaryNavigation({
                     ? "Personal workspace"
                     : workspaceKind === "organization"
                       ? "Organization"
-                      : "Selected workspace"}
-            </h2>
+                      : "Selected workspace"
+            }
+          >
             {group.label === "Organization" ? (
               <p
                 className={
@@ -1908,7 +1961,7 @@ function PrimaryNavigation({
                   );
                 })}
             </ul>
-          </section>
+          </NavigationSection>
         ))}
     </nav>
   );

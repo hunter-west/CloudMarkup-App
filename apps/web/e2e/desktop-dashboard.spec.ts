@@ -70,6 +70,34 @@ for (const [theme, width] of [
       name: "Dismiss workspace tour",
     });
     if (await dismissTour.isVisible()) await dismissTour.click();
+    if (width === 320) {
+      const navigationTrigger = page.getByRole("button", {
+        name: "Open application navigation",
+      });
+      await navigationTrigger.click();
+      const navigationDrawer = page.getByRole("dialog", {
+        name: "Application navigation",
+      });
+      await expect(navigationDrawer.getByRole("link")).toHaveCount(3);
+      const accountSection = navigationDrawer
+        .locator("summary")
+        .filter({ hasText: "Personal account" });
+      await expect(accountSection).toHaveCSS("min-block-size", "44px");
+      await accountSection.focus();
+      await page.keyboard.press("Space");
+      await expect(
+        navigationDrawer.getByRole("link", {
+          name: "Personal security",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath("phone-personal-navigation.png"),
+      });
+      await page.keyboard.press("Escape");
+      await expect(navigationDrawer).toBeHidden();
+      await expect(navigationTrigger).toBeFocused();
+    }
     const trigger = page.getByRole("button", {
       name: "Open authenticated account",
     });
@@ -341,6 +369,14 @@ test("keeps settings sections beside the primary navigation with history and key
     name: "Primary navigation",
     exact: true,
   });
+  await expect(navigation.getByRole("link")).toHaveCount(3);
+  await expect(navigation.locator("summary")).toHaveText([
+    "Personal account",
+    "Organization",
+  ]);
+  await page.screenshot({
+    path: testInfo.outputPath("compact-dashboard-navigation.png"),
+  });
   const panel = page.getByRole("main");
   async function expectSettledHeadingInView() {
     const heading = panel.getByRole("heading", { level: 1 });
@@ -396,6 +432,21 @@ test("keeps settings sections beside the primary navigation with history and key
     ],
     ["Personal & organizations", "/organizations", "Personal & organizations"],
   ] as const) {
+    const group =
+      path === "/organizations" || path.startsWith("/settings/")
+        ? "Account"
+        : /\/(?:usage|billing|settings\/)/u.test(path)
+          ? "Organization"
+          : null;
+    if (group !== null) {
+      const disclosure = navigation.locator(
+        `[data-navigation-group="${group}"] details`,
+      );
+      if ((await disclosure.getAttribute("open")) === null) {
+        await disclosure.locator("summary").focus();
+        await page.keyboard.press("Enter");
+      }
+    }
     const link = navigation.getByRole("link", { name: label, exact: true });
     await link.focus();
     await page.keyboard.press("Enter");
@@ -585,18 +636,12 @@ for (const theme of ["light", "dark"]) {
       );
       await expect(groups.locator("h2")).toHaveText([
         "Project work",
-        "Organization",
         "Personal account",
+        "Organization",
       ]);
       const workspaceNavigation = groups.filter({
         has: page.getByRole("heading", { name: "Organization", exact: true }),
       });
-      await expect(
-        workspaceNavigation.getByRole("link", { name: "Usage", exact: true }),
-      ).toHaveAttribute("href", root + "/usage");
-      await expect(
-        workspaceNavigation.getByRole("link", { name: "Plans & billing" }),
-      ).toHaveAttribute("href", root + "/billing");
       const tour = page.getByRole("complementary", { name: "Workspace tour" });
       await expect(tour).toBeVisible();
       await expect(tour).toHaveAttribute("data-step", "workspace");
@@ -615,21 +660,10 @@ for (const theme of ["light", "dark"]) {
         "blur(4px) saturate(1.15)",
       );
       await tour.getByRole("button", { name: "Next", exact: true }).click();
-      await expect(tour).toHaveAttribute("data-step", "organization");
-      await expect(
-        tour.getByRole("heading", { name: "Your selected workspace" }),
-      ).toBeVisible();
-      await expect(workspaceNavigation).toHaveAttribute(
-        "data-tour-target",
-        "true",
-      );
-      await expect(workspaceNavigation).toHaveCSS("outline-width", "4px");
-      await expect(groups.first()).not.toHaveAttribute(
-        "data-tour-target",
-        "true",
-      );
-      await tour.getByRole("button", { name: "Next", exact: true }).click();
       await expect(tour).toHaveAttribute("data-step", "account");
+      await expect(
+        tour.getByRole("heading", { name: "Personal account" }),
+      ).toBeVisible();
       const personalNavigation = groups.filter({
         hasText: "Personal security",
       });
@@ -638,10 +672,34 @@ for (const theme of ["light", "dark"]) {
         "true",
       );
       await expect(personalNavigation).toHaveCSS("outline-width", "4px");
-      await expect(workspaceNavigation).not.toHaveAttribute(
+      await expect(groups.first()).not.toHaveAttribute(
         "data-tour-target",
         "true",
       );
+      await personalNavigation.locator("summary").focus();
+      await page.keyboard.press("Enter");
+      await expect(
+        personalNavigation.getByRole("link", { name: "Profile", exact: true }),
+      ).toBeVisible();
+      await tour.getByRole("button", { name: "Next", exact: true }).click();
+      await expect(tour).toHaveAttribute("data-step", "organization");
+      await expect(workspaceNavigation).toHaveAttribute(
+        "data-tour-target",
+        "true",
+      );
+      await expect(workspaceNavigation).toHaveCSS("outline-width", "4px");
+      await expect(personalNavigation).not.toHaveAttribute(
+        "data-tour-target",
+        "true",
+      );
+      await workspaceNavigation.locator("summary").focus();
+      await page.keyboard.press("Space");
+      await expect(
+        workspaceNavigation.getByRole("link", { name: "Usage", exact: true }),
+      ).toHaveAttribute("href", root + "/usage");
+      await expect(
+        workspaceNavigation.getByRole("link", { name: "Plans & billing" }),
+      ).toHaveAttribute("href", root + "/billing");
       await tour
         .getByRole("button", { name: "Dismiss workspace tour" })
         .click();
@@ -1222,6 +1280,11 @@ for (const theme of ["light"] as const) {
           .getByRole("navigation", { name: "Primary navigation" })
           .getByRole("link", { name: "Organization settings" }),
       ).toHaveCount(0);
+      await page
+        .getByRole("navigation", { name: "Primary navigation" })
+        .locator("summary")
+        .filter({ hasText: "Personal account" })
+        .click();
       await page
         .getByRole("navigation", { name: "Primary navigation" })
         .getByRole("link", { name: "Personal & organizations", exact: true })

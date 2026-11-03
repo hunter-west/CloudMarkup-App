@@ -19,7 +19,10 @@ import {
   type createConfigurationFormModel,
 } from "./configuration-form-model.js";
 
-function ConfigurationFieldInformation({ field }: ConfigurationFormFieldModel) {
+function ConfigurationFieldInformation({
+  field,
+  reason,
+}: ConfigurationFormFieldModel) {
   const informationRef = useRef<HTMLSpanElement>(null);
   const constraints: string[] = [];
   if ("enum" in field.schema) {
@@ -87,6 +90,12 @@ function ConfigurationFieldInformation({ field }: ConfigurationFormFieldModel) {
         triggerLabel={`More information about ${field.label}`}
       >
         <dl className="selected-inspector__information-list">
+          {reason === undefined ? null : (
+            <div>
+              <dt>Editing</dt>
+              <dd>{reason}</dd>
+            </div>
+          )}
           {field.helpText === undefined ? null : (
             <div>
               <dt>Help</dt>
@@ -125,7 +134,7 @@ function ConfigurationFieldInformation({ field }: ConfigurationFormFieldModel) {
 }
 
 function fieldDescription(
-  { field, reason }: ConfigurationFormFieldModel,
+  { field, fixed, reason }: ConfigurationFormFieldModel,
   showHelp: boolean,
 ): ReactNode {
   return (
@@ -136,7 +145,7 @@ function fieldDescription(
         field.costImpact !== "cost-sensitive") ? null : (
         <span>{field.helpText} </span>
       )}
-      {reason === undefined ? null : <strong>{reason}</strong>}
+      {reason === undefined || fixed ? null : <strong>{reason}</strong>}
     </>
   );
 }
@@ -172,7 +181,7 @@ export function ConfigurationInput({
   const description =
     (error !== undefined && field.helpText !== undefined) ||
     isValidationTarget ||
-    fieldModel.reason !== undefined ||
+    (fieldModel.reason !== undefined && !fieldModel.fixed) ||
     (field.helpText !== undefined &&
       (field.securityImpact !== "none" ||
         field.costImpact === "cost-sensitive")) ? (
@@ -198,6 +207,9 @@ export function ConfigurationInput({
     return (
       <FormField
         {...validationHighlightAttributes}
+        className={
+          fieldModel.fixed ? "selected-inspector__fixed-field" : undefined
+        }
         description={description}
         error={error}
         htmlFor={inputId}

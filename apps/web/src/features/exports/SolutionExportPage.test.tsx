@@ -23,7 +23,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { StrictMode, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -1123,7 +1123,7 @@ describe("Solution Export workflow UI", () => {
     expect(
       screen.getByRole("status", { name: "Export availability" }),
     ).toHaveTextContent(
-      "infrastructure-only revisions with an eligible active Professional plan",
+      "infrastructure-only revisions with an eligible paid plan or active trial",
     );
     expect(
       screen.getByRole("status", { name: "Export availability" }),
@@ -1805,7 +1805,13 @@ describe("Solution Export workflow UI", () => {
     vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(
       () => undefined,
     );
-    renderAuthenticated(exportPage(), fixture.client, { downloadBinary });
+    renderAuthenticated(
+      <StrictMode>{exportPage()}</StrictMode>,
+      fixture.client,
+      {
+        downloadBinary,
+      },
+    );
 
     expect(await screen.findByRole("tab", { name: "IaC" })).toBeInTheDocument();
     expect(screen.getByText("Exact revision assessment")).toBeInTheDocument();
@@ -1880,7 +1886,10 @@ describe("Solution Export workflow UI", () => {
     expect(
       await screen.findByText("Verified ZIP download started."),
     ).toBeInTheDocument();
-    expect(downloadBinary).toHaveBeenCalledWith(grantFixture.url);
+    expect(downloadBinary).toHaveBeenCalledWith(
+      grantFixture.url,
+      expect.any(AbortSignal),
+    );
     expect(createObjectUrl).toHaveBeenCalledTimes(1);
     expect(revokeObjectUrl).toHaveBeenCalledWith(
       "blob:https://app.test/verified",
@@ -1988,6 +1997,70 @@ describe("Solution Export workflow UI", () => {
       );
       expect(calls).toHaveLength(2);
       expect(calls[0]?.[1]).toEqual(calls[1]?.[1]);
+    },
+  );
+
+  it.each(["grant", "content"] as const)(
+    "stops a pending %s download when its export view is disposed",
+    async (phase) => {
+      let finish: () => void = () => {
+        throw new Error("The pending download is not initialized.");
+      };
+      const pending = new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+      const grantResponse = vi.fn(async () => {
+        if (phase === "grant") await pending;
+        return { apiVersion: "v1" as const, data: grantFixture };
+      });
+      const downloadBinary = vi.fn<AuthenticatedBinaryDownloader>(async () => {
+        if (phase === "content") await pending;
+        return {
+          bytes: new TextEncoder().encode("zip-bytes").buffer,
+          digest: ARCHIVE_DIGEST,
+          fileName: "notes-api.zip",
+          mediaType: "application/zip",
+          sizeBytes: 9,
+        };
+      });
+      const createObjectUrl = vi.spyOn(URL, "createObjectURL");
+      const fixture = clientFixture({
+        artifact: artifactFixture(),
+        job: jobFixture("succeeded"),
+        grantResponse,
+      });
+      const view = renderAuthenticated(
+        <StrictMode>{exportPage()}</StrictMode>,
+        fixture.client,
+        { downloadBinary },
+      );
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Download ZIP" }),
+      );
+      await waitFor(() => {
+        expect(grantResponse).toHaveBeenCalledOnce();
+        if (phase === "content") expect(downloadBinary).toHaveBeenCalledOnce();
+      });
+      if (phase === "grant") view.unmount();
+      else {
+        view.rerender(
+          <StrictMode>
+            {exportPage(JOB_ID, {
+              principal: { ...principal, id: "principal_other" },
+            })}
+          </StrictMode>,
+        );
+        await screen.findByRole("button", { name: "Download ZIP" });
+      }
+      await act(async () => {
+        finish();
+        await pending;
+      });
+      expect(downloadBinary).toHaveBeenCalledTimes(phase === "content" ? 1 : 0);
+      expect(createObjectUrl).not.toHaveBeenCalled();
+      if (phase === "content") {
+        expect(downloadBinary.mock.calls[0]?.[1]?.aborted).toBe(true);
+      }
     },
   );
 
@@ -2190,6 +2263,11 @@ it("requires an explicit application-source choice and binds the returned job to
     name: "Generate application source with AI",
   });
   await waitFor(() => expect(option).toBeEnabled());
+  expect(
+    screen.getByText(
+      /Infrastructure code and architecture diagrams are included/u,
+    ),
+  ).toHaveTextContent("AI application source is optional.");
   expect(option).not.toBeChecked();
   fireEvent.click(option);
   fireEvent.click(screen.getByRole("button", { name: "Generate export" }));
@@ -2226,6 +2304,13 @@ it("preserves infrastructure-only exports and disables unadvertised source-v3 co
     },
   );
   await screen.findByText(/Reviewed application-source AI is unavailable/u);
+  expect(
+    screen.getByText(
+      /Infrastructure code and architecture diagrams are included/u,
+    ),
+  ).toHaveTextContent(
+    "AI application source cannot be selected until this server confirms support.",
+  );
   expect(
     screen.getByRole("checkbox", {
       name: "Generate application source with AI",
