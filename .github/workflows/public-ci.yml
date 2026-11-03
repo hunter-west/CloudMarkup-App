@@ -109,6 +109,8 @@ jobs:
             test-results/editor-validation*/**/error-context.md
             test-results/typed-backend/desktop-dashboard-*/**/*.png
             test-results/typed-backend/desktop-dashboard-*/**/error-context.md
+            test-results/typed-backend/typed-backend-*/**/*.png
+            test-results/typed-backend/typed-backend-*/**/error-context.md
           if-no-files-found: warn
           retention-days: 1
           compression-level: 0

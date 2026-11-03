@@ -363,3 +363,19 @@ dependency, API, persistence, permission or deployment contract is added. The
 source can be reverted without a migration. Implementation is ready for the
 release owner's combined `check:web`, selected browser and public admission
 checks. Publication, deployment and signed-in live acceptance remain separate.
+
+### Integrated browser alignment, November 3, 2026
+
+The broader typed-backend keyboard journeys retained the earlier flat-sidebar
+interaction. Their account-directory link is now inside the intended closed
+personal disclosure. They open the relevant Account or Organization summary with
+Enter before selecting its link. Current-route expansion, heading focus,
+history, role restrictions, billing refusals and phone targets remain asserted.
+The fixture also waits for the initial client document before route assertions,
+instead of starting them at response commit during cold module loading.
+
+The two existing viewport cases are retained; no case, assertion deadline or
+test timeout is removed or increased.
+[PR #8](https://github.com/hunter-west/CloudMarkup-App/pull/8) records focused
+timings and exact-head integrated admission. These test-only corrections do not
+change application behavior or establish live acceptance.

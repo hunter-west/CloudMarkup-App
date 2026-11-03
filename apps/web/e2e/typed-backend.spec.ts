@@ -562,7 +562,7 @@ for (const width of [1440, 390]) {
         .getByRole("banner", { name: "Application header" })
         .getByText("Navigation engineering", { exact: true }),
     ).toHaveCount(1);
-    const openNavigation = async () => {
+    const openNavigation = async (group?: "Account" | "Organization") => {
       if (width < 1280) {
         await page
           .getByRole("button", { name: "Open application navigation" })
@@ -571,10 +571,23 @@ for (const width of [1440, 390]) {
           page.getByRole("dialog", { name: "Application navigation" }),
         ).toBeVisible();
       }
-      return page.getByRole("navigation", { name: "Primary navigation" });
+      const navigation = page.getByRole("navigation", {
+        name: "Primary navigation",
+      });
+      if (group !== undefined) {
+        const disclosure = navigation.locator(
+          `[data-navigation-group="${group}"] > details`,
+        );
+        await expect(disclosure).toBeVisible();
+        if ((await disclosure.getAttribute("open")) === null) {
+          await disclosure.locator(":scope > summary").press("Enter");
+        }
+        await expect(disclosure).toHaveAttribute("open", "");
+      }
+      return navigation;
     };
     await (
-      await openNavigation()
+      await openNavigation("Account")
     )
       .getByRole("link", { name: "Personal & organizations" })
       .press("Enter");
@@ -651,7 +664,7 @@ for (const width of [1440, 390]) {
       page.getByRole("heading", { level: 1, name: "Projects" }),
     ).toBeFocused();
     await (
-      await openNavigation()
+      await openNavigation("Organization")
     )
       .getByRole("link", { name: "Plans & billing" })
       .press("Enter");
