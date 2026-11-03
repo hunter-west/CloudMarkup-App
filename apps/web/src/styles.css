@@ -595,11 +595,53 @@ p {
 }
 
 .navigation-group h2 {
-  margin: 0 var(--cm-space-1) var(--cm-space-0-5);
+  margin: 0 var(--cm-space-3) var(--cm-space-1);
   color: var(--cm-color-text-muted);
   font-size: var(--cm-font-size-1);
-  letter-spacing: 0.08em;
+  font-weight: var(--cm-weight-semibold);
+  letter-spacing: 0.045em;
   text-transform: uppercase;
+}
+
+.navigation-group summary {
+  display: flex;
+  align-items: center;
+  gap: var(--cm-space-3);
+  min-block-size: 40px;
+  padding: var(--cm-space-2) var(--cm-space-3);
+  border-radius: var(--cm-radius-md);
+  color: var(--cm-color-text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.navigation-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.navigation-group summary h2 {
+  margin: 0;
+  color: inherit;
+  font-size: var(--cm-font-size-2);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.navigation-group summary:hover {
+  background: var(--cm-color-action-subtle);
+}
+
+.navigation-group summary:focus-visible {
+  outline: 2px solid var(--cm-color-selection);
+  outline-offset: -2px;
+}
+
+.navigation-group__chevron {
+  margin-inline-start: auto;
+}
+
+.navigation-group details[open] .navigation-group__chevron {
+  transform: rotate(180deg);
 }
 
 .navigation-group ul {
@@ -611,7 +653,7 @@ p {
 }
 
 .navigation-workspace-note {
-  margin: var(--cm-space-2) var(--cm-space-3);
+  margin: var(--cm-space-1) var(--cm-space-3);
   color: var(--cm-color-text-muted);
   font-size: var(--cm-font-size-2);
   line-height: var(--cm-line-body);
@@ -620,12 +662,14 @@ p {
 .navigation-group a {
   display: flex;
   align-items: center;
-  min-block-size: 36px;
-  padding: var(--cm-space-1) var(--cm-space-2);
+  gap: var(--cm-space-3);
+  min-block-size: 40px;
+  padding: var(--cm-space-2) var(--cm-space-3);
   border-radius: var(--cm-radius-md);
   color: var(--cm-color-text);
   font-size: var(--cm-font-size-2);
   font-weight: var(--cm-weight-medium);
+  line-height: var(--cm-line-heading);
   text-decoration: none;
 }
 
@@ -638,10 +682,46 @@ p {
   overflow-wrap: anywhere;
 }
 
+.navigation-group a svg,
+.navigation-group summary svg {
+  flex: none;
+  color: var(--cm-color-text-muted);
+}
+
 .navigation-group a[aria-current="page"] {
   background: var(--cm-color-action-subtle);
   color: var(--cm-color-action-hover);
   font-weight: var(--cm-weight-bold);
+  box-shadow: inset 3px 0 var(--cm-color-selection);
+}
+
+.navigation-group a[aria-current="page"] svg {
+  color: currentColor;
+}
+
+@media (max-width: 47.999rem) {
+  .navigation-group a,
+  .navigation-group summary {
+    min-block-size: 44px;
+  }
+}
+
+.primary-navigation--collapsed {
+  justify-items: center;
+  padding: var(--cm-space-2) var(--cm-space-1);
+  overflow: visible;
+}
+
+.primary-navigation--collapsed .navigation-group + .navigation-group {
+  padding-block-start: var(--cm-space-3);
+  border-block-start: 1px solid var(--cm-color-border);
+}
+
+.primary-navigation--collapsed a {
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: var(--cm-space-2);
 }
 
 .shell-main {
@@ -2394,52 +2474,6 @@ input:disabled {
 }
 .standard-shell .panel-chrome[data-expanded="false"] .panel-toggle {
   width: 44px;
-}
-.primary-navigation {
-  gap: var(--cm-space-5);
-  padding: var(--cm-space-3);
-}
-.navigation-group h2 {
-  margin: 0 var(--cm-space-3) var(--cm-space-2);
-  letter-spacing: 0.045em;
-  font-weight: var(--cm-weight-semibold);
-}
-.navigation-group a {
-  gap: var(--cm-space-3);
-  min-block-size: 40px;
-  padding: var(--cm-space-2) var(--cm-space-3);
-  line-height: var(--cm-line-heading);
-}
-.navigation-group a svg {
-  flex: none;
-  color: var(--cm-color-text-muted);
-}
-.navigation-group a[aria-current="page"] {
-  box-shadow: inset 3px 0 var(--cm-color-selection);
-}
-.navigation-group a[aria-current="page"] svg {
-  color: currentColor;
-}
-@media (max-width: 47.999rem) {
-  .navigation-group a {
-    min-block-size: 44px;
-  }
-}
-.primary-navigation--collapsed {
-  gap: var(--cm-space-3);
-  justify-items: center;
-  padding: var(--cm-space-2) var(--cm-space-1);
-  overflow: visible;
-}
-.primary-navigation--collapsed .navigation-group + .navigation-group {
-  padding-block-start: var(--cm-space-3);
-  border-block-start: 1px solid var(--cm-color-border);
-}
-.primary-navigation--collapsed a {
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  padding: var(--cm-space-2);
 }
 .account-avatar-trigger {
   position: relative;

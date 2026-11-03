@@ -1466,14 +1466,6 @@ function ConfigurePanel({
             />
           ))}
         </div>
-        {formModel.advancedFields.length === 0 ? null : (
-          <AdvancedConfigurationFields
-            disclosureId={advancedDisclosureId}
-            fields={formModel.advancedFields}
-            form={form}
-            model={formModel}
-          />
-        )}
         {formModel.fixedFields.length === 0 ? null : (
           <AdvancedConfigurationFields
             disclosureId={`${advancedDisclosureId}-fixed`}
@@ -1481,6 +1473,14 @@ function ConfigurePanel({
             form={form}
             model={formModel}
             label="Fixed settings"
+          />
+        )}
+        {formModel.advancedFields.length === 0 ? null : (
+          <AdvancedConfigurationFields
+            disclosureId={advancedDisclosureId}
+            fields={formModel.advancedFields}
+            form={form}
+            model={formModel}
           />
         )}
         <div className="selected-inspector__actions">

@@ -509,7 +509,7 @@ button.service-catalog-card__drag:focus-visible {
 
 .service-setup-form {
   display: grid;
-  gap: var(--cm-space-3);
+  gap: var(--cm-space-2);
 }
 
 .service-setup-form > p {

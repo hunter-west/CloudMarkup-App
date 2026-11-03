@@ -250,6 +250,12 @@ describe("ServiceCatalogPanel", () => {
 
   it("requires caller supplied EC2 image and root declarations before adding private compute", async () => {
     renderCatalog();
+    fireEvent.change(
+      screen.getByRole("searchbox", { name: "Search services" }),
+      {
+        target: { value: "EC2 instance" },
+      },
+    );
     fireEvent.click(
       within(serviceCard("aws.ec2.instance")).getByRole("button", {
         name: "Set up EC2 instance",
@@ -264,6 +270,13 @@ describe("ServiceCatalogPanel", () => {
       .closest("details");
     expect(optional).not.toHaveAttribute("open");
     expect(fixed).not.toHaveAttribute("open");
+    expect(
+      within(dialog)
+        .getAllByText(/^(Fixed|Optional) settings \(/u, {
+          selector: "summary",
+        })
+        .map((summary) => summary.textContent.split(" (")[0]),
+    ).toEqual(["Fixed settings", "Optional settings"]);
     expect(
       within(dialog).queryByRole("combobox", { name: /Tenancy/u }),
     ).toBeNull();
@@ -340,9 +353,7 @@ describe("ServiceCatalogPanel", () => {
     fireEvent.click(within(dialog).getByLabelText(/^Detailed monitoring/u));
     fireEvent.click(add);
     await waitFor(() => {
-      expect(
-        screen.queryByRole("dialog", { name: "Set up EC2 instance" }),
-      ).toBeNull();
+      expect(dialog).not.toBeInTheDocument();
     });
     expect(
       JSON.parse(screen.getByTestId("ec2-configurations").textContent),

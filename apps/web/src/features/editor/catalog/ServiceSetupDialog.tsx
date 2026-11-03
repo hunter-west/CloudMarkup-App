@@ -325,14 +325,6 @@ function ServiceSetupForm({
             />
           ))}
         </div>
-        {optionalFields.length > 0 ? (
-          <AdvancedConfigurationFields
-            disclosureId={`${id}-advanced`}
-            fields={optionalFields}
-            form={form}
-            model={model}
-          />
-        ) : null}
         {model.fixedFields.length > 0 ? (
           <AdvancedConfigurationFields
             disclosureId={`${id}-fixed`}
@@ -340,6 +332,14 @@ function ServiceSetupForm({
             form={form}
             model={model}
             label="Fixed settings"
+          />
+        ) : null}
+        {optionalFields.length > 0 ? (
+          <AdvancedConfigurationFields
+            disclosureId={`${id}-advanced`}
+            fields={optionalFields}
+            form={form}
+            model={model}
           />
         ) : null}
         {error === "" ? null : <p role="alert">{error}</p>}

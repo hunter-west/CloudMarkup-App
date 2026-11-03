@@ -969,6 +969,13 @@ describe("SelectedResourceInspector", () => {
     selectLambda();
     const initialContentHash = screen.getByTestId("content-hash").textContent;
     const functionName = screen.getByLabelText(/^Function name/u);
+    expect(
+      within(selectedPanel("Configure"))
+        .getAllByText(/^(Fixed|Optional) settings \(/u, {
+          selector: "summary",
+        })
+        .map((summary) => summary.textContent.split(" (")[0]),
+    ).toEqual(["Fixed settings", "Optional settings"]);
     const guidedTabLabels = inspectorTabLabels();
     const guidedTabSize = inspectorTabList()
       .closest(".cm-tabs")

@@ -23,6 +23,13 @@ describe("workspace navigation tour", () => {
     expect(reveal).toHaveBeenCalledTimes(2);
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(
+      screen.getByRole("heading", { name: "Personal account" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("complementary", { name: "Workspace tour" }),
+    ).toHaveAttribute("data-step", "account");
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(
       screen.getByRole("heading", { name: "Your selected workspace" }),
     ).toBeVisible();
     expect(
@@ -63,18 +70,18 @@ describe("workspace navigation tour", () => {
       </RouterProvider>,
     );
     expect(
-      screen.getByRole("heading", { name: "Your selected workspace" }),
+      screen.getByRole("heading", { name: "Personal account" }),
     ).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(
-      screen.getByRole("heading", { name: "Personal account" }),
+      screen.getByRole("heading", { name: "Your selected workspace" }),
     ).toBeVisible();
     expect(
       localStorage.getItem("cloudmarkup.workspace-tour.v1.actor_tour"),
-    ).toBe("step:account");
+    ).toBe("step:organization");
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(
-      screen.getByRole("heading", { name: "Your selected workspace" }),
+      screen.getByRole("heading", { name: "Personal account" }),
     ).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(screen.getByRole("heading", { name: "Project work" })).toBeVisible();

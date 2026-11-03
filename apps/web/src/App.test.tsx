@@ -455,6 +455,19 @@ describe("CloudMarkup application routes", () => {
       await screen.findByRole("heading", { level: 1, name: "Projects" });
       const workspaceNavigation = await openNavigation();
       expect(
+        within(workspaceNavigation)
+          .getAllByRole("heading")
+          .map((heading) => heading.textContent),
+      ).toEqual(["Project work", "Personal account", "Organization"]);
+      fireEvent.click(
+        within(workspaceNavigation).getByRole("heading", {
+          name: "Organization",
+        }),
+      );
+      expect(
+        within(workspaceNavigation).getByRole("link", { name: "Usage" }),
+      ).toHaveAttribute("href", "/organizations/org_navigation/usage");
+      expect(
         within(workspaceNavigation).queryByRole("link", {
           name: "Members & roles",
         }),
@@ -464,6 +477,11 @@ describe("CloudMarkup application routes", () => {
           name: "Organization integrations",
         }),
       ).not.toBeInTheDocument();
+      fireEvent.click(
+        within(workspaceNavigation).getByRole("heading", {
+          name: "Personal account",
+        }),
+      );
       fireEvent.click(
         within(workspaceNavigation).getByRole("link", {
           name: "Personal & organizations",

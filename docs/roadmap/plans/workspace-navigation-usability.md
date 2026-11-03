@@ -315,3 +315,71 @@ Implementation is ready for integration. The sole release owner owns the
 combined `check:web`, selected browser profiles and `check:public` on the frozen
 batch. Publication, merge, deployment and live acceptance remain separate; this
 lane launches no PR/CI or AWS deployment independently.
+
+### November 3 compact sidebar follow-up
+
+This isolated change starts at public source
+`5e3fdc7fed703825c5ba693452d9493d86abeaff`. The current navigation order is
+**Project work**, **Personal account**, then selected **Personal workspace** or
+**Organization**. Project links remain visible. Personal and selected-workspace
+settings use compact native disclosures; the current route's section opens on
+navigation. Every previous destination and capability filter is retained. The
+collapsed rail still exposes labeled, focusable icon links and tooltips.
+
+Navigation spacing is reduced without shrinking phone or collapsed-rail targets
+below 44 pixels. Duplicate navigation declarations are consolidated in the
+existing stylesheet. The workspace tour follows the new order, explains the
+disclosures, and preserves semantic step keys, actor-scoped dismissal and
+restart/resume. Profile-menu and notification behavior are unchanged.
+
+Focused evidence on the isolated candidate:
+
+- Frozen installation and 14 prerequisite builds passed (builds: 1m11.843s). Web
+  and browser-test types, changed-file lint/format and diff checks passed. The
+  production build passed in 2.81s with the existing IIFE/chunk warnings.
+- All 61 existing App/tour cases are covered across the initial run and a
+  focused correction: 59 passed initially; a new link-visibility assertion in
+  two viewport cases encountered JSDOM's incomplete native-details model. That
+  presentation assertion was removed and its real-browser equivalent retained;
+  the two affected navigation cases passed in 37.13s (1.20s assertions).
+  Executable case-count delta is zero. The prior App suite recorded 78.24s; the
+  current initial two-suite run took 51.90s, a different selection and load, so
+  those durations do not establish a performance improvement.
+- Nine existing Chromium cases passed in 3.4m: five responsive account journeys,
+  sidebar routes/history/overflow/keyboard focus, both light/dark dashboard tour
+  variants, and personal-to-organization navigation. They exercise summary
+  Enter/Space activation, phone Escape/focus restoration, all existing settings
+  destinations, current-route expansion, the collapsed rail, tour target
+  highlights, and accessibility scans. No assertion deadline was increased.
+- A restricted loopback/process startup was stopped before browser assertions;
+  the reviewed local execution context ran the synthetic fixture successfully. A
+  diagnostic restart was stopped after the original run returned success.
+  Verification receipts, screenshots and local runner configuration remain
+  outside tracked source. No signed-in live browser was driven by this lane.
+
+The existing navigation regression is criticality 8; retained principal,
+membership and capability refusals protect higher-risk boundaries. No test case,
+dependency, API, persistence, permission or deployment contract is added. The
+source can be reverted without a migration. Implementation is ready for the
+release owner's combined `check:web`, selected browser and public admission
+checks. Publication, deployment and signed-in live acceptance remain separate.
+
+### Integrated browser alignment, November 3, 2026
+
+The broader typed-backend keyboard journeys retained the earlier flat-sidebar
+interaction. Their account-directory link is now inside the intended closed
+personal disclosure. They open the relevant Account or Organization summary with
+Enter before selecting its link. Current-route expansion, heading focus,
+history, role restrictions, billing refusals and phone targets remain asserted.
+The fixture also waits for the initial client document before route assertions,
+instead of starting them at response commit during cold module loading.
+
+The two existing viewport cases are retained; no case, assertion deadline or
+test timeout is removed or increased. Both passed locally in 83.776 seconds
+including fixture startup. A comparable successful pre-change focused timing was
+not recorded. CI retains this synthetic file's failure screenshots and context
+for one day, with the strict path list, read-only permissions and pinned actions
+preserved; raw traces are not uploaded.
+[PR #8](https://github.com/hunter-west/CloudMarkup-App/pull/8) records focused
+timings and exact-head integrated admission. These test-only corrections do not
+change application behavior or establish live acceptance.

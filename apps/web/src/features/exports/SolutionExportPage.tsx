@@ -735,7 +735,7 @@ export function SolutionExportCreatePanel({
             <small>
               {availability.state === "fixture"
                 ? "Choose Terraform or CloudFormation for your own deployment workflow. Any unsupported resources are reported for review."
-                : "Terraform exports are not available in this beta yet. CloudFormation exports include infrastructure and diagrams, with optional AI application source."}
+                : "Terraform exports are not available in this beta yet. CloudFormation exports include infrastructure and diagrams."}
             </small>
           </label>
           <label className="field">
@@ -870,8 +870,10 @@ export function SolutionExportCreatePanel({
             />
           ) : null}
           <p className="solution-export__assistance">
-            Infrastructure code and architecture diagrams are included. AI
-            application source is optional.
+            Infrastructure code and architecture diagrams are included.{" "}
+            {aiAvailability.sourceAvailable
+              ? "AI application source is optional."
+              : "AI application source cannot be selected until this server confirms support."}
           </p>
           <label className="solution-export-create__checkbox">
             <input
@@ -2640,6 +2642,15 @@ function ArtifactDownload({
   const [grant, setGrant] = useState<SolutionExportDownloadGrant>();
   const idempotencyKey = useRef<string | undefined>(undefined);
   const [downloaded, setDownloaded] = useState(false);
+  // Mutation callbacks can finish after this keyed export view is disposed.
+  const downloadScope = useRef<AbortController | undefined>(undefined);
+  useEffect(() => {
+    const controller = new AbortController();
+    downloadScope.current = controller;
+    return () => {
+      controller.abort();
+    };
+  }, []);
   const grantDownload = useMutation({
     mutationFn: async () => {
       idempotencyKey.current ??= createMutationKey("solution-export-download");
@@ -2655,6 +2666,7 @@ function ArtifactDownload({
       return response.data;
     },
     onSuccess: (createdGrant) => {
+      if (downloadScope.current?.signal.aborted !== false) return;
       idempotencyKey.current = undefined;
       setGrant(createdGrant);
       downloadArtifact.mutate(createdGrant);
@@ -2662,13 +2674,21 @@ function ArtifactDownload({
   });
   const downloadArtifact = useMutation({
     mutationFn: async (downloadGrant: SolutionExportDownloadGrant) => {
+      const signal = downloadScope.current?.signal;
+      if (signal === undefined || signal.aborted)
+        throw new SolutionExportResponseBindingError();
       if (Date.parse(downloadGrant.expiresAt) <= Date.now())
         throw new SolutionExportResponseBindingError();
-      const download = await context.runtime.downloadBinary(downloadGrant.url);
+      const download = await context.runtime.downloadBinary(
+        downloadGrant.url,
+        signal,
+      );
+      signal.throwIfAborted();
       assertDownloadedBinaryBinding(download, artifact, downloadGrant);
       return download;
     },
     onSuccess: (download) => {
+      if (downloadScope.current?.signal.aborted !== false) return;
       saveAuthenticatedBinary(download);
       setDownloaded(true);
     },

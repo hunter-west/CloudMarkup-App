@@ -13,16 +13,16 @@ const steps = [
       "Dashboard is your starting point. Open recent projects, create with AI, or explore templates.",
   },
   {
-    key: "organization",
-    title: "Your selected workspace",
-    description:
-      "The Personal workspace or Organization section shows the selected workspace's name. Review its usage, plans and billing, and the settings your role permits.",
-  },
-  {
     key: "account",
     title: "Personal account",
     description:
-      "Manage your profile, personal security and preferences here. Personal & organizations opens the directory for switching between your personal workspace and organizations.",
+      "Expand Personal account to manage your profile, personal security and preferences. Personal & organizations opens the directory for switching workspaces.",
+  },
+  {
+    key: "organization",
+    title: "Your selected workspace",
+    description:
+      "Expand the Personal workspace or Organization section to review the selected workspace's usage, plans and billing, and the settings your role permits.",
   },
   {
     key: "profile",
