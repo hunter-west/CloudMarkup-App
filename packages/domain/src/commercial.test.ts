@@ -477,7 +477,9 @@ describe("commercial entitlement decisions", () => {
       { includedCreditGrants: base.includedCreditGrants },
       { entitlements: base.entitlements },
     ])
-      expect(() => validatePlanVersionV1({ ...plan, ...changed })).toThrow();
+      expect(() => {
+        validatePlanVersionV1({ ...plan, ...changed });
+      }).toThrow();
     expect(() =>
       evaluateEntitlementV1({
         ...input,
