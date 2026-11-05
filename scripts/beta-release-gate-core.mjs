@@ -1654,7 +1654,7 @@ export function validateBetaAssembly(stacks, environment, assets = []) {
             .CLOUDMARKUP_PROJECT_CLEANUP_ENABLED !==
             (cleanupEnabled ? "true" : "false") ||
           lambdaVariables(entry.resource)
-            .CLOUDMARKUP_EXPECTED_SCHEMA_VERSION !== "0138"))
+            .CLOUDMARKUP_EXPECTED_SCHEMA_VERSION !== "0139"))
     ) {
       findings.push(
         finding(
@@ -1748,7 +1748,7 @@ export function validateBetaAssembly(stacks, environment, assets = []) {
       ].every((marker) => runtimeConfig.includes(marker));
       productionApiSeen =
         variables.CLOUDMARKUP_RUNTIME_COMPOSITION === "production-v1" &&
-        variables.CLOUDMARKUP_EXPECTED_SCHEMA_VERSION === "0138" &&
+        variables.CLOUDMARKUP_EXPECTED_SCHEMA_VERSION === "0139" &&
         runtimeConfigValid;
     }
     if (
@@ -1775,7 +1775,7 @@ export function validateBetaAssembly(stacks, environment, assets = []) {
       finding(
         "BETA_PRODUCTION_COMPOSITION_MISSING",
         "cloudmarkup-beta-api",
-        "The API must bind the production-v1 composition, exact schema version 0138, and complete Cognito public runtime config.",
+        "The API must bind the production-v1 composition, exact schema version 0139, and complete Cognito public runtime config.",
       ),
     );
   }
@@ -1788,7 +1788,7 @@ export function validateBetaAssembly(stacks, environment, assets = []) {
   const migrationResources = resources.filter(
     ({ resource }) =>
       resource.Type === "AWS::CloudFormation::CustomResource" &&
-      resource.Properties?.ExpectedSchemaVersion === "0138" &&
+      resource.Properties?.ExpectedSchemaVersion === "0139" &&
       /^[0-9a-f]{64}$/u.test(resource.Properties?.ManifestSha256 ?? ""),
   );
   if (migrators.length !== 1 || migrationResources.length !== 1) {

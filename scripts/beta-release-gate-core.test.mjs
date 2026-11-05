@@ -756,7 +756,7 @@ test("requires synchronized activation and the reviewed schema for project clean
       Environment: {
         Variables: {
           CLOUDMARKUP_PROJECT_CLEANUP_ENABLED: "false",
-          CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0138",
+          CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
         },
       },
     },
@@ -1609,7 +1609,7 @@ test("rejects a stale compiled cleanup asset even when source and Lambda schema 
       Environment: {
         Variables: {
           CLOUDMARKUP_PROJECT_CLEANUP_ENABLED: "true",
-          CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0138",
+          CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
         },
       },
     },

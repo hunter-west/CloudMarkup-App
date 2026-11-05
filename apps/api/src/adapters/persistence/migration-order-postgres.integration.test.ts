@@ -97,7 +97,7 @@ suite("forward migration admission on genuine isolated PostgreSQL", () => {
       };
     });
 
-  it("upgrades the admitted 75-file predecessor through exact 0094-0098 and additive 0138 with concurrent replay", async () => {
+  it("upgrades the admitted 75-file predecessor through exact 0094-0098 and additive 0138/0139 with concurrent replay", async () => {
     const all = await loadHistoricalBetaMigrations(
       fileURLToPath(new URL("../../../migrations/", import.meta.url)),
     );

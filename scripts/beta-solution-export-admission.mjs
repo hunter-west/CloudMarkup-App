@@ -397,7 +397,7 @@ export function validateBetaSolutionExport(stacks, profile, assets = []) {
     CLOUDMARKUP_DATABASE_NAME: "cloudmarkup",
     CLOUDMARKUP_CONTENT_BUCKET: apiEnv.CLOUDMARKUP_CONTENT_BUCKET,
     CLOUDMARKUP_OBJECT_DOCUMENT_PREFIX: "documents/v1/organizations/",
-    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0138",
+    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
     NODE_OPTIONS: "--enable-source-maps",
   };
   if (
@@ -445,7 +445,7 @@ export function validateBetaSolutionExport(stacks, profile, assets = []) {
     (item) =>
       item.stack === application &&
       item.resource.Type === "AWS::CloudFormation::CustomResource" &&
-      item.resource.Properties?.ExpectedSchemaVersion === "0138",
+      item.resource.Properties?.ExpectedSchemaVersion === "0139",
   );
   if (
     migrations.length !== 1 ||
