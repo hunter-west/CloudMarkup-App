@@ -209,7 +209,7 @@ integration("canonical preview commercial read host (component only)", () => {
       maximumConcurrentReservations: 1,
       entitlement: {
         planKey: "starter",
-        planVersionId: "planver_staff_credits_2026_10_15_v1",
+        planVersionId: "planver_staff_credits_2026_11_05_v2",
       },
       balance: { availableCreditUnits: "200" },
     });
@@ -225,7 +225,7 @@ integration("canonical preview commercial read host (component only)", () => {
     });
     expect(routing.plan).toMatchObject({
       key: "starter",
-      versionId: "planver_staff_credits_2026_10_15_v1",
+      versionId: "planver_staff_credits_2026_11_05_v2",
     });
     const standard = selectModelRoutingDecisionV1({
       request: { ...routing, selectedPreference: "standard-design" },

@@ -47,6 +47,15 @@ import {
 const configured = process.env["CLOUDMARKUP_TEST_DATABASE_URL"],
   suite = configured ? describe : describe.skip;
 const suffix = () => randomUUID().replaceAll("-", "");
+const staffCreditFeatures = [
+  "ai-assisted-operations",
+  "cloudformation",
+  "data-export",
+  "diagram-export",
+  "terraform",
+  "validation-jobs",
+  "zip-export",
+];
 const schema = "cm_staff_test_" + suffix(),
   marker = "CloudMarkup synthetic staff accounts";
 suite("platform staff authority and accounting on PostgreSQL", () => {
@@ -990,7 +999,7 @@ suite("platform staff authority and accounting on PostgreSQL", () => {
       plan.entitlements
         .filter((entry) => entry.enabled)
         .map((entry) => entry.feature),
-    ).toEqual(["ai-assisted-operations"]);
+    ).toEqual(staffCreditFeatures);
     await expectCustomerCredits(t.organizationId, 700, 0);
   });
   it("bootstraps only an exact immutable Cognito identity and audits operator revocation", async () => {
@@ -1723,7 +1732,7 @@ suite("platform staff authority and accounting on PostgreSQL", () => {
     };
     return { staff, t, receipt, customer, scope, meter, identity };
   }
-  it("funds unsubscribed AI through audited staff credits, reservations, consumption and exhaustion without paid privileges", async () => {
+  it("admits staff-funded exports and meters unsubscribed AI without paid privileges or invented credit", async () => {
     const f = await trialOperation("staff");
     const reads = createProductionCommercialReads({ database: typed });
     const summary = await reads.getCurrentPlanEntitlements(
@@ -1740,7 +1749,53 @@ suite("platform staff authority and accounting on PostgreSQL", () => {
       summary.entitlements
         .filter((entry) => entry.enabled)
         .map((entry) => entry.feature),
+    ).toEqual(staffCreditFeatures);
+    // The predecessor stays immutable; export access lives in its successor.
+    expect(
+      (
+        await typed.query(
+          sql(
+            "SELECT feature_key FROM commercial_plan_feature_entitlements WHERE plan_version_id='planver_staff_credits_2026_10_15_v1' AND entitlement_state='enabled' ORDER BY feature_key",
+          ),
+        )
+      ).rows.map((row) => row["feature_key"]),
     ).toEqual(["ai-assisted-operations"]);
+    const record = admissionSelectionFixture().initialRecord;
+    const ownership = {
+      organizationId: f.t.organizationId,
+      projectId: f.identity.projectId,
+    };
+    const settings = workflowFixture("infrastructure-only", "cloudformation")
+      .request.targetSettings;
+    const exportPolicy = new PostgresSolutionExportTargetPolicy(
+      new SolutionExportRequestAuthority(
+        typed,
+        f.customer,
+        ownership,
+        "exports.run",
+      ),
+      settings,
+    );
+    const exportInput = {
+      principal: f.customer,
+      organizationId: ownership.organizationId,
+      targetProfileId: "cloudmarkup.export.cloudformation-nodejs24-v1" as const,
+      environment: record.job.target.environment,
+      binding: {
+        ...ownership,
+        solutionRevisionId: record.job.solutionRevision.solutionRevisionId,
+        manifestRecordId: record.job.solutionRevision.manifestRecordId,
+        manifestDigest: sha256DigestSchema.parse(
+          record.job.solutionRevision.manifestDigest,
+        ),
+        applicationCodeRequired: false,
+        generationCoverage: record.job.generationCoverage,
+        workflowSources: record.workflowSubmission.request.sources,
+      },
+    };
+    await expect(exportPolicy.evaluate(exportInput)).resolves.toHaveProperty(
+      "entitlementDecisionReference",
+    );
     await expect(
       new CurrentPlanRepositoryExportEntitlementPolicy(
         reads,
@@ -1801,6 +1856,11 @@ suite("platform staff authority and accounting on PostgreSQL", () => {
     await expect(
       f.meter.reserve(f.scope, nextIdentity, "1", "1", expires),
     ).rejects.toMatchObject({ code: "insufficient-credits" });
+    // Deterministic export eligibility does not reserve or manufacture AI funds.
+    await expect(exportPolicy.evaluate(exportInput)).resolves.toHaveProperty(
+      "entitlementDecisionReference",
+    );
+    await expectCustomerCredits(f.t.organizationId, 0, 0);
     const beforeRefill = await app.get(f.staff, f.t.organizationId);
     await app.act(
       f.staff,

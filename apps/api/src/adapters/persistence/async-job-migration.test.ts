@@ -184,6 +184,7 @@ describe("provider-neutral async-job migration", () => {
       "0136",
       "0137",
       "0138",
+      "0139",
     ]);
   });
 

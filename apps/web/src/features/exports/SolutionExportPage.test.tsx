@@ -1027,7 +1027,7 @@ describe("Solution Export workflow UI", () => {
     ).not.toBeInTheDocument();
     expect(fixture.request).toHaveBeenCalledTimes(1);
   });
-  it("explains that Credits only funds AI without implying export access", async () => {
+  it("explains an older server's staff-credit refusal without repeating obsolete policy", async () => {
     const fixture = clientFixture({ job: jobFixture("running") });
     fixture.request.mockRejectedValue(
       new ApiClientError(403, {
@@ -1059,7 +1059,7 @@ describe("Solution Export workflow UI", () => {
     fireEvent.click(screen.getByRole("button", { name: "Generate export" }));
     expect(
       await screen.findByText(
-        "Complimentary credits fund AI workflows, not exports. Exports require an eligible paid plan or trial.",
+        "This server could not verify staff-funded export access. Reload and try again; contact support if the restriction remains.",
       ),
     ).toBeVisible();
     expect(

@@ -302,7 +302,7 @@ function exportErrorMessage(error: unknown, action: string): string {
             issue.path[0] === "targetProfileId",
         ) === true
       )
-        return "Complimentary credits fund AI workflows, not exports. Exports require an eligible paid plan or trial.";
+        return "This server could not verify staff-funded export access. Reload and try again; contact support if the restriction remains.";
       return `You do not have permission to ${action}.`;
     case "not_found":
       return "The requested export is unavailable or has expired.";

@@ -19,7 +19,7 @@ function environment() {
     CLOUDMARKUP_ENVIRONMENT: "beta",
     AWS_REGION: region,
     CLOUDMARKUP_ACCOUNT_ID: account,
-    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0138",
+    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
     CLOUDMARKUP_PROJECT_CLEANUP_ENABLED: "true",
     CLOUDMARKUP_DATABASE_ARN: `arn:aws:rds:${region}:${account}:cluster:cloudmarkup-beta-postgresql`,
     CLOUDMARKUP_DATABASE_SECRET_ARN: `arn:aws:secretsmanager:${region}:${account}:secret:cloudmarkup-beta/database/admin-ABC123`,
@@ -31,9 +31,9 @@ function environment() {
 function fixture(enabled = true) {
   const rows: SqlRow[] = [
     {
-      version: "0138",
+      version: "0139",
       checksum_sha256:
-        "b5cd0bcb42f94baaa6266ed43e0222a89af7c4bd2b84535d9e6949a5c7a0ad4b",
+        "b2b99e854c95c8a33ed271de58a35a573e00ccb4c22b6e3b17b1758264864c31",
     },
   ];
   const observed = vi.fn();
@@ -80,7 +80,7 @@ describe("the dedicated project content cleanup host", () => {
     const preceding = migrations.at(-2);
     if (latest === undefined || preceding === undefined)
       throw new Error("Expected reviewed migration history.");
-    expect(latest.version).toBe("0138");
+    expect(latest.version).toBe("0139");
     expect(environment().CLOUDMARKUP_EXPECTED_SCHEMA_VERSION).toBe(
       latest.version,
     );
@@ -147,7 +147,7 @@ describe("the dedicated project content cleanup host", () => {
   );
   it.each([
     { rows: [] },
-    { rows: [{ version: "0138" }] },
+    { rows: [{ version: "0139" }] },
     {
       rows: [
         {
@@ -178,19 +178,19 @@ describe("the dedicated project content cleanup host", () => {
     {
       rows: [
         {
-          version: "0138",
+          version: "0139",
           checksum_sha256:
             "67b5381a6e46f30d3b71635d7fddd6d047a73c66e808106a21e685697a656184",
         },
       ],
     },
-    { rows: [{ version: "0138", checksum_sha256: "0".repeat(64) }] },
+    { rows: [{ version: "0139", checksum_sha256: "0".repeat(64) }] },
   ])(
     "requires the exact migration ledger before listing candidates",
     async ({ rows }) => {
       const f = fixture();
       if (
-        rows[0]?.version === "0138" &&
+        rows[0]?.version === "0139" &&
         !Object.hasOwn(rows[0], "checksum_sha256")
       ) {
         const control = fixture();

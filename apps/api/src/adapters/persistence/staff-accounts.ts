@@ -472,7 +472,7 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
         await tx.query(
           sql(
             `INSERT INTO organization_entitlement_snapshots(organization_id,entitlement_snapshot_id,billing_account_id,subscription_projection_id,plan_version_id,entitlement_policy_version,source_record_version,expensive_operations_enabled,effective_at)
-             VALUES($1,$2,$3,NULL,'planver_staff_credits_2026_10_15_v1','cloudmarkup-entitlements-v1',$4,true,$5::timestamptz)
+             VALUES($1,$2,$3,NULL,'planver_staff_credits_2026_11_05_v2','cloudmarkup-entitlements-v1',$4,true,$5::timestamptz)
              ON CONFLICT(organization_id) DO NOTHING`,
             [
               organizationId,

@@ -68,7 +68,7 @@ describe("billing audit target compatibility migration", () => {
     ).toBe(
       manifest.migrations.findIndex(({ version }) => version === "0017") + 1,
     );
-    expect(manifest.migrations.at(-1)?.version).toBe("0138");
+    expect(manifest.migrations.at(-1)?.version).toBe("0139");
     expect(createHash("sha256").update(stripeMigration).digest("hex")).toBe(
       "bc85458cf94571e8c766889e0b44d2ef13e21cfe3a6269fba0ac6795cb6e849c",
     );

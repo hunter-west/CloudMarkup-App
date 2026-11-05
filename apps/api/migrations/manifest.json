@@ -600,6 +600,11 @@
       "version": "0138",
       "file": "0138_staff_credit_ai_access.sql",
       "checksumSha256": "b5cd0bcb42f94baaa6266ed43e0222a89af7c4bd2b84535d9e6949a5c7a0ad4b"
+    },
+    {
+      "version": "0139",
+      "file": "0139_staff_credit_export_access.sql",
+      "checksumSha256": "b2b99e854c95c8a33ed271de58a35a573e00ccb4c22b6e3b17b1758264864c31"
     }
   ]
 }

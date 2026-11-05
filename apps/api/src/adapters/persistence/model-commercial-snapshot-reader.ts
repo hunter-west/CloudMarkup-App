@@ -136,7 +136,7 @@ export async function readModelCommercialSnapshotData<
     "planver_staff_trial_2026_10_06_v1";
   const staffCreditProfile =
     account.rows[0]?.["plan_version_id"] ===
-    "planver_staff_credits_2026_10_15_v1";
+    "planver_staff_credits_2026_11_05_v2";
   const plan = (
     await tx.query(
       sql(

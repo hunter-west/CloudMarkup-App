@@ -437,7 +437,7 @@ integrationDescribe("async repository on isolated loopback PostgreSQL", () => {
       sql("SELECT version FROM cloudmarkup_schema_migrations ORDER BY version"),
     );
     expect(applied.rows.at(-2)?.["version"]).toBe("0098");
-    expect(applied.rows.at(-1)?.["version"]).toBe("0138");
+    expect(applied.rows.at(-1)?.["version"]).toBe("0139");
     expect(applied.rows).toHaveLength(expectedMigrationCount);
     const current = await database.query(
       sql("SELECT current_schema() AS schema"),

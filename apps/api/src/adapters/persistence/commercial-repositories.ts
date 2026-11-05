@@ -3024,7 +3024,7 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
                   s.source_record_version, s.expensive_operations_enabled,
                   s.record_version, s.effective_at,
                   f.entitlement_state
-           FROM ${input.planVersionId === "planver_staff_credits_2026_10_15_v1" ? "organization_effective_entitlement_snapshots_v1" : "organization_entitlement_snapshots"} s
+           FROM ${input.planVersionId === "planver_staff_credits_2026_11_05_v2" ? "organization_effective_entitlement_snapshots_v1" : "organization_entitlement_snapshots"} s
            JOIN commercial_plan_versions current_plan
              ON current_plan.plan_version_id = s.plan_version_id
             AND current_plan.configuration_status = 'proposed-beta-example'
@@ -3050,7 +3050,7 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
              AND s.plan_version_id = current_subscription.plan_version_id
              AND current_subscription.normalized_status = 'active')
              ${input.planVersionId === "planver_staff_trial_2026_10_06_v1" ? "OR (s.subscription_projection_id IS NULL AND cloudmarkup_staff_trial_current_v1(s.organization_id,s.billing_account_id))" : ""}
-             ${input.planVersionId === "planver_staff_credits_2026_10_15_v1" ? "OR (s.subscription_projection_id IS NULL AND s.plan_version_id='planver_staff_credits_2026_10_15_v1' AND cloudmarkup_staff_credit_access_v1(s.organization_id,s.billing_account_id))" : ""})`,
+             ${input.planVersionId === "planver_staff_credits_2026_11_05_v2" ? "OR (s.subscription_projection_id IS NULL AND s.plan_version_id='planver_staff_credits_2026_11_05_v2' AND cloudmarkup_staff_credit_access_v1(s.organization_id,s.billing_account_id))" : ""})`,
           [organizationId, input.featureKey],
         ),
       );
@@ -4505,7 +4505,7 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
              AND ((snapshot.subscription_projection_id IS NOT NULL
              AND snapshot.source_record_version = subscription.record_version
              AND snapshot.plan_version_id = subscription.plan_version_id)
-             OR (snapshot.subscription_projection_id IS NULL AND snapshot.plan_version_id IN ('planver_staff_trial_2026_10_06_v1','planver_staff_credits_2026_10_15_v1')))`,
+             OR (snapshot.subscription_projection_id IS NULL AND snapshot.plan_version_id IN ('planver_staff_trial_2026_10_06_v1','planver_staff_credits_2026_11_05_v2')))`,
           [scope.membershipId, scope.principalId, scope.organizationId],
         ),
       );
@@ -4547,7 +4547,7 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
           readString(row.normalized_status) === "active") ||
         (planVersionId === STAFF_TRIAL_PLAN_VERSION &&
           trial?.["trial_current"] === true) ||
-        (planVersionId === "planver_staff_credits_2026_10_15_v1" &&
+        (planVersionId === "planver_staff_credits_2026_11_05_v2" &&
           row["staff_credit_current"] === true);
       const expensiveOperationsEnabled =
         organizationState === "active" &&
@@ -4974,7 +4974,7 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
            AND (
              (entitlement.subscription_projection_id IS NULL
                AND ((entitlement.plan_version_id<>'planver_staff_trial_2026_10_06_v1' AND entitlement.source_record_version = account.record_version)
-                 OR entitlement.plan_version_id IN ('planver_staff_trial_2026_10_06_v1','planver_staff_credits_2026_10_15_v1')))
+                 OR entitlement.plan_version_id IN ('planver_staff_trial_2026_10_06_v1','planver_staff_credits_2026_11_05_v2')))
              OR
              (entitlement.subscription_projection_id IS NOT NULL
                AND entitlement.source_record_version = subscription.record_version

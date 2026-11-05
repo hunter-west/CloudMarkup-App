@@ -33,7 +33,7 @@ describe("persistence migrations", () => {
       ),
     );
 
-    expect(migrationFiles).toHaveLength(120);
+    expect(migrationFiles).toHaveLength(121);
     expect(
       migrationFiles.filter((_, index) => sources[index]?.includes(13)),
     ).toEqual([]);
@@ -349,6 +349,7 @@ describe("persistence migrations", () => {
         version: "0137",
       },
       { file: "0138_staff_credit_ai_access.sql", version: "0138" },
+      { file: "0139_staff_credit_export_access.sql", version: "0139" },
     ]);
     const joined = migrations
       .flatMap((migration) => migration.statements)

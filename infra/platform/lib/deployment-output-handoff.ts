@@ -168,9 +168,9 @@ function validateOutputs(outputs: DeploymentOutputs): void {
   if (outputs.DeploymentEnvironment !== "beta") {
     throw new TypeError("DeploymentEnvironment must be beta.");
   }
-  if (outputs.DatabaseMigrationExpectedVersion !== "0138") {
+  if (outputs.DatabaseMigrationExpectedVersion !== "0139") {
     throw new TypeError(
-      "DatabaseMigrationExpectedVersion must be the exact reviewed schema version 0138.",
+      "DatabaseMigrationExpectedVersion must be the exact reviewed schema version 0139.",
     );
   }
   if (

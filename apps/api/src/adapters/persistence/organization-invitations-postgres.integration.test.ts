@@ -43,7 +43,7 @@ const runId = randomUUID().replaceAll("-", "");
 const schema = `cloudmarkup_invitation_test_${runId}`;
 const marker = `CloudMarkup synthetic invitation test ${runId}`;
 const legacyPlan = "planver_starter_2026_08_14_v1";
-const staffCreditsPlan = "planver_staff_credits_2026_10_15_v1";
+const staffCreditsPlan = "planver_staff_credits_2026_11_05_v2";
 const id = (prefix: string): string => `${prefix}_${randomUUID()}`;
 const secretHash = (token: string): string =>
   createHash("sha256")
@@ -699,6 +699,11 @@ integration("registered sharing migration on isolated real PostgreSQL", () => {
         version: "0138",
         checksum_sha256:
           "b5cd0bcb42f94baaa6266ed43e0222a89af7c4bd2b84535d9e6949a5c7a0ad4b",
+      },
+      {
+        version: "0139",
+        checksum_sha256:
+          "b2b99e854c95c8a33ed271de58a35a573e00ccb4c22b6e3b17b1758264864c31",
       },
     ]);
     const plans = await database.query(

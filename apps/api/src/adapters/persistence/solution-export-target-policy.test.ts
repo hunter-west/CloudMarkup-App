@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import {
   BETA_PLAN_VERSIONS_V1,
   ENTITLEMENT_POLICY_VERSION,
+  STAFF_CREDIT_PLAN_VERSION,
+  STAFF_CREDIT_POLICY_VERSION,
   STAFF_TRIAL_PLAN_V1,
 } from "@cloudmarkup/domain";
 import {
@@ -20,6 +22,16 @@ import { admissionSelectionFixture } from "./solution-export-admission-test-help
 import type { SqlDatabase, SqlResult, SqlRow, SqlStatement } from "./sql.js";
 
 describe("canonical export target decision without commercial writes", () => {
+  const staffCreditPlanVersion = STAFF_CREDIT_PLAN_VERSION;
+  const creditExportFeatures = new Set([
+    "ai-assisted-operations",
+    "data-export",
+    "zip-export",
+    "cloudformation",
+    "terraform",
+    "diagram-export",
+    "validation-jobs",
+  ]);
   function fixture(
     role: OrganizationRole = "editor",
     changed: SqlRow = {},
@@ -28,11 +40,40 @@ describe("canonical export target decision without commercial writes", () => {
     const selection = admissionSelectionFixture();
     const record = selection.initialRecord;
     const foundPlan =
-      changed["plan_version_id"] === STAFF_TRIAL_PLAN_V1.planVersionId
-        ? STAFF_TRIAL_PLAN_V1
-        : BETA_PLAN_VERSIONS_V1.find(
-            (value) => value.planVersionId === "planver_pro_2026_08_14_v2",
-          );
+      changed["plan_version_id"] === staffCreditPlanVersion
+        ? {
+            ...STAFF_TRIAL_PLAN_V1,
+            planDefinitionId: "plan_staff_credits",
+            planVersionId: staffCreditPlanVersion,
+            configurationVersion: STAFF_CREDIT_POLICY_VERSION,
+            includedBillableSeats: 1,
+            includedCreditGrants: [],
+            entitlements: STAFF_TRIAL_PLAN_V1.entitlements.map((entry) => ({
+              ...entry,
+              enabled: creditExportFeatures.has(entry.feature),
+            })),
+            limits: STAFF_TRIAL_PLAN_V1.limits
+              .filter((entry) =>
+                [
+                  "concurrent-ai-jobs",
+                  "active-members",
+                  "active-owners",
+                  "active-administrators",
+                  "active-editors",
+                  "billable-seats",
+                  "viewers",
+                ].includes(entry.key),
+              )
+              .map((entry) => ({
+                ...entry,
+                value: entry.key === "viewers" ? 0 : 1,
+              })),
+          }
+        : changed["plan_version_id"] === STAFF_TRIAL_PLAN_V1.planVersionId
+          ? STAFF_TRIAL_PLAN_V1
+          : BETA_PLAN_VERSIONS_V1.find(
+              (value) => value.planVersionId === "planver_pro_2026_08_14_v2",
+            );
     if (foundPlan === undefined)
       throw new Error("Missing canonical synthetic plan fixture.");
     const plan = foundPlan;
@@ -118,12 +159,6 @@ describe("canonical export target decision without commercial writes", () => {
           },
         ];
       else if (statement.text.startsWith("SET TRANSACTION")) rows = [];
-      else if (
-        statement.text.startsWith("SELECT cloudmarkup_staff_credit_access_v1")
-      )
-        rows = [
-          { staff_credit_current: changed["staff_credit_current"] === true },
-        ];
       else if (statement.text.includes("FROM organization_billing_accounts a"))
         rows = missing ? [] : [{ ...row, evaluated_at: now.toISOString() }];
       else if (
@@ -371,25 +406,38 @@ describe("canonical export target decision without commercial writes", () => {
       ),
     ).toBe(true);
   });
-  it("explains Credits only export denial for prior-subscription and new staff-credit accounts", async () => {
-    for (const missingPaidOrTrialRow of [false, true]) {
+  it("admits verified staff-credit exports without a paid subscription, trial or commercial writes", async () => {
+    for (const target of ["terraform", "cloudformation"] as const) {
       const f = fixture("editor", {
-        normalized_status: "canceled",
-        snapshot_expensive: false,
+        plan_version_id: staffCreditPlanVersion,
+        subscription_projection_id: null,
+        subscription_version: null,
+        normalized_status: null,
         staff_credit_current: true,
       });
-      if (missingPaidOrTrialRow) f.setMissing();
-      await expect(f.policy.evaluate(f.input)).rejects.toMatchObject({
-        code: "access_denied",
-        status: 403,
-        fieldIssues: [
-          {
-            code: "solution-export.staff-credits-ai-only.v1",
-            path: ["targetProfileId"],
-            message: "Exports require an eligible paid plan or trial.",
-          },
-        ],
-      });
+      const settings = workflowFixture("infrastructure-only", target).request
+        .targetSettings;
+      const policy = new PostgresSolutionExportTargetPolicy(
+        f.authority,
+        settings,
+      );
+      const input = {
+        ...f.input,
+        targetProfileId:
+          target === "terraform"
+            ? ("cloudmarkup.export.terraform-nodejs24-v1" as const)
+            : ("cloudmarkup.export.cloudformation-nodejs24-v1" as const),
+      };
+      await expect(policy.evaluate(input)).resolves.toHaveProperty(
+        "entitlementDecisionReference",
+      );
+      expect(
+        f.statements.some((statement) =>
+          statement.text.includes(
+            "organization_effective_entitlement_snapshots_v1",
+          ),
+        ),
+      ).toBe(true);
       expect(
         f.statements.every((statement) =>
           /^\s*(SELECT|SET TRANSACTION|WITH authorized_project\b)/u.test(
@@ -397,6 +445,10 @@ describe("canonical export target decision without commercial writes", () => {
           ),
         ),
       ).toBe(true);
+      f.row["staff_credit_current"] = false;
+      await expect(policy.evaluate(input)).rejects.toMatchObject({
+        code: "access_denied",
+      });
     }
     const paid = fixture("editor", { staff_credit_current: true });
     await expect(paid.policy.evaluate(paid.input)).resolves.toMatchObject({
@@ -523,7 +575,7 @@ describe("canonical export target decision without commercial writes", () => {
       code: "access_denied",
     });
   });
-  it("rechecks trial revocation under the claimed worker authority", async () => {
+  it("rechecks trial expiry and staff-credit revocation under the claimed worker authority", async () => {
     const f = workerFixture(trialRow);
     const clock = vi
       .spyOn(Date, "now")
@@ -544,6 +596,25 @@ describe("canonical export target decision without commercial writes", () => {
     } finally {
       clock.mockRestore();
     }
+    const funded = workerFixture({
+      plan_version_id: staffCreditPlanVersion,
+      subscription_projection_id: null,
+      subscription_version: null,
+      normalized_status: null,
+      staff_credit_current: true,
+    });
+    await expect(
+      funded.workerPolicy.evaluateForWorker(funded.workerInput),
+    ).resolves.toHaveProperty("entitlementDecisionReference");
+    funded.row["staff_credit_current"] = false;
+    await expect(
+      funded.workerPolicy.evaluateForWorker(funded.workerInput),
+    ).rejects.toMatchObject({ code: "access_denied" });
+    funded.row["staff_credit_current"] = true;
+    funded.row["account_expensive"] = false;
+    await expect(
+      funded.workerPolicy.evaluateForWorker(funded.workerInput),
+    ).rejects.toMatchObject({ code: "access_denied" });
   });
   function workerFixture(changed: SqlRow = {}) {
     const f = fixture("editor", changed);

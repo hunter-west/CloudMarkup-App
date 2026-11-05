@@ -423,8 +423,9 @@ function ScopedBillingWorkspacePage({
                         : scope?.kind === "organization"
                           ? "organization"
                           : "workspace"}
-                      . Available funds can support AI; they do not include a
-                      subscription or export access.
+                      . This access includes exports without a paid subscription
+                      or trial. AI work uses available credits; deterministic
+                      infrastructure exports do not spend AI credits.
                     </p>
                   ) : value.subscriptionState === "not-subscribed" ? (
                     <p>

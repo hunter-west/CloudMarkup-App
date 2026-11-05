@@ -44,6 +44,6 @@ export function useExportCapabilities() {
   return {
     state: "available" as const,
     message:
-      "Export CloudFormation from infrastructure-only revisions with an eligible paid plan or active trial. Packages can be up to 4 MiB. We'll check your plan and project when you generate.",
+      "Export CloudFormation from infrastructure-only revisions with staff-granted credit access, an eligible paid plan or an active trial. Packages can be up to 4 MiB. We'll check your workspace access and project when you generate.",
   };
 }

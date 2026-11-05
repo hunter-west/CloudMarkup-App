@@ -326,7 +326,7 @@ describe("shared self-host runtime admission and lifecycle", () => {
       };
     }
     const input = document();
-    input.persistence.expectedSchemaVersion = "0138";
+    input.persistence.expectedSchemaVersion = "0139";
     input.persistence.readinessTimeoutMillis = 5000;
     const factories = { ...f.factories };
     Reflect.deleteProperty(factories, "readMigrations");
@@ -334,7 +334,7 @@ describe("shared self-host runtime admission and lifecycle", () => {
     const runtime = await createSelfHostRuntime(input, factories);
     expect(inspected).toEqual(new Set(ORDINARY_PERSISTENCE_PURPOSES));
     expect(profile.migrations[0]?.version).toBe("0000");
-    expect(profile.migrations.at(-1)?.version).toBe("0138");
+    expect(profile.migrations.at(-1)?.version).toBe("0139");
     admission.wrongPurpose = "cleanup";
     expect(
       (await runtime.checkReadiness()).find((c) => c.name === "schema")?.ready,

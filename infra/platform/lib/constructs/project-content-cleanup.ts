@@ -80,7 +80,7 @@ export class ProjectContentCleanup extends Construct {
           CLOUDMARKUP_DATABASE_ARN: props.databaseArn,
           CLOUDMARKUP_DATABASE_SECRET_ARN: props.databaseSecretArn,
           CLOUDMARKUP_DATABASE_NAME: "cloudmarkup",
-          CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0138",
+          CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
           CLOUDMARKUP_CONTENT_BUCKET: props.contentBucketName,
           CLOUDMARKUP_CLEANUP_SCHEDULE_ARN: scheduleArn,
           CLOUDMARKUP_PROJECT_CLEANUP_ENABLED: "true",

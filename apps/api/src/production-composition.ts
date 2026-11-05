@@ -256,7 +256,7 @@ export function readProductionEnvironment(
   environment: NodeJS.ProcessEnv,
 ): ProductionEnvironment {
   exact(environment, "CLOUDMARKUP_ENVIRONMENT", "beta");
-  exact(environment, "CLOUDMARKUP_EXPECTED_SCHEMA_VERSION", "0138");
+  exact(environment, "CLOUDMARKUP_EXPECTED_SCHEMA_VERSION", "0139");
   exact(environment, "CLOUDMARKUP_RUNTIME_COMPOSITION", "production-v1");
   if (environment["CLOUDMARKUP_DEPLOYMENT_SHELL"] === "true") {
     throw new Error("The beta deployment shell cannot run the production API.");

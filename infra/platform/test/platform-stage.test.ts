@@ -83,7 +83,7 @@ test("binds the checked migration contract to exact repository bytes", () => {
       new URL("../../../apps/api/migrations/manifest.json", import.meta.url),
     ),
   );
-  expect(DATABASE_MIGRATION_EXPECTED_VERSION).toBe("0138");
+  expect(DATABASE_MIGRATION_EXPECTED_VERSION).toBe("0139");
   expect(createHash("sha256").update(manifest).digest("hex")).toBe(
     DATABASE_MIGRATION_MANIFEST_SHA256,
   );
@@ -498,12 +498,12 @@ describe("CloudMarkup platform security and lifecycle", () => {
     expect(
       applicationOutputs["DatabaseMigrationExpectedVersion"],
     ).toMatchObject({
-      Value: "0138",
+      Value: "0139",
     });
     expect(applicationOutputs["DatabaseMigrationManifestSha256"]).toMatchObject(
       {
         Value:
-          "bc316cae6997880786ecf27fee40f43f997669cfd521356dc942adca9d849a16",
+          "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
       },
     );
     const migrationResources = application.findResources(
@@ -514,9 +514,9 @@ describe("CloudMarkup platform security and lifecycle", () => {
     expect(migrationLogicalId).toBeDefined();
     expect(migrationResource).toMatchObject({
       Properties: {
-        ExpectedSchemaVersion: "0138",
+        ExpectedSchemaVersion: "0139",
         ManifestSha256:
-          "bc316cae6997880786ecf27fee40f43f997669cfd521356dc942adca9d849a16",
+          "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
       },
     });
     const functions = application.findResources("AWS::Lambda::Function");

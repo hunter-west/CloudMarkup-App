@@ -34,7 +34,7 @@ function environment(enabled: "absent" | "false" | "true"): NodeJS.ProcessEnv {
   return {
     CLOUDMARKUP_RUNTIME_COMPOSITION: "production-v1",
     CLOUDMARKUP_ENVIRONMENT: "beta",
-    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0138",
+    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
     AWS_REGION: "us-east-1",
     CLOUDMARKUP_DATABASE_ARN:
       "arn:aws:rds:us-east-1:123456789012:cluster:synthetic",

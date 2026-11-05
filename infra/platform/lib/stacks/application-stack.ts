@@ -44,9 +44,9 @@ import { TerraformValidationProject } from "../constructs/terraform-validation-p
 import type { ObservabilityStack } from "./observability-stack.js";
 import type { StatefulStack } from "./stateful-stack.js";
 
-export const DATABASE_MIGRATION_EXPECTED_VERSION = "0138";
+export const DATABASE_MIGRATION_EXPECTED_VERSION = "0139";
 export const DATABASE_MIGRATION_MANIFEST_SHA256 =
-  "bc316cae6997880786ecf27fee40f43f997669cfd521356dc942adca9d849a16";
+  "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47";
 
 const API_GATEWAY_SECURITY_RESPONSE_HEADERS = Object.freeze({
   "Cache-Control": "'no-store'",
