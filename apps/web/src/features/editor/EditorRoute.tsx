@@ -587,7 +587,7 @@ function DraftLoadFailure({
   const mapped = mapApiError(error);
   return (
     <AppShell identity={identity}>
-      <main id="main-content" tabIndex={-1}>
+      <div>
         <section
           className={
             mapped.sessionExpired
@@ -618,7 +618,7 @@ function DraftLoadFailure({
             </AppLink>
           )}
         </section>
-      </main>
+      </div>
     </AppShell>
   );
 }
@@ -656,7 +656,7 @@ function ReadOnlyServerDraft({
 
   return (
     <AppShell identity={identity}>
-      <main className="editor-project-access" id="main-content" tabIndex={-1}>
+      <div className="editor-project-access">
         <section className="state-card editor-project-access__card">
           <p className="status-label">Read-only project</p>
           <h1>{project.name}</h1>
@@ -760,7 +760,7 @@ function ReadOnlyServerDraft({
             </AppLink>
           </div>
         </section>
-      </main>
+      </div>
     </AppShell>
   );
 }
@@ -986,7 +986,7 @@ function BackendEditorRoute({
   ) {
     return (
       <AppShell identity={shellIdentity}>
-        <main id="main-content" tabIndex={-1}>
+        <div>
           <section className="state-card" role="status">
             <p className="status-label">Project closed</p>
             <h1>{projectQuery.data.project.name}</h1>
@@ -1000,7 +1000,7 @@ function BackendEditorRoute({
               Return to projects
             </AppLink>
           </section>
-        </main>
+        </div>
       </AppShell>
     );
   }
