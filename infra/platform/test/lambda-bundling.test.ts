@@ -641,16 +641,16 @@ if (!Buffer.isBuffer(photo) || photo.readUInt32BE(16) !== 192 || photo.readUInt3
     process.env["CLOUDMARKUP_MIGRATION_MANIFEST_SHA256"] = createHash("sha256")
       .update(migrationManifest)
       .digest("hex");
-    process.env["CLOUDMARKUP_MIGRATION_EXPECTED_VERSION"] = "0138";
+    process.env["CLOUDMARKUP_MIGRATION_EXPECTED_VERSION"] = "0139";
     try {
       const migrations = (await bundleMigrator()).loadMigrations() as readonly {
         readonly statements: readonly string[];
       }[];
-      expect(migrations).toHaveLength(120);
+      expect(migrations).toHaveLength(121);
       const statements = migrations.flatMap(({ statements: migrationSql }) => [
         ...migrationSql,
       ]);
-      expect(statements).toHaveLength(1367);
+      expect(statements).toHaveLength(1374);
       expect(
         Math.max(
           ...statements.map((statement) => Buffer.byteLength(statement)),
