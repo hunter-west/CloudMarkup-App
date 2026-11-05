@@ -2,7 +2,7 @@
   "proposalContractVersion": 2,
   "profileId": "cloudmarkup-standalone-pg17-v1",
   "capabilityProfile": "local-editor-core-v1",
-  "installedProfileManifestSha256": "2fb13c3f4a46f3025f1b972254896ac0e50575450680495cdd968ecda6eb9651",
+  "installedProfileManifestSha256": "0be8cc2baf7898de9a52c4d65a2967c984f5280e88576025ab173f1a02d8e577",
   "state": "REVIEW_ONLY_UNARMED",
   "automaticBootstrap": false,
   "runtimeActivation": false,
