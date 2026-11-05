@@ -89,8 +89,9 @@ integrationDescribe(
       const migrations = await loadHistoricalBetaMigrations(
         fileURLToPath(new URL("../../../migrations", import.meta.url)),
       );
-      expect(migrations.at(-2)?.version).toBe("0098");
-      expect(migrations.at(-2)?.statements).toHaveLength(21);
+      expect(migrations.at(-3)?.version).toBe("0098");
+      expect(migrations.at(-3)?.statements).toHaveLength(21);
+      expect(migrations.at(-2)?.version).toBe("0138");
       expect(migrations.at(-1)?.version).toBe("0139");
       expect(
         migrations.find(({ version }) => version === "0093")?.statements,

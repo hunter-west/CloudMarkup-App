@@ -126,16 +126,17 @@ integration("registered sharing migration on isolated real PostgreSQL", () => {
     return (
       await database.query(
         sql(
-          "SELECT 'plan' AS kind,to_jsonb(t) AS value FROM commercial_plan_versions t WHERE plan_version_id<>$1 AND plan_version_id<>$2 AND plan_version_id<>$3 AND plan_version_id<>$4 " +
-            "UNION ALL SELECT 'features',to_jsonb(t) FROM commercial_plan_feature_entitlements t WHERE plan_version_id<>$1 AND plan_version_id<>$2 AND plan_version_id<>$3 AND plan_version_id<>$4 " +
-            "UNION ALL SELECT 'limits',to_jsonb(t) FROM commercial_plan_numeric_limits t WHERE plan_version_id<>$1 AND plan_version_id<>$2 AND plan_version_id<>$3 AND plan_version_id<>$4 " +
-            "UNION ALL SELECT 'credits',to_jsonb(t) FROM commercial_plan_included_credit_grants t WHERE plan_version_id<>$1 AND plan_version_id<>$2 AND plan_version_id<>$3 AND plan_version_id<>$4 " +
-            "UNION ALL SELECT 'seats',to_jsonb(t) FROM commercial_plan_seat_rules t WHERE plan_version_id<>$1 AND plan_version_id<>$2 AND plan_version_id<>$3 AND plan_version_id<>$4 ORDER BY kind,value",
+          "SELECT 'plan' AS kind,to_jsonb(t) AS value FROM commercial_plan_versions t WHERE plan_version_id<>$1 AND plan_version_id<>$2 AND plan_version_id<>$3 AND plan_version_id<>$4 AND plan_version_id<>$5 " +
+            "UNION ALL SELECT 'features',to_jsonb(t) FROM commercial_plan_feature_entitlements t WHERE plan_version_id<>$1 AND plan_version_id<>$2 AND plan_version_id<>$3 AND plan_version_id<>$4 AND plan_version_id<>$5 " +
+            "UNION ALL SELECT 'limits',to_jsonb(t) FROM commercial_plan_numeric_limits t WHERE plan_version_id<>$1 AND plan_version_id<>$2 AND plan_version_id<>$3 AND plan_version_id<>$4 AND plan_version_id<>$5 " +
+            "UNION ALL SELECT 'credits',to_jsonb(t) FROM commercial_plan_included_credit_grants t WHERE plan_version_id<>$1 AND plan_version_id<>$2 AND plan_version_id<>$3 AND plan_version_id<>$4 AND plan_version_id<>$5 " +
+            "UNION ALL SELECT 'seats',to_jsonb(t) FROM commercial_plan_seat_rules t WHERE plan_version_id<>$1 AND plan_version_id<>$2 AND plan_version_id<>$3 AND plan_version_id<>$4 AND plan_version_id<>$5 ORDER BY kind,value",
           [
             BETA_EXPORT_PRO_PLAN_ID,
             BETA_CREDIT_PRO_PLAN_ID,
             "planver_staff_trial_2026_10_06_v1",
             staffCreditsPlan,
+            "planver_staff_credits_2026_10_15_v1",
           ],
         ),
       )
