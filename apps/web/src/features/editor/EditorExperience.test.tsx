@@ -197,20 +197,21 @@ describe("guided onboarding and professional productivity", () => {
 
   it("keeps permission teaching truthful and exposes the revision placeholder from Project status", async () => {
     await renderEditor("template");
+    const tour = screen.getByTestId("guided-walkthrough");
 
     expect(
-      await screen.findByRole("heading", { name: "Add a service" }),
+      await within(tour).findByRole("heading", { name: "Add a service" }),
     ).toBeVisible();
     for (let step = 0; step < 3; step += 1) {
-      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      fireEvent.click(within(tour).getByRole("button", { name: "Next" }));
     }
     expect(
-      screen.getByRole("heading", {
+      within(tour).getByRole("heading", {
         name: "Understand generated permissions",
       }),
     ).toBeVisible();
 
-    fireEvent.click(screen.getByRole("button", { name: "Show me" }));
+    fireEvent.click(within(tour).getByRole("button", { name: "Show me" }));
     await waitFor(() => {
       expect(
         document.querySelector(".architecture-live-region"),
@@ -223,11 +224,12 @@ describe("guided onboarding and professional productivity", () => {
       "true",
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    fireEvent.click(within(tour).getByRole("button", { name: "Dismiss" }));
     await runCommand("revision", /^Locate future revision review/u);
-    expect(
-      await screen.findByRole("dialog", { name: "Project status" }),
-    ).toBeVisible();
+    const projectStatus = await screen.findByRole("dialog", {
+      name: "Project status",
+    });
+    expect(projectStatus).toBeVisible();
     const revisionPlaceholder = document.getElementById(
       "responsive-review-revision-entry-point",
     );
@@ -235,7 +237,7 @@ describe("guided onboarding and professional productivity", () => {
     expect(revisionPlaceholder).toHaveAttribute("tabindex", "-1");
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { name: "Project status" }),
+        within(projectStatus).getByRole("heading", { name: "Project status" }),
       ).toHaveFocus();
     });
   });
@@ -361,7 +363,11 @@ describe("guided onboarding and professional productivity", () => {
 
   it("opens catalog-sourced learning for a keyboard-selected resource", async () => {
     await renderEditor("template");
-    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    fireEvent.click(
+      within(screen.getByTestId("guided-walkthrough")).getByRole("button", {
+        name: "Dismiss",
+      }),
+    );
 
     await waitFor(() => {
       expect(architectureNode("node_cognito_user_pool")).toBeInTheDocument();
@@ -487,10 +493,14 @@ describe("guided onboarding and professional productivity", () => {
     fireEvent.click(selectedOverviewSummary);
 
     fireEvent.click(
-      screen.getByText("Technical identity", { selector: "summary" }),
+      within(reopenedSelectedInspector).getByText("Technical identity", {
+        selector: "summary",
+      }),
     );
     fireEvent.click(
-      screen.getByRole("button", { name: "Copy stable identifier" }),
+      within(reopenedSelectedInspector).getByRole("button", {
+        name: "Copy stable identifier",
+      }),
     );
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledWith("node_cognito_user_pool");
