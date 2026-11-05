@@ -1123,7 +1123,7 @@ describe("Solution Export workflow UI", () => {
     expect(
       screen.getByRole("status", { name: "Export availability" }),
     ).toHaveTextContent(
-      "infrastructure-only revisions with an eligible paid plan or active trial",
+      "infrastructure-only revisions with staff-granted credit access, an eligible paid plan or an active trial",
     );
     expect(
       screen.getByRole("status", { name: "Export availability" }),
