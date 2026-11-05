@@ -194,9 +194,9 @@ function validateOutputs(outputs: DeploymentOutputs): void {
       "DatabaseMigrationAppliedManifestSha256 must equal the checked manifest digest.",
     );
   }
-  if (outputs.DatabaseMigrationCount !== "120") {
+  if (outputs.DatabaseMigrationCount !== "121") {
     throw new TypeError(
-      "DatabaseMigrationCount must prove all 120 checked migrations were validated.",
+      "DatabaseMigrationCount must prove all 121 checked migrations were validated.",
     );
   }
   if (outputs.AwsAccountId !== "000000000000") {

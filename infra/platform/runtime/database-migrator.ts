@@ -134,6 +134,7 @@ import migration0135 from "../../../apps/api/migrations/0135_ordinary_preview_ca
 import migration0136 from "../../../apps/api/migrations/0136_model_private_runtime_definitions.sql";
 import migration0137 from "../../../apps/api/migrations/0137_provider_direct_usage_journal_definitions.sql";
 import migration0138 from "../../../apps/api/migrations/0138_staff_credit_ai_access.sql";
+import migration0139 from "../../../apps/api/migrations/0139_staff_credit_export_access.sql";
 import bundledMigrationManifest from "../../../apps/api/migrations/manifest.json" with { type: "json" };
 
 interface ManifestEntry {
@@ -277,6 +278,7 @@ const sourceByFile: Readonly<Record<string, string>> = Object.freeze({
   "0136_model_private_runtime_definitions.sql": migration0136,
   "0137_provider_direct_usage_journal_definitions.sql": migration0137,
   "0138_staff_credit_ai_access.sql": migration0138,
+  "0139_staff_credit_export_access.sql": migration0139,
 });
 
 const sha256Pattern = /^[0-9a-f]{64}$/u;
