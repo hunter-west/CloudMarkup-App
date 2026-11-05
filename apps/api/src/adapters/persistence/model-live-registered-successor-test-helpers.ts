@@ -219,7 +219,7 @@ export async function loadRegisteredEvaluationSuccessor(
     ),
   };
   if (
-    all.length !== 120 ||
+    all.length !== 121 ||
     selected.length !== contract.count ||
     selected.reduce(
       (sum, migration) => sum + migration.statements.length,

@@ -157,7 +157,7 @@ suite(
       expect(retained.rows).toEqual([{ roles: 0, schemas: 0 }]);
     });
 
-    it("upgrades 108 to all 120 migrations and verifies every helper owner and ACL", async () => {
+    it("upgrades 108 to all 121 migrations and verifies every helper owner and ACL", async () => {
       await runMigrations(admin, migrations);
       await runMigrations(admin, migrations);
       const ledger = await admin.query(
@@ -165,7 +165,7 @@ suite(
           "SELECT version,checksum_sha256 FROM cloudmarkup_schema_migrations ORDER BY version",
         ),
       );
-      expect(ledger.rows).toHaveLength(120);
+      expect(ledger.rows).toHaveLength(121);
       expect(
         ledger.rows.map((row) => String(row["checksum_sha256"]).trim()),
       ).toEqual(migrations.map(({ checksumSha256 }) => checksumSha256));

@@ -17,10 +17,10 @@ describe("strict memory-only preview metadata", () => {
     const migrations = await loadMigrations(
       fileURLToPath(new URL("../../../migrations", import.meta.url)),
     );
-    expect(migrations).toHaveLength(120);
+    expect(migrations).toHaveLength(121);
     expect(
       migrations.reduce((count, item) => count + item.statements.length, 0),
-    ).toBe(1367);
+    ).toBe(1374);
     const previewMigration = migrations.find(
       ({ version }) => version === "0026",
     );

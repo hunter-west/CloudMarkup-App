@@ -532,7 +532,7 @@ describe("persistence migrations", () => {
     }
     // Establish a complete valid preimage so the refusal below exercises the
     // byte checksum, rather than the earlier missing-file count guard.
-    await expect(loadMigrations(targetDirectory)).resolves.toHaveLength(120);
+    await expect(loadMigrations(targetDirectory)).resolves.toHaveLength(121);
     await writeFile(
       resolve(targetDirectory, "0001_identity_and_tenancy.sql"),
       "SELECT 1;\n",

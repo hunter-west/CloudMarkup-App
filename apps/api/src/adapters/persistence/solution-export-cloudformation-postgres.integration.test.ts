@@ -127,7 +127,7 @@ integrationDescribe(
           "SELECT version FROM cloudmarkup_schema_migrations ORDER BY version",
         ),
       );
-      expect(applied.rows).toHaveLength(81);
+      expect(applied.rows).toHaveLength(82);
       expect(applied.rows.at(-2)?.["version"]).toBe("0098");
       expect(applied.rows.at(-1)?.["version"]).toBe("0139");
     });
