@@ -33,6 +33,7 @@ it.each([
   "0136",
   "0137",
   "0138",
+  "0139",
 ] as const)("admits only the complete reviewed %s ledger", async (version) => {
   const migrations = await loadRegisteredEvaluationSuccessor(version);
   const rows = migrations.map((migration) => ({
@@ -49,11 +50,11 @@ it.each([
   // Every inferred-version branch keeps its own valid prefix above. The common
   // count/order/checksum rejection loop needs the oldest and current boundary
   // prefixes, rather than another full source authentication for every version.
-  if (version === "0138")
+  if (version === "0139")
     await expect(
       requireRegisteredEvaluationSuccessor(database, "0059"),
     ).rejects.toThrow("complete exact registered prefix");
-  if (version !== "0059" && version !== "0138") return;
+  if (version !== "0059" && version !== "0139") return;
   for (const invalid of [
     rows.slice(1),
     [...rows.slice(0, -1), { ...rows.at(-1), checksum_sha256: "0".repeat(64) }],
@@ -76,9 +77,9 @@ it.each([
   }
 });
 
-it("admits only the exact published 0098 plus additive 0138 fixture ledger", async () => {
-  const current = await loadRegisteredEvaluationSuccessor("0138");
-  const rows = [...current.slice(0, 80), ...current.slice(-1)].map(
+it("admits only the exact published 0098 plus additive 0138/0139 fixture ledger", async () => {
+  const current = await loadRegisteredEvaluationSuccessor("0139");
+  const rows = [...current.slice(0, 80), ...current.slice(-2)].map(
     (migration) => ({
       version: migration.version,
       checksum_sha256: migration.checksumSha256,
@@ -113,6 +114,6 @@ it("admits only the exact published 0098 plus additive 0138 fixture ledger", asy
   }
   database.query.mockResolvedValue({ rows, rowCount: rows.length });
   await expect(
-    requireRegisteredEvaluationSuccessor(database, "0138"),
+    requireRegisteredEvaluationSuccessor(database, "0139"),
   ).rejects.toThrow("complete exact registered prefix");
 });

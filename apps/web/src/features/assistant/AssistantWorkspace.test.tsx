@@ -4,7 +4,7 @@ import {
   modelBlockingQuestionsRequestV1Schema,
   modelBlockingQuestionsResponseV1Schema,
 } from "@cloudmarkup/schemas";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { App } from "../../App.js";
@@ -200,6 +200,9 @@ describe("AssistantWorkspace", () => {
       />,
     );
 
+    await act(async () => {
+      await vi.dynamicImportSettled();
+    });
     fireEvent.click(await screen.findByRole("button", { name: "Workspace" }));
     fireEvent.click(screen.getByRole("tab", { name: "Assistant" }));
     const workspace = screen.getByRole("region", {

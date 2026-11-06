@@ -9,9 +9,10 @@ export async function loadHistoricalBetaMigrations(
 ): Promise<readonly LoadedMigration[]> {
   const registered = await loadMigrations(directory);
   const historicalEnd = registered.at(79);
+  const creditProfile = registered.at(119);
   const latest = registered.at(-1);
   if (
-    registered.length !== 120 ||
+    registered.length !== 121 ||
     historicalEnd?.version !== "0098" ||
     historicalEnd.checksumSha256 !==
       "1ceb0fc0f89f084dc537857718bbb2553b444ce7bbd9bdd669c2b250c583596f" ||
@@ -21,11 +22,14 @@ export async function loadHistoricalBetaMigrations(
     registered.at(118)?.version !== "0137" ||
     registered.at(118)?.checksumSha256 !==
       "c4265920980a11a2f0fd608f7b9d7907a378bde28f28ab9bdc3fcdf09017d0da" ||
-    latest?.version !== "0138" ||
+    creditProfile?.version !== "0138" ||
+    creditProfile.checksumSha256 !==
+      "b5cd0bcb42f94baaa6266ed43e0222a89af7c4bd2b84535d9e6949a5c7a0ad4b" ||
+    latest?.version !== "0139" ||
     latest.checksumSha256 !==
-      "b5cd0bcb42f94baaa6266ed43e0222a89af7c4bd2b84535d9e6949a5c7a0ad4b"
+      "b2b99e854c95c8a33ed271de58a35a573e00ccb4c22b6e3b17b1758264864c31"
   ) {
     throw new Error("The frozen beta migration registry changed");
   }
-  return [...registered.slice(0, 80), latest];
+  return [...registered.slice(0, 80), creditProfile, latest];
 }

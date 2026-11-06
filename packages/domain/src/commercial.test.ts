@@ -6,6 +6,8 @@ import {
   CHARGING_SCENARIO_TECHNICAL_OUTCOME_V1,
   COMMERCIAL_DOMAIN_VERSION,
   COMMERCIAL_FEATURE_KEYS,
+  STAFF_CREDIT_PLAN_VERSION,
+  STAFF_CREDIT_POLICY_VERSION,
   EXPENSIVE_COMMERCIAL_FEATURE_KEYS,
   TECHNICAL_USAGE_OUTCOMES,
   USAGE_DISPOSITION_POLICY_V1,
@@ -33,6 +35,7 @@ import {
   technicalUsageOutcomeForChargingScenarioV1,
   validateLocalSubscriptionProjectionV1,
   validateOrganizationBillingAccountV1,
+  validatePlanVersionV1,
   type CloseReservationInputV1,
   type CommercialFeatureKey,
   type CreditAccountStateV1,
@@ -425,6 +428,66 @@ describe("commercial beta plan configuration", () => {
 });
 
 describe("commercial entitlement decisions", () => {
+  it("bounds independent credit access without paid features, allowances or free AI", () => {
+    const base = getBetaPlanVersion("pro", planNow);
+    const enabled = new Set([
+      "ai-assisted-operations",
+      "data-export",
+      "zip-export",
+      "cloudformation",
+      "terraform",
+      "diagram-export",
+      "validation-jobs",
+    ]);
+    const plan: PlanVersionV1 = {
+      ...base,
+      configurationVersion: STAFF_CREDIT_POLICY_VERSION,
+      planDefinitionId: "plan_staff_credits",
+      planVersionId: STAFF_CREDIT_PLAN_VERSION,
+      proposedMonthlyPrice: { currencyCode: "USD", unitAmountMicros: 0 },
+      includedCreditGrants: [],
+      entitlements: base.entitlements.map((entry) => ({
+        ...entry,
+        enabled: enabled.has(entry.feature),
+      })),
+    };
+    const input = decisionInput({
+      plan,
+      subscriptionState: "not-required",
+      subscriptionProjectionVersion: null,
+      feature: "cloudformation",
+      operationKind: "data-export",
+    });
+    expect(evaluateEntitlementV1(input).allowed).toBe(true);
+    expect(
+      evaluateEntitlementV1({ ...input, feature: "github-export" }).allowed,
+    ).toBe(false);
+    expect(
+      evaluateEntitlementV1(
+        expensiveDecisionInput({
+          plan,
+          subscriptionState: "not-required",
+          subscriptionProjectionVersion: null,
+          availableCreditUnits: 0,
+        }),
+      ).denialReason,
+    ).toBe("insufficient_credits");
+    for (const changed of [
+      { planVersionId: base.planVersionId },
+      { includedCreditGrants: base.includedCreditGrants },
+      { entitlements: base.entitlements },
+    ])
+      expect(() => {
+        validatePlanVersionV1({ ...plan, ...changed });
+      }).toThrow();
+    expect(() =>
+      evaluateEntitlementV1({
+        ...input,
+        subscriptionState: "active",
+        subscriptionProjectionVersion: 1,
+      }),
+    ).toThrow();
+  });
   function decisionInput(
     overrides: Partial<EntitlementDecisionInputV1> = {},
   ): EntitlementDecisionInputV1 {

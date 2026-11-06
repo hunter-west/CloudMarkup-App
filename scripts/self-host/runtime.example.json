@@ -14,7 +14,7 @@
   },
   "persistence": {
     "objectRoot": "/data/cloudmarkup/objects",
-    "expectedSchemaVersion": "0138",
+    "expectedSchemaVersion": "0139",
     "readinessTimeoutMillis": 10000,
     "shutdownTimeoutMillis": 30000,
     "databases": {

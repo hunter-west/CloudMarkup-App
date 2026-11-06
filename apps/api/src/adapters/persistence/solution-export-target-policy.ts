@@ -3,6 +3,7 @@ import {
   COMMERCIAL_LIMIT_KEYS,
   COMMERCIAL_LIMIT_PERIOD_KINDS,
   ENTITLEMENT_POLICY_VERSION,
+  STAFF_CREDIT_PLAN_VERSION,
   STAFF_TRIAL_PLAN_VERSION,
   STAFF_TRIAL_POLICY_VERSION,
   evaluateEntitlementV1,
@@ -30,7 +31,7 @@ import {
 } from "./solution-export-run-codec.js";
 import type { SolutionExportRequestAuthority } from "./solution-export-authority.js";
 import { SolutionExportWorkerAuthority } from "./solution-export-worker-authority.js";
-import { sql, type SqlExecutor } from "./sql.js";
+import { sql } from "./sql.js";
 
 type ExportPolicyInput = Parameters<SolutionExportTargetPolicy["evaluate"]>[0];
 type ExportPolicyAuthority =
@@ -48,37 +49,6 @@ function unsigned(value: unknown): number {
 function boolean(value: unknown): boolean {
   if (typeof value !== "boolean") exportRunUnavailable();
   return value;
-}
-async function creditsOnlyAccess(
-  tx: SqlExecutor,
-  organizationId: string,
-): Promise<boolean> {
-  const found = await tx.query(
-    sql(
-      `SELECT cloudmarkup_staff_credit_access_v1(a.organization_id,a.billing_account_id) AS staff_credit_current
-       FROM organization_billing_accounts a
-       WHERE a.organization_id=$1 AND a.lifecycle_status='active'`,
-      [organizationId],
-    ),
-  );
-  return (
-    found.rows.length === 1 && found.rows[0]?.["staff_credit_current"] === true
-  );
-}
-function creditsOnlyExportDenied(): never {
-  throw new ApplicationError(
-    "access_denied",
-    "Complimentary credits fund AI workflows, not exports.",
-    {
-      fieldIssues: [
-        {
-          code: "solution-export.staff-credits-ai-only.v1",
-          path: ["targetProfileId"],
-          message: "Exports require an eligible paid plan or trial.",
-        },
-      ],
-    },
-  );
 }
 const utc = (column: string) =>
   `to_char(${column} AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')`;
@@ -159,11 +129,12 @@ export class PostgresSolutionExportTargetPolicy implements SolutionExportTargetP
         e.entitlement_snapshot_id,e.entitlement_policy_version,e.record_version AS snapshot_version,e.expensive_operations_enabled AS snapshot_expensive,
         s.subscription_projection_id,s.record_version AS subscription_version,s.normalized_status,
         t.trial_id,${utc("t.starts_at")} AS trial_starts_at,${utc("t.expires_at")} AS trial_expires_at,cloudmarkup_staff_trial_current_v1(a.organization_id,a.billing_account_id) AS trial_current,
+        cloudmarkup_staff_credit_access_v1(a.organization_id,a.billing_account_id) AS staff_credit_current,
         v.plan_version_id,v.plan_id,v.configuration_version,v.proposed_monthly_price_micros,v.price_currency,${utc("v.effective_from")} AS effective_from,${utc("v.effective_until")} AS effective_until,
         seats.included_billable_seats,seats.additional_seat_enabled,seats.additional_seat_monthly_price_micros,seats.additional_seat_price_currency,seats.additional_seat_credit_units,
         to_json(r.capabilities)::text AS capabilities,${utc("clock_timestamp()")} AS evaluated_at
         FROM organization_billing_accounts a
-        JOIN organization_entitlement_snapshots e ON e.organization_id=a.organization_id AND e.billing_account_id=a.billing_account_id
+        JOIN organization_effective_entitlement_snapshots_v1 e ON e.organization_id=a.organization_id AND e.billing_account_id=a.billing_account_id
         LEFT JOIN platform_staff_trials t ON t.organization_id=e.organization_id AND t.billing_account_id=e.billing_account_id
         LEFT JOIN organization_subscription_projections s ON s.organization_id=e.organization_id AND s.subscription_projection_id=e.subscription_projection_id AND s.billing_account_id=a.billing_account_id
         JOIN commercial_plan_versions v ON v.plan_version_id=e.plan_version_id
@@ -174,7 +145,10 @@ export class PostgresSolutionExportTargetPolicy implements SolutionExportTargetP
         JOIN organization_roles r ON r.organization_id=m.organization_id AND r.role_key=m.role_key AND r.policy_version='authorization-v2'
         JOIN projects project ON project.organization_id=o.organization_id AND project.project_id=$5 AND project.lifecycle_status='active'
         WHERE a.organization_id=$1 AND ((e.source_record_version=s.record_version AND v.plan_version_id=s.plan_version_id)
-          OR (e.subscription_projection_id IS NULL AND cloudmarkup_staff_trial_current_v1(a.organization_id,a.billing_account_id))) AND e.effective_at<=clock_timestamp()
+          OR (e.subscription_projection_id IS NULL AND (
+            (e.plan_version_id='${STAFF_TRIAL_PLAN_VERSION}' AND cloudmarkup_staff_trial_current_v1(a.organization_id,a.billing_account_id))
+            OR (e.plan_version_id='${STAFF_CREDIT_PLAN_VERSION}' AND cloudmarkup_staff_credit_access_v1(a.organization_id,a.billing_account_id))
+          ))) AND e.effective_at<=clock_timestamp()
         AND v.configuration_status='proposed-beta-example' AND v.effective_from<=clock_timestamp() AND (v.effective_until IS NULL OR v.effective_until>clock_timestamp())`,
           [
             scope.organizationId,
@@ -187,11 +161,9 @@ export class PostgresSolutionExportTargetPolicy implements SolutionExportTargetP
       );
       const row = found.rows[0];
       if (found.rows.length !== 1 || row === undefined) {
-        if (await creditsOnlyAccess(tx, scope.organizationId))
-          creditsOnlyExportDenied();
         throw new ApplicationError(
           "service_unavailable",
-          "A current billing account and approved paid or trial export plan are required.",
+          "A current billing account and approved export access are required.",
         );
       }
       if (row["entitlement_policy_version"] !== ENTITLEMENT_POLICY_VERSION)
@@ -295,12 +267,19 @@ export class PostgresSolutionExportTargetPolicy implements SolutionExportTargetP
         "closed",
       ] as const);
       const trial = planId === STAFF_TRIAL_PLAN_VERSION;
+      const staffCredits = planId === STAFF_CREDIT_PLAN_VERSION;
+      if (staffCredits && row["staff_credit_current"] !== true)
+        throw new ApplicationError(
+          "access_denied",
+          "Staff-funded export access is unavailable.",
+        );
       if (trial && row["trial_current"] !== true)
         throw new ApplicationError(
           "access_denied",
           "Trial export access has expired or been revoked.",
         );
-      const status = trial
+      const independentAccess = trial || staffCredits;
+      const status = independentAccess
         ? null
         : member(row["normalized_status"], [
             "pending",
@@ -311,10 +290,8 @@ export class PostgresSolutionExportTargetPolicy implements SolutionExportTargetP
             "incomplete",
           ] as const);
       const active = status === "active";
-      const accessActive = active || trial;
+      const accessActive = active || independentAccess;
       if (!accessActive && this.inactivePolicy === undefined) {
-        if (await creditsOnlyAccess(tx, scope.organizationId))
-          creditsOnlyExportDenied();
         throw new ApplicationError(
           "service_unavailable",
           "The inactive-subscription export policy is unavailable.",
@@ -342,10 +319,10 @@ export class PostgresSolutionExportTargetPolicy implements SolutionExportTargetP
           billingAccountRecordVersion: exportRunInteger(row["account_version"]),
           commercialState: accountState === "active" ? "active" : "unavailable",
           organizationStatus: "active",
-          subscriptionProjectionVersion: trial
+          subscriptionProjectionVersion: independentAccess
             ? null
             : exportRunInteger(row["subscription_version"]),
-          subscriptionState: trial
+          subscriptionState: independentAccess
             ? "not-required"
             : active
               ? "active"

@@ -8,7 +8,7 @@ describe("additive normal-runtime metadata migration", () => {
     const migrations = await loadMigrations(
       fileURLToPath(new URL("../../../migrations", import.meta.url)),
     );
-    expect(migrations).toHaveLength(120);
+    expect(migrations).toHaveLength(121);
     const admissionMigration = migrations.find(
       ({ version }) => version === "0027",
     );
@@ -24,7 +24,7 @@ describe("additive normal-runtime metadata migration", () => {
         (sum, migration) => sum + migration.statements.length,
         0,
       ),
-    ).toBe(1367);
+    ).toBe(1374);
     const prior = migrations
       .slice(0, 26)
       .map(({ version, file, checksumSha256 }) => ({

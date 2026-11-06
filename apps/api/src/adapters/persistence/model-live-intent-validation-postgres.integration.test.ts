@@ -138,8 +138,8 @@ integration("durable current Intent evaluation receipts", () => {
     const migrations = await loadMigrations(
       fileURLToPath(new URL("../../../migrations", import.meta.url)),
     );
-    expect(migrations).toHaveLength(120);
-    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(1367);
+    expect(migrations).toHaveLength(121);
+    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(1374);
     const prior = {
       storageContractVersion: 1,
       migrations: migrations

@@ -13,6 +13,10 @@ export const BETA_EXPORT_PLAN_CONFIGURATION_VERSION =
   "cloudmarkup-beta-cloudformation-plans-2026-09-12-v1" as const;
 export const BETA_CREDIT_PLAN_CONFIGURATION_VERSION =
   "cloudmarkup-beta-credit-plans-2026-09-30-v1" as const;
+export const STAFF_CREDIT_PLAN_VERSION =
+  "planver_staff_credits_2026_11_05_v2" as const;
+export const STAFF_CREDIT_POLICY_VERSION =
+  "cloudmarkup-staff-credits-v2" as const;
 export const ENTITLEMENT_POLICY_VERSION =
   "cloudmarkup-entitlements-v1" as const;
 export const USAGE_DISPOSITION_POLICY_VERSION =
@@ -138,7 +142,8 @@ export interface PlanVersionV1 {
     | typeof BETA_SHARING_PLAN_CONFIGURATION_VERSION
     | typeof BETA_EXPORT_PLAN_CONFIGURATION_VERSION
     | typeof BETA_CREDIT_PLAN_CONFIGURATION_VERSION
-    | typeof STAFF_TRIAL_POLICY_VERSION;
+    | typeof STAFF_TRIAL_POLICY_VERSION
+    | typeof STAFF_CREDIT_POLICY_VERSION;
   readonly effectiveFrom: string;
   readonly effectiveUntil: string | null;
   readonly entitlements: readonly FeatureEntitlementV1[];
@@ -437,7 +442,8 @@ export function validatePlanVersionV1(
       plan.configurationVersion !== BETA_SHARING_PLAN_CONFIGURATION_VERSION &&
       plan.configurationVersion !== BETA_EXPORT_PLAN_CONFIGURATION_VERSION &&
       plan.configurationVersion !== BETA_CREDIT_PLAN_CONFIGURATION_VERSION &&
-      plan.configurationVersion !== STAFF_TRIAL_POLICY_VERSION)
+      plan.configurationVersion !== STAFF_TRIAL_POLICY_VERSION &&
+      plan.configurationVersion !== STAFF_CREDIT_POLICY_VERSION)
   ) {
     fail("invalid-plan-version", "The plan version is unsupported.");
   }
@@ -458,6 +464,37 @@ export function validatePlanVersionV1(
     (plan.configurationVersion === STAFF_TRIAL_POLICY_VERSION)
   )
     fail("invalid-plan-version", "Trial plan identity and policy must match.");
+  if (
+    (plan.planVersionId === STAFF_CREDIT_PLAN_VERSION) !==
+    (plan.configurationVersion === STAFF_CREDIT_POLICY_VERSION)
+  )
+    fail(
+      "invalid-plan-version",
+      "Staff-credit plan identity and policy must match.",
+    );
+  if (
+    plan.configurationVersion === STAFF_CREDIT_POLICY_VERSION &&
+    (plan.planDefinitionId !== "plan_staff_credits" ||
+      plan.includedCreditGrants.length !== 0 ||
+      plan.proposedMonthlyPrice?.unitAmountMicros !== 0 ||
+      plan.entitlements.some(
+        (entry) =>
+          entry.enabled &&
+          ![
+            "ai-assisted-operations",
+            "data-export",
+            "zip-export",
+            "diagram-export",
+            "terraform",
+            "cloudformation",
+            "validation-jobs",
+          ].includes(entry.feature),
+      ))
+  )
+    fail(
+      "invalid-plan-version",
+      "Staff-credit access cannot manufacture paid features or included credits.",
+    );
   assertIdentifier(plan.planDefinitionId, "planDefinitionId");
   assertIdentifier(plan.planVersionId, "planVersionId");
   const effectiveFrom = parseInstant(plan.effectiveFrom, "effectiveFrom");
@@ -1306,6 +1343,17 @@ export function evaluateEntitlementV1(
     );
   }
   const trial = input.trialAccess;
+  if (
+    input.plan.planVersionId === STAFF_CREDIT_PLAN_VERSION &&
+    (input.subscriptionState !== "not-required" ||
+      input.subscriptionProjectionVersion !== null ||
+      input.trialAccess !== undefined ||
+      input.inactiveSubscriptionAccessPolicy !== undefined)
+  )
+    fail(
+      "invalid-input",
+      "Staff-credit access is independent of subscription and trial authority.",
+    );
   if (
     (input.plan.planVersionId === STAFF_TRIAL_PLAN_VERSION) !==
     (trial !== undefined)

@@ -563,7 +563,7 @@ integrationDescribe(
         expect(await snapshot(database)).toEqual(before);
         await runMigrations(database, migrations);
         expect((await snapshot(database)).ledger.at(-1)?.["version"]).toBe(
-          "0138",
+          "0139",
         );
       });
     }, 30000);
@@ -617,7 +617,7 @@ integrationDescribe(
         expect(await snapshot(database)).toEqual(before);
         await runMigrations(database, migrations);
         expect((await snapshot(database)).ledger.at(-1)?.["version"]).toBe(
-          "0138",
+          "0139",
         );
       });
     }, 30000);

@@ -33,7 +33,7 @@ describe("persistence migrations", () => {
       ),
     );
 
-    expect(migrationFiles).toHaveLength(120);
+    expect(migrationFiles).toHaveLength(121);
     expect(
       migrationFiles.filter((_, index) => sources[index]?.includes(13)),
     ).toEqual([]);
@@ -349,6 +349,7 @@ describe("persistence migrations", () => {
         version: "0137",
       },
       { file: "0138_staff_credit_ai_access.sql", version: "0138" },
+      { file: "0139_staff_credit_export_access.sql", version: "0139" },
     ]);
     const joined = migrations
       .flatMap((migration) => migration.statements)
@@ -531,7 +532,7 @@ describe("persistence migrations", () => {
     }
     // Establish a complete valid preimage so the refusal below exercises the
     // byte checksum, rather than the earlier missing-file count guard.
-    await expect(loadMigrations(targetDirectory)).resolves.toHaveLength(120);
+    await expect(loadMigrations(targetDirectory)).resolves.toHaveLength(121);
     await writeFile(
       resolve(targetDirectory, "0001_identity_and_tenancy.sql"),
       "SELECT 1;\n",

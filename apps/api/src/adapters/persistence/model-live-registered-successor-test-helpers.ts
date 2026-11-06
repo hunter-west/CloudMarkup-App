@@ -185,6 +185,12 @@ const contracts = {
     manifest:
       "bc316cae6997880786ecf27fee40f43f997669cfd521356dc942adca9d849a16",
   },
+  "0139": {
+    count: 121,
+    statements: 1374,
+    manifest:
+      "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
+  },
 } as const;
 export type RegisteredEvaluationSuccessorVersion = keyof typeof contracts;
 export async function loadRegisteredEvaluationSuccessor(
@@ -195,7 +201,7 @@ export async function loadRegisteredEvaluationSuccessor(
     createHash("sha256").update(value).digest("hex");
   if (
     digest(await readFile(new URL("manifest.json", directory))) !==
-    "bc316cae6997880786ecf27fee40f43f997669cfd521356dc942adca9d849a16"
+    "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47"
   )
     throw Error("The exact current manifest is required.");
   // Authenticating all source bytes precedes selecting a historical prefix.
@@ -213,7 +219,7 @@ export async function loadRegisteredEvaluationSuccessor(
     ),
   };
   if (
-    all.length !== 120 ||
+    all.length !== 121 ||
     selected.length !== contract.count ||
     selected.reduce(
       (sum, migration) => sum + migration.statements.length,
@@ -252,7 +258,8 @@ export async function requireRegisteredEvaluationSuccessor(
     latestVersion === "0135" ||
     latestVersion === "0136" ||
     latestVersion === "0137" ||
-    latestVersion === "0138"
+    latestVersion === "0138" ||
+    latestVersion === "0139"
       ? latestVersion
       : undefined;
   const migrations = await loadRegisteredEvaluationSuccessor(
@@ -297,12 +304,13 @@ export async function requireRegisteredEvaluationSuccessor(
   // current registry above, then compare that exact sparse fixture ledger.
   const expected =
     version === undefined &&
-    latestVersion === "0138" &&
-    result.rows.length === 81 &&
-    migrations.length === 120 &&
+    latestVersion === "0139" &&
+    result.rows.length === 82 &&
+    migrations.length === 121 &&
     migrations[79]?.version === "0098" &&
-    migrations[119]?.version === "0138"
-      ? [...migrations.slice(0, 80), ...migrations.slice(-1)]
+    migrations[119]?.version === "0138" &&
+    migrations[120]?.version === "0139"
+      ? [...migrations.slice(0, 80), ...migrations.slice(-2)]
       : migrations;
   if (
     result.rowCount !== expected.length ||

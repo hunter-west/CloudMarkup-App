@@ -234,7 +234,7 @@ function fixture() {
             CLOUDMARKUP_ENVIRONMENT: "beta",
             CLOUDMARKUP_DATABASE_NAME: "cloudmarkup",
             CLOUDMARKUP_OBJECT_DOCUMENT_PREFIX: "documents/v1/organizations/",
-            CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0138",
+            CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
             NODE_OPTIONS: "--enable-source-maps",
           },
         },
@@ -273,7 +273,7 @@ function fixture() {
     },
     Migration: {
       Type: "AWS::CloudFormation::CustomResource",
-      Properties: { ExpectedSchemaVersion: "0138" },
+      Properties: { ExpectedSchemaVersion: "0139" },
     },
   };
   const stacks = [

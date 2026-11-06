@@ -108,7 +108,7 @@ export class SolutionExportDelivery extends Construct {
         CLOUDMARKUP_DATABASE_NAME: "cloudmarkup",
         CLOUDMARKUP_CONTENT_BUCKET: props.contentBucketName,
         CLOUDMARKUP_OBJECT_DOCUMENT_PREFIX: "documents/v1/organizations/",
-        CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0138",
+        CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
         NODE_OPTIONS: "--enable-source-maps",
       },
     });

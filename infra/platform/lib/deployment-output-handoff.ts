@@ -168,9 +168,9 @@ function validateOutputs(outputs: DeploymentOutputs): void {
   if (outputs.DeploymentEnvironment !== "beta") {
     throw new TypeError("DeploymentEnvironment must be beta.");
   }
-  if (outputs.DatabaseMigrationExpectedVersion !== "0138") {
+  if (outputs.DatabaseMigrationExpectedVersion !== "0139") {
     throw new TypeError(
-      "DatabaseMigrationExpectedVersion must be the exact reviewed schema version 0138.",
+      "DatabaseMigrationExpectedVersion must be the exact reviewed schema version 0139.",
     );
   }
   if (
@@ -194,9 +194,9 @@ function validateOutputs(outputs: DeploymentOutputs): void {
       "DatabaseMigrationAppliedManifestSha256 must equal the checked manifest digest.",
     );
   }
-  if (outputs.DatabaseMigrationCount !== "120") {
+  if (outputs.DatabaseMigrationCount !== "121") {
     throw new TypeError(
-      "DatabaseMigrationCount must prove all 120 checked migrations were validated.",
+      "DatabaseMigrationCount must prove all 121 checked migrations were validated.",
     );
   }
   if (outputs.AwsAccountId !== "000000000000") {

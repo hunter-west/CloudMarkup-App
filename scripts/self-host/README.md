@@ -112,9 +112,9 @@ and privileged application commands appear only after every required private
 file has been prepared in the next section.
 
 `inspect` is dependency-free: it reports pinned tools, lockfile SHA-256 and the
-current canonical migration manifest/hash. This successor has **120**
-migrations, last **0138**, manifest SHA-256
-`bc316cae6997880786ecf27fee40f43f997669cfd521356dc942adca9d849a16`. The
+current canonical migration manifest/hash. This successor has **121**
+migrations, last **0139**, manifest SHA-256
+`163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47`. The
 canonical manifest remains the authority on an integrated successor.
 
 Select `cloudmarkup-standalone-pg17-v1` explicitly. Canonical 0127 remains
@@ -162,7 +162,7 @@ replace the profile checksum placeholder with
   "user": "cloudmarkup_admin",
   "passwordFile": "/run/secrets/migrator_password",
   "tls": "disable",
-  "manifestSha256": "bc316cae6997880786ecf27fee40f43f997669cfd521356dc942adca9d849a16",
+  "manifestSha256": "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
   "migrationProfile": "cloudmarkup-standalone-pg17-v1",
   "profileManifestSha256": "<copy the exact inspected profile hash>",
   "acknowledgeCanonicalMigrations": true,
@@ -176,8 +176,8 @@ profile/common SQL and source hashes before the ordered first-install commands
 below. The empty-database admin stage must precede migration bootstrap.
 
 Bootstrap reuses the existing transaction/advisory-lock/checksum/history runner.
-Per-migration retries remain ordered and immutable; the complete 121-entry
-profile includes the 120 current shared source migrations. An immutable
+Per-migration retries remain ordered and immutable; the complete 122-entry
+profile includes the 121 current shared source migrations. An immutable
 installation identity and ledger distinguish the profile. Hosted,
 legacy/unmarked, partially mixed, wrong-version, wrong-engine, wrong-owner and
 modified history are refused. Repeated installation of this same profile applies

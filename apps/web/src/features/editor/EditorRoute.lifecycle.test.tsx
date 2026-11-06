@@ -113,11 +113,11 @@ vi.mock("../../shell/AppShell.js", () => ({
       bottom?: (tab: string, change: (tab: string) => void) => ReactNode;
     };
   }) => (
-    <>
+    <main id="main-content" tabIndex={-1}>
       {workspace?.header}
       {workspace?.bottom?.("repository", () => undefined)}
       {children}
-    </>
+    </main>
   ),
 }));
 vi.mock("./EditorWorkspace.js", () => ({
@@ -625,6 +625,8 @@ describe("one active project editor per workspace", () => {
       });
     });
     expect(await screen.findByText("Read-only project")).toBeVisible();
+    expect(screen.getByRole("main")).toHaveAttribute("id", "main-content");
+    expect(document.querySelectorAll("#main-content")).toHaveLength(1);
     expect(
       screen.getByText(/Editing access was reserved when last checked/u),
     ).toBeVisible();
@@ -728,6 +730,8 @@ describe("one active project editor per workspace", () => {
     (status) => {
       const { requestWithMetadata, readDraft } = setup(undefined, status);
       expect(screen.getByRole("status")).toHaveTextContent("Project closed");
+      expect(screen.getByRole("main")).toHaveAttribute("id", "main-content");
+      expect(document.querySelectorAll("#main-content")).toHaveLength(1);
       expect(
         screen.queryByLabelText("Mounted architecture"),
       ).not.toBeInTheDocument();
@@ -753,6 +757,8 @@ describe("one active project editor per workspace", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "The project draft could not be loaded",
     );
+    expect(screen.getByRole("main")).toHaveAttribute("id", "main-content");
+    expect(document.querySelectorAll("#main-content")).toHaveLength(1);
     expect(
       request.mock.calls.map(([operation]: readonly unknown[]) => operation),
     ).toEqual(["projects.get"]);
