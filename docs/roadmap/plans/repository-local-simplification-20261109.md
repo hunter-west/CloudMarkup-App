@@ -2,7 +2,7 @@
 
 - Milestone: M9, independent refactor requested by the owner
 - Workflows: public clone, standalone local editor, hosted source composition
-- Status: active
+- Status: implemented; independent review and native acceptance pending
 - Owner: independent refactor lane; hosted release/acceptance remains separate
 
 ## Goals
@@ -38,9 +38,10 @@ different compositions of the same application.
 
 - [x] Map composition/local configuration and establish baseline.
 - [x] Implement a coherent simplification with focused regression coverage.
-- [ ] (current) Verify fresh-clone paths and compatibility; report external
+- [x] Verify available fresh-clone paths and compatibility; report external
       blockers.
-- [ ] Review final diffs, record evidence and open separate draft PRs as needed.
+- [x] Review final diffs and record evidence, compatibility risks and review
+      guide.
 
 ## Validation strategy
 
@@ -93,6 +94,9 @@ with refusal and recovery behavior; merely increasing a version is insufficient.
 - The build command uses the existing Dockerfile and immutable Node/Go pins
   directly. Runtime secrets and PostgreSQL configuration no longer have to exist
   merely to build an image. The duplicate Compose build declaration is removed.
+  Its project lock is independent of incomplete optional-model configuration;
+  runtime Compose validation remains unchanged. Configured image tags retain
+  their case and registry prefix.
 - The guides distinguish synthetic preview, persisted core and configured
   integrations, and place setup in executable order.
 
@@ -126,11 +130,37 @@ Raw logs and generated smoke-test configuration remain outside tracked source.
 Additional checks:
 
 - `pnpm build:backend`: 19 successful tasks (13 cached), 8m5.4s.
-- Generated runtime parsed by the compiled API: local-owner, schema 0139,
-  models disabled, existing infrastructure export adapter; passed.
-- Catalog-opening and BYOK/Bedrock adapter/count suites: 108/108 in four existing
-  files, 147.12s, with fixtures/stub transports.
+- Generated runtime parsed by the compiled API: local-owner, schema 0139, models
+  disabled, existing infrastructure export adapter; passed.
+- Catalog-opening and BYOK/Bedrock adapter/count suites: 108/108 in four
+  existing files, 147.12s, with fixtures/stub transports.
 - Backup/restore suites: 41/41, 0.40s, synthetic files only.
+- Standalone API configuration, migration-profile, owner bootstrap, runtime,
+  model-composition and server suites: 78 passed, one existing Windows-disabled
+  symlink test skipped, 164.52s in six files.
+- Final launcher plus backup/restore suites after project-lock separation:
+  64/64, 7.66s. These include the previously listed launcher and recovery cases;
+  counts should not be added together.
+- The image-build case passed again after preserving configured image-tag case
+  (1/1, 0.13s). This extends that existing case rather than adding another
+  suite.
+- Existing unconfigured local-preview browser test: 1/1 passed (3.2m including
+  server/browser startup), with no API requests or failed resources.
+- Changed-script ESLint passed; local Markdown links passed across 338 files.
+- After the final image-tag edit, formatting, changed-script ESLint and
+  `pnpm security:check` passed again (12 security cases; audit still reports 11
+  moderate advisories and no high/critical finding).
+
+Browser evidence is incomplete. Five existing editor journeys ran against a
+task-owned development server: two passed and three timed out (9.3m). Repeating
+only those three after initial build work produced two passes and one
+first-navigation timeout (4.2m). Add-service, typed connection, delete/undo and
+deterministic layout passed across the runs; the exact-fixture first-load case
+remains unqualified. No assertions or timeouts were relaxed. A diagnostic run
+against the production web bundle failed all five synthetic cases because that
+bundle requires its API and disables development fixture composition. It is not
+the credential-free preview. These failures are retained, not reported as a
+passing browser gate.
 
 Three new cases reuse the owning suites: build isolation (8/10), generated
 configuration/source/identity and explicit approval contract (9/10), and

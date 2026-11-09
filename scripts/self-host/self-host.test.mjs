@@ -25,6 +25,7 @@ import {
   operatorInvocation,
   privateFile,
   root,
+  stateDirectory,
   stopAndVerify,
   startLocalOwnerTransport,
   transportConfigurationProgram,
@@ -62,6 +63,18 @@ test("image build uses the shared Dockerfile and only pinned build inputs, witho
     buildArgs(env),
   );
   assert.throws(() => validateImagePins(env), /immutable image/);
+  const configuredImage = "localhost:5000/cloudmarkup:Review_A";
+  assert.equal(
+    buildArgs({ ...env, CLOUDMARKUP_SELF_HOST_IMAGE: configuredImage })[4],
+    configuredImage,
+  );
+  const incompleteModels = {
+    ...env,
+    CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY: "not-yet-configured",
+  };
+  assert.deepEqual(buildArgs(incompleteModels), buildArgs(env));
+  assert.equal(stateDirectory(incompleteModels), stateDirectory(env));
+  assert.throws(() => composeArgs([], incompleteModels), /Configured models/);
   for (const bad of [
     { ...env, CLOUDMARKUP_NODE_IMAGE: "node:latest" },
     { ...env, CLOUDMARKUP_GO_IMAGE: "golang:latest" },

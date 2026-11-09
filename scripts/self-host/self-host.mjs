@@ -625,10 +625,14 @@ async function foregroundTransport() {
     await transport.stop();
   }
 }
-export function composeArgs(args, env = process.env) {
+function composeProject(env) {
   const project = env.CLOUDMARKUP_SELF_HOST_PROJECT ?? "cloudmarkup-self-host";
   if (!/^[a-z0-9][a-z0-9_-]{0,62}$/.test(project))
     fail("Invalid Compose project.");
+  return project;
+}
+export function composeArgs(args, env = process.env) {
+  const project = composeProject(env);
   if (env.CLOUDMARKUP_RETAINED_HISTORY_VOLUME)
     fail("Retained history is not admitted by the standalone core profile.");
   const retained = env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY;
@@ -731,7 +735,7 @@ export function buildArgs(env = process.env) {
   validateImagePins(env, { runtime: false });
   const image =
     env.CLOUDMARKUP_SELF_HOST_IMAGE ?? "cloudmarkup-self-host:local";
-  if (!/^[a-z0-9][a-z0-9./:_-]{0,254}$/u.test(image))
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9./:_-]{0,511}$/u.test(image))
     fail("A valid local application image name is required.");
   return [
     "build",
@@ -790,7 +794,7 @@ export async function exclusive(work, env = process.env) {
   }
 }
 export function stateDirectory(env = process.env) {
-  return join(root, ".cache/self-host", composeArgs([], env)[2]);
+  return join(root, ".cache/self-host", composeProject(env));
 }
 export async function assertNoIncompleteRestore(env = process.env) {
   try {
