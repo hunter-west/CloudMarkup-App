@@ -17,6 +17,7 @@ import { promisify } from "node:util";
 import {
   auditObjects,
   admitLocalOwnerTransport,
+  buildArgs,
   composeArgs,
   containerVersion,
   doctor,
@@ -33,6 +34,42 @@ import {
   validateImagePins,
   validatePrivateLocations,
 } from "./self-host.mjs";
+
+test("image build uses the shared Dockerfile and only pinned build inputs, without runtime credentials", () => {
+  const env = {
+    CLOUDMARKUP_NODE_IMAGE: `node:24.18.0-bookworm-slim@sha256:${"a".repeat(64)}`,
+    CLOUDMARKUP_GO_IMAGE: `golang:1.26.8-bookworm@sha256:${"b".repeat(64)}`,
+  };
+  assert.deepEqual(buildArgs(env), [
+    "build",
+    "--file",
+    join(root, "scripts/self-host/Dockerfile"),
+    "--tag",
+    "cloudmarkup-self-host:local",
+    "--build-arg",
+    `NODE_IMAGE=${env.CLOUDMARKUP_NODE_IMAGE}`,
+    "--build-arg",
+    `GO_IMAGE=${env.CLOUDMARKUP_GO_IMAGE}`,
+    root,
+  ]);
+  assert.deepEqual(
+    buildArgs({
+      ...env,
+      CLOUDMARKUP_POSTGRES_IMAGE: "not-a-runtime-pin",
+      CLOUDMARKUP_SELF_HOST_CONFIGURATION_SOURCE: "/missing/runtime.json",
+      CLOUDMARKUP_POSTGRES_OWNER_PASSWORD_FILE: "/never-read/password",
+    }),
+    buildArgs(env),
+  );
+  assert.throws(() => validateImagePins(env), /immutable image/);
+  for (const bad of [
+    { ...env, CLOUDMARKUP_NODE_IMAGE: "node:latest" },
+    { ...env, CLOUDMARKUP_GO_IMAGE: "golang:latest" },
+    { ...env, CLOUDMARKUP_SELF_HOST_IMAGE: "--output=other" },
+    { ...env, CLOUDMARKUP_SELF_HOST_IMAGE: "image;command" },
+  ])
+    assert.throws(() => buildArgs(bad));
+});
 
 test("operator routing admits only the closed privileged stages and keeps restore preparation outside runtime startup", () => {
   for (const [command, service, stage] of [

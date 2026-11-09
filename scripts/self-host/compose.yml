@@ -19,16 +19,6 @@ services:
     stop_grace_period: 60s
   app:
     image: ${CLOUDMARKUP_SELF_HOST_IMAGE:-cloudmarkup-self-host:local}
-    build:
-      context: ../..
-      dockerfile: scripts/self-host/Dockerfile
-      args:
-        NODE_IMAGE:
-          ${CLOUDMARKUP_NODE_IMAGE:?Supply reviewed Node 24.18.0 bookworm image
-          digest}
-        GO_IMAGE:
-          ${CLOUDMARKUP_GO_IMAGE:?Supply reviewed Go 1.26.8 bookworm image
-          digest}
     init: true
     restart: "no"
     user: "10001:10001"

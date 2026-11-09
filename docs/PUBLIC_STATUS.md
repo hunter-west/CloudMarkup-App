@@ -1,5 +1,11 @@
 # Public source status
 
+The
+[local setup refactor](roadmap/plans/repository-local-simplification-20261109.md)
+adds source-derived, non-secret setup templates and image builds independent of
+runtime credentials. Its evidence distinguishes local checks from native
+container and provider acceptance.
+
 This distribution supports the credential-free synthetic editor. Its seeded
 contributor setup candidate explicitly selects the standalone PG17 profile,
 separate bootstrap/migrator/runtime logins and acknowledged core permissions.

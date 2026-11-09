@@ -712,11 +712,11 @@ export async function doctor(exec = run) {
     durableMount: "Docker-managed named volume; actual runtime probe required",
   };
 }
-export function validateImagePins(env = process.env) {
+export function validateImagePins(env = process.env, { runtime = true } = {}) {
   for (const key of [
     "CLOUDMARKUP_NODE_IMAGE",
     "CLOUDMARKUP_GO_IMAGE",
-    "CLOUDMARKUP_POSTGRES_IMAGE",
+    ...(runtime ? ["CLOUDMARKUP_POSTGRES_IMAGE"] : []),
   ]) {
     if (
       typeof env[key] !== "string" ||
@@ -724,6 +724,27 @@ export function validateImagePins(env = process.env) {
     )
       fail("Reviewed immutable image references are required.");
   }
+}
+// Building the shared image needs source and toolchain pins, never operator
+// credentials or runtime mounts. Keep the Dockerfile as the sole build recipe.
+export function buildArgs(env = process.env) {
+  validateImagePins(env, { runtime: false });
+  const image =
+    env.CLOUDMARKUP_SELF_HOST_IMAGE ?? "cloudmarkup-self-host:local";
+  if (!/^[a-z0-9][a-z0-9./:_-]{0,254}$/u.test(image))
+    fail("A valid local application image name is required.");
+  return [
+    "build",
+    "--file",
+    join(root, "scripts/self-host/Dockerfile"),
+    "--tag",
+    image,
+    "--build-arg",
+    `NODE_IMAGE=${env.CLOUDMARKUP_NODE_IMAGE}`,
+    "--build-arg",
+    `GO_IMAGE=${env.CLOUDMARKUP_GO_IMAGE}`,
+    root,
+  ];
 }
 export async function validatePrivateLocations(env = process.env) {
   if (
@@ -989,13 +1010,14 @@ export async function main(command = process.argv[2]) {
   )
     fail("Unknown self-host command.");
   await doctor();
+  if (command === "build") {
+    const args = buildArgs();
+    await exclusive(() => run(args));
+    return;
+  }
   validateImagePins();
   await validatePrivateLocations();
   await exclusive(async () => {
-    if (command === "build") {
-      await compose(["build", "app"]);
-      return;
-    }
     if (command === "postgres:start") {
       await compose(["up", "--detach", "--wait", "postgres"]);
       return;
