@@ -16,6 +16,7 @@ import {
   dirname,
   isAbsolute,
   join,
+  parse,
   relative,
   resolve,
   sep,
@@ -975,6 +976,17 @@ async function canonicalLocation(path) {
 export async function outsideRepository(path, { allowMissing = false } = {}) {
   if (!path || !isAbsolute(path))
     fail("An absolute external backup path is required.");
+  // Win32 consumers can remove trailing dots/spaces where Node's native path
+  // lookup reports ENOENT. Do not admit that ambiguous spelling as a new path.
+  if (
+    process.platform === "win32" &&
+    path
+      .split(/[\\/]/u)
+      .some((part) => part !== "." && part !== ".." && /[. ]$/u.test(part))
+  )
+    fail(
+      "Windows private paths cannot have trailing-dot or trailing-space components.",
+    );
   const result = resolve(path);
   if (insideDirectory(root, result))
     fail("Backups must be outside the repository/build context.");
@@ -989,6 +1001,14 @@ export async function privateDirectory(path, { allowMissing = false } = {}) {
     fail("A private absolute directory is required.");
   let current = path;
   while (true) {
+    // Preserve raw link/.. ancestry, but lstat the link itself rather than
+    // following a trailing directory separator on POSIX.
+    const rootLength = parse(current).root.length;
+    while (
+      current.length > rootLength &&
+      (current.endsWith(sep) || current.endsWith("/"))
+    )
+      current = current.slice(0, -1);
     let state;
     try {
       state = await lstat(current);

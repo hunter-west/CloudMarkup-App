@@ -334,3 +334,33 @@ locally tested correction, not complete security-fix verification or release
 admission. Publication and deployment remain on hold pending independent review
 of the corrected commit, the blocked native checks, and exact public/private
 source admission.
+
+### Independent patch-review follow-up
+
+The first correction checkpoint did not pass independent review. On Windows, an
+existing repository directory spelled with a trailing dot resolved inside the
+checkout for Win32 consumers while Node reported it missing. The
+missing-external-path allowance therefore admitted that alias. The failed review
+and synthetic evidence are preserved; no Docker build or credential exposure was
+observed.
+
+The follow-up rejects trailing-dot/trailing-space Windows path components,
+except the ordinary `.` and `..` navigation components, before accepting a
+missing path. It also strips terminal directory separators before each raw
+ancestry `lstat`, preserving both link detection and `link/..` checks. The
+existing dispatch case covers the confirmed Windows alias and missing alias
+forms. The existing native-link case now includes terminal separators; that case
+remains unrun under the native permission restriction.
+
+After the follow-up, the same nine focused checks passed in 1.799 seconds
+(dispatch case 93 milliseconds), and the 102 bootstrap/backup/restore checks
+passed in 7.929 seconds. `pnpm security:check` passed again in 14.833 seconds,
+with the same 11 moderate dependency advisories and no high/critical findings.
+Syntax, lint and formatting checks passed. The native fixture's separator
+assertions were then bound to the directory configuration input they protect;
+that fixture is still unverified, not a passing native check.
+
+The corrected immutable candidate requires the external independent review.
+Actual Linux context/image inspection, native links, source-pair admission and
+the remaining release gates are still unmet. These local results do not close
+the release hold.

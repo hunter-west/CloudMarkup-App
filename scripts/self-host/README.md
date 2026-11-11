@@ -54,9 +54,11 @@ pins and the application image name. Every supplied configuration or secret path
 must remain outside the repository/build context, with regular, unsymlinked
 existing ancestry. Missing external files and directories are allowed during
 build; no credential contents are read. Keep other private files out of the
-checkout as well. Runtime commands still require every documented private file
-and PostgreSQL image pin. Compose consumes the built image and no longer
-contains a second build declaration.
+checkout as well. On Windows, use paths without trailing dots or spaces in a
+component; Windows and Node can resolve those spellings differently. Runtime
+commands still require every documented private file and PostgreSQL image pin.
+Compose consumes the built image and no longer contains a second build
+declaration.
 
 Review the generated source bindings against `bootstrap.mjs inspect`. Before the
 corresponding privileged stage, set the two migration acknowledgements in

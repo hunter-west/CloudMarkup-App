@@ -151,6 +151,13 @@ test("build dispatch rejects supplied private paths before any Docker command an
       42,
       inContext,
       toNamespacedPath(markerFile),
+      ...(process.platform === "win32"
+        ? [
+            root + "." + sep + "package.json",
+            root + "." + sep + "uncreated/operator.txt",
+            root + " " + sep + "uncreated/operator.txt",
+          ]
+        : []),
     ]) {
       await assert.rejects(
         main("build", {
@@ -937,6 +944,11 @@ test("build validation refuses configured leaf links into the source context", a
     ])
       await assert.rejects(
         buildArgs({ ...env, CLOUDMARKUP_OPERATOR_CONFIGURATION_SOURCE: path }),
+        /unsymlinked directory/,
+      );
+    for (const path of [externalLink + sep, externalLink + sep + sep])
+      await assert.rejects(
+        buildArgs({ ...env, CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY: path }),
         /unsymlinked directory/,
       );
     await assert.rejects(
