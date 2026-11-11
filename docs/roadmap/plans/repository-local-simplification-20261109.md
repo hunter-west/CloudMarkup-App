@@ -534,7 +534,8 @@ before retry. The old checkpoint fingerprint then falsely reported another
 writer. The checkpoint now retains the exact unacknowledged operation and
 reconciles it before writing newer state. Only the known retirement can resolve
 its missing record; unrelated missing or changed records still fail CAS. The
-existing recovery download includes this pending operation alongside local edits.
+existing recovery download includes this pending operation alongside local
+edits.
 
 Four focused synthetic sequences cover the reported failure, unchanged retry,
 pre-commit failure with a newer edit and a real competing writer. Before the
