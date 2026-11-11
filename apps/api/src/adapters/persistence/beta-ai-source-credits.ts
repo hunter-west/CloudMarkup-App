@@ -64,15 +64,15 @@ export function createBetaAiSourceCredits(
         new Date(Date.now() + 3_600_000).toISOString(),
       );
       let recorded = false;
+      let usage: BetaConverseUsage | undefined;
       try {
         if ((await meter.claim(identity)) !== "dispatch")
           throw new Error(
             "The prior source model dispatch needs reconciliation.",
           );
-        let usage: BetaConverseUsage | undefined;
         const output = await input.invoke((actual) => {
           usage = actual;
-          return Promise.resolve();
+          return meter.observe(identity, actual);
         });
         if (!usage) throw new Error("Source model usage is unavailable.");
         const receipt = await input.persist(output);
@@ -85,7 +85,7 @@ export function createBetaAiSourceCredits(
         await meter.settle(identity);
         return output;
       } catch (error) {
-        if (!recorded) await meter.release(identity);
+        if (!recorded) await meter.release(identity, usage);
         throw error;
       }
     },

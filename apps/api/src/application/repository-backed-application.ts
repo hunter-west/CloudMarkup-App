@@ -24,7 +24,10 @@ import {
 } from "@cloudmarkup/schemas";
 
 import type { OrganizationPermission } from "./authorization.js";
-import { hasMatchingDraftDocumentIdentity } from "./draft-document-identity.js";
+import {
+  hasMatchingDraftDocumentIdentity,
+  hasOnlyDraftPresentationChanges,
+} from "./draft-document-identity.js";
 import { ApplicationError } from "./errors.js";
 import { applyBoundDraftCommand } from "./apply-draft-command.js";
 import { requireRecentAuthentication } from "./identity.js";
@@ -740,6 +743,27 @@ class RepositoryBackedApplication implements RepositoryBackedApplicationOverride
         throw new ApplicationError(
           "invalid_request",
           "Draft identity cannot change during save. Create a project copy instead.",
+        );
+      }
+      if (!hasOnlyDraftPresentationChanges(currentDocument, document)) {
+        const recovery = this.#draftConflict(
+          current,
+          found.project.updatedAt,
+        ).conflict;
+        throw new ApplicationError(
+          "unsupported_version",
+          "This change requires command-aware editing. Keep your unsaved work and reload or save a project copy.",
+          {
+            ...(recovery === undefined ? {} : { conflict: recovery }),
+            fieldIssues: [
+              {
+                code: "draft.command-history-required",
+                message:
+                  "Send the actual versioned command history to the draft command endpoint.",
+                path: ["body", "architectureDocument"],
+              },
+            ],
+          },
         );
       }
       const storage = getArchitectureDocumentStorage(document);

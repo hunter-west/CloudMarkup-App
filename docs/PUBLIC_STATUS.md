@@ -6,6 +6,11 @@ adds source-derived, non-secret setup templates and image builds independent of
 runtime credentials. Its evidence distinguishes local checks from native
 container and provider acceptance.
 
+The same plan now records an unreleased backend correction: command-based editor
+saves and retained provider-usage evidence. Local integration is under review;
+accounting ownership, native migration/restore and release admission remain
+pending. The server save restriction and supported editor must ship together.
+
 This distribution supports the credential-free synthetic editor. Its seeded
 contributor setup candidate explicitly selects the standalone PG17 profile,
 separate bootstrap/migrator/runtime logins and acknowledged core permissions.

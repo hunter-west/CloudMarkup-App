@@ -335,7 +335,7 @@ export function createBetaInfrastructureWorker(options: {
                   180_000,
                   (actual) => {
                     usage = actual;
-                    return Promise.resolve();
+                    return meter.observe(creditIdentity, actual);
                   },
                   baselineReader,
                 );
@@ -358,7 +358,7 @@ export function createBetaInfrastructureWorker(options: {
                   usage,
                 });
               } catch (error) {
-                await meter.release(creditIdentity);
+                await meter.release(creditIdentity, usage);
                 throw error;
               }
             }

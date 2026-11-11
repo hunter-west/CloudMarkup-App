@@ -9,6 +9,7 @@ import {
   type SolutionRevisionV1,
 } from "@cloudmarkup/api-contract";
 import {
+  getArchitectureDocumentCanonicalHash,
   getArchitectureDocumentHashes,
   parseArchitectureDocument,
   type ArchitectureDocument,
@@ -97,7 +98,12 @@ import {
   createIndexedDbEditorRecoveryStore,
   type IndexedDbEditorRecoveryStoreV1,
 } from "./persistence/indexeddb-editor-recovery-store.js";
-import { createLatestSaveDrain } from "./persistence/latest-save-drain.js";
+import {
+  DraftCommandDrain,
+  DraftCommandRecoveryError,
+} from "./persistence/draft-command-drain.js";
+import { DraftCommandCheckpoint } from "./persistence/draft-command-checkpoint.js";
+import { parseGraphCommandV1, type GraphCommandV1 } from "@cloudmarkup/schemas";
 import { EditorProductivityTools } from "./productivity/EditorProductivityTools.js";
 import {
   GitHubRepositoryWorkspace,
@@ -1192,9 +1198,23 @@ function BackendEditorSession({
   }, [editingPaused, initialHead.etag, leaseId, needsFreshHeadReview]);
   const saveTimerReference = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeScope = useRef(false);
-  const [saveDrain] = useState(() =>
-    createLatestSaveDrain<ArchitectureDocument, ServerDraftHead>(),
-  );
+  const saveDrain = useRef(new DraftCommandDrain(initialHead));
+  const [commandRecoveryHead] = useState(initialHead);
+  const capturedCatalogOpening = useRef<EditorCatalogOpening | null>(null);
+  const [commandCheckpoint] = useState(() => {
+    let factory: IDBFactory | undefined;
+    try {
+      factory = typeof window === "undefined" ? undefined : window.indexedDB;
+    } catch {
+      /* Browser policy may disable storage. */
+    }
+    return new DraftCommandCheckpoint(
+      [principal.id, organizationId, project.id, initialHead.draft.id],
+      initialHead,
+      factory,
+    );
+  });
+  const [commandRecoveryReady, setCommandRecoveryReady] = useState(false);
   const blockedReference = useRef(false);
   const queuedChangeVersion = useRef(0);
   const acceptingRepository = useRef(false);
@@ -1258,10 +1278,11 @@ function BackendEditorSession({
       queueMicrotask(() => {
         if (recoveryStoreLifecycle.current === generation) {
           recoveryStore?.close();
+          commandCheckpoint.close();
         }
       });
     };
-  }, [recoveryStore]);
+  }, [commandCheckpoint, recoveryStore]);
 
   useEffect(() => {
     activeScope.current = true;
@@ -1293,153 +1314,262 @@ function BackendEditorSession({
     [draftKey, runtime],
   );
 
-  const performSave = useCallback(
-    async (document: ArchitectureDocument): Promise<ServerDraftHead | null> => {
-      const editingLease = getEditingLease();
-      if (
-        runtime === null ||
-        !editingAllowed.current ||
-        editingLease === null ||
-        blockedReference.current ||
-        !isEditorScopeActive(activeScope)
-      ) {
-        return null;
-      }
-      setSaveState({
-        editingLeaseId: editingLease.leaseId,
-        message: "Saving Architecture and Workload Documents...",
-        status: "saving",
+  const performSave = useCallback(async (): Promise<ServerDraftHead | null> => {
+    const editingLease = getEditingLease();
+    if (
+      runtime === null ||
+      !editingAllowed.current ||
+      editingLease === null ||
+      blockedReference.current ||
+      !isEditorScopeActive(activeScope)
+    ) {
+      return null;
+    }
+    setSaveState({
+      editingLeaseId: editingLease.leaseId,
+      message: "Saving Architecture and Workload Documents...",
+      status: "saving",
+    });
+    try {
+      const nextHead = await saveDrain.current.flush({
+        editingLease: getEditingLease,
+        isCurrent: () =>
+          isEditorScopeActive(activeScope) && editingAllowed.current,
+        checkpoint: (recovery) => commandCheckpoint.save(recovery),
+        send: async (request) => {
+          const response = await runtime.client.requestWithMetadata(
+            "drafts.apply-command",
+            request,
+          );
+          return { value: response.data.data, etag: response.metadata.etag };
+        },
       });
-      try {
-        const response = await runtime.client.requestWithMetadata(
-          "drafts.save",
-          {
-            body: {
-              architectureDocument: document,
-              contractVersion: 1,
-              editingLease,
-            },
-            headers: { "if-match": headReference.current.etag },
-            path: { projectId: project.id },
-          },
-        );
-        if (
-          !isEditorScopeActive(activeScope) ||
-          !isEditorScopeActive(editingAllowed) ||
-          getEditingLease()?.leaseId !== editingLease.leaseId ||
-          getEditingLease()?.token !== editingLease.token
-        ) {
-          invalidateDraftSnapshot();
-          return null;
-        }
-        const nextHead: ServerDraftHead = {
-          draft: response.data.data,
-          etag: response.metadata.etag,
-        };
-        assertServerResponseBinding(
-          nextHead.draft.projectId === project.id &&
-            nextHead.draft.id === headReference.current.draft.id,
-        );
-        applySuccessfulHead(nextHead);
-        return nextHead;
-      } catch (error) {
-        if (
-          !isEditorScopeActive(activeScope) ||
-          !isEditorScopeActive(editingAllowed) ||
-          getEditingLease()?.leaseId !== editingLease.leaseId ||
-          getEditingLease()?.token !== editingLease.token
-        ) {
-          invalidateDraftSnapshot();
-          return null;
-        }
-        blockedReference.current = true;
-        const mapped = mapApiError(error);
-        if (isApiErrorCode(error, "precondition_failed")) {
-          const conflict =
-            error instanceof ApiClientError
-              ? error.envelope.error.conflict
-              : undefined;
-          setSaveState({
-            ...(conflict === undefined ? {} : { conflict }),
-            message:
-              "Save conflict · the server draft is newer. Reload, compare, or save as copy.",
-            status: "conflict",
-          });
-        } else if (mapped.sessionExpired) {
-          runtime.expireSession();
-          setSaveState({
-            message: "Your session expired. Local recovery remains separate.",
-            status: "session-expired",
-          });
-        } else if (mapped.code === "network_unavailable") {
-          setSaveState({
-            message:
-              "Offline recovery · the server was not changed. A validated browser checkpoint is kept when available.",
-            status: "offline",
-          });
-        } else {
-          setSaveState({
-            message: "Save failed · " + mapped.message,
-            status: "error",
-          });
-        }
+      if (
+        !isEditorScopeActive(activeScope) ||
+        !isEditorScopeActive(editingAllowed) ||
+        getEditingLease()?.leaseId !== editingLease.leaseId ||
+        getEditingLease()?.token !== editingLease.token
+      ) {
+        invalidateDraftSnapshot();
         return null;
       }
-    },
-    [
-      applySuccessfulHead,
-      getEditingLease,
-      invalidateDraftSnapshot,
-      project.id,
-      runtime,
-    ],
+      assertServerResponseBinding(
+        nextHead.draft.projectId === project.id &&
+          nextHead.draft.id === headReference.current.draft.id,
+      );
+      applySuccessfulHead(nextHead);
+      setMountedDocument(saveDrain.current.recovery().document);
+      if (saveDrain.current.recovery().pending.length > 0)
+        setSaveState({ status: "queued", message: "Unsaved local changes" });
+      return nextHead;
+    } catch (error) {
+      if (
+        !isEditorScopeActive(activeScope) ||
+        !isEditorScopeActive(editingAllowed) ||
+        getEditingLease()?.leaseId !== editingLease.leaseId ||
+        getEditingLease()?.token !== editingLease.token
+      ) {
+        invalidateDraftSnapshot();
+        return null;
+      }
+      blockedReference.current = true;
+      const mapped = mapApiError(error);
+      if (
+        error instanceof ApiClientError &&
+        error.envelope.error.code === "unsupported_version" &&
+        error.envelope.error.fieldIssues?.some(
+          (issue) => issue.code === "draft.command-history-required",
+        )
+      ) {
+        const conflict = error.envelope.error.conflict;
+        setSaveState({
+          ...(conflict === undefined ? {} : { conflict }),
+          status: "conflict",
+          message:
+            "This editor needs command-aware saving. Unsaved work is retained; download it or save a copy before reloading to review the saved design.",
+        });
+      } else if (isApiErrorCode(error, "precondition_failed")) {
+        const conflict =
+          error instanceof ApiClientError
+            ? error.envelope.error.conflict
+            : undefined;
+        setSaveState({
+          ...(conflict === undefined ? {} : { conflict }),
+          message:
+            "Save conflict · the server draft is newer. Reload, compare, or save as copy.",
+          status: "conflict",
+        });
+      } else if (error instanceof DraftCommandRecoveryError) {
+        setSaveState({ status: "conflict", message: error.message });
+      } else if (mapped.sessionExpired) {
+        runtime.expireSession();
+        setSaveState({
+          message: "Your session expired. Local recovery remains separate.",
+          status: "session-expired",
+        });
+      } else if (mapped.code === "network_unavailable") {
+        setSaveState({
+          message:
+            "The save acknowledgement is unavailable. Retained commands will retry with the same request identity; the server may already have accepted them.",
+          status: "offline",
+        });
+      } else {
+        setSaveState({
+          message: "Save failed · " + mapped.message,
+          status: "error",
+        });
+      }
+      return null;
+    }
+  }, [
+    applySuccessfulHead,
+    commandCheckpoint,
+    getEditingLease,
+    invalidateDraftSnapshot,
+    project.id,
+    runtime,
+  ]);
+
+  const matchesQueuedDocument = useCallback(
+    (document: ArchitectureDocument) =>
+      getArchitectureDocumentCanonicalHash(document) ===
+      getArchitectureDocumentCanonicalHash(
+        saveDrain.current.recovery().document,
+      ),
+    [],
   );
 
   const flushPending = useCallback(
     async (
       explicitDocument?: ArchitectureDocument,
     ): Promise<ServerDraftHead | null> => {
-      if (explicitDocument !== undefined) saveDrain.queue(explicitDocument);
       if (saveTimerReference.current !== null) {
         clearTimeout(saveTimerReference.current);
         saveTimerReference.current = null;
       }
-      return saveDrain.flush({
-        currentHead: () => headReference.current,
-        isBlocked: () => blockedReference.current,
-        save: performSave,
-      });
+      if (!commandRecoveryReady || blockedReference.current) return null;
+      if (
+        explicitDocument !== undefined &&
+        !matchesQueuedDocument(explicitDocument)
+      ) {
+        blockedReference.current = true;
+        setSaveState({
+          status: "conflict",
+          message:
+            "This local snapshot has no matching command history. Keep it for comparison, download or save as copy.",
+        });
+        return null;
+      }
+      return performSave();
     },
-    [performSave, saveDrain],
+    [commandRecoveryReady, matchesQueuedDocument, performSave],
   );
 
   const queueSave = useCallback(
     (document: ArchitectureDocument) => {
-      queuedChangeVersion.current += 1;
-      saveDrain.queue(document);
-      if (!blockedReference.current && isEditorScopeActive(activeScope)) {
+      if (!matchesQueuedDocument(document)) {
+        blockedReference.current = true;
         setSaveState({
-          message: "Unsaved local changes",
-          status: "queued",
+          status: "conflict",
+          message:
+            "The local snapshot is retained. Review its recovery or save a copy before continuing command-aware editing.",
         });
+        return;
       }
+      queuedChangeVersion.current += 1;
+      if (!blockedReference.current && isEditorScopeActive(activeScope))
+        setSaveState({ status: "queued", message: "Unsaved local changes" });
       if (
         blockedReference.current ||
         !editingAllowed.current ||
         getEditingLease() === null
-      ) {
+      )
         return;
-      }
-      if (saveTimerReference.current !== null) {
+      if (saveTimerReference.current !== null)
         clearTimeout(saveTimerReference.current);
-      }
       saveTimerReference.current = setTimeout(() => {
         saveTimerReference.current = null;
         void flushPending();
       }, 700);
     },
-    [flushPending, getEditingLease, saveDrain],
+    [flushPending, getEditingLease, matchesQueuedDocument],
   );
+
+  const queueCommand = useCallback(
+    (command: GraphCommandV1, document: ArchitectureDocument) => {
+      if (!commandRecoveryReady)
+        throw new Error("Review retained command recovery before editing.");
+      try {
+        saveDrain.current.enqueue(
+          command,
+          createBrowserMutationKey("draft-command"),
+          document,
+        );
+        const checkpoint = saveDrain.current.recovery();
+        void Promise.resolve()
+          .then(() => commandCheckpoint.save(checkpoint))
+          .catch(() => {
+            if (!isEditorScopeActive(activeScope)) return;
+            blockedReference.current = true;
+            setSaveState({
+              status: "error",
+              message:
+                "The recovery checkpoint was not acknowledged. Local work is retained; retry saving or download a copy.",
+            });
+          });
+        queueSave(document);
+      } catch (error) {
+        blockedReference.current = true;
+        setSaveState({
+          status: "conflict",
+          message:
+            "This edit does not match the retained command history. Keep the local draft and review recovery or save a copy.",
+        });
+        throw error;
+      }
+    },
+    [commandCheckpoint, commandRecoveryReady, queueSave],
+  );
+
+  useEffect(() => {
+    let current = true;
+    void commandCheckpoint
+      .load()
+      .then((recovery) => {
+        if (!current) return;
+        if (
+          recovery !== null &&
+          (recovery.pending.length > 0 || recovery.reviewRequired)
+        ) {
+          saveDrain.current = DraftCommandDrain.restore(
+            recovery,
+            commandRecoveryHead,
+          );
+          setMountedDocument(recovery.document);
+          setMountGeneration((generation) => generation + 1);
+          blockedReference.current = recovery.reviewRequired;
+          setSaveState({
+            status: recovery.reviewRequired ? "conflict" : "queued",
+            message:
+              "Unsaved command history was recovered. Review the draft and retry the original save.",
+          });
+        }
+        setCommandRecoveryReady(true);
+      })
+      .catch(() => {
+        if (!current) return;
+        blockedReference.current = true;
+        setCommandRecoveryReady(true);
+        setSaveState({
+          status: "conflict",
+          message:
+            "Command recovery could not be validated. Existing local checkpoints were retained; review or download the draft before reloading.",
+        });
+      });
+    return () => {
+      current = false;
+    };
+  }, [commandCheckpoint, commandRecoveryHead]);
 
   const acceptRepositoryGraph = useCallback<AcceptRepositoryGraph>(
     async (request) => {
@@ -1536,7 +1666,8 @@ function BackendEditorSession({
             nextHead.draft.id === attempt.head.draft.id &&
             nextHead.draft.version > attempt.head.draft.version,
         );
-        saveDrain.clearPending();
+        saveDrain.current = new DraftCommandDrain(nextHead);
+        await commandCheckpoint.save(saveDrain.current.recovery());
         blockedReference.current = false;
         repositoryAttempt.current = null;
         applySuccessfulHead(nextHead);
@@ -1569,17 +1700,16 @@ function BackendEditorSession({
       invalidateDraftSnapshot,
       project.id,
       runtime,
-      saveDrain,
+      commandCheckpoint,
     ],
   );
 
   const retrySave = useCallback(
     async (document: ArchitectureDocument) => {
       blockedReference.current = false;
-      saveDrain.queue(document);
-      return flushPending();
+      return flushPending(document);
     },
-    [flushPending, saveDrain],
+    [flushPending],
   );
 
   const closeProject = useCallback(
@@ -1632,7 +1762,8 @@ function BackendEditorSession({
       const nextDocument = parseArchitectureDocument(
         nextHead.draft.architectureDocument,
       );
-      saveDrain.clearPending();
+      saveDrain.current = new DraftCommandDrain(nextHead);
+      await commandCheckpoint.save(saveDrain.current.recovery());
       repositoryAttempt.current = null;
       blockedReference.current = false;
       applySuccessfulHead(nextHead);
@@ -1650,7 +1781,7 @@ function BackendEditorSession({
         status: "error",
       });
     }
-  }, [applySuccessfulHead, leaseId, project.id, runtime, saveDrain]);
+  }, [applySuccessfulHead, commandCheckpoint, leaseId, project.id, runtime]);
 
   const saveAsCopy = useCallback(
     async (document: ArchitectureDocument) => {
@@ -1807,6 +1938,45 @@ function BackendEditorSession({
     if (revisionAttempt.abandon()) setRevisionError(null);
   }, [revisionAttempt]);
 
+  useLayoutEffect(() => {
+    if (
+      !commandRecoveryReady ||
+      editsPaused ||
+      blockedReference.current ||
+      capturedCatalogOpening.current === catalogOpening ||
+      catalogOpening.status !== "compatible" ||
+      catalogOpening.command === undefined
+    )
+      return;
+    const command = parseGraphCommandV1({
+      ...catalogOpening.command,
+      commandId: createId(),
+      inverseCommandId: createId(),
+    });
+    try {
+      // Capture before the adapted child can emit edits or recovery snapshots.
+      // Opening remains a read; only a subsequent edit/save drains this operation.
+      saveDrain.current.enqueue(
+        command,
+        createBrowserMutationKey("catalog-binding"),
+        catalogOpening.document,
+      );
+      capturedCatalogOpening.current = catalogOpening;
+    } catch {
+      blockedReference.current = true;
+      queueMicrotask(() => {
+        if (isEditorScopeActive(activeScope))
+          setSaveState({
+            status: "conflict",
+            message:
+              "Catalog adaptation does not match retained command history. Keep local work and review recovery before saving.",
+          });
+      });
+    }
+  }, [catalogOpening, commandRecoveryReady, createId, editsPaused]);
+
+  if (!commandRecoveryReady)
+    return <p role="status">Checking unsaved command recovery...</p>;
   const document = catalogOpening.document;
   const binding = serverEditorBinding(document);
   if (binding === undefined || catalogOpening.status === "review-required") {
@@ -1822,9 +1992,19 @@ function BackendEditorSession({
             onApply={() => {
               if (editsPaused || catalogOpening.status !== "review-required")
                 return;
+              if (catalogOpening.command === undefined) return;
+              const command = parseGraphCommandV1({
+                ...catalogOpening.command,
+                commandId: createId(),
+                inverseCommandId: createId(),
+              });
+              try {
+                queueCommand(command, catalogOpening.document);
+              } catch {
+                return;
+              }
               setMountedDocument(catalogOpening.document);
               setMountGeneration((current) => current + 1);
-              queueSave(catalogOpening.document);
             }}
           />
         }
@@ -1853,12 +2033,19 @@ function BackendEditorSession({
       iconRegistry={binding.iconRegistry}
       layoutAdapter={editorLayoutAdapter}
       onDocumentChange={queueSave}
+      onCommandApplied={queueCommand}
       preserveSessionOnRecoveryRebind
       recoveryCheckingFallback={<DevelopmentFixtureStatus serverBacked />}
       recoveryWriterId={runtimeIdentity.writerId}
       scopeKey={scopeKey}
       {...(recoveryStore === undefined ? {} : { recoveryStore })}
     >
+      {!commandCheckpoint.available ? (
+        <p role="status">
+          Command recovery is available only while this tab stays open. Download
+          unsaved work before closing.
+        </p>
+      ) : null}
       {editsPaused ? (
         <PausedProjectRecovery
           head={needsFreshHeadReview ? initialHead : head}

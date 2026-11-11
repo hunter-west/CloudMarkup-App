@@ -171,6 +171,10 @@ export function createBetaInfrastructureModel(
         new ConverseCommand(betaInfrastructureModelRequest(input)),
         { abortSignal: input.signal },
       );
+      if (input.onUsage)
+        await input.onUsage(
+          requireBetaConverseUsage(result.usage, result.$metadata.requestId),
+        );
       const tools = (result.output?.message?.content ?? []).flatMap((block) =>
         block.toolUse === undefined ? [] : [block.toolUse],
       );
@@ -184,10 +188,6 @@ export function createBetaInfrastructureModel(
       const proposal = infrastructureProposalSchemaForVersion(
         input.proposalVersion,
       ).parse(responseInput);
-      if (input.onUsage)
-        await input.onUsage(
-          requireBetaConverseUsage(result.usage, result.$metadata.requestId),
-        );
       return proposal;
     } catch (error) {
       const reason =

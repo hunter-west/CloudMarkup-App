@@ -212,6 +212,71 @@ function expectUndoRedoRoundTrip(
 }
 
 describe("Graph command application", () => {
+  it("supports same-ID generated replacement through an explicit release/add batch", async () => {
+    const document = await representativeDocument();
+    const generated = generatedNode(
+      "node_regenerated_support",
+      "regenerated_support",
+      "node_network" as ArchitectureNodeV1["id"],
+    );
+    const added = applyGraphCommand(document, {
+      ...commandEnvelope(document, "operation_add_regenerated_support"),
+      kind: "add-node",
+      node: generated,
+    });
+    const release = expectAvailable(added.inversion);
+    if (release.kind !== "release-generated-resource") {
+      throw new Error("Generated additions must invert through release.");
+    }
+    const replacement = {
+      ...generated,
+      semantic: {
+        ...generated.semantic,
+        configuration: {
+          ...generated.semantic.configuration,
+          values: {
+            ...generated.semantic.configuration.values,
+            instanceCount: { kind: "integer" as const, value: 3 },
+          },
+        },
+      },
+    };
+    const before = serializeArchitectureDocumentV1(added.document);
+
+    const regenerated = applyGraphCommand(added.document, {
+      ...commandEnvelope(added.document, "operation_regenerate_support"),
+      kind: "batch",
+      commands: [
+        release,
+        {
+          ...commandEnvelope(added.document, "operation_replace_support"),
+          kind: "add-node",
+          node: replacement,
+        },
+      ],
+    });
+    const sameIdNodes = regenerated.document.nodes.filter(
+      (node) => node.id === generated.id,
+    );
+    expect(sameIdNodes).toHaveLength(1);
+    expect(sameIdNodes[0]?.semantic.configuration).toEqual(
+      replacement.semantic.configuration,
+    );
+    expect(sameIdNodes[0]?.semantic.lifecycle).toEqual(
+      generated.semantic.lifecycle,
+    );
+    expect(sameIdNodes[0]?.semantic.deploymentKey).toBe(
+      generated.semantic.deploymentKey,
+    );
+    expect(serializeArchitectureDocumentV1(added.document)).toBe(before);
+
+    const undone = applyGraphCommand(
+      regenerated.document,
+      expectAvailable(regenerated.inversion),
+    );
+    expect(serializeArchitectureDocumentV1(undone.document)).toBe(before);
+  });
+
   it("adds and removes a node without mutating input or changing stable identity", async () => {
     const document = deepFreeze(await representativeDocument());
     const node = userNode("node_worker", "worker");

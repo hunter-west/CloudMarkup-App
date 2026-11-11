@@ -132,6 +132,8 @@ it("uses identical reviewed content for both transports and rejects a different 
         ],
       },
     },
+    usage: { inputTokens: 1200, outputTokens: 300 },
+    $metadata: { requestId: "invalid-version-usage" },
   });
   const before = send.mock.calls.length;
   await expect(
@@ -144,7 +146,12 @@ it("uses identical reviewed content for both transports and rejects a different 
     }),
   ).rejects.toThrow();
   expect(send.mock.calls.length - before).toBe(1);
-  expect(onUsage).not.toHaveBeenCalled();
+  expect(onUsage).toHaveBeenCalledExactlyOnceWith({
+    inputTokens: 1200,
+    outputTokens: 300,
+    cacheReadInputTokens: 0,
+    providerRequestId: "invalid-version-usage",
+  });
   expect(onFailure).toHaveBeenCalledExactlyOnceWith("invalid-response", {
     validationFields: ["contractVersion"],
   });
@@ -516,7 +523,7 @@ it.each([
   "empty-assessment",
   "blocking-question",
 ] as const)(
-  "refuses %s without retry, usage delivery or private diagnostic text",
+  "refuses %s while preserving usage without retries or private diagnostic text",
   async (rule) => {
     const valid = {
       ...proposal,
@@ -601,6 +608,8 @@ it.each([
           ],
         },
       },
+      usage: { inputTokens: 1200, outputTokens: 300 },
+      $metadata: { requestId: "invalid-schema-usage" },
     });
     const before = send.mock.calls.length;
     await expect(
@@ -613,7 +622,12 @@ it.each([
       }),
     ).rejects.toThrow();
     expect(send.mock.calls.length - before).toBe(1);
-    expect(onUsage).not.toHaveBeenCalled();
+    expect(onUsage).toHaveBeenCalledExactlyOnceWith({
+      inputTokens: 1200,
+      outputTokens: 300,
+      cacheReadInputTokens: 0,
+      providerRequestId: "invalid-schema-usage",
+    });
     expect(onFailure).toHaveBeenCalledExactlyOnceWith("invalid-response", {
       validationFields: ["root"],
       validationRules: [rule],

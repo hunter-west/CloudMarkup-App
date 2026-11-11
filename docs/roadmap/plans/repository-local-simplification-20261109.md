@@ -2,7 +2,7 @@
 
 - Milestone: M9, independent refactor requested by the owner
 - Workflows: public clone, standalone local editor, hosted source composition
-- Status: implemented; independent review and native acceptance pending
+- Status: active; review-driven backend/client integration, release held
 - Owner: independent refactor lane; hosted release/acceptance remains separate
 
 ## Goals
@@ -42,6 +42,12 @@ different compositions of the same application.
       blockers.
 - [x] Review final diffs and record evidence, compatibility risks and review
       guide.
+- [x] Integrate command-consistent saves with supported editor transport and
+      recovery; verify focused API and editor journeys locally.
+- [ ] (current) Admit retained provider-usage evidence, authenticated accounting
+      ownership and native migration/permission/recovery proofs.
+- [ ] Freeze the corrected source pair for independent review and required
+      release gates.
 
 ## Validation strategy
 
@@ -53,13 +59,14 @@ the ongoing owner's release or native acceptance runs.
 
 ## Migration and security impact
 
-No application runtime algorithm, HTTP contract, graph command, catalog,
-compiler protocol, SQL, database ACL or immutable revision format changes.
-Canonical migrations remain 121 registered entries through 0139; the standalone
-profile still adds its existing installation identity. No data migration is
-needed for this patch. Existing configurations and staged operator commands
-remain valid. `docker compose build app` is replaced by the documented
-`self-host.mjs build` command; Compose consumes the resulting image.
+The initial setup phase changed no application runtime algorithm, HTTP contract,
+graph command, catalog, compiler protocol, SQL, database ACL or immutable
+revision format. Its canonical migration set had 121 registered entries through
+0139; the standalone profile added its existing installation identity. That
+phase needed no data migration. The backend follow-up below adds migration 0140
+and requires separate native admission. Existing configurations and staged
+operator commands remain valid. `docker compose build app` is replaced by the
+documented `self-host.mjs build` command; Compose consumes the resulting image.
 
 The setup helper is exclusively for a new installation directory. It cannot
 overwrite an existing directory, reset credentials, seed a project, activate a
@@ -364,3 +371,101 @@ The corrected immutable candidate requires the external independent review.
 Actual Linux context/image inspection, native links, source-pair admission and
 the remaining release gates are still unmet. These local results do not close
 the release hold.
+
+### Backend review integration
+
+The reviewed setup anchors remain immutable in history. The follow-up integrates
+two separate correctness boundaries: command-consistent draft saves and retained
+provider-usage accounting. They require new evidence and do not inherit release
+admission from the setup checks.
+
+Draft snapshot writes must retain all semantics and protected provenance; only
+existing node label/position changes may use that path. Semantic edits use the
+existing authoritative command endpoint, original ETag, current authorization
+and editing lease, and exact receipt replay. The editor captures actual commands
+independently of bounded undo history. Browser recovery retains pending command
+identity and uncertain acknowledgements; it never treats a snapshot or digest as
+proof of a command history. Older snapshot-only checkpoints remain recoverable
+for comparison/download/copy, without a semantic-save bypass.
+
+This integration is not ready for rollout. Focused copy-level checks preceded
+integration; the complete client transport, browser checkpoint, command
+receipts, catalog adaptation, imports, lease loss, offline/reconnect, and exact
+undo must pass integrated checks. Required backend/web, native persistence,
+source-pair and independent review gates remain separate. The server restriction
+must not ship without its supported client.
+
+The accounting proposal preserves pricing, caps, customer refunds and summary
+fields. Authenticated internal report ownership and cleanup checkpoint/outcome
+retention require explicit source-bound admission. Billing reader permissions do
+not authorize cleanup writes. No new endpoint, live schedule, operator identity,
+production record or permission is activated by local preparation.
+
+### Local integration checkpoint
+
+The supported server-backed editor now sends actual commands for autosave,
+explicit save, close, revision creation, catalog adaptation and import draining.
+Undo/redo receives fresh command identities for new actions; retry retains its
+original body, key and ETag. A scope-bound IndexedDB command checkpoint
+preserves uncertain requests independently of undo history and retains its
+previous value under compare-and-swap. Existing snapshot recovery is unchanged.
+Storage failure does not silently drop local work or authorize a semantic
+snapshot write. Native browser storage/crash and offline acceptance remain
+required.
+
+Provider usage is recorded before output validation/publication and retained
+through financial-release errors. Identical financial replay resolves uncertain
+acknowledgements; conflicting terminal evidence remains explicit. Cleanup
+follows financial completion without making refunds depend on evidence
+migration. The internal projection counts agreeing representations once using
+original pricing; unresolved or conflicting costs remain null/incomplete.
+Customer summaries, prices, caps and refund calculations are unchanged.
+All-write failure still can leave counts only in memory; no crash-durability
+guarantee or fabricated backfill is claimed.
+
+Migration 0140 adds five write-once observation columns and an invoker trigger.
+All 121 prior migration bytes/checksums remain unchanged. Ordinary-role column
+grants are a separate **unapplied** authority proposal. The report reader has no
+authenticated entry point, and cleanup has no durable owner/checkpoint wiring.
+The integration is therefore incomplete and held: internal operator/report
+visibility and checkpoint retention/deletion/restore must be admitted before
+those contracts are activated. Existing billing-reader grants confer no cleanup
+write authority. No new service, schedule, or live database change was made.
+
+Focused source checks passed: 69 editor lifecycle/session/lease/command-recovery
+tests; 31 model-adapter fixture tests; two API command-save tests; two read-only
+migration manifest/portable-byte tests; and three selected domain replacement,
+inverse and catalog cases. Six accounting tests passed with SQL/financial or
+admitted-authority doubles, including source-wrapper observation/publication
+failure, financial lost acknowledgement, pre-commit failure, conflicting
+terminal state and retained legacy usage during cleanup failure. API and web
+no-emit checks passed. OpenAPI regeneration and verification passed, with only
+the draft-save operation summary changed. Local static security checks and
+secret scanning passed; the network-dependent registry audit remains unrun for
+this integration.
+
+Failed attempts remain in the external evidence bundle. Early web fixture issues
+and command-capture ordering were corrected without relaxing test limits. Tests
+for immutable revision retries now require the existing saved version when the
+command queue is empty, retaining exact request replay. Initial lint failures
+identified weak recovery-input typing and fixture conventions; changed-file lint
+passed after correction. One new source-wrapper mock had an incorrect return
+shape; its corrected API type-check and six focused tests passed. These are
+author checks, not independent review or native certification.
+
+New regression cases protect semantic/provenance rejection, generated
+replacement and inverse compatibility, command receipt/retry/recovery, known
+financial usage and release availability (criticality 8–10/10). Existing
+lifecycle, validation, lease, store and session suites were extended; the
+IndexedDB double was extracted without deleting its five tests. No performance
+improvement is claimed: selected runs and concurrent local checks are not
+comparable suite baselines.
+
+Remaining admission: authenticated accounting owner/checkpoint and report
+access; native SQL/ordinary roles/concurrency/lost acknowledgements/restore;
+complete source-generation and asynchronous-worker orchestration; real-browser
+recovery; the required backend/web/public gates and registry audit; exact
+hosted/public composition and independent review. The retained build-context
+native-link and container/image gates remain unrun under their existing
+restrictions. Source integration is neither deployment evidence nor permission
+to bypass these gates.

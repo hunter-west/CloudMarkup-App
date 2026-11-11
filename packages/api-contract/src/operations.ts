@@ -1443,7 +1443,8 @@ export const apiOperationsV1 = {
     responseSchema: saveDraftResponseV1Schema,
     security: "principal",
     successStatus: 200,
-    summary: "Autosave the current mutable draft with optimistic concurrency",
+    summary:
+      "Save draft node labels and positions with optimistic concurrency; semantic changes require commands",
     tag: "Drafts",
   }),
   "environments.create": defineOperation({
