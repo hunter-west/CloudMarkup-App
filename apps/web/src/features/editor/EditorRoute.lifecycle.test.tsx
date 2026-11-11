@@ -46,6 +46,7 @@ import {
 import { EditorRoute } from "./EditorRoute.js";
 import type { AcceptRepositoryGraph } from "./repository/GitHubRepositoryWorkspace.js";
 import { loadFoundationArchitectureDocument } from "./model/index.js";
+import { DraftCommandCheckpoint } from "./persistence/draft-command-checkpoint.js";
 
 // Isolate route/cache/save coordination from the separately tested canvas and
 // domain command engine. This leaf emits the actual command before its document event.
@@ -458,6 +459,55 @@ afterEach(() => {
 });
 
 describe("one active project editor per workspace", () => {
+  it("keeps rejected recovery paused through a failed or pending reset and installs the new server drain only after acknowledgement", async () => {
+    vi.spyOn(DraftCommandCheckpoint.prototype, "load").mockRejectedValue(
+      new Error("Invalid synthetic command checkpoint"),
+    );
+    const pending = deferred<undefined>();
+    const reset = vi
+      .spyOn(DraftCommandCheckpoint.prototype, "reset")
+      .mockRejectedValueOnce(
+        new Error("Synthetic reset acknowledgement unavailable"),
+      )
+      .mockReturnValueOnce(pending.promise);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const f = setup();
+    await screen.findByRole("region", { name: "Command recovery review" });
+    f.readDraft.mockResolvedValue(response(draft("project_a", 2)));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reset recovery to saved draft" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent("Reload failed"),
+    );
+    expect(f.queryClient.getQueryData(draftKey("project_a"))).toMatchObject({
+      draft: { version: 1 },
+    });
+    expect(
+      screen.queryByRole("button", { name: "Simulate document change" }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reset recovery to saved draft" }),
+    );
+    await waitFor(() => {
+      expect(reset).toHaveBeenCalledTimes(2);
+    });
+    expect(
+      screen.getByRole("region", { name: "Command recovery review" }),
+    ).toBeInTheDocument();
+    expect(f.requestWithMetadata).not.toHaveBeenCalled();
+    await act(async () => {
+      pending.resolve(undefined);
+      await pending.promise;
+    });
+    await screen.findByRole("button", { name: "Simulate document change" });
+    expect(f.queryClient.getQueryData(draftKey("project_a"))).toMatchObject({
+      draft: { version: 2 },
+    });
+    expect(
+      screen.queryByRole("region", { name: "Command recovery review" }),
+    ).not.toBeInTheDocument();
+  });
   it("opens an older AWS project without writing on read, then saves and reloads with the current catalog", async () => {
     const document = parseArchitectureDocument({
       ...loadManualNotesApiArchitectureDocument(),

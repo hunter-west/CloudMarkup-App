@@ -1216,6 +1216,10 @@ function BackendEditorSession({
   });
   const [commandRecoveryReady, setCommandRecoveryReady] = useState(false);
   const blockedReference = useRef(false);
+  const resettingRecovery = useRef(false);
+  const [recoveryResetBusy, setRecoveryResetBusy] = useState(false);
+  const [commandRecoveryIssue, setCommandRecoveryIssue] = useState(false);
+  const [commandRecoveryDownload, setCommandRecoveryDownload] = useState("");
   const queuedChangeVersion = useRef(0);
   const acceptingRepository = useRef(false);
   const [repositoryAcceptanceBusy, setRepositoryAcceptanceBusy] =
@@ -1330,11 +1334,15 @@ function BackendEditorSession({
       message: "Saving Architecture and Workload Documents...",
       status: "saving",
     });
+    const drain = saveDrain.current;
     try {
-      const nextHead = await saveDrain.current.flush({
+      const nextHead = await drain.flush({
         editingLease: getEditingLease,
         isCurrent: () =>
-          isEditorScopeActive(activeScope) && editingAllowed.current,
+          isEditorScopeActive(activeScope) &&
+          editingAllowed.current &&
+          !resettingRecovery.current &&
+          saveDrain.current === drain,
         checkpoint: (recovery) => commandCheckpoint.save(recovery),
         send: async (request) => {
           const response = await runtime.client.requestWithMetadata(
@@ -1345,6 +1353,8 @@ function BackendEditorSession({
         },
       });
       if (
+        resettingRecovery.current ||
+        saveDrain.current !== drain ||
         !isEditorScopeActive(activeScope) ||
         !isEditorScopeActive(editingAllowed) ||
         getEditingLease()?.leaseId !== editingLease.leaseId ||
@@ -1364,6 +1374,8 @@ function BackendEditorSession({
       return nextHead;
     } catch (error) {
       if (
+        resettingRecovery.current ||
+        saveDrain.current !== drain ||
         !isEditorScopeActive(activeScope) ||
         !isEditorScopeActive(editingAllowed) ||
         getEditingLease()?.leaseId !== editingLease.leaseId ||
@@ -1497,7 +1509,11 @@ function BackendEditorSession({
 
   const queueCommand = useCallback(
     (command: GraphCommandV1, document: ArchitectureDocument) => {
-      if (!commandRecoveryReady)
+      if (
+        !commandRecoveryReady ||
+        commandRecoveryIssue ||
+        resettingRecovery.current
+      )
         throw new Error("Review retained command recovery before editing.");
       try {
         saveDrain.current.enqueue(
@@ -1528,7 +1544,7 @@ function BackendEditorSession({
         throw error;
       }
     },
-    [commandCheckpoint, commandRecoveryReady, queueSave],
+    [commandCheckpoint, commandRecoveryReady, commandRecoveryIssue, queueSave],
   );
 
   useEffect(() => {
@@ -1559,11 +1575,12 @@ function BackendEditorSession({
       .catch(() => {
         if (!current) return;
         blockedReference.current = true;
+        setCommandRecoveryIssue(true);
         setCommandRecoveryReady(true);
         setSaveState({
           status: "conflict",
           message:
-            "Command recovery could not be validated. Existing local checkpoints were retained; review or download the draft before reloading.",
+            "Command recovery needs review. Download the retained evidence, restore a valid previous checkpoint, or reset to the saved draft. Reset preserves the rejected record separately.",
         });
       });
     return () => {
@@ -1666,8 +1683,10 @@ function BackendEditorSession({
             nextHead.draft.id === attempt.head.draft.id &&
             nextHead.draft.version > attempt.head.draft.version,
         );
-        saveDrain.current = new DraftCommandDrain(nextHead);
-        await commandCheckpoint.save(saveDrain.current.recovery());
+        const replacement = new DraftCommandDrain(nextHead);
+        await commandCheckpoint.save(replacement.recovery());
+        assertCurrent();
+        saveDrain.current = replacement;
         blockedReference.current = false;
         repositoryAttempt.current = null;
         applySuccessfulHead(nextHead);
@@ -1735,10 +1754,90 @@ function BackendEditorSession({
     ],
   );
 
+  const downloadCommandRecovery = useCallback(async () => {
+    try {
+      const evidence = await commandCheckpoint.evidence();
+      const url = URL.createObjectURL(
+        new Blob(
+          [
+            JSON.stringify(
+              {
+                purpose: "command-recovery-evidence",
+                evidence,
+                local: saveDrain.current.recovery(),
+              },
+              null,
+              2,
+            ),
+          ],
+          { type: "application/json" },
+        ),
+      );
+      const anchor = window.document.createElement("a");
+      anchor.href = url;
+      anchor.download = "cloudmarkup-command-recovery.json";
+      window.document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+      setCommandRecoveryDownload(
+        "Recovery download prepared. Check your downloads before clearing local recovery.",
+      );
+    } catch {
+      setCommandRecoveryDownload(
+        "Recovery download could not start. Keep this tab open and retry.",
+      );
+    }
+  }, [commandCheckpoint]);
+
+  const restorePreviousCommands = useCallback(async () => {
+    const previous = commandCheckpoint.previousValid;
+    if (
+      previous === null ||
+      resettingRecovery.current ||
+      !window.confirm(
+        "Restore the valid previous command checkpoint for review? The rejected record will be kept separately. Commands still require current server authorization.",
+      )
+    )
+      return;
+    resettingRecovery.current = true;
+    setRecoveryResetBusy(true);
+    try {
+      const replacement = DraftCommandDrain.restore(
+        previous,
+        commandRecoveryHead,
+      );
+      await commandCheckpoint.reset(replacement.recovery());
+      if (!isEditorScopeActive(activeScope)) return;
+      saveDrain.current = replacement;
+      blockedReference.current = previous.reviewRequired;
+      setMountedDocument(previous.document);
+      setMountGeneration((value) => value + 1);
+      setCommandRecoveryIssue(false);
+      setSaveState({
+        status: previous.reviewRequired ? "conflict" : "queued",
+        message:
+          "Previous commands restored for review. Retry uses their original request identities.",
+      });
+    } catch {
+      setSaveState({
+        status: "error",
+        message:
+          "Recovery reset was not acknowledged. Existing work is retained; retry the same reset or download it.",
+      });
+    } finally {
+      resettingRecovery.current = false;
+      setRecoveryResetBusy(false);
+    }
+  }, [commandCheckpoint, commandRecoveryHead]);
+
   const reloadServerDraft = useCallback(async () => {
+    if (resettingRecovery.current) return;
     if (
       !window.confirm(
-        "Load the latest saved draft? This replaces unsaved changes in this tab. Save a copy or download local recovery first if you need to keep them.",
+        "Load the latest saved draft and reset command recovery? This replaces unsaved changes in this tab. The existing checkpoint is retained separately for download. Save a copy or download local work first.",
       )
     ) {
       return;
@@ -1746,6 +1845,10 @@ function BackendEditorSession({
     if (runtime === null) {
       return;
     }
+    resettingRecovery.current = true;
+    setRecoveryResetBusy(true);
+    if (saveTimerReference.current !== null)
+      clearTimeout(saveTimerReference.current);
     try {
       const response = await runtime.client.requestWithMetadata("drafts.get", {
         path: { projectId: project.id },
@@ -1762,8 +1865,11 @@ function BackendEditorSession({
       const nextDocument = parseArchitectureDocument(
         nextHead.draft.architectureDocument,
       );
-      saveDrain.current = new DraftCommandDrain(nextHead);
-      await commandCheckpoint.save(saveDrain.current.recovery());
+      const replacement = new DraftCommandDrain(nextHead);
+      await commandCheckpoint.reset(replacement.recovery());
+      if (!isEditorScopeActive(activeScope)) return;
+      saveDrain.current = replacement;
+      setCommandRecoveryIssue(false);
       repositoryAttempt.current = null;
       blockedReference.current = false;
       applySuccessfulHead(nextHead);
@@ -1780,6 +1886,9 @@ function BackendEditorSession({
         message: "Reload failed · " + mapped.message,
         status: "error",
       });
+    } finally {
+      resettingRecovery.current = false;
+      setRecoveryResetBusy(false);
     }
   }, [applySuccessfulHead, commandCheckpoint, leaseId, project.id, runtime]);
 
@@ -1977,6 +2086,50 @@ function BackendEditorSession({
 
   if (!commandRecoveryReady)
     return <p role="status">Checking unsaved command recovery...</p>;
+  if (commandRecoveryIssue)
+    return (
+      <ReadOnlyServerDraft
+        head={head}
+        identity={shellIdentity}
+        project={project}
+        recoveryActions={
+          <section aria-label="Command recovery review">
+            <p role="alert">{saveState.message}</p>
+            <button
+              type="button"
+              onClick={() => {
+                void downloadCommandRecovery();
+              }}
+            >
+              Download retained command recovery
+            </button>
+            {commandCheckpoint.previousValid === null ? null : (
+              <button
+                type="button"
+                disabled={recoveryResetBusy}
+                onClick={() => {
+                  void restorePreviousCommands();
+                }}
+              >
+                Restore previous command checkpoint
+              </button>
+            )}
+            <button
+              type="button"
+              disabled={recoveryResetBusy}
+              onClick={() => {
+                void reloadServerDraft();
+              }}
+            >
+              Reset recovery to saved draft
+            </button>
+            {commandRecoveryDownload ? (
+              <p role="status">{commandRecoveryDownload}</p>
+            ) : null}
+          </section>
+        }
+      />
+    );
   const document = catalogOpening.document;
   const binding = serverEditorBinding(document);
   if (binding === undefined || catalogOpening.status === "review-required") {
@@ -2040,6 +2193,24 @@ function BackendEditorSession({
       scopeKey={scopeKey}
       {...(recoveryStore === undefined ? {} : { recoveryStore })}
     >
+      <details>
+        <summary>Retained command recovery</summary>
+        <p>
+          Saved-aside checkpoints remain available until you choose to clear
+          local recovery when signing out.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            void downloadCommandRecovery();
+          }}
+        >
+          Download retained command recovery
+        </button>
+        {commandRecoveryDownload ? (
+          <p role="status">{commandRecoveryDownload}</p>
+        ) : null}
+      </details>
       {!commandCheckpoint.available ? (
         <p role="status">
           Command recovery is available only while this tab stays open. Download

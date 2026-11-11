@@ -298,7 +298,11 @@ export class PostgresBetaAiInternalCostReader {
         sql("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY"),
       );
       const stamp = await tx.query(
-        sql("SELECT transaction_timestamp() AS as_of"),
+        // Bind the public report timestamp independently of driver-specific
+        // timestamp strings or the process/database session timezone.
+        sql(
+          `SELECT to_char(transaction_timestamp() AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS as_of`,
+        ),
       );
       const asOfValue = stamp.rows[0]?.["as_of"];
       const asOf =

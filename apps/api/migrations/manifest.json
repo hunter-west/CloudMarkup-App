@@ -610,6 +610,11 @@
       "version": "0140",
       "file": "0140_beta_ai_usage_evidence.sql",
       "checksumSha256": "0506cd7b7d3419e2be1addbbe930f4e74016dd33984b9c504829c71ee0ab64f2"
+    },
+    {
+      "version": "0141",
+      "file": "0141_staff_provider_cost_scope.sql",
+      "checksumSha256": "358f79f5d19cd2e5540c03f3e72d1010bd726c5c82500e3174ef20ca3249b956"
     }
   ]
 }

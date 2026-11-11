@@ -1,4 +1,5 @@
 import { PostgresStaffAccounts } from "./adapters/persistence/staff-accounts.js";
+import { PostgresStaffProviderCosts } from "./adapters/persistence/staff-provider-costs.js";
 
 import {
   optionalCleanupWakeObserver,
@@ -734,6 +735,7 @@ export function createProductionApp(
     },
     staffAccounts: {
       application: new PostgresStaffAccounts(database),
+      providerCosts: new PostgresStaffProviderCosts(database),
       publicOrigin: new URL(config.runtimeConfig.authentication.callbackUrl)
         .origin,
     },

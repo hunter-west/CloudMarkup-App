@@ -1,6 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseOperatorArguments } from "./platform-account-operator.mjs";
+import {
+  parseOperatorArguments,
+  validateOperatorUser,
+} from "./platform-account-operator.mjs";
 const valid = [
   "--profile",
   "synthetic",
@@ -11,6 +14,63 @@ const valid = [
   "--reason",
   "Synthetic staff bootstrap",
 ];
+test("provider-cost access requires explicit global permission and a separate exact organization action", () => {
+  assert.ok(
+    !parseOperatorArguments(valid).permissions.includes("provider-costs.read"),
+  );
+  assert.deepEqual(
+    parseOperatorArguments([...valid, "--permissions", "provider-costs.read"])
+      .permissions,
+    ["provider-costs.read"],
+  );
+  const scoped = valid.map((v) =>
+    v === "staff-authorize" ? "staff-cost-authorize" : v,
+  );
+  assert.throws(() => parseOperatorArguments(scoped));
+  assert.throws(() =>
+    parseOperatorArguments([...valid, "--organization-id", "org_fixture"]),
+  );
+  assert.throws(() =>
+    parseOperatorArguments([
+      ...scoped,
+      "--organization-id",
+      "org_fixture",
+      "--permissions",
+      "accounts.read",
+    ]),
+  );
+  const parsed = parseOperatorArguments([
+    ...scoped,
+    "--organization-id",
+    "org_fixture",
+  ]);
+  assert.equal(parsed.organizationId, "org_fixture");
+  assert.equal(parsed.confirmation, undefined);
+  const disabled = {
+    Enabled: false,
+    UserStatus: "CONFIRMED",
+    UserAttributes: [
+      { Name: "email", Value: "staff@example.test" },
+      { Name: "email_verified", Value: "true" },
+      { Name: "sub", Value: "synthetic_subject" },
+    ],
+  };
+  assert.throws(() => validateOperatorUser(disabled, parsed));
+  const revoke = parseOperatorArguments([
+    ...scoped.map((v) =>
+      v === "staff-cost-authorize" ? "staff-cost-revoke" : v,
+    ),
+    "--organization-id",
+    "org_fixture",
+  ]);
+  assert.equal(validateOperatorUser(disabled, revoke).sub, "synthetic_subject");
+  assert.throws(() =>
+    validateOperatorUser(disabled, {
+      ...revoke,
+      email: "someone@example.test",
+    }),
+  );
+});
 test("operator defaults to a read-only preview and requires an explicit reviewed digest for writes", () => {
   assert.equal(parseOperatorArguments(valid).confirmation, undefined);
   assert.equal(

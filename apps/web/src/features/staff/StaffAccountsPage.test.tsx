@@ -47,6 +47,7 @@ function fixture(
     unsubscribed?: boolean;
     suspended?: boolean;
     fresh?: boolean;
+    costs?: boolean;
   } = {},
 ) {
   const preview = {
@@ -99,6 +100,7 @@ function fixture(
                   "credits.revoke",
                   "operations.manage",
                   ...(options.trials ? ["trials.grant", "trials.revoke"] : []),
+                  ...(options.costs ? ["provider-costs.read"] : []),
                 ],
         },
       };
@@ -110,6 +112,46 @@ function fixture(
         },
       };
     if (operation === "staff.accounts.act") return action();
+    if (operation === "staff.provider-costs.get")
+      return {
+        data: {
+          contractVersion: 1,
+          organizationId: account.organizationId,
+          cohort: {
+            from: "2026-11-01T00:00:00.000Z",
+            until: "2026-11-02T00:00:00.000Z",
+          },
+          asOf: "2026-11-02T01:00:00.000Z",
+          records: [
+            {
+              organizationId: account.organizationId,
+              reservationId: "beta-ai." + "a".repeat(64),
+              accountingStatus: "unresolved",
+              providerCostMicros: null,
+              providerCostCurrency: null,
+              counts: null,
+              evidenceSources: [],
+              financialStatus: "released",
+              cleanupPending: true,
+              pricingVersionId: "original_price",
+              chargingPolicyVersion: "original_policy",
+            },
+          ],
+          nextCursor: null,
+          pageOnly: true,
+          counts: {
+            known: 0,
+            "not-incurred": 0,
+            unresolved: 1,
+            conflict: 0,
+            "unsupported-pricing": 0,
+          },
+          knownProviderCostMicros: null,
+          knownProviderCostCurrency: null,
+          evidenceComplete: false,
+          pointInTimeCohortComplete: true,
+        },
+      };
     throw Error("Unexpected operation");
   });
   const metadata = vi.fn(() =>
@@ -182,6 +224,39 @@ async function review() {
   await screen.findByRole("region", { name: "Review staff action" });
 }
 describe("staff account workspace", () => {
+  it("shows an explicitly requested internal page as incomplete without changing customer credits", async () => {
+    const f = fixture({ costs: true });
+    await selectAccount();
+    expect(
+      f.request.mock.calls.some(
+        ([operation]) => operation === "staff.provider-costs.get",
+      ),
+    ).toBe(false);
+    fireEvent.change(screen.getByLabelText("Start date (UTC)"), {
+      target: { value: "2026-11-01" },
+    });
+    fireEvent.change(screen.getByLabelText("End date (UTC, exclusive)"), {
+      target: { value: "2026-11-02" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Read provider costs" }),
+    );
+    await screen.findByText("Known cost on this page: Unknown.");
+    expect(screen.getByText(/This page is incomplete/)).toBeInTheDocument();
+    expect(f.action).not.toHaveBeenCalled();
+  });
+  it("does not offer provider costs without the explicit permission", async () => {
+    const f = fixture();
+    await selectAccount();
+    expect(
+      screen.queryByRole("region", { name: "Internal provider costs" }),
+    ).not.toBeInTheDocument();
+    expect(
+      f.request.mock.calls.some(
+        ([operation]) => operation === "staff.provider-costs.get",
+      ),
+    ).toBe(false);
+  });
   it.each(["credits", "trial"] as const)(
     "reviews a fresh workspace before its first %s action initializes billing",
     async (kind) => {

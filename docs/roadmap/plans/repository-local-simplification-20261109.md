@@ -469,3 +469,59 @@ hosted/public composition and independent review. The retained build-context
 native-link and container/image gates remain unrun under their existing
 restrictions. Source integration is neither deployment evidence nor permission
 to bypass these gates.
+
+### Recovery corrections and scoped report preparation
+
+Independent review of the integrated candidate found three editor recovery
+regressions. Completed command records consumed the 32-scope capacity forever; a
+rejected record could not be reset through the offered reload action; and
+confirmed local clearing omitted the new command database. The correction
+retires only provably completed records, preserves pending or unexplained prior
+work, and provides explicit evidence download, previous-checkpoint recovery and
+atomic quarantine/reset. Failed or uncertain reset acknowledgements cannot
+install a new in-memory drain. Confirmed clearing now includes both databases;
+blocked/error outcomes prevent a reported successful clear. Ordinary sign-out
+and cancelled clearing retain local work. No real recovery data was deleted.
+
+Sixty-three focused recovery/session/lifecycle tests passed with synthetic
+IndexedDB and UI fixtures. Web type checking and changed-file lint passed. The
+native stale-import setup now advances through an authoritative domain command,
+preserving its stale-import assertion; that PostgreSQL test remains unrun.
+
+The [staff-report proposal](../../adr/proposed-staff-provider-cost-report.md)
+records the approved audience and new implementation. A dedicated permission and
+separately audited exact organization grant gate each page, with canonical
+session/staff checks before and after its read-only cost query. Migration 0141
+and operator source add no automatic grants or live authority. The original 122
+migration bytes and manifest entries remain preserved. Ordinary-role authority
+deltas and native grant/transaction/restore admission remain pending. Customer
+summaries and accepted provider accounting/financial calculations are unchanged.
+
+Focused author tests cover report authorization, foreign scope, revocation,
+cursor/cohort binding, scoped operator audit, transport and UI boundaries.
+API/web type checks, changed-file lint and OpenAPI verification passed after
+correcting a duplicate no-store header, a missing operation registry entry and
+operator result narrowing. Original failed attempts are retained externally.
+These checks are not independent review or native proof.
+
+Cleanup-owner preparation remains separate and unapplied. Its bounded protocol
+checkpoints selected identities before cleanup, uses organization-bound CAS and
+exact operation receipts, records each outcome, progresses past failed rows and
+restarts completed sweeps. Synthetic copy tests include failed/lost checkpoint
+acknowledgements, competing owners, revocation and restore fencing. No durable
+adapter, meter selection/execution binding or production caller is supplied;
+none of those tests establishes actual durable cleanup. Storage classification,
+holds, recovery and retention admission remain unresolved.
+
+No TTL is enabled. Thirty days is only a tentative possibility for redundant
+operational metadata after durably verified completion and hold/replay/restore
+checks. Pending or uncertain work, recoverable previous copies, unique provider
+observations and canonical financial/security/audit evidence are excluded.
+Existing data policies have not established a legal retention period for these
+new operational records. No jurisdiction or new financial policy is assumed.
+
+Publication and release remain held for immutable corrected-candidate review,
+ordinary-role/native SQL/concurrency/restore, real-browser recovery, cleanup
+owner admission, required integrated gates and exact public/private composition.
+Prior setup native-link/container restrictions remain. Current source checks do
+not admit a release, grant staff access or certify a retention policy.

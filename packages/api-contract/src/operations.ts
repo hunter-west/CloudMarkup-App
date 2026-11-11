@@ -9,6 +9,10 @@ import {
   staffActionReceiptResponseV1Schema,
 } from "./staff-accounts.js";
 import {
+  staffProviderCostQueryV1Schema,
+  staffProviderCostResponseV1Schema,
+} from "./staff-provider-costs.js";
+import {
   createGitlabExportReviewV1Schema,
   advanceGitlabExportV1Schema,
   gitlabExportCollectionPathV1Schema,
@@ -654,6 +658,27 @@ export interface StaffAccountsActOperationV1 extends ApiOperationDefinition {
   readonly bodySchema: typeof staffAccountActionV1Schema;
   readonly headerSchema: typeof staffActionHeadersV1Schema;
 }
+export interface StaffProviderCostsGetOperationV1 extends ApiOperationDefinition {
+  readonly method: "GET";
+  readonly path: "/v1/staff/accounts/:organizationId/provider-costs";
+  readonly security: "principal";
+  readonly successStatus: 200;
+  readonly pathSchema: typeof organizationPathV1Schema;
+  readonly querySchema: typeof staffProviderCostQueryV1Schema;
+  readonly responseSchema: typeof staffProviderCostResponseV1Schema;
+}
+const staffProviderCostsGetOperation: StaffProviderCostsGetOperationV1 =
+  defineOperation({
+    method: "GET",
+    path: "/v1/staff/accounts/:organizationId/provider-costs",
+    pathSchema: organizationPathV1Schema,
+    querySchema: staffProviderCostQueryV1Schema,
+    responseSchema: staffProviderCostResponseV1Schema,
+    security: "principal",
+    successStatus: 200,
+    summary: "Read one organization-authorized internal provider-cost page",
+    tag: "Staff",
+  });
 const staffOperation3: StaffAccountsActOperationV1 = defineOperation({
   method: "POST",
   path: "/v1/staff/accounts/:organizationId/actions",
@@ -972,6 +997,7 @@ export const apiOperationsV1 = {
   "staff.accounts.act": staffOperation3,
   "staff.workspaces.list": staffWorkspacesListOperation,
   "staff.workspaces.get": staffWorkspacesGetOperation,
+  "staff.provider-costs.get": staffProviderCostsGetOperation,
   "account.authenticator.get": accountAuthenticatorGetOperation,
   "account.authenticator.start": accountAuthenticatorStartOperation,
   "account.authenticator.change": accountAuthenticatorChangeOperation,

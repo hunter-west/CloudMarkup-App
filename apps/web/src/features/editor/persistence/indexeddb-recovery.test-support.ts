@@ -32,8 +32,11 @@ class MemoryTransaction {
   public onerror: (() => void) | null = null;
 
   readonly #records: Map<string, unknown>;
+  readonly #staged: Map<string, unknown>;
   readonly #keyPath: string;
   readonly #lostAcknowledgement: boolean;
+  readonly #failBeforeCommit: boolean;
+  readonly #readwrite: boolean;
   #aborted = false;
   #completed = false;
   #completionTimer: ReturnType<typeof setTimeout> | undefined;
@@ -43,10 +46,15 @@ class MemoryTransaction {
     records: Map<string, unknown>,
     keyPath: string,
     lostAcknowledgement = false,
+    failBeforeCommit = false,
+    readwrite = false,
   ) {
     this.#lostAcknowledgement = lostAcknowledgement;
     this.#keyPath = keyPath;
     this.#records = records;
+    this.#staged = new Map(records);
+    this.#failBeforeCommit = failBeforeCommit;
+    this.#readwrite = readwrite;
     this.#scheduleCompletion();
   }
 
@@ -65,13 +73,15 @@ class MemoryTransaction {
 
   public objectStore(): IDBObjectStore {
     return {
-      count: () => this.#request(() => this.#records.size),
+      count: () => this.#request(() => this.#staged.size),
+      getAll: () =>
+        this.#request(() => [...this.#staged.values()].map(structuredCopy)),
       delete: (key: IDBValidKey) =>
         this.#request(() => {
           if (typeof key !== "string") {
             throw new DOMException("Expected a string key.", "DataError");
           }
-          this.#records.delete(key);
+          this.#staged.delete(key);
           return undefined;
         }),
       get: (key: IDBValidKey) =>
@@ -79,7 +89,7 @@ class MemoryTransaction {
           if (typeof key !== "string") {
             throw new DOMException("Expected a string key.", "DataError");
           }
-          const value = this.#records.get(key);
+          const value = this.#staged.get(key);
           return value === undefined ? undefined : structuredCopy(value);
         }),
       put: (value: unknown) =>
@@ -92,7 +102,7 @@ class MemoryTransaction {
           ) {
             throw new DOMException("Missing scope fingerprint.", "DataError");
           }
-          this.#records.set(
+          this.#staged.set(
             Reflect.get(value, this.#keyPath) as string,
             structuredCopy(value),
           );
@@ -128,6 +138,7 @@ class MemoryTransaction {
         request.onerror?.();
         this.error = request.error;
         this.onerror?.();
+        this.abort();
       } finally {
         this.#pending -= 1;
         this.#scheduleCompletion();
@@ -148,6 +159,15 @@ class MemoryTransaction {
     this.#completionTimer = setTimeout(() => {
       this.#completionTimer = undefined;
       if (this.#pending === 0 && !this.#aborted && !this.#completed) {
+        if (this.#failBeforeCommit) {
+          this.abort();
+          return;
+        }
+        if (this.#readwrite) {
+          this.#records.clear();
+          for (const [key, value] of this.#staged)
+            this.#records.set(key, value);
+        }
         this.#completed = true;
         if (this.#lostAcknowledgement) this.onabort?.();
         else this.oncomplete?.();
@@ -161,6 +181,20 @@ export class MemoryIndexedDb {
   #hasStore = false;
   #keyPath = "scopeFingerprint";
   #loseNextCommit = false;
+  #failNextCommit = false;
+  readonly #connections = new Set<IDBDatabase>();
+  public failNextCommit(): void {
+    this.#failNextCommit = true;
+  }
+  public requestVersionChange(): void {
+    for (const connection of [...this.#connections])
+      connection.onversionchange?.({
+        newVersion: null,
+      } as IDBVersionChangeEvent);
+  }
+  public get openConnections(): number {
+    return this.#connections.size;
+  }
   /** Synthetic committed write followed by a lost transaction acknowledgement. */
   public loseNextCommitAcknowledgement(): void {
     this.#loseNextCommit = true;
@@ -188,7 +222,7 @@ export class MemoryIndexedDb {
 
   public replaceField(
     scopeFingerprint: string,
-    key: "latest" | "schemaVersion",
+    key: "latest" | "schemaVersion" | "digest" | "previous",
     value: unknown,
   ): void {
     const rawRecord = this.#records.get(scopeFingerprint);
@@ -204,8 +238,10 @@ export class MemoryIndexedDb {
     const objectStoreNames = {
       contains: (name: string) => name === "recovery-scopes" && this.#hasStore,
     };
-    return {
-      close: () => undefined,
+    const database = {
+      close: () => {
+        this.#connections.delete(database);
+      },
       createObjectStore: (
         _name: string,
         options?: IDBObjectStoreParameters,
@@ -219,14 +255,20 @@ export class MemoryIndexedDb {
       onversionchange: null,
       transaction: (_store: string, mode: IDBTransactionMode) => {
         const lost = mode === "readwrite" && this.#loseNextCommit;
+        const fail = mode === "readwrite" && this.#failNextCommit;
         if (lost) this.#loseNextCommit = false;
+        if (fail) this.#failNextCommit = false;
         return new MemoryTransaction(
           this.#records,
           this.#keyPath,
           lost,
+          fail,
+          mode === "readwrite",
         ).toIdbTransaction();
       },
     } as unknown as IDBDatabase;
+    this.#connections.add(database);
+    return database;
   }
 
   #open(): IDBOpenDBRequest {

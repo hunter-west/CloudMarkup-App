@@ -109,6 +109,7 @@ export const API_AUTHORIZATION_REQUIREMENTS = {
   "staff.access.get": { kind: "principal" },
   "staff.accounts.list": { kind: "principal" },
   "staff.accounts.get": { kind: "principal" },
+  "staff.provider-costs.get": { kind: "principal" },
   "staff.accounts.act": { kind: "principal" },
   "staff.workspaces.list": { kind: "principal" },
   "staff.workspaces.get": { kind: "principal" },

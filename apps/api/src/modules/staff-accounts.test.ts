@@ -6,6 +6,7 @@ import {
 } from "../testing/in-memory-adapters.js";
 import { ApplicationError } from "../application/errors.js";
 import type { StaffAccountsApplication } from "../application/staff-accounts.js";
+import type { StaffProviderCostsApplication } from "../application/staff-provider-costs.js";
 import { staffUnprovisionedAccountV2Schema } from "@cloudmarkup/api-contract";
 const now = "2026-10-01T00:00:00.000Z",
   actor = {
@@ -30,6 +31,31 @@ const headers = {
   "idempotency-key": "staff-grant-001",
 };
 function fixture(configured = true) {
+  const costs = vi
+    .fn<StaffProviderCostsApplication["read"]>()
+    .mockResolvedValue({
+      contractVersion: 1,
+      organizationId: "org_target",
+      cohort: {
+        from: "2026-10-01T00:00:00.000Z",
+        until: "2026-10-02T00:00:00.000Z",
+      },
+      asOf: "2026-10-02T00:00:00.000Z",
+      records: [],
+      nextCursor: null,
+      pageOnly: true,
+      counts: {
+        known: 0,
+        "not-incurred": 0,
+        unresolved: 0,
+        conflict: 0,
+        "unsupported-pricing": 0,
+      },
+      knownProviderCostMicros: null,
+      knownProviderCostCurrency: null,
+      evidenceComplete: true,
+      pointInTimeCohortComplete: true,
+    });
   const port = {
     access: vi
       .fn<StaffAccountsApplication["access"]>()
@@ -58,13 +84,53 @@ function fixture(configured = true) {
     authenticationClock: () => new Date(now),
     principalResolver: new FixedPrincipalResolver({ "Bearer actor": actor }),
     ...(configured
-      ? { staffAccounts: { application: port, publicOrigin: headers.origin } }
+      ? {
+          staffAccounts: {
+            application: port,
+            providerCosts: { read: costs },
+            publicOrigin: headers.origin,
+          },
+        }
       : {}),
   });
-  return { app, port };
+  return { app, port, costs };
 }
 const endpoint = "/v1/staff/accounts/org_target/actions";
 describe("platform staff HTTP boundary", () => {
+  it("keeps provider-cost reads separate, authenticated, validated and uncached", async () => {
+    const f = fixture(),
+      url =
+        "/v1/staff/accounts/org_target/provider-costs?from=2026-10-01T00%3A00%3A00.000Z&until=2026-10-02T00%3A00%3A00.000Z";
+    expect((await f.app.request(url)).status).toBe(401);
+    expect(f.costs).not.toHaveBeenCalled();
+    const result = await f.app.request(url, { headers });
+    expect(result.status).toBe(200);
+    expect(result.headers.get("cache-control")).toBe("no-store");
+    expect(await result.json()).toMatchObject({
+      data: { pageOnly: true, knownProviderCostMicros: null },
+    });
+    expect(f.costs).toHaveBeenCalledWith(
+      expect.objectContaining(actor),
+      "org_target",
+      { from: "2026-10-01T00:00:00.000Z", until: "2026-10-02T00:00:00.000Z" },
+    );
+    expect(f.port.get).not.toHaveBeenCalled();
+    expect(f.port.act).not.toHaveBeenCalled();
+    for (const suffix of [
+      "&authority=internal-accounting",
+      "&organizationId=org_other",
+      "&from=duplicate",
+    ])
+      expect((await f.app.request(url + suffix, { headers })).status).toBe(400);
+    expect(f.costs).toHaveBeenCalledTimes(1);
+    f.costs.mockRejectedValue(
+      new ApplicationError(
+        "access_denied",
+        "Explicit organization grant required.",
+      ),
+    );
+    expect((await f.app.request(url, { headers })).status).toBe(403);
+  });
   it("retains v1 reads and serves an explicit v2 preview without issuing an action", async () => {
     const f = fixture();
     const legacy = await f.app.request("/v1/staff/accounts?q=Synthetic", {

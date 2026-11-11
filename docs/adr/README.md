@@ -257,3 +257,8 @@ evaluation/promotion campaign |
 - [Standalone core runtime profile](proposed-standalone-core-runtime-profile.md) -
   Proposed. Main-derived standalone history and explicitly acknowledged core ACL
   admission preserve canonical hosted SQL and the full provider-direct contract.
+
+- [Organization-scoped staff provider-cost reporting](proposed-staff-provider-cost-report.md)
+  - Proposed; restricted audience approved. Explicit staff and organization
+    grants, current-session reauthorization and a separate read-only report;
+    native authority/restore and release admission remain pending.

@@ -11,7 +11,8 @@ import {
   prepareEditorRecoverySnapshotV1,
 } from "./editor-recovery-envelope.js";
 
-const DATABASE = "cloudmarkup-draft-command-recovery-v1";
+export const DRAFT_COMMAND_RECOVERY_DATABASE =
+  "cloudmarkup-draft-command-recovery-v1";
 const STORE = "drafts";
 const MAX_SCOPES = 32;
 interface RecordV1 {
@@ -20,6 +21,68 @@ interface RecordV1 {
   readonly digest: string;
   readonly latest: DraftCommandRecovery;
   readonly previous: DraftCommandRecovery | null;
+  readonly operationId?: string;
+}
+interface QuarantineV1 {
+  readonly key: string;
+  readonly kind: "rejected-command-recovery";
+  readonly scopeKey: string;
+  readonly record: unknown;
+}
+function object(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+function fingerprint(value: unknown): string | null {
+  return value === undefined ? null : hashCanonicalValue(value);
+}
+function inspectRecord(raw: unknown, expected?: CommandDraftHead): RecordV1 {
+  if (
+    !object(raw) ||
+    typeof raw["key"] !== "string" ||
+    !Number.isSafeInteger(raw["generation"]) ||
+    Number(raw["generation"]) < 1 ||
+    !object(raw["latest"]) ||
+    !object(raw["latest"]["baseline"])
+  )
+    throw new Error("Invalid command recovery record.");
+  const latest = DraftCommandDrain.restore(
+    raw["latest"],
+    expected ?? (raw["latest"]["baseline"] as unknown as CommandDraftHead),
+  ).recovery();
+  if (hashCanonicalValue(latest) !== raw["digest"])
+    throw new Error("Command recovery integrity mismatch.");
+  return raw as unknown as RecordV1;
+}
+function completed(data: DraftCommandRecovery): boolean {
+  return (
+    data.pending.length === 0 && data.attempt === null && !data.reviewRequired
+  );
+}
+/** Previous pending work must be exactly accounted for by the completed head.
+ * Rejected, uncertain and quarantined records are never capacity victims. */
+function retirable(raw: unknown): raw is RecordV1 {
+  try {
+    const record = inspectRecord(raw);
+    if (!completed(record.latest)) return false;
+    if (record.previous === null) return true;
+    const previous = DraftCommandDrain.restore(
+      record.previous,
+      record.latest.baseline,
+    ).recovery();
+    if (previous.reviewRequired) return false;
+    if (completed(previous))
+      return (
+        previous.baseline.draft.version <= record.latest.baseline.draft.version
+      );
+    return (
+      record.latest.baseline.draft.version ===
+        previous.baseline.draft.version + previous.pending.length &&
+      hashCanonicalValue(previous.document) ===
+        hashCanonicalValue(record.latest.document)
+    );
+  } catch {
+    return false;
+  }
 }
 
 /** Browser recovery, never an authentication source. The key binds the current
@@ -32,6 +95,9 @@ export class DraftCommandCheckpoint {
   #db: Promise<IDBDatabase> | null = null;
   #head: string | null = null;
   #loaded = false;
+  #checked = false;
+  #observed: unknown;
+  #invalidated = false;
   #tail: Promise<void> = Promise.resolve();
   constructor(
     scope: readonly [string, string, string, string],
@@ -45,14 +111,26 @@ export class DraftCommandCheckpoint {
   get available() {
     return this.#factory !== undefined;
   }
+  get previousValid(): DraftCommandRecovery | null {
+    if (!object(this.#observed)) return null;
+    try {
+      return this.#validate(this.#observed["previous"]);
+    } catch {
+      return null;
+    }
+  }
   async #open(): Promise<IDBDatabase> {
+    if (this.#invalidated)
+      throw new Error(
+        "Command recovery was cleared or changed in another tab. Reload before editing.",
+      );
     const factory = this.#factory;
     if (!factory)
       throw new Error(
         "Command recovery storage is unavailable. Keep this tab open or download the draft.",
       );
     this.#db ??= new Promise((resolve, reject) => {
-      const request = factory.open(DATABASE, 1);
+      const request = factory.open(DRAFT_COMMAND_RECOVERY_DATABASE, 1);
       request.onupgradeneeded = () => {
         request.result.createObjectStore(STORE, { keyPath: "key" });
       };
@@ -68,6 +146,7 @@ export class DraftCommandCheckpoint {
       };
       request.onsuccess = () => {
         request.result.onversionchange = () => {
+          this.#invalidated = true;
           request.result.close();
         };
         resolve(request.result);
@@ -105,42 +184,45 @@ export class DraftCommandCheckpoint {
   async load(): Promise<DraftCommandRecovery | null> {
     if (!this.available) {
       this.#loaded = true;
+      this.#checked = true;
       return null;
     }
     const db = await this.#open();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE, "readonly"),
         request = tx.objectStore(STORE).get(this.#key);
-      let data: DraftCommandRecovery | null = null;
-      let digest: string | null = null;
+      let data: DraftCommandRecovery | null = null,
+        raw: unknown,
+        head: string | null = null;
+      let failure: Error | undefined;
       request.onsuccess = () => {
+        raw = request.result as unknown;
         try {
-          const record = request.result as RecordV1 | undefined;
-          if (record) {
-            if (
-              record.key !== this.#key ||
-              !Number.isSafeInteger(record.generation) ||
-              record.generation < 1
-            )
-              throw new Error("Invalid command recovery record.");
+          head = fingerprint(raw);
+          if (raw !== undefined) {
+            const record = inspectRecord(raw, this.#expected);
+            if (record.key !== this.#key)
+              throw new Error("Invalid command recovery scope.");
+            if (completed(record.latest) && !retirable(record))
+              throw new Error(
+                "Previous command completion needs review. Retained work was not discarded.",
+              );
             data = this.#validate(record.latest);
-            digest = hashCanonicalValue(data);
-            if (digest !== record.digest)
-              throw new Error("Command recovery integrity mismatch.");
           }
         } catch (error) {
-          reject(
+          failure =
             error instanceof Error
               ? error
-              : new Error("Invalid command recovery data."),
-          );
-          tx.abort();
+              : new Error("Invalid command recovery data.");
         }
       };
       tx.oncomplete = () => {
-        this.#head = digest;
-        this.#loaded = true;
-        resolve(data);
+        this.#observed = raw;
+        this.#head = head;
+        this.#checked = true;
+        this.#loaded = failure === undefined;
+        if (failure !== undefined) reject(failure);
+        else resolve(data);
       };
       tx.onabort = () => {
         reject(
@@ -150,91 +232,208 @@ export class DraftCommandCheckpoint {
         );
       };
       tx.onerror = () => {
-        /* The abort handler owns the transaction failure. */
+        /* The abort handler owns transaction failure. */
       };
     });
   }
+  /** Explicit user-confirmed remediation. A prior load, including rejection,
+   * binds the exact record to quarantine; another writer is never overwritten. */
+  reset(raw: DraftCommandRecovery): Promise<void> {
+    return this.#queue(raw, true);
+  }
   save(raw: DraftCommandRecovery): Promise<void> {
+    return this.#queue(raw, false);
+  }
+  #queue(raw: DraftCommandRecovery, reset: boolean): Promise<void> {
     const data = this.#validate(raw);
     const next = this.#tail
       .catch(() => {
-        /* A failed write must permit explicit retry. */
+        /* Permit explicit retry. */
       })
-      .then(() => this.#write(data));
+      .then(() => this.#write(data, reset));
     this.#tail = next;
     return next;
   }
-  async #write(data: DraftCommandRecovery): Promise<void> {
-    if (!this.available) return; // Explicitly visible memory-only mode; no false durability claim.
-    if (!this.#loaded)
+  async #write(data: DraftCommandRecovery, reset: boolean): Promise<void> {
+    if (!this.available) return; // Visible memory-only mode; no durability claim.
+    if (!(reset ? this.#checked : this.#loaded))
       throw new Error("Command recovery has not been checked yet.");
     const db = await this.#open(),
       digest = hashCanonicalValue(data);
+    const expected = this.#head;
+    const operationId = hashCanonicalValue({
+      scope: this.#key,
+      expected,
+      digest,
+      reset,
+    });
+    let written: unknown = this.#observed;
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(STORE, "readwrite"),
         store = tx.objectStore(STORE),
         request = store.get(this.#key);
       let failure: Error | undefined;
-      const fail = (message: string) => {
-        failure = new Error(message);
+      const fail = (error: unknown) => {
+        failure =
+          error instanceof Error
+            ? error
+            : new Error("Command recovery could not be replaced.");
         tx.abort();
       };
       request.onsuccess = () => {
-        const current = request.result as RecordV1 | undefined;
-        if (
-          current &&
-          (current.key !== this.#key ||
-            !Number.isSafeInteger(current.generation) ||
-            current.generation < 1 ||
-            hashCanonicalValue(current.latest) !== current.digest)
-        ) {
-          fail(
-            "The existing command checkpoint is inconsistent. It was retained for recovery.",
-          );
-          return;
-        }
-        // Resolves a committed write with a lost acknowledgement without replacing another writer.
-        if (current?.digest === digest) return;
-        if ((current?.digest ?? null) !== this.#head) {
-          fail(
-            "Another tab changed this draft's recovery checkpoint. Keep local work and review it.",
-          );
-          return;
-        }
-        const put = () =>
-          store.put({
+        try {
+          const rawCurrent: unknown = request.result;
+          let current: RecordV1 | undefined;
+          try {
+            if (rawCurrent !== undefined)
+              current = inspectRecord(rawCurrent, this.#expected);
+          } catch {
+            if (!reset)
+              throw new Error(
+                "The existing command checkpoint is inconsistent. It was retained for recovery.",
+              );
+          }
+          if (
+            current?.operationId === operationId &&
+            current.digest === digest
+          ) {
+            written = rawCurrent;
+            return;
+          }
+          // Missing completed data contains no unsaved operation to overwrite.
+          if (!reset && rawCurrent === undefined && completed(data)) {
+            written = undefined;
+            return;
+          }
+          if (fingerprint(rawCurrent) !== expected)
+            throw new Error(
+              "Another tab changed this draft's recovery checkpoint. Keep local work and review it.",
+            );
+          if (!reset && current?.digest === digest && !retirable(current)) {
+            written = rawCurrent;
+            return;
+          }
+          const generation = (current?.generation ?? 0) + 1;
+          if (!Number.isSafeInteger(generation))
+            throw new Error(
+              "The command recovery generation limit was reached.",
+            );
+          // Reset keeps the WHOLE original record in quarantine. Its uncertain
+          // history must not masquerade as a predecessor of the new server head.
+          const previous = reset
+            ? null
+            : (current?.latest ?? this.previousValid);
+          const next: RecordV1 = {
             key: this.#key,
-            generation: (current?.generation ?? 0) + 1,
+            generation,
             digest,
             latest: data,
-            previous: current?.latest ?? null,
-          } satisfies RecordV1);
-        if (current) put();
-        else {
-          const count = store.count();
-          count.onsuccess = () => {
-            if (count.result >= MAX_SCOPES)
-              fail(
-                "Browser command recovery is full. Existing drafts were retained.",
-              );
-            else put();
+            previous,
+            operationId,
           };
+          if (!reset && retirable(next)) {
+            store.delete(this.#key);
+            written = undefined;
+            return;
+          }
+          const archive: QuarantineV1 | null =
+            reset && rawCurrent !== undefined
+              ? {
+                  key: "quarantine:" + this.#key + ":" + String(expected),
+                  kind: "rejected-command-recovery",
+                  scopeKey: this.#key,
+                  record: rawCurrent,
+                }
+              : null;
+          const all = store.getAll();
+          all.onsuccess = () => {
+            try {
+              const records: unknown[] = all.result;
+              let count = records.length;
+              const needed =
+                (rawCurrent === undefined ? 1 : 0) +
+                (archive !== null &&
+                !records.some(
+                  (row) => object(row) && row["key"] === archive.key,
+                )
+                  ? 1
+                  : 0);
+              for (const record of records) {
+                if (count + needed <= MAX_SCOPES) break;
+                if (retirable(record) && record.key !== this.#key) {
+                  store.delete(record.key);
+                  count--;
+                }
+              }
+              if (count + needed > MAX_SCOPES)
+                throw new Error(
+                  "Browser command recovery is full. Pending and quarantined drafts were retained. Download recovery before using the confirmed clear action.",
+                );
+              if (archive !== null) store.put(archive);
+              store.put(next);
+              written = next;
+            } catch (error) {
+              fail(error);
+            }
+          };
+        } catch (error) {
+          fail(error);
         }
       };
       tx.oncomplete = () => {
-        this.#head = digest;
         resolve();
       };
       tx.onabort = () => {
         reject(
           failure ??
             new Error(
-              "The command checkpoint was not acknowledged. Keep local work and retry the same save.",
+              "The command checkpoint was not acknowledged. Keep local work and retry the same save or reset.",
             ),
         );
       };
       tx.onerror = () => {
-        /* The abort handler reports acknowledgement uncertainty. */
+        /* Aborts never install a replacement in memory. */
+      };
+    });
+    this.#head = fingerprint(written);
+    this.#observed = written;
+    this.#loaded = true;
+  }
+  /** User-requested evidence download. Rejected bytes are never replay input. */
+  async evidence(): Promise<unknown> {
+    if (!this.available)
+      return {
+        scopeKey: this.#key,
+        record: this.#observed ?? null,
+        quarantines: [],
+      };
+    const db = await this.#open();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, "readonly"),
+        request = tx.objectStore(STORE).getAll();
+      let records: unknown[] = [];
+      request.onsuccess = () => {
+        records = request.result as unknown[];
+      };
+      tx.oncomplete = () => {
+        resolve({
+          scopeKey: this.#key,
+          record:
+            records.find((row) => object(row) && row["key"] === this.#key) ??
+            null,
+          quarantines: records.filter(
+            (row) =>
+              object(row) &&
+              row["kind"] === "rejected-command-recovery" &&
+              row["scopeKey"] === this.#key,
+          ),
+        });
+      };
+      tx.onabort = () => {
+        reject(new Error("Recovery evidence could not be read."));
+      };
+      tx.onerror = () => {
+        /* The abort handler owns failure. */
       };
     });
   }

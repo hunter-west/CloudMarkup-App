@@ -9,9 +9,12 @@ import {
   staffActionReceiptResponseV1Schema,
   preconditionHeadersV1Schema,
   idempotencyHeadersV1Schema,
+  staffProviderCostQueryV1Schema,
+  staffProviderCostResponseV1Schema,
 } from "@cloudmarkup/api-contract";
 import type { Hono } from "hono";
 import type { StaffAccountsApplication } from "../application/staff-accounts.js";
+import type { StaffProviderCostsApplication } from "../application/staff-provider-costs.js";
 import { ApplicationError } from "../application/errors.js";
 import {
   type ApiEnvironment,
@@ -25,6 +28,7 @@ import {
 export interface StaffAccountsConfiguration {
   readonly application: StaffAccountsApplication;
   readonly publicOrigin: string;
+  readonly providerCosts?: StaffProviderCostsApplication;
   /** Trusted server composition only; requests cannot select transport mode. */
   readonly mode?: "hosted-cognito" | "local-owner";
 }
@@ -101,6 +105,39 @@ export function registerStaffAccountRoutes(
       { ETag: result.etag },
     );
   });
+  app.get(
+    "/v1/staff/accounts/:organizationId/provider-costs",
+    async (context) => {
+      const params = new URL(context.req.url).searchParams;
+      if (
+        [...params.keys()].some(
+          (key) =>
+            !["from", "until", "cursor"].includes(key) ||
+            params.getAll(key).length !== 1,
+        )
+      )
+        throw new ApplicationError(
+          "invalid_request",
+          "The report page is invalid.",
+        );
+      const input = parseQuery(context, staffProviderCostQueryV1Schema);
+      if (!configuration?.providerCosts)
+        throw new ApplicationError(
+          "service_unavailable",
+          "Provider-cost reports are unavailable.",
+        );
+      const report = await configuration.providerCosts.read(
+        context.get("principal"),
+        context.req.param("organizationId"),
+        input,
+      );
+      return validatedJsonResponse(
+        staffProviderCostResponseV1Schema,
+        dataEnvelope(report),
+        200,
+      );
+    },
+  );
   app.get("/v1/staff/workspaces", async (context) => {
     query(context, true);
     const input = parseQuery(context, staffAccountSearchV1Schema);

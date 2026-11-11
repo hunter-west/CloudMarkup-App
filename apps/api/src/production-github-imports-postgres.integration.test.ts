@@ -29,6 +29,7 @@ import { createPinnedTerraformHclInspector } from "./adapters/pinned-terraform-i
 import { buildSolutionRevisionV1 } from "./application/solution-revision-builder.js";
 import { createProductionGitHubImports } from "./production-github-imports.js";
 import { createApp } from "./app.js";
+import { parseGraphCommandV1 } from "@cloudmarkup/schemas";
 import {
   FixedPrincipalResolver,
   InMemoryCloudMarkupApplication,
@@ -675,19 +676,45 @@ describe.skipIf(!configured)(
       const document = parseArchitectureDocument(
         f.current.value.architectureDocument,
       );
-      const saved = await f.application.saveDraft(
+      const queue = document.nodes.find((node) => node.id === "queue_source");
+      if (queue === undefined)
+        throw new Error("Missing synthetic source queue.");
+      const saved = await f.application.applyDraftCommand(
         f.principal,
         f.projectId,
         {
           contractVersion: 1,
           editingLease: f.editingLease,
-          architectureDocument: {
-            ...document,
-            metadata: { ...document.metadata, source: "migration" },
-          },
+          command: parseGraphCommandV1({
+            schemaVersion: 1,
+            commandId: "command_stale_import_advance",
+            inverseCommandId: "command_stale_import_advance_inverse",
+            origin: "user",
+            target: {
+              documentId: document.documentId,
+              architectureId: document.architectureId,
+              revisionId: document.revision.revisionId,
+            },
+            kind: "update-node-configuration",
+            nodeId: queue.id,
+            expectedConfiguration: queue.semantic.configuration,
+            configuration: {
+              ...queue.semantic.configuration,
+              values: {
+                ...queue.semantic.configuration.values,
+                visibilityTimeoutSeconds: { kind: "integer", value: 61 },
+              },
+            },
+          }),
         },
         f.current.etag,
+        "stale-import-advance-command",
       );
+      expect(
+        getArchitectureDocumentContentHash(
+          saved.value.draft.architectureDocument,
+        ),
+      ).not.toBe(getArchitectureDocumentContentHash(document));
       await expect(
         f.accept({
           expectedDraftEtag: saved.etag,

@@ -84,6 +84,209 @@ function response(baseline: CommandDraftHead, request: DraftCommandRequest) {
   };
 }
 describe("draft command drain", () => {
+  it("retires acknowledged queues across more than 32 scopes while retaining pending work and stale-writer fencing", async () => {
+    const db = new MemoryIndexedDb(),
+      original = await head();
+    for (let index = 0; index < 40; index++) {
+      const scope = [
+        "principal_one",
+        "org_one",
+        "project_" + String(index),
+        original.draft.id,
+      ] as const;
+      const baseline = {
+        ...original,
+        draft: { ...original.draft, projectId: scope[2] },
+      };
+      const checkpoint = new DraftCommandCheckpoint(
+        scope,
+        baseline,
+        db.factory,
+      );
+      await checkpoint.load();
+      const drain = new DraftCommandDrain(baseline);
+      drain.enqueue(
+        move(
+          baseline.draft.architectureDocument,
+          "command_sequential_" + String(index),
+          310,
+        ),
+        "request-sequential-" + String(index),
+      );
+      await drain.flush({
+        editingLease: () => lease,
+        isCurrent: () => true,
+        checkpoint: (data) => checkpoint.save(data),
+        send: (request) => Promise.resolve(response(baseline, request)),
+      });
+      expect(
+        await new DraftCommandCheckpoint(scope, baseline, db.factory).load(),
+      ).toBeNull();
+      checkpoint.close();
+    }
+    const scope = [
+      "principal_one",
+      "org_one",
+      original.draft.projectId,
+      original.draft.id,
+    ] as const;
+    const stale = new DraftCommandCheckpoint(scope, original, db.factory),
+      writer = new DraftCommandCheckpoint(scope, original, db.factory);
+    await stale.load();
+    await writer.load();
+    const pending = new DraftCommandDrain(original);
+    pending.enqueue(
+      move(original.draft.architectureDocument, "command_still_pending", 320),
+      "request-still-pending",
+    );
+    await writer.save(pending.recovery());
+    await expect(
+      stale.save(new DraftCommandDrain(original).recovery()),
+    ).rejects.toThrow("Another tab");
+    expect((await writer.load())?.pending).toHaveLength(1);
+  });
+  it("reclaims legacy completed records but refuses to evict 32 unresolved scopes", async () => {
+    const original = await head(),
+      db = new MemoryIndexedDb();
+    const recovery = new DraftCommandDrain(original).recovery();
+    for (let index = 0; index < 32; index++) {
+      const key = hashCanonicalValue(["legacy", String(index)]);
+      db.setRaw(key, {
+        key,
+        generation: 1,
+        digest: hashCanonicalValue(recovery),
+        latest: recovery,
+        previous: null,
+      });
+    }
+    for (let index = 0; index < 32; index++) {
+      const scope = [
+        "principal_one",
+        "org_one",
+        "project_pending_" + String(index),
+        original.draft.id,
+      ] as const;
+      const baseline = {
+        ...original,
+        draft: { ...original.draft, projectId: scope[2] },
+      };
+      const checkpoint = new DraftCommandCheckpoint(
+        scope,
+        baseline,
+        db.factory,
+      );
+      await checkpoint.load();
+      const drain = new DraftCommandDrain(baseline);
+      drain.enqueue(
+        move(
+          baseline.draft.architectureDocument,
+          "command_pending_" + String(index),
+          310,
+        ),
+        "request-pending-" + String(index),
+      );
+      await checkpoint.save(drain.recovery());
+    }
+    const last = new DraftCommandCheckpoint(
+      ["principal_one", "org_one", original.draft.projectId, original.draft.id],
+      original,
+      db.factory,
+    );
+    await last.load();
+    const drain = new DraftCommandDrain(original);
+    drain.enqueue(
+      move(original.draft.architectureDocument, "command_over_capacity", 315),
+      "request-over-capacity",
+    );
+    await expect(last.save(drain.recovery())).rejects.toThrow("full");
+    const retained = await new DraftCommandCheckpoint(
+      ["principal_one", "org_one", "project_pending_0", original.draft.id],
+      {
+        ...original,
+        draft: { ...original.draft, projectId: "project_pending_0" },
+      },
+      db.factory,
+    ).load();
+    expect(retained?.pending).toHaveLength(1);
+  });
+  it.each(["latest", "digest"] as const)(
+    "quarantines rejected %s with valid previous recovery and resolves a lost reset acknowledgement without replacing a competitor",
+    async (field) => {
+      const original = await head(),
+        db = new MemoryIndexedDb();
+      const scope = [
+        "principal_one",
+        "org_one",
+        original.draft.projectId,
+        original.draft.id,
+      ] as const;
+      const first = new DraftCommandCheckpoint(scope, original, db.factory),
+        drain = new DraftCommandDrain(original);
+      await first.load();
+      const local = drain.enqueue(
+        move(original.draft.architectureDocument, "command_reset_first", 310),
+        "request-reset-first",
+      );
+      await first.save(drain.recovery());
+      const previous = drain.recovery();
+      drain.enqueue(
+        move(local, "command_reset_second", 320),
+        "request-reset-second",
+      );
+      await first.save(drain.recovery());
+      db.replaceField(
+        hashCanonicalValue(scope),
+        field,
+        field === "latest" ? null : "sha256:" + "f".repeat(64),
+      );
+      const rejected = new DraftCommandCheckpoint(scope, original, db.factory),
+        competitor = new DraftCommandCheckpoint(scope, original, db.factory);
+      await expect(rejected.load()).rejects.toThrow();
+      await expect(competitor.load()).rejects.toThrow();
+      expect(rejected.previousValid).toEqual(previous);
+      const before = await rejected.evidence(),
+        fresh = new DraftCommandDrain(original).recovery();
+      db.failNextCommit();
+      await expect(rejected.reset(fresh)).rejects.toThrow("not acknowledged");
+      expect(await rejected.evidence()).toEqual(before);
+      db.loseNextCommitAcknowledgement();
+      await expect(rejected.reset(fresh)).rejects.toThrow("not acknowledged");
+      await expect(rejected.reset(fresh)).resolves.toBeUndefined();
+      const evidence = await rejected.evidence();
+      expect(evidence).toMatchObject({
+        quarantines: [{ record: (before as { record: unknown }).record }],
+      });
+      expect((evidence as { quarantines: unknown[] }).quarantines).toHaveLength(
+        1,
+      );
+      await expect(competitor.reset(previous)).rejects.toThrow("Another tab");
+      expect(await rejected.evidence()).toEqual(evidence);
+      await rejected.load();
+      await rejected.reset(previous);
+      expect((await rejected.load())?.pending).toHaveLength(1);
+    },
+  );
+  it("closes command-store connections on cross-tab deletion and prevents a stale tab from recreating recovery", async () => {
+    const original = await head(),
+      db = new MemoryIndexedDb();
+    const scope = [
+      "principal_one",
+      "org_one",
+      original.draft.projectId,
+      original.draft.id,
+    ] as const;
+    const first = new DraftCommandCheckpoint(scope, original, db.factory),
+      second = new DraftCommandCheckpoint(scope, original, db.factory);
+    await first.load();
+    await second.load();
+    expect(db.openConnections).toBe(2);
+    db.requestVersionChange();
+    expect(db.openConnections).toBe(0);
+    await expect(
+      first.save(new DraftCommandDrain(original).recovery()),
+    ).rejects.toThrow("cleared or changed");
+    await expect(second.load()).rejects.toThrow("cleared or changed");
+  });
   it("reconciles a lost checkpoint acknowledgement and refuses stale writers, other scopes and corrupted history", async () => {
     const original = await head(),
       drain = new DraftCommandDrain(original),
