@@ -525,3 +525,30 @@ ordinary-role/native SQL/concurrency/restore, real-browser recovery, cleanup
 owner admission, required integrated gates and exact public/private composition.
 Prior setup native-link/container restrictions remain. Current source checks do
 not admit a release, grant staff access or certify a retention policy.
+
+### Checkpoint retirement acknowledgement follow-up
+
+Independent review reproduced an additional recovery sequence: completed record
+retirement commits, its acknowledgement is lost, and a newer command is queued
+before retry. The old checkpoint fingerprint then falsely reported another
+writer. The checkpoint now retains the exact unacknowledged operation and
+reconciles it before writing newer state. Only the known retirement can resolve
+its missing record; unrelated missing or changed records still fail CAS. The
+existing recovery download includes this pending operation alongside local edits.
+
+Four focused synthetic sequences cover the reported failure, unchanged retry,
+pre-commit failure with a newer edit and a real competing writer. Before the
+correction, only the reported sequence failed after correcting two fixture
+assertions; both initial receipts are retained outside source. After correction,
+all 17 command-drain/checkpoint cases passed in 13.14 seconds. Web type checking
+and changed-file lint passed. The four added cases protect saved/unsaved work
+and replay identity (criticality 9/10); they extend the owning IndexedDB double
+without duplicating native or browser suites. Compared with the earlier broader
+63-case recovery run, this narrower selection is not a performance comparison.
+
+These are author-executed synthetic acknowledgement checks. Native IndexedDB
+transaction, browser quota, cross-tab and restart evidence remains unrun. No
+provider, accounting, permission, migration, pricing or retention behavior is
+changed by this follow-up. The previously reviewed candidate and evidence remain
+available; independent review of this successor and all retained release gates
+are still required.

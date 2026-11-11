@@ -29,6 +29,12 @@ interface QuarantineV1 {
   readonly scopeKey: string;
   readonly record: unknown;
 }
+interface UnacknowledgedCheckpoint {
+  readonly data: DraftCommandRecovery;
+  readonly reset: boolean;
+  readonly expected: string | null;
+  readonly retired: boolean;
+}
 function object(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
@@ -98,6 +104,7 @@ export class DraftCommandCheckpoint {
   #checked = false;
   #observed: unknown;
   #invalidated = false;
+  #unacknowledged: UnacknowledgedCheckpoint | null = null;
   #tail: Promise<void> = Promise.resolve();
   constructor(
     scope: readonly [string, string, string, string],
@@ -250,17 +257,34 @@ export class DraftCommandCheckpoint {
       .catch(() => {
         /* Permit explicit retry. */
       })
-      .then(() => this.#write(data, reset));
+      .then(async () => {
+        const prior = this.#unacknowledged;
+        if (prior !== null) {
+          // Reconcile the original operation, not a newer optimistic snapshot.
+          // This preserves its CAS/retry identity even after another edit.
+          await this.#write(prior.data, prior.reset, prior);
+          if (
+            prior.reset === reset &&
+            hashCanonicalValue(prior.data) === hashCanonicalValue(data)
+          )
+            return;
+        }
+        await this.#write(data, reset);
+      });
     this.#tail = next;
     return next;
   }
-  async #write(data: DraftCommandRecovery, reset: boolean): Promise<void> {
+  async #write(
+    data: DraftCommandRecovery,
+    reset: boolean,
+    retry?: UnacknowledgedCheckpoint,
+  ): Promise<void> {
     if (!this.available) return; // Visible memory-only mode; no durability claim.
     if (!(reset ? this.#checked : this.#loaded))
       throw new Error("Command recovery has not been checked yet.");
     const db = await this.#open(),
       digest = hashCanonicalValue(data);
-    const expected = this.#head;
+    const expected = retry === undefined ? this.#head : retry.expected;
     const operationId = hashCanonicalValue({
       scope: this.#key,
       expected,
@@ -268,6 +292,7 @@ export class DraftCommandCheckpoint {
       reset,
     });
     let written: unknown = this.#observed;
+    let retired = retry?.retired ?? false;
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(STORE, "readwrite"),
         store = tx.objectStore(STORE),
@@ -300,8 +325,14 @@ export class DraftCommandCheckpoint {
             written = rawCurrent;
             return;
           }
-          // Missing completed data contains no unsaved operation to overwrite.
-          if (!reset && rawCurrent === undefined && completed(data)) {
+          // Absence resolves only an initially empty scope or this exact
+          // outstanding retirement. It does not authorize a new pending write.
+          if (
+            !reset &&
+            rawCurrent === undefined &&
+            completed(data) &&
+            (expected === null || retry?.retired === true)
+          ) {
             written = undefined;
             return;
           }
@@ -334,6 +365,7 @@ export class DraftCommandCheckpoint {
           if (!reset && retirable(next)) {
             store.delete(this.#key);
             written = undefined;
+            retired = true;
             return;
           }
           const archive: QuarantineV1 | null =
@@ -384,6 +416,8 @@ export class DraftCommandCheckpoint {
         resolve();
       };
       tx.onabort = () => {
+        if (failure === undefined)
+          this.#unacknowledged = { data, reset, expected, retired };
         reject(
           failure ??
             new Error(
@@ -398,6 +432,7 @@ export class DraftCommandCheckpoint {
     this.#head = fingerprint(written);
     this.#observed = written;
     this.#loaded = true;
+    this.#unacknowledged = null;
   }
   /** User-requested evidence download. Rejected bytes are never replay input. */
   async evidence(): Promise<unknown> {
@@ -406,6 +441,7 @@ export class DraftCommandCheckpoint {
         scopeKey: this.#key,
         record: this.#observed ?? null,
         quarantines: [],
+        pendingCheckpoint: this.#unacknowledged,
       };
     const db = await this.#open();
     return new Promise((resolve, reject) => {
@@ -427,6 +463,7 @@ export class DraftCommandCheckpoint {
               row["kind"] === "rejected-command-recovery" &&
               row["scopeKey"] === this.#key,
           ),
+          pendingCheckpoint: this.#unacknowledged,
         });
       };
       tx.onabort = () => {

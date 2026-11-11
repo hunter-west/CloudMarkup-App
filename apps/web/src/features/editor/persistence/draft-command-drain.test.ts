@@ -84,6 +84,105 @@ function response(baseline: CommandDraftHead, request: DraftCommandRequest) {
   };
 }
 describe("draft command drain", () => {
+  it.each([
+    "lost-ack-newer",
+    "lost-ack-unchanged",
+    "precommit-newer",
+    "competing-writer",
+  ] as const)(
+    "reconciles the exact completed checkpoint before newer state: %s",
+    async (mode) => {
+      const original = await head(),
+        db = new MemoryIndexedDb(),
+        scope = [
+          "principal_one",
+          "org_one",
+          original.draft.projectId,
+          original.draft.id,
+        ] as const,
+        checkpoint = new DraftCommandCheckpoint(scope, original, db.factory),
+        drain = new DraftCommandDrain(original),
+        sent: DraftCommandRequest[] = [];
+      await checkpoint.load();
+      drain.enqueue(
+        move(original.draft.architectureDocument, "command_retire_a", 310),
+        "request-retire-a",
+      );
+      let server = original;
+      const transport = {
+        editingLease: () => lease,
+        isCurrent: () => true,
+        checkpoint: (data: DraftCommandRecovery) => checkpoint.save(data),
+        send: (request: DraftCommandRequest) => {
+          sent.push(structuredClone(request));
+          const result = response(server, request);
+          server = { draft: result.value.draft, etag: result.etag };
+          if (sent.length === 1) {
+            if (mode === "precommit-newer") db.failNextCommit();
+            else db.loseNextCommitAcknowledgement();
+          }
+          return Promise.resolve(result);
+        },
+      };
+      await expect(drain.flush(transport)).rejects.toThrow("not acknowledged");
+      expect(server.draft.version).toBe(2);
+      expect(drain.recovery().pending).toHaveLength(0);
+      expect(await checkpoint.evidence()).toMatchObject({
+        pendingCheckpoint: {
+          data: drain.recovery(),
+          reset: false,
+          retired: true,
+        },
+      });
+      if (mode !== "precommit-newer")
+        expect(await checkpoint.evidence()).toMatchObject({ record: null });
+      if (mode !== "lost-ack-unchanged")
+        drain.enqueue(
+          move(server.draft.architectureDocument, "command_retire_b", 320),
+          "request-retire-b",
+        );
+      const newer = drain.recovery();
+      if (mode === "competing-writer") {
+        const competitor = new DraftCommandCheckpoint(
+            scope,
+            server,
+            db.factory,
+          ),
+          other = new DraftCommandDrain(server);
+        await competitor.load();
+        other.enqueue(
+          move(server.draft.architectureDocument, "command_competitor", 330),
+          "request-competitor",
+        );
+        await competitor.save(other.recovery());
+        const evidence = await competitor.evidence();
+        await expect(checkpoint.save(newer)).rejects.toThrow("Another tab");
+        await expect(drain.flush(transport)).rejects.toThrow("Another tab");
+        expect(drain.recovery()).toMatchObject({
+          baseline: newer.baseline,
+          document: newer.document,
+          pending: newer.pending,
+        });
+        expect(await competitor.evidence()).toEqual(evidence);
+        expect(sent).toHaveLength(1);
+      } else {
+        await checkpoint.save(newer);
+        await drain.flush(transport);
+        expect(sent).toHaveLength(mode === "lost-ack-unchanged" ? 1 : 2);
+        if (sent.length === 2) {
+          expect(sent[1]?.headers).toEqual({
+            "if-match": '"draft:fixture:v2"',
+            "idempotency-key": "request-retire-b",
+          });
+          expect(sent[1]?.body.command.commandId).toBe("command_retire_b");
+        }
+        expect(drain.recovery().pending).toHaveLength(0);
+        expect(
+          await new DraftCommandCheckpoint(scope, server, db.factory).load(),
+        ).toBeNull();
+      }
+    },
+  );
   it("retires acknowledged queues across more than 32 scopes while retaining pending work and stale-writer fencing", async () => {
     const db = new MemoryIndexedDb(),
       original = await head();
@@ -248,7 +347,11 @@ describe("draft command drain", () => {
         fresh = new DraftCommandDrain(original).recovery();
       db.failNextCommit();
       await expect(rejected.reset(fresh)).rejects.toThrow("not acknowledged");
-      expect(await rejected.evidence()).toEqual(before);
+      expect(await rejected.evidence()).toMatchObject({
+        record: (before as { record: unknown }).record,
+        quarantines: [],
+        pendingCheckpoint: { data: fresh, reset: true },
+      });
       db.loseNextCommitAcknowledgement();
       await expect(rejected.reset(fresh)).rejects.toThrow("not acknowledged");
       await expect(rejected.reset(fresh)).resolves.toBeUndefined();
