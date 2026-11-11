@@ -156,7 +156,8 @@ task-owned development server: two passed and three timed out (9.3m). Repeating
 only those three after initial build work produced two passes and one
 first-navigation timeout (4.2m). Add-service, typed connection, delete/undo and
 deterministic layout passed across the runs; the exact-fixture first-load case
-remains unqualified. No assertions or timeouts were relaxed. A diagnostic run
+was unqualified in that initial run; the November 11 follow-up below records its
+later qualification. No assertions or timeouts were relaxed. A diagnostic run
 against the production web bundle failed all five synthetic cases because that
 bundle requires its API and disables development fixture composition. It is not
 the credential-free preview. These failures are retained, not reported as a
@@ -171,12 +172,99 @@ socket suite; filesystem restrictions dominate the bootstrap timing. No new
 browser suite or duplicated application scenario is introduced.
 
 Native container acceptance is unverified here: Docker engine inspection
-returned permission denied, and existing Docker/WSL holds were not changed.
-Ambient Go is 1.26.5, while this checkout requires 1.26.8. No compiler run under
-the wrong toolchain is claimed. Model dispatch, real accounts, production
-permissions and deployment were not exercised. The release owner still owns
-`check:public` and exact-source Linux/PG17 install, persistence/restart/restore,
-configured export and provider acceptance.
+returned permission denied, and existing Docker/WSL holds were not changed. At
+the initial November 9 check, ambient Go was 1.26.5 while this checkout required
+1.26.8; the November 11 follow-up below closes that Windows-toolchain gap. No
+compiler run under the wrong toolchain is claimed. Model dispatch, real
+accounts, production permissions and deployment were not exercised. The release
+owner still owns `check:public` and exact-source Linux/PG17 install,
+persistence/restart/restore, configured export and provider acceptance.
+
+## November 11 local validation follow-up
+
+This bounded follow-up checked only the required Go toolchain and the previously
+timed-out first editor navigation. The public checkout was clean at
+`63907f62f51f33238401d36303cf31d96a24895a`; process inspection found no
+overlapping check in the task workspace. Unrelated processes were left
+untouched. Compiler and browser work ran sequentially. No application, test,
+configuration guard, dependency, lockfile, or test-limit change was needed.
+
+### Required Go toolchain
+
+`GOTOOLCHAIN=go1.26.8` obtained the exact toolchain in task-scoped caches. The
+process PATH selected its own `go` and `gofmt`, not the ambient 1.26.5
+formatter. `go version` reported `go version go1.26.8 windows/amd64`; checking
+the selected `gofmt.exe` build also reported `go1.26.8`. `GOFLAGS=-mod=readonly`
+preserved module manifests.
+
+The repository command `pnpm check:compiler` passed in 102.33s. It ran:
+
+```text
+node scripts/check-go-format.mjs
+go -C services/iac-compiler vet ./...
+go -C services/iac-compiler test ./...
+```
+
+Formatting and vet passed. All four Go packages passed: the compiler (29.419s),
+CLI (11.005s), internal contracts (6.464s), and internal JSON Schema (8.383s).
+This is Windows local compiler evidence, not Linux/container or live export
+acceptance. No extra fuzz campaign, golden update, or full release gate ran.
+
+### First-navigation editor case
+
+The existing case at `apps/web/e2e/editor-canvas.spec.ts:125` passed unchanged.
+It verifies the exact AWS fixture/catalog, minimap and Guided/Professional mode
+behavior while retaining document identity, node IDs and content hash.
+
+Exact invocation:
+
+```text
+pnpm exec playwright test apps/web/e2e/editor-canvas.spec.ts --config=.cache/refactor-playwright-validation-20261111.config.ts --grep 'opens the exact AWS fixture and catalog in both experience modes without changing its content$'
+```
+
+The task-only ignored configuration inherits the repository configuration. It
+uses an owned `127.0.0.1:44173` server, refuses server reuse, writes separate
+artifacts and retains the success trace. The existing 30s test limit, 5s expect
+limit, 300s startup limit, one worker and zero retries remain unchanged. Node
+was 24.18.0, pnpm 11.16.0 and Playwright 1.61.1. A new Vite process and clean
+Chromium context started; workspace dependency builds used 14 cache hits. No
+editor URL was manually preloaded.
+
+Result: 1 passed, 0 failed/skipped/retries. The test itself took 5.730s, the
+Playwright run 17.072s and the outer command 18.353s. Navigation with the
+original `waitUntil: load` completed in 968.968ms. The document returned HTTP
+200 in 134.106ms; all 630 recorded requests stayed on the local HTTP/WebSocket
+origin, with no unsuccessful response recorded.
+
+The preserved November 9 trace has only one document request, response status
+`-1` (no response), no completed navigation, and no application-script requests
+before the timeout. The later `ERR_ABORTED` accompanied timeout teardown; it is
+not evidence that application code detached the frame. The unchanged case now
+passes with substantial margin under its existing limit. This supports an
+environment-specific navigation/transport stall in the earlier run; the exact
+historical OS/network/server cause cannot be established from the retained
+trace. No product defect was established, so no product or test correction was
+made.
+
+The first follow-up invocation selected zero tests because an overly anchored
+grep expression did not match Playwright's full title. Its exit-1 log is
+retained as a setup failure, not test evidence. Correcting only the selector
+produced the single selected passing run above. This is not a
+repeated-until-green test loop.
+
+Raw evidence is retained beside the checkout in `refactor-validation-20261111/`:
+`go-toolchain-setup.log`, `run-go-check.ps1`, `go-check.log`,
+`go-check-outcome.json`, `editor-check.log` (selection failure),
+`run-editor-run1.ps1`, `editor-check-run1.log`,
+`editor-first-navigation-run1.json`, the success trace directory, and
+`trace-comparison.json`. The original failed logs and trace were not
+overwritten; their SHA-256 values were verified unchanged.
+
+Publication denials remain unresolved. This pass did not push, create a PR,
+merge, deploy, trigger CI, call providers, use a signed-in hosted session or
+retry Docker inspection. Native Linux/PG17 persistence, restart/restore,
+configured export, provider and hosted acceptance remain with their existing
+owner.
 
 ## Independent review guide
 
