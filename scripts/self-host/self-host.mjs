@@ -8,9 +8,18 @@ import {
   open,
   readdir,
   readFile,
+  realpath,
   unlink,
 } from "node:fs/promises";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import {
+  basename,
+  dirname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+  sep,
+} from "node:path";
 import { createServer } from "node:net";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -36,20 +45,17 @@ export async function cli(main) {
     process.exitCode = 1;
   }
 }
-export async function privateFile(path) {
+export async function privateFile(path, { allowMissing = false } = {}) {
   if (!path || !isAbsolute(path)) fail("A private absolute file is required.");
-  let current = resolve(path);
-  const leaf = await lstat(current);
-  if (!leaf.isFile() || leaf.isSymbolicLink())
-    fail("A regular private file is required.");
-  while (true) {
-    const state = await lstat(current);
-    if (state.isSymbolicLink())
-      fail("Symlinked private configuration is refused.");
-    const parent = dirname(current);
-    if (parent === current) break;
-    current = parent;
+  let leaf;
+  try {
+    leaf = await lstat(path);
+  } catch (error) {
+    if (!allowMissing || error.code !== "ENOENT") throw error;
   }
+  if (leaf && (!leaf.isFile() || leaf.isSymbolicLink()))
+    fail("A regular private file is required.");
+  await privateDirectory(dirname(path), { allowMissing });
   return path;
 }
 export async function sha256(path) {
@@ -731,12 +737,16 @@ export function validateImagePins(env = process.env, { runtime = true } = {}) {
 }
 // Building the shared image needs source and toolchain pins, never operator
 // credentials or runtime mounts. Keep the Dockerfile as the sole build recipe.
-export function buildArgs(env = process.env) {
+export async function buildArgs(env = process.env) {
   validateImagePins(env, { runtime: false });
   const image =
     env.CLOUDMARKUP_SELF_HOST_IMAGE ?? "cloudmarkup-self-host:local";
   if (!/^[a-zA-Z0-9][a-zA-Z0-9./:_-]{0,511}$/u.test(image))
     fail("A valid local application image name is required.");
+  // Missing runtime files are fine; supplied paths must never enter COPY . .
+  // Validate here as well as at CLI dispatch so printed build arguments cannot
+  // describe an unsafe build that a caller might execute later.
+  await validatePrivateLocations(env, { runtime: false });
   return [
     "build",
     "--file",
@@ -750,19 +760,18 @@ export function buildArgs(env = process.env) {
     root,
   ];
 }
-export async function validatePrivateLocations(env = process.env) {
+export async function validatePrivateLocations(
+  env = process.env,
+  { runtime = true } = {},
+) {
   if (
-    env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY !== undefined ||
-    env.CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE !== undefined
+    runtime &&
+    (env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY !== undefined ||
+      env.CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE !== undefined)
   ) {
     composeArgs([], env);
-    await outsideRepository(env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY);
-    await privateDirectory(env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY);
-    await outsideRepository(
-      env.CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE,
-    );
-    await privateFile(env.CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE);
   }
+  const options = { allowMissing: !runtime };
   for (const key of [
     "CLOUDMARKUP_SELF_HOST_CONFIGURATION_SOURCE",
     "CLOUDMARKUP_POSTGRES_OWNER_PASSWORD_FILE",
@@ -770,14 +779,25 @@ export async function validatePrivateLocations(env = process.env) {
     "CLOUDMARKUP_OPERATOR_CONFIGURATION_SOURCE",
     "CLOUDMARKUP_PROVISIONING_CONFIGURATION_SOURCE",
     "CLOUDMARKUP_OWNER_CONFIGURATION_SOURCE",
+    ...(env.CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE === undefined
+      ? []
+      : ["CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE"]),
   ]) {
-    await outsideRepository(env[key]);
-    await privateFile(env[key]);
+    if (!runtime && env[key] === undefined) continue;
+    await outsideRepository(env[key], options);
+    await privateFile(env[key], options);
   }
-  await outsideRepository(env.CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY);
-  await privateDirectory(env.CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY);
-  await outsideRepository(env.CLOUDMARKUP_DATABASE_SECRETS_DIRECTORY);
-  await privateDirectory(env.CLOUDMARKUP_DATABASE_SECRETS_DIRECTORY);
+  for (const key of [
+    "CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY",
+    "CLOUDMARKUP_DATABASE_SECRETS_DIRECTORY",
+    ...(env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY === undefined
+      ? []
+      : ["CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY"]),
+  ]) {
+    if (!runtime && env[key] === undefined) continue;
+    await outsideRepository(env[key], options);
+    await privateDirectory(env[key], options);
+  }
 }
 export async function exclusive(work, env = process.env) {
   const directory = stateDirectory(env);
@@ -931,30 +951,61 @@ async function restoreVolumeMarker(complete) {
     await directory.close();
   }
 }
-export async function outsideRepository(path) {
+function insideDirectory(directory, path) {
+  const rel = relative(directory, path);
+  return (
+    !rel || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
+  );
+}
+async function canonicalLocation(path) {
+  const missing = [];
+  let current = path;
+  while (true) {
+    try {
+      return resolve(await realpath(current), ...missing);
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+      const parent = dirname(current);
+      if (parent === current) throw error;
+      missing.unshift(basename(current));
+      current = parent;
+    }
+  }
+}
+export async function outsideRepository(path, { allowMissing = false } = {}) {
   if (!path || !isAbsolute(path))
     fail("An absolute external backup path is required.");
-  const result = resolve(path),
-    rel = relative(root, result);
-  if (!rel || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel)))
+  const result = resolve(path);
+  if (insideDirectory(root, result))
     fail("Backups must be outside the repository/build context.");
-  await privateDirectory(dirname(result));
+  if (insideDirectory(await realpath(root), await canonicalLocation(path)))
+    fail("Backups must be outside the repository/build context.");
+  // Check the supplied spelling before normalization can erase link/.. .
+  await privateDirectory(dirname(path), { allowMissing });
   return result;
 }
-export async function privateDirectory(path) {
+export async function privateDirectory(path, { allowMissing = false } = {}) {
   if (!path || !isAbsolute(path))
     fail("A private absolute directory is required.");
-  let current = resolve(path);
+  let current = path;
   while (true) {
-    const state = await lstat(current);
-    if (!state.isDirectory() || state.isSymbolicLink())
+    let state;
+    try {
+      state = await lstat(current);
+    } catch (error) {
+      if (!allowMissing || error.code !== "ENOENT") throw error;
+    }
+    if (state && (!state.isDirectory() || state.isSymbolicLink()))
       fail("A regular unsymlinked directory is required.");
     const parent = dirname(current);
     if (parent === current) break;
     current = parent;
   }
 }
-export async function main(command = process.argv[2]) {
+export async function main(
+  command = process.argv[2],
+  { buildEnvironment = process.env, buildRunner = run } = {},
+) {
   if (command === "transport") {
     await foregroundTransport();
     return;
@@ -1013,12 +1064,13 @@ export async function main(command = process.argv[2]) {
     ].includes(command)
   )
     fail("Unknown self-host command.");
-  await doctor();
   if (command === "build") {
-    const args = buildArgs();
-    await exclusive(() => run(args));
+    const args = await buildArgs(buildEnvironment);
+    await doctor(buildRunner);
+    await exclusive(() => buildRunner(args), buildEnvironment);
     return;
   }
+  await doctor();
   validateImagePins();
   await validatePrivateLocations();
   await exclusive(async () => {

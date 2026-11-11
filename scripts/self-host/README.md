@@ -49,11 +49,14 @@ build the shared image before creating any runtime secret files:
 node --env-file=C:/CloudMarkupPrivate/self-host.env scripts/self-host/self-host.mjs build
 ```
 
-The build uses only the existing Dockerfile, source context, two immutable base
-image pins and the application image name. It does not parse runtime mounts or
-require PostgreSQL credentials. Runtime commands still require every documented
-private file and PostgreSQL image pin. Compose consumes the built image and no
-longer contains a second build declaration.
+The build uses the existing Dockerfile, source context, two immutable base image
+pins and the application image name. Every supplied configuration or secret path
+must remain outside the repository/build context, with regular, unsymlinked
+existing ancestry. Missing external files and directories are allowed during
+build; no credential contents are read. Keep other private files out of the
+checkout as well. Runtime commands still require every documented private file
+and PostgreSQL image pin. Compose consumes the built image and no longer
+contains a second build declaration.
 
 Review the generated source bindings against `bootstrap.mjs inspect`. Before the
 corresponding privileged stage, set the two migration acknowledgements in

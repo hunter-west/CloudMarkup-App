@@ -282,3 +282,55 @@ owner.
 5. Review catalog-opening refusal/preservation behavior before any future
    service or schema change. Keep provider credentials server-side and retain
    the existing quota/journal and exact revision checks.
+
+## Post-review build containment correction — 2026-11-11
+
+Independent review identified a regression in the credential-independent build
+route: its early branch omitted the configured private-path checks. The local
+correction restores that boundary without requiring runtime provisioning.
+
+- `buildArgs()` now awaits validation of every supplied configuration, password,
+  secret-directory and provider-dispatch path before returning executable or
+  printable arguments. CLI build dispatch performs this validation before any
+  Docker command. Omitted inputs and missing external files/directories remain
+  supported; existing private contents are never read during build validation.
+- The shared location helpers retain strict runtime defaults, check existing raw
+  ancestry without dropping a `link/..` component, and compare canonical
+  existing ancestors plus missing suffixes against the repository. Runtime still
+  requires all core inputs and both optional-model inputs. Image pins, project
+  validation and exclusive operator locking remain enforced.
+- The owning suite gains one dispatch case (9/10 criticality: prevents
+  configured credentials entering a shared image). It checks all ten
+  private-path keys, malformed/wrong-type paths, native namespace spelling, safe
+  absent/external inputs, diagnostic argument output, image/project validation
+  and lock exclusion. Existing argument and native-link cases are extended. No
+  test limits, retries or existing assertions were removed to obtain a pass.
+
+Validation on the local correction:
+
+- Node syntax checks, changed-script ESLint, Prettier and `git diff --check`
+  passed.
+- Nine selected build/dispatch/containment/Compose/Dockerfile tests passed in
+  1.280 seconds. The new dispatch case took 70 milliseconds. The earlier
+  5.24-second full launcher run used a broader selection, so these durations are
+  not a like-for-like performance comparison.
+- All 102 bootstrap, backup and restore tests passed in 6.143 seconds. These use
+  synthetic files, SQL ports and container runners; no database or Docker engine
+  was contacted and no real backup was changed.
+- `pnpm security:check` passed: 12 static security tests, public workflow/source
+  validation, secret scanning and dependency audit. The audit reported 11
+  moderate advisories, no high/critical finding.
+
+The original synthetic exposure result is retained outside tracked source. The
+new dispatch test rejects its in-context marker files before the injected Docker
+runner is called, and confirms the marker contents remain unchanged. A pins-only
+build and safe external not-yet-created configuration still reach the synthetic
+runner while holding the existing operator lock.
+
+Native symlink/junction creation and actual Linux Docker context/image
+inspection were not run because their existing restrictions remain. Native-link
+regression assertions are retained for an authorized environment. This is a
+locally tested correction, not complete security-fix verification or release
+admission. Publication and deployment remain on hold pending independent review
+of the corrected commit, the blocked native checks, and exact public/private
+source admission.
