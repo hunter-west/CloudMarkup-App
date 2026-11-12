@@ -771,3 +771,14 @@ checks remain intact. The separately gated bootstrap fixture compares the full
 ordered version/checksum ledger after its repeated migration runs. Source-level
 assertion probes cover the stale-count failures and altered-history refusals;
 native bootstrap, PostgreSQL and integrated CI acceptance remain separate.
+
+### Export workflow capacity and retry boundaries
+
+The supported 32-build batch now has room for its additional target-validation
+Evidence in workflow projections and canonical job output. The shared finite
+ceiling is 34; unrelated job families and per-stage limits retain their existing
+bounds. Success and failure projections preserve every reference. The diagram
+wrapper preserves typed monitor failures and their bounded retry delay while
+unknown renderer errors stay sanitized and permanent. Deferred-operation tests
+and projected capacity checks are provider-free; they do not execute 32 builds
+or establish native worker, compiler, browser or hosted acceptance.

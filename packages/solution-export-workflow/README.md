@@ -1,7 +1,7 @@
 # Solution export workflow
 
-This private package composes the existing deterministic compiler, application
-generator, isolated application builder, Terraform static validator, and
+This workspace package composes the existing deterministic compiler, application
+generator, isolated application builder, target-specific validation, and
 solution exporter through injected ports. It owns no cloud, container, network,
 repository-write, Terraform execution, credential, publication, or deployment
 authority.
@@ -23,17 +23,21 @@ downgrade remain visible as the distinct job-level `applicationVerification`;
 the immutable Solution Revision generation assessment is never rewritten.
 Sanitized diagnostics preserve only stable codes, stage/severity, and safe
 path/node/edge/workload/owned-policy references. Compiler diagnostics remain
-diagnostics; `infrastructure-compilation` Evidence and `terraform-validation`
+diagnostics. Terraform's `infrastructure-compilation` and `terraform-validation`
 Evidence are separate canonical records returned by the validation boundary and
-bound to its durable report.
+bound to its durable report. CloudFormation instead receives one
+`cloudformation-validation` record from local structural validation of the
+compiler's JSON template. That check does not call AWS or establish deployment
+acceptance.
 
 `createGoCliSolutionExportCompilerPort` is the concrete compiler boundary. It
 always invokes the allow-listed `cloudmarkup-iac` executable without a shell and
-with the fixed
-`compile --architecture architecture.json --workload workload.json --solution-revision solution-revision.json --target terraform --output -`
-argument vector. The injected executor receives only those three bounded
-canonical JSON files and bounded output/time/cancellation limits; raw stderr is
-never propagated into workflow failures.
+with the fixed command shape
+`compile --architecture architecture.json --workload workload.json --solution-revision solution-revision.json --target <target> --output -`.
+The validated target setting selects `terraform` or `cloudformation`; it does
+not supply arbitrary command arguments. The injected executor receives only
+those three bounded canonical JSON files and bounded output/time/cancellation
+limits; raw stderr is never propagated into workflow failures.
 
 `createSolutionExportApplicationGeneratorPort` is the concrete deterministic
 application-generation boundary. It checks cancellation, derives the strict
@@ -41,9 +45,13 @@ generator request only from resolved immutable sources, the compiler's
 normalized model, and the approved generation descriptor, then calls the public
 application generator. AI-assisted/custom scaffolds are never built; only
 conflict-free starter/complete results with build contracts reach the isolated
-build port. Workflow v1 admits exactly one generated build contract and fails
-closed before build/publication when generated coverage requires zero or
-multiple build handoffs.
+build port. Workflow v1 admits an ordered batch of up to 32 distinct generated
+workload builds. Their requests, returned contracts, artifacts and Evidence must
+match the exact immutable generation; an omitted or substituted build fails
+closed. Aggregate evidence allows 32 build records plus at most two validation
+records in read models, persisted outputs and canonical job output. The finite
+bound retains every record without truncation; per-stage limits remain
+unchanged.
 
 `createSolutionExportApplicationBuildPort` and
 `createSolutionExportTerraformValidationPort` are concrete adapters over the
@@ -55,8 +63,8 @@ the approved validation actor. Host workspace executors remain injected; the
 same active-stage `AbortSignal` reaches each long runner. Object and diff
 adapters also receive the trusted job/ownership scope.
 
-Passing build artifacts and canonical build/Terraform Evidence records are
-data-only supplemental export files with exact checksums and provenance. The
+Passing build artifacts and canonical build/target-validation Evidence records
+are data-only supplemental export files with exact checksums and provenance. The
 workflow supplies a strict `externalStageStatus` bound to the workflow request,
 approved target settings, selected environment, report digests, Evidence IDs,
 and full canonical Evidence digests. The ZIP manifest reports those stages as
@@ -70,6 +78,11 @@ before terminal commit, so late cancellation wins and staged bytes remain
 hidden. Permanent publication-integrity failure is terminal review truth;
 transient terminal-metadata persistence is retryable and cannot expose an
 artifact.
+
+Diagram rendering preserves an already classified workflow failure from the
+active-stage monitor, including its transient classification and retry delay.
+Unknown renderer errors still become a sanitized permanent diagram failure;
+cancellation remains authoritative. Durable worker attempt limits are unchanged.
 
 Workflow v1 deliberately uses `restart-from-input` retry semantics. Its
 content-addressed checkpoint objects are audit and reconciliation records, not

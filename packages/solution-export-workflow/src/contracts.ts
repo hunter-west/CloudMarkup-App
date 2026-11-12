@@ -8,6 +8,8 @@ import {
   type ApplicationBuildResultV1,
 } from "@cloudmarkup/application-build-runner";
 import {
+  SOLUTION_EXPORT_AGGREGATE_EVIDENCE_MAXIMUM,
+  SOLUTION_EXPORT_APPLICATION_BUILD_BATCH_MAXIMUM,
   applicationPatternPinV1Schema,
   applicationRuntimePinV1Schema,
   applicationTemplatePinV1Schema,
@@ -39,7 +41,7 @@ import { z } from "zod";
 export const SOLUTION_EXPORT_WORKFLOW_V1_LIMITS = Object.freeze({
   diagnostics: 256,
   diffEntries: 2_048,
-  evidenceRecords: 32,
+  evidenceRecords: SOLUTION_EXPORT_AGGREGATE_EVIDENCE_MAXIMUM,
   stageReports: 2,
   stages: 10,
   warnings: 32,
@@ -262,8 +264,6 @@ export const solutionExportWorkflowSourceInputsV1Schema = z
     workloadBehavior: durableJsonInputReferenceSchema,
   })
   .strict();
-
-const SOLUTION_EXPORT_APPLICATION_BUILD_BATCH_MAXIMUM = 32;
 
 function generatedBuildRequestIdentity(
   request: ApplicationBuildRequestV1,
@@ -667,7 +667,7 @@ export const solutionExportWorkflowStageReportV1Schema = z
     artifact: solutionExportWorkflowArtifactV1Schema,
     evidenceRecords: z
       .array(asyncJobEvidenceReferenceV1Schema)
-      .max(SOLUTION_EXPORT_WORKFLOW_V1_LIMITS.evidenceRecords),
+      .max(SOLUTION_EXPORT_APPLICATION_BUILD_BATCH_MAXIMUM),
     stage: z.enum(["build-application", "validate-infrastructure"]),
   })
   .strict()
