@@ -1096,7 +1096,25 @@ test("runtime admission rejects effective directive overrides after safe declara
     ]);
     const validate = (text) =>
       assertDockerfile(contextId, Buffer.from(text), paths, prefixes);
-    assert.doesNotThrow(() => validate(dockerfile));
+    for (const newline of ["\n", "\r\n"]) {
+      const recipe = dockerfile.replace(/\r?\n/gu, newline);
+      assert.doesNotThrow(() => validate(recipe));
+      assert.doesNotThrow(() =>
+        validate(
+          `${recipe}${newline}# USER 0:0${newline}  # ordinary comment${newline}`,
+        ),
+      );
+      for (const directive of ["USER 0:0", 'ENTRYPOINT ["/bin/sh"]']) {
+        assert.throws(
+          () =>
+            validate(
+              `${recipe}${newline}# synthetic continuation comment \\${newline}${directive}${newline}`,
+            ),
+          /CONTEXT_DOCKER_RUNTIME_UNSAFE/u,
+          `${contextId}: continued comment before ${directive}`,
+        );
+      }
+    }
     for (const suffix of [
       "USER 0:0",
       "user root:root",

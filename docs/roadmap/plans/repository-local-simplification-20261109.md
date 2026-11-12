@@ -633,3 +633,22 @@ Archive generation completes short writes and rejects invalid progress before
 hashing a chunk. Existing reviewed recipes and digest-only output remain
 supported. Focused synthetic regressions and fixture controls cover both paths;
 actual Docker execution and image inspection remain separate qualification.
+
+### Delivery-audit follow-up
+
+Exact secret-fixture exceptions are filtered before the scanner's retained
+finding limit; dense allowed fixtures cannot hide later unmatched findings. The
+optional branding writer now edits Markdown prose ranges through the already
+pinned parser, preserving links, code, identifiers and accepted early historical
+decisions. Its check command runs focused synthetic-file regressions before
+inspecting documentation. Native-proof assertions require each guard and
+operation to exist before comparing their order. Tool self-test documentation
+now describes the actual temporary fixture and its explicit dependency link.
+
+The image validator also rejects full-line comments ending in a continuation
+before joining instructions. Both recipe contexts have LF/CRLF positive and
+negative controls in the existing runtime case. The unique private refreshed
+license-rejection assertion is shared upstream; the test copies are identical.
+Removing the private override still requires authentic successor source assets,
+the matching admitted pin and cold-composition evidence. No native gate, source
+guard, deployment permission or live setting changes with these corrections.

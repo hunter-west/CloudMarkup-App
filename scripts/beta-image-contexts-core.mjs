@@ -1433,6 +1433,13 @@ function assertDockerfile(
   // The reviewed recipes use the default escape and no heredocs. Refuse parser
   // forms this fixed-input validator cannot interpret rather than misreading
   // embedded text as a runtime instruction.
+  if (/^[ \t]*#[^\r\n]*\\[ \t]*\r?$/mu.test(text)) {
+    fail(
+      "CONTEXT_DOCKER_RUNTIME_UNSAFE",
+      "Dockerfile",
+      "full-line comments ending in a continuation are unsupported",
+    );
+  }
   const logicalLines = text.replaceAll(/\\\r?\n/gu, " ").split(/\r?\n/gu);
   let runtimeUser;
   let runtimeEntrypoint;
