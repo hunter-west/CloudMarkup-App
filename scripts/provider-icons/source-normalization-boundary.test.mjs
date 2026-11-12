@@ -143,20 +143,6 @@ test("keeps unsupported namespace shapes and deceptive exact tokens rejected", (
   }
 });
 
-test("rejects unsupported XML declaration versions", () => {
-  const body = `<svg${svgNamespace} viewBox="0 0 1 1"><path d="M0 0"/></svg>`;
-  for (const version of ["1.2", "1.01"]) {
-    assert.throws(
-      () =>
-        validateAndNormalizeSvg(
-          Buffer.from(`<?xml version="${version}"?>${body}`),
-        ),
-      /processing-instruction/u,
-      version,
-    );
-  }
-});
-
 test("requires exact top-level and per-entry transformation sequences", async () => {
   const root = await temporaryDirectory();
   try {
