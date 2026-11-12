@@ -1116,3 +1116,26 @@ version proposal is unapplied and its 16 golden-pair refreshes are unfinished.
 Go, authored-golden reproduction, native SQL/restore, browser, R1 and
 cleanup-owner acceptance remain separate gates. Local integration does not
 publish or deploy.
+
+### Commercial timestamp replay correction
+
+Pricing, normalization-policy and model-usage replay compare declared timestamp
+fields as UTC instants at PostgreSQL microsecond precision. Equivalent UTC,
+explicit-offset and database representations retain one identity. SQL timestamp
+projections preserve fractional precision without changing stored values,
+parameters, authority predicates or locks. Nested attempt JSON, monetary fields
+and opaque identifiers remain exact. Inputs must carry an explicit ISO offset
+and fit database precision; ambiguous or over-precision inputs fail closed.
+
+Three focused predecessor replay failures are preserved. The corrected six-case
+suite retains every original statement and adds pricing, policy and usage replay
+controls, including true microsecond conflicts. Source-extracted probes verify
+offset crossings, fractional range ordering and unchanged SQL parameters. These
+use explicit SQL/transaction doubles and do not prove native encoding, locking,
+constraints or rollback. The original database timestamp helper, historical SQL
+and both isolated native returned-copy mutation cases remain unchanged.
+
+This local successor is separate from the accepted billing and integration
+objects. No provider, financial ledger, source intake, override, pin, CI or
+deployment state changes. Native/restore, browser, compiler, authentic
+composition and cleanup-owner qualifications remain separate.
