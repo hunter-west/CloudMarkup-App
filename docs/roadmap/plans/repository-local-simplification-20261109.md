@@ -1219,3 +1219,29 @@ execution helper/test bindings, authentic assets/intake/cold composition,
 provider-version proposal and sixteen golden-pair refreshes remain open. Native
 SQL/restore, browser/R1, Go/authored-golden and cleanup-owner acceptance remain
 separate gates.
+
+### Editor draft lifetime and Undo consistency
+
+Workload purpose and I/O drafts now survive unrelated configuration changes.
+Prepared workload commands are invalidated when the document content changes,
+without discarding typed input. Draft lifetime stays scoped to the selected
+workload and operation. A changed saved operation or configuration while dirty
+requires an explicit reload or decision to retain edits before review/save.
+Pristine and successfully saved owned forms read the current graph values, so
+Undo and Redo cannot leave a stale complete replacement ready to resubmit.
+
+Both reported failures reproduced in the existing component harnesses before the
+correction. All 39 owning cases pass afterward: the existing 37 remain, one
+history case gains same-node Undo/Redo, unrelated-node and dirty-conflict
+controls, and two cases cover workload draft preservation and operation
+selection isolation. The new cases protect unsaved core editor data and target
+identity, respectively; existing simple apply/undo, secret rejection, ownership
+and generated-read-only cases remain. These are local component checks, not
+browser acceptance. Comparable full-suite predecessor timing is unavailable.
+
+Domain command preparation, ownership, schema validation, preconditions and
+inverse history remain unchanged. The private source, published head and CI are
+untouched. This correction is a separate sibling of the accounting, deadline and
+IAM union. Render anchors and other queued editor findings are excluded. Exact
+independent review and later integration remain required; existing native,
+browser, source-intake/composition and release gates stay open.
