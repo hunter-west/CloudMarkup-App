@@ -1182,3 +1182,28 @@ predecessor reports zero instead of ten. Source/query checks are bounded
 evidence; native PostgreSQL execution, snapshot isolation, roles and transaction
 behavior remain unqualified. No ledger, grant, migration or financial history is
 written, and no private override or intake binding is removed.
+
+### Expiration detail precision correction
+
+Independent review found that precise SQL summary totals could disagree with
+detail availability and status after JavaScript truncated timestamps. The
+successor projects start/expiry decisions and the same available balance from
+SQL into the detail mapper. Snapshot, start, expiry and next-expiration text
+retain database microseconds; window validity is compared in SQL. Driver-decoded
+Date objects are no longer a basis for these decisions.
+
+The predecessor reproduces both one-microsecond contradictions. The owning suite
+now passes 22 cases, retaining all 21 previous cases, pagination limits,
+overflow, empty results and authorization controls. The additional case covers
+start/expiry and window boundaries, offset equivalence, truncated driver values
+and complete-page reconciliation. Extracted SQL-expression controls preserve
+funding rules and reject seven targeted guard mutations. These are bounded
+source/result-double checks, not native PostgreSQL or driver qualification.
+
+Only the expiration read method, its owning tests and this checkpoint change.
+Ledger and terminal semantics, tenant/account/event bindings, idempotency,
+canonical migrations and private source remain intact. The frozen expiration
+candidate and evidence are preserved. This separate accounting successor is
+unpublished; the accounting aggregate still requires independent review and
+explicit integration with the accepted public line. Existing native, browser,
+authentic intake/composition, override and cleanup-owner gates remain open.

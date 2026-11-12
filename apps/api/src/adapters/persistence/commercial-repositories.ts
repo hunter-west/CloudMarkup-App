@@ -4711,10 +4711,11 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
         true,
       );
       const access = await transaction.query<
-        SqlRow & { readonly as_of: unknown }
+        SqlRow & { readonly as_of: unknown; readonly window_valid: unknown }
       >(
         sql(
-          `SELECT CURRENT_TIMESTAMP AS as_of
+          `SELECT to_char(CURRENT_TIMESTAMP AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS as_of,
+                  $4::timestamptz > CURRENT_TIMESTAMP AS window_valid
            FROM memberships membership
            JOIN principals principal ON principal.principal_id = membership.principal_id
            JOIN organizations organization
@@ -4725,14 +4726,19 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
              AND membership.lifecycle_status = 'active'
              AND principal.lifecycle_status = 'active'
              AND organization.lifecycle_status IN ('active', 'suspended')`,
-          [scope.membershipId, scope.principalId, scope.organizationId],
+          [
+            scope.membershipId,
+            scope.principalId,
+            scope.organizationId,
+            windowEndsAt,
+          ],
         ),
       );
       const accessRow = access.rows[0];
       if (accessRow === undefined)
         return fail("access-denied", "Access is not available.");
       const asOf = readString(accessRow.as_of);
-      if (Date.parse(windowEndsAt) <= Date.parse(asOf)) {
+      if (!readBoolean(accessRow.window_valid)) {
         return fail(
           "invalid-input",
           "The expiration summary window is invalid.",
@@ -4743,6 +4749,11 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
           readonly active_reserved: unknown;
           readonly adjustments: unknown;
           readonly settled: unknown;
+          readonly summary_available: unknown;
+          readonly summary_started: unknown;
+          readonly summary_expired: unknown;
+          readonly summary_starts_at: unknown;
+          readonly summary_expires_at: unknown;
           readonly summary_expiring: unknown;
           readonly summary_grant_count: unknown;
           readonly summary_next_expiration: unknown;
@@ -4791,23 +4802,30 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
            LEFT JOIN active_reservations USING (credit_grant_id)
            WHERE grant_row.organization_id = $1
              AND grant_row.created_at <= $2
-           ), grant_balances AS (
+           ), grant_timing AS (
              SELECT grant_rows.*,
-                    CASE WHEN starts_at <= $2
-                           AND (expires_at IS NULL OR expires_at > $2)
+                    starts_at <= $2 AS summary_started,
+                    COALESCE(expires_at <= $2, FALSE) AS summary_expired
+             FROM grant_rows
+           ), grant_balances AS (
+             SELECT grant_timing.*,
+                    CASE WHEN summary_started AND NOT summary_expired
                            AND expiration_policy_kind <> 'unresolved'
                            AND trial_grant_admitted IS TRUE
                          THEN GREATEST(
                            (CASE WHEN grant_kind = 'administrative' THEN 0 ELSE credit_units END)
                            + adjustments - settled - active_reserved, 0)
                          ELSE 0 END AS summary_available
-             FROM grant_rows
+             FROM grant_timing
            )
            SELECT grant_row.*,
+                  to_char(grant_row.starts_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS summary_starts_at,
+                  to_char(grant_row.expires_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS summary_expires_at,
                   SUM(CASE WHEN expires_at > $2 AND expires_at <= $3
                            THEN summary_available ELSE 0 END) OVER () AS summary_expiring,
-                  MIN(CASE WHEN expires_at > $2 AND expires_at <= $3
-                           THEN expires_at ELSE NULL END) OVER () AS summary_next_expiration,
+                  to_char((MIN(CASE WHEN expires_at > $2 AND expires_at <= $3
+                           THEN expires_at ELSE NULL END) OVER ()) AT TIME ZONE 'UTC',
+                           'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS summary_next_expiration,
                   COUNT(*) OVER () AS summary_grant_count
            FROM grant_balances grant_row
            ORDER BY grant_row.expires_at NULLS LAST,
@@ -4831,26 +4849,21 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
         ) as CreditGrantSummaryRecord["kind"];
         const adjustment = readInteger(grant.adjustments);
         const expirationKind = readString(grant.expiration_policy_kind);
-        const expiresAt = readOptionalString(grant.expires_at);
-        const startsAt = readString(grant.starts_at);
+        const expiresAt = readOptionalString(grant.summary_expires_at);
+        const startsAt = readString(grant.summary_starts_at);
         const settled = readInteger(grant.settled);
         const reserved = readInteger(grant.active_reserved);
         const granted = readInteger(grant.credit_units);
         const baseGranted = kind === "administrative" ? 0n : granted;
         const funding = baseGranted + adjustment;
-        const started = Date.parse(startsAt) <= Date.parse(asOf);
-        const expired =
-          expiresAt !== undefined && Date.parse(expiresAt) <= Date.parse(asOf);
+        const started = readBoolean(grant.summary_started);
+        const expired = readBoolean(grant.summary_expired);
         const unresolved = expirationKind === "unresolved";
         const remaining = funding - settled - reserved;
-        const available =
-          started &&
-          !expired &&
-          !unresolved &&
-          grant["trial_grant_admitted"] === true &&
-          remaining > 0n
-            ? remaining
-            : 0n;
+        const available = readInteger(grant.summary_available);
+        if (available < 0n) {
+          return fail("invalid-input", "The expiration summary is invalid.");
+        }
         const expiredUnits =
           expired && !unresolved && remaining > 0n ? remaining : 0n;
         const expirationPolicyVersion = readOptionalString(

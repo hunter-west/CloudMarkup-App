@@ -205,6 +205,256 @@ function grantSourceResults(subscription: SqlRow = monthlySubscriptionRow) {
 }
 
 describe("commercial PostgreSQL repository", () => {
+  it("keeps expiration details and totals consistent at microsecond boundaries", async () => {
+    const asOf = "2026-08-03T12:00:00.000000Z";
+    const windowEndsAt = "2026-08-31T00:00:00.000000Z";
+    const earlier = "2026-08-01T00:00:00.000000Z";
+    const later = "2026-08-10T00:00:00.000000Z";
+    const scenarios = [
+      {
+        id: "start-before",
+        start: "2026-08-03T11:59:59.999999Z",
+        expiry: later,
+        started: true,
+        expired: false,
+        available: "10",
+        status: "active",
+        expiring: true,
+      },
+      {
+        id: "start-equal",
+        start: asOf,
+        expiry: later,
+        started: true,
+        expired: false,
+        available: "10",
+        status: "active",
+        expiring: true,
+      },
+      {
+        id: "start-after",
+        start: "2026-08-03T12:00:00.000001Z",
+        expiry: later,
+        started: false,
+        expired: false,
+        available: "0",
+        status: "scheduled",
+        expiring: false,
+      },
+      {
+        id: "expire-before",
+        start: earlier,
+        expiry: "2026-08-03T11:59:59.999999Z",
+        started: true,
+        expired: true,
+        available: "0",
+        status: "expired",
+        expiring: false,
+      },
+      {
+        id: "expire-equal",
+        start: earlier,
+        expiry: asOf,
+        started: true,
+        expired: true,
+        available: "0",
+        status: "expired",
+        expiring: false,
+      },
+      {
+        id: "expire-after",
+        start: earlier,
+        expiry: "2026-08-03T12:00:00.000001Z",
+        started: true,
+        expired: false,
+        available: "10",
+        status: "active",
+        expiring: true,
+      },
+      {
+        id: "window-before",
+        start: earlier,
+        expiry: "2026-08-30T23:59:59.999999Z",
+        started: true,
+        expired: false,
+        available: "10",
+        status: "active",
+        expiring: true,
+      },
+      {
+        id: "window-equal",
+        start: earlier,
+        expiry: windowEndsAt,
+        started: true,
+        expired: false,
+        available: "10",
+        status: "active",
+        expiring: true,
+      },
+      {
+        id: "window-after",
+        start: earlier,
+        expiry: "2026-08-31T00:00:00.000001Z",
+        started: true,
+        expired: false,
+        available: "10",
+        status: "active",
+        expiring: false,
+      },
+      {
+        id: "offset-equivalent",
+        start: "2026-08-03T14:00:00.000000+02:00",
+        expiry: "2026-08-03T07:00:00.000001-05:00",
+        started: true,
+        expired: false,
+        available: "10",
+        status: "active",
+        expiring: true,
+      },
+    ] as const;
+    // These are explicit SQL-result doubles, including raw timestamp fields
+    // already truncated by a driver. Native SQL evaluation is a separate gate.
+    const rows = scenarios.map((scenario) => ({
+      ...grantBase,
+      credit_grant_id: scenario.id,
+      grant_kind: "promotional",
+      grant_policy_version: "promotional-v1",
+      expiration_policy_kind: "expires-at",
+      expiration_policy_version: "expiry_test_v1",
+      trial_grant_admitted: true,
+      adjustments: "0",
+      settled: "0",
+      active_reserved: "0",
+      starts_at: new Date(scenario.start),
+      expires_at: new Date(scenario.expiry),
+      summary_starts_at: scenario.start,
+      summary_expires_at: scenario.expiry,
+      summary_started: scenario.started,
+      summary_expired: scenario.expired,
+      summary_available: scenario.available,
+      summary_expiring: "60",
+      summary_grant_count: String(scenarios.length),
+      summary_next_expiration: "2026-08-03T12:00:00.000001Z",
+    }));
+    const database = new RecordingDatabase([
+      result(),
+      result([{ allowed: 1 }]),
+      result([{ as_of: asOf, window_valid: true }]),
+      result(rows),
+    ]);
+    const summary = await new PostgresCommercialPersistenceRepository(
+      database,
+    ).getCreditGrantExpirationSummary(scope, windowEndsAt);
+    expect(
+      summary.grants.map((grant) => ({
+        id: grant.id,
+        available: grant.availableCreditUnits,
+        expired: grant.expiredCreditUnits,
+        status: grant.status,
+      })),
+    ).toEqual(
+      scenarios.map((scenario) => ({
+        id: scenario.id,
+        available: scenario.available,
+        expired: scenario.expired ? "10" : "0",
+        status: scenario.status,
+      })),
+    );
+    expect(summary).toMatchObject({
+      asOf,
+      windowEndsAt,
+      grantsTruncated: false,
+      expiringCreditUnits: "60",
+      nextExpirationAt: "2026-08-03T12:00:00.000001Z",
+    });
+    for (const [index, scenario] of scenarios.entries()) {
+      expect(summary.grants[index]).toMatchObject({
+        startsAt: scenario.start,
+        expiresAt: scenario.expiry,
+      });
+    }
+    expect(
+      summary.grants
+        .reduce(
+          (total, grant, index) =>
+            total +
+            (scenarios[index]?.expiring
+              ? BigInt(grant.availableCreditUnits)
+              : 0n),
+          0n,
+        )
+        .toString(),
+    ).toBe(summary.expiringCreditUnits);
+    expect(database.statements).toHaveLength(4);
+    expect(database.statements[2]?.values).toEqual([
+      membershipId,
+      principalId,
+      organizationId,
+      windowEndsAt,
+    ]);
+    expect(database.statements[3]?.values).toEqual([
+      organizationId,
+      asOf,
+      windowEndsAt,
+    ]);
+    expect(database.statements[2]?.text).toContain(
+      "$4::timestamptz > CURRENT_TIMESTAMP AS window_valid",
+    );
+    expect(database.statements[2]?.text).toContain(
+      `to_char(CURRENT_TIMESTAMP AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS as_of`,
+    );
+    expect(database.statements[3]?.text).toContain(
+      "starts_at <= $2 AS summary_started",
+    );
+    expect(database.statements[3]?.text).toContain(
+      "COALESCE(expires_at <= $2, FALSE) AS summary_expired",
+    );
+    expect(database.statements[3]?.text).toContain(
+      "CASE WHEN summary_started AND NOT summary_expired",
+    );
+    expect(database.statements[3]?.text).toContain(
+      `to_char(grant_row.starts_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS summary_starts_at`,
+    );
+    expect(database.statements[3]?.text).toContain(
+      `to_char(grant_row.expires_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS summary_expires_at`,
+    );
+
+    for (const [window, valid] of [
+      ["2026-08-03T11:59:59.999999Z", false],
+      [asOf, false],
+      ["2026-08-03T12:00:00.000001Z", true],
+      ["2026-08-03T14:00:00.000000+02:00", false],
+      ["2026-08-03T14:00:00.000001+02:00", true],
+    ] as const) {
+      const bounded = new RecordingDatabase([
+        result(),
+        result([{ allowed: 1 }]),
+        result([{ as_of: asOf, window_valid: valid }]),
+        result(),
+      ]);
+      const read = new PostgresCommercialPersistenceRepository(
+        bounded,
+      ).getCreditGrantExpirationSummary(scope, window);
+      if (valid)
+        await expect(read).resolves.toMatchObject({
+          expiringCreditUnits: "0",
+          grants: [],
+          grantsTruncated: false,
+        });
+      else
+        await expect(read).rejects.toMatchObject({
+          code: "invalid-input",
+          message: "The expiration summary window is invalid.",
+        });
+      expect(bounded.statements).toHaveLength(valid ? 4 : 3);
+      expect(bounded.statements[2]?.values).toEqual([
+        membershipId,
+        principalId,
+        organizationId,
+        window,
+      ]);
+    }
+  });
   it("keeps complete expiration totals while bounding historical grant details", async () => {
     const asOf = "2026-08-03T12:00:00.000Z";
     const windowEndsAt = "2026-08-31T00:00:00.000Z";
@@ -295,16 +545,43 @@ describe("commercial PostgreSQL repository", () => {
       const scoped = all.filter(
         (row) => row["organization_id"] === organizationId,
       );
-      const details = scoped.slice(0, 1000).map((row) => ({
-        ...row,
-        summary_expiring: scenario.total,
-        summary_next_expiration: scenario.next ?? null,
-        summary_grant_count: String(scoped.length),
-      }));
+      const details = scoped.slice(0, 1000).map((row) => {
+        // These existing historical fixtures have exact millisecond timestamps.
+        const start = row["starts_at"] as string;
+        const expiry = row["expires_at"] as string | null;
+        const started = Date.parse(start) <= Date.parse(asOf);
+        const expired =
+          expiry !== null && Date.parse(expiry) <= Date.parse(asOf);
+        const remaining =
+          (row["grant_kind"] === "administrative"
+            ? 0n
+            : BigInt(row["credit_units"] as string)) +
+          BigInt(row["adjustments"] as string) -
+          BigInt(row["settled"] as string) -
+          BigInt(row["active_reserved"] as string);
+        return {
+          ...row,
+          summary_started: started,
+          summary_expired: expired,
+          summary_starts_at: start,
+          summary_expires_at: expiry,
+          summary_available:
+            started &&
+            !expired &&
+            row["expiration_policy_kind"] !== "unresolved" &&
+            row["trial_grant_admitted"] === true &&
+            remaining > 0n
+              ? remaining.toString()
+              : "0",
+          summary_expiring: scenario.total,
+          summary_next_expiration: scenario.next ?? null,
+          summary_grant_count: String(scoped.length),
+        };
+      });
       const database = new RecordingDatabase([
         result(),
         result([{ allowed: 1 }]),
-        result([{ as_of: asOf }]),
+        result([{ as_of: asOf, window_valid: true }]),
         result(details),
       ]);
       const repository = new PostgresCommercialPersistenceRepository(database);
@@ -343,6 +620,7 @@ describe("commercial PostgreSQL repository", () => {
         membershipId,
         principalId,
         organizationId,
+        windowEndsAt,
       ]);
       const query = database.statements[3];
       expect(query?.values).toEqual([organizationId, asOf, windowEndsAt]);
@@ -353,7 +631,8 @@ describe("commercial PostgreSQL repository", () => {
       expect(query?.text).toContain("AND grant_row.created_at <= $2");
       expect(query?.text).toContain("COUNT(*) OVER () AS summary_grant_count");
       expect(query?.text).toContain("END) OVER () AS summary_expiring");
-      expect(query?.text).toContain("END) OVER () AS summary_next_expiration");
+      expect(query?.text).toContain("END) OVER ()) AT TIME ZONE 'UTC'");
+      expect(query?.text).toContain("AS summary_next_expiration");
       expect(query?.text).toContain("trial_grant_admitted");
       expect(query?.text.match(/LIMIT/gu)).toHaveLength(1);
       expect(query?.text.trim()).toMatch(
@@ -363,7 +642,7 @@ describe("commercial PostgreSQL repository", () => {
     const overflow = new RecordingDatabase([
       result(),
       result([{ allowed: 1 }]),
-      result([{ as_of: asOf }]),
+      result([{ as_of: asOf, window_valid: true }]),
       result([
         {
           ...current,
