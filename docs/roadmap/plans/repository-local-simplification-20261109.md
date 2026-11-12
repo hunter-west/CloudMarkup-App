@@ -886,3 +886,16 @@ boundary and its explicit starting-state assertion change; production
 authorization and historical migrations are unchanged. Focused synthetic proof
 remains distinct from the required native PostgreSQL rerun and integrated CI
 acceptance.
+
+### Scoring and review input ownership
+
+Optional evaluation judges receive detached score and case inputs, so their
+informational grades cannot rewrite deterministic evidence or its derived pass
+state. Assistant review decisions capture an owned request before storage or
+authorization awaits and retain the same validated action through eligibility,
+authorization and persistence. The V1 report exact-set check now rejects
+duplicates on either side, including a rehashed advertised list with an omitted
+case. Existing promotion checks, historical datasets, held reports, disabled
+production profiles and downstream write authority remain unchanged. Focused
+regressions use synthetic adapters and in-memory stores; they establish no live
+provider, canonical-write or deployment acceptance.
