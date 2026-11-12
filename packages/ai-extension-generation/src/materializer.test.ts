@@ -257,6 +257,26 @@ describe("candidate bundle materialization", () => {
     expect(accepted.files[0]?.ownership).toBe("user-owned-preserved");
     expect(accepted.files[0]?.sourceKind).toBe("patch");
     expect(accepted.files[0]?.digest).toBe(sha256Text(proposedContent));
+    const insertedContent = `${oldContent}export const added = true;\n`;
+    const insertion = materializeCandidateBundle({
+      bundle: bundle({
+        candidates: [
+          {
+            ...patch,
+            proposedResultDigest: sha256Text(insertedContent),
+            unifiedDiff: `--- a/${path}\n+++ b/${path}\n@@ -1,0 +2,1 @@\n+export const added = true;\n`,
+          },
+        ],
+      }),
+      policy: patchPolicy,
+    });
+    expect(insertion.succeeded).toBe(true);
+    expect(insertion.files[0]).toMatchObject({
+      content: insertedContent,
+      digest: sha256Text(insertedContent),
+      ownership: "user-owned-preserved",
+      sourceKind: "patch",
+    });
 
     const replacement = {
       ...fileCandidate(path, proposedContent),

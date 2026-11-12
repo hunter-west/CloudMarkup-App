@@ -937,3 +937,16 @@ with a matching primary attempt and a successful at-limit control. The two
 outbox retry rows compare all expected event kinds as Set members, including
 terminal latency. Existing reservation, no-charge, uniqueness and replay checks
 remain. These synthetic checks add no financial or production execution.
+
+### Generation materialization and bounded reports
+
+Insertion-only unified hunks now use the empty-range coordinate convention and
+verify both old and new positions. Exact context, ownership, hash, hunk and byte
+limits remain; final-newline behavior is unchanged. Artifact supersession and
+edit history compare UTC instants with full supported fractional precision while
+preserving the original timestamp text and identities. CloudFormation validation
+omits unrepresentable resource details from failed reports and bounds diagnostic
+output without losing failed categories, nonrepairable errors or Evidence check
+statuses. Rejection and current-artifact safeguards remain. Focused pure and
+in-memory checks establish these library boundaries, not provider, compiler,
+native storage or deployment acceptance.

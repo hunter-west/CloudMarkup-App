@@ -386,13 +386,20 @@ export const cloudFormationStructuredResourceV1Schema = z
   })
   .strict();
 
+const maximumReportedDiagnostics = 1_000;
+const maximumReportedResources = 10_000;
+
 const cloudFormationExtensionValidationResultBaseV1Schema = z
   .object({
     contractVersion: z.literal(1),
-    diagnostics: z.array(candidateDiagnosticV1Schema).max(1_000),
+    diagnostics: z
+      .array(candidateDiagnosticV1Schema)
+      .max(maximumReportedDiagnostics),
     evidence: evidenceRecordV1Schema,
     reportDigest: sha256DigestSchema,
-    resources: z.array(cloudFormationStructuredResourceV1Schema).max(10_000),
+    resources: z
+      .array(cloudFormationStructuredResourceV1Schema)
+      .max(maximumReportedResources),
     state: z.enum(["passed", "failed", "error"]),
   })
   .strict();
@@ -1122,6 +1129,7 @@ export function validateCloudFormationExtension(
   const protectedIds = new Set(request.policy.protectedLogicalIds);
   const logicalIds = new Set<string>();
   const referenceEdges = new Map<string, Set<string>>();
+  const referencePaths = new Map<string, string>();
   let totalBytes = 0;
   let resourceDeclarationCount = 0;
 
@@ -1552,6 +1560,7 @@ export function validateCloudFormationExtension(
         );
       }
       referenceEdges.set(logicalId, collector.references);
+      referencePaths.set(logicalId, path);
       if (
         !request.policy.policy.allowWildcardIamActions &&
         containsWildcardPolicy(properties, "Action")
@@ -1584,15 +1593,29 @@ export function validateCloudFormationExtension(
           }),
         );
       }
-      resources.push(
-        cloudFormationStructuredResourceV1Schema.parse({
+      const reportedResource =
+        cloudFormationStructuredResourceV1Schema.safeParse({
           logicalId,
           path,
           propertyNames: Object.keys(properties).sort(),
           references: [...collector.references].sort(),
           resourceType,
-        }),
-      );
+        });
+      if (reportedResource.success) {
+        resources.push(reportedResource.data);
+      } else {
+        diagnostics.push(
+          diagnostic({
+            category: "static-analysis",
+            code: "cloudmarkup.ai-extension.cloudformation-resource-report-invalid",
+            detail:
+              "Resource details exceed the bounded report representation.",
+            path,
+            repairable: true,
+            summary: "CloudFormation resource details cannot be represented.",
+          }),
+        );
+      }
     }
   }
 
@@ -1620,9 +1643,7 @@ export function validateCloudFormationExtension(
     );
   }
   for (const [source, references] of referenceEdges.entries()) {
-    const sourcePath = resources.find(
-      ({ logicalId }) => logicalId === source,
-    )?.path;
+    const sourcePath = referencePaths.get(source);
     for (const reference of references) {
       if (
         !logicalIds.has(reference) &&
@@ -1655,13 +1676,55 @@ export function validateCloudFormationExtension(
     );
   }
 
-  const orderedDiagnostics = [...diagnostics].sort((left, right) => {
+  const compareDiagnostics = (
+    left: CandidateDiagnosticV1,
+    right: CandidateDiagnosticV1,
+  ): number => {
     const leftKey = [left.path ?? "", left.code, left.summary].join("\u0000");
     const rightKey = [right.path ?? "", right.code, right.summary].join(
       "\u0000",
     );
     return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
-  });
+  };
+  const orderedDiagnostics = [...diagnostics].sort(compareDiagnostics);
+  const diagnosticOverflow =
+    orderedDiagnostics.length > maximumReportedDiagnostics
+      ? diagnostic({
+          category: "admission",
+          code: "cloudmarkup.ai-extension.cloudformation-diagnostics-exceeded",
+          detail:
+            "Additional diagnostics were omitted from the bounded report; all checks remain reflected in Evidence.",
+          repairable: !diagnostics.some(
+            ({ severity, repairable }) => severity === "error" && !repairable,
+          ),
+          summary:
+            "CloudFormation validation exceeded the diagnostic report limit.",
+        })
+      : undefined;
+  let reportedDiagnostics = orderedDiagnostics;
+  if (diagnosticOverflow !== undefined) {
+    // Consumers classify outcomes from these diagnostics. Retain every failed
+    // category, preferring its nonrepairable error, even when details overflow.
+    const failuresByCategory = new Map<
+      CandidateDiagnosticV1["category"],
+      CandidateDiagnosticV1
+    >();
+    for (const entry of orderedDiagnostics) {
+      if (entry.severity !== "error") continue;
+      const prior = failuresByCategory.get(entry.category);
+      if (prior === undefined || (prior.repairable && !entry.repairable)) {
+        failuresByCategory.set(entry.category, entry);
+      }
+    }
+    const required = new Set(failuresByCategory.values());
+    reportedDiagnostics = [
+      ...[
+        ...required,
+        ...orderedDiagnostics.filter((entry) => !required.has(entry)),
+      ].slice(0, maximumReportedDiagnostics - 1),
+      diagnosticOverflow,
+    ].sort(compareDiagnostics);
+  }
   const orderedResources = [...resources].sort((left, right) => {
     const leftKey = [portablePathKey(left.path), left.logicalId].join("\u0000");
     const rightKey = [portablePathKey(right.path), right.logicalId].join(
@@ -1670,16 +1733,19 @@ export function validateCloudFormationExtension(
     return leftKey < rightKey ? -1 : leftKey > rightKey ? 1 : 0;
   });
   const evidence = makeEvidence({
-    diagnostics: orderedDiagnostics,
+    diagnostics:
+      diagnosticOverflow === undefined
+        ? orderedDiagnostics
+        : [...orderedDiagnostics, diagnosticOverflow],
     request,
     totalBytes,
   });
   const projection = {
     contractVersion: 1 as const,
-    diagnostics: orderedDiagnostics,
+    diagnostics: reportedDiagnostics,
     evidence,
-    resources: orderedResources,
-    state: orderedDiagnostics.some(({ severity }) => severity === "error")
+    resources: orderedResources.slice(0, maximumReportedResources),
+    state: reportedDiagnostics.some(({ severity }) => severity === "error")
       ? ("failed" as const)
       : ("passed" as const),
   };

@@ -370,6 +370,79 @@ describe("candidate artifact storage", () => {
       }),
     ).rejects.toThrow(/unavailable/u);
     expect(store.artifactCount()).toBe(3);
+    for (const [previousAt, nextAt, order] of [
+      ["2026-08-21T12:00:00Z", "2026-08-21T12:00:00.001Z", 1],
+      ["2026-08-21T12:00:00.900Z", "2026-08-21T12:00:00Z", -1],
+      ["2026-08-21T12:00:00.1Z", "2026-08-21T12:00:00.10Z", 0],
+      ["2026-08-21T12:00:00Z", "2026-08-21T12:00:00.000Z", 0],
+      ["2026-08-21T12:00:00.0001Z", "2026-08-21T12:00:00.0002Z", 1],
+      ["2026-08-21T12:00:00.0002Z", "2026-08-21T12:00:00.0001Z", -1],
+      ["2026-08-21T12:00:00.009Z", "2026-08-21T12:00:00.01Z", 1],
+      ["2026-08-21T12:00:00.01Z", "2026-08-21T12:00:00.009Z", -1],
+      [
+        "2026-08-21T12:00:00.0000000000000001Z",
+        "2026-08-21T12:00:00.0000000000000002Z",
+        1,
+      ],
+      ["2026-08-21T12:00:00.9999999999999999Z", "2026-08-21T12:00:01Z", 1],
+    ] as const) {
+      const temporalStore = new InMemoryCandidateArtifactStore();
+      const previous = await temporalStore.put({
+        ...putInput([baseFile]),
+        storedAt: previousAt,
+      });
+      await temporalStore.bindReview({
+        artifactId: previous.artifactId,
+        boundAt: previousAt,
+        expectedArtifactDigest: previous.artifactDigest,
+        ...baseReview,
+        scope: primaryScope,
+      });
+      const next = supersessionInput({
+        content: firstContent,
+        editId: "candidate-edit-temporal",
+        editedAt: nextAt,
+        previous,
+        previousFile: baseFile,
+        previousReview: baseReview,
+        successorReview: firstReview,
+      });
+      if (next.origin?.kind !== "user-modified" || !next.origin.edits[0])
+        throw new Error("Missing temporal edit fixture.");
+      const edit = next.origin.edits[0];
+      const history = candidateArtifactOriginV1Schema.safeParse({
+        ...next.origin,
+        edits: [
+          {
+            ...edit,
+            editId: "candidate-edit-temporal-prior",
+            editedAt: previousAt,
+            priorDigest: sha256Text("earlier-content"),
+            resultDigest: edit.priorDigest,
+          },
+          edit,
+        ],
+      });
+      expect(history.success).toBe(order >= 0);
+      if (!history.success)
+        expect(history.error.issues).toContainEqual(
+          expect.objectContaining({ path: ["edits", 1, "editedAt"] }),
+        );
+      if (order > 0) {
+        const successor = await temporalStore.supersede(next);
+        expect(successor.storedAt).toBe(nextAt);
+        expect(successor.origin).toEqual(next.origin);
+        expect(temporalStore.artifactCount()).toBe(2);
+      } else {
+        await expect(temporalStore.supersede(next)).rejects.toThrow(
+          /ordered storage/u,
+        );
+        expect(temporalStore.artifactLifecycle(previous.artifactId)).toEqual({
+          state: "current",
+        });
+        expect(temporalStore.artifactCount()).toBe(1);
+      }
+    }
   });
 
   it("leaves the predecessor current when lineage validation rejects the successor", async () => {
