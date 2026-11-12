@@ -6,6 +6,11 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/hashicorp/hcl/v2/hclwrite"
+	"github.com/zclconf/go-cty/cty"
 )
 
 func TestOwnedRedriveMustMatchExactDLQEdge(t *testing.T) {
@@ -107,6 +112,7 @@ func TestCloudFormationRedriveExactNamesWithoutDependencyCycle(t *testing.T) {
 		{"standard", "STANDARD", "reviewed-work", "reviewed-dlq", 1},
 		{"fifo-add-suffix", "FIFO", "reviewed-work", "reviewed-dlq", 1},
 		{"fifo-preserve-suffix", "FIFO", "reviewed-work.fifo", "reviewed-dlq.fifo", 1},
+		{"two-exact-sources", "STANDARD", "reviewed-work", "reviewed-dlq", 2},
 		{"multiple-exact-sources", "STANDARD", "reviewed-work", "reviewed-dlq", 10},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -168,6 +174,65 @@ func TestCloudFormationRedriveExactNamesWithoutDependencyCycle(t *testing.T) {
 			}
 			assertQueueRedriveAndPartialBatch(t, resources)
 			assertNoCloudFormationResourceCycle(t, resources)
+			terraform, diagnostics := renderTerraformArtifact(context.Background(), model, nil, DefaultLimits())
+			assertNoTargetErrors(t, diagnostics)
+			if terraform == nil {
+				t.Fatal("Terraform redrive artifact missing")
+			}
+			parsed, parseDiagnostics := hclsyntax.ParseConfig([]byte(fileContent(t, terraform, "infrastructure/eventing.tf")), "eventing.tf", hcl.InitialPos)
+			if parseDiagnostics.HasErrors() {
+				t.Fatal(parseDiagnostics.Error())
+			}
+			expectedARNs := map[string]bool{}
+			addresses := &terraformRenderer{model: model, resourceNames: map[string]string{}}
+			addresses.assignResourceNames()
+			for _, edge := range model.Connections {
+				if edge.RelationshipType == "aws.sqs.uses-dead-letter-queue" && edge.Target.NodeID == "queue_dlq" {
+					expectedARNs["aws_sqs_queue."+addresses.resourceNames[edge.Source.NodeID]+".arn"] = true
+				}
+			}
+			policies := 0
+			for _, block := range parsed.Body.(*hclsyntax.Body).Blocks {
+				if block.Type != "resource" || len(block.Labels) != 2 || block.Labels[0] != "aws_sqs_queue_redrive_allow_policy" {
+					continue
+				}
+				policies++
+				call, ok := block.Body.Attributes["redrive_allow_policy"].Expr.(*hclsyntax.FunctionCallExpr)
+				if !ok || call.Name != "jsonencode" || len(call.Args) != 1 {
+					t.Fatal("redrive policy lost structured JSON encoding")
+				}
+				actualARNs := map[string]bool{}
+				for _, traversal := range call.Args[0].Variables() {
+					actualARNs[string(hclwrite.TokensForTraversal(traversal).Bytes())] = true
+				}
+				if !reflect.DeepEqual(actualARNs, expectedARNs) {
+					t.Fatalf("Terraform redrive source scope = %#v, want %#v", actualARNs, expectedARNs)
+				}
+				object, ok := call.Args[0].(*hclsyntax.ObjectConsExpr)
+				if !ok || len(object.Items) != 2 {
+					t.Fatal("unexpected redrive policy fields")
+				}
+				permission, errors := object.Items[0].ValueExpr.Value(nil)
+				if errors.HasErrors() || !permission.RawEquals(cty.StringVal("byQueue")) {
+					t.Fatal("Terraform redrive permission widened")
+				}
+				queueURL := block.Body.Attributes["queue_url"].Expr.Variables()
+				if len(queueURL) != 1 || string(hclwrite.TokensForTraversal(queueURL[0]).Bytes()) != "aws_sqs_queue."+addresses.resourceNames["queue_dlq"]+".id" {
+					t.Fatal("redrive policy lost its exact DLQ owner")
+				}
+			}
+			if policies != 1 {
+				t.Fatalf("one DLQ must own one policy, got %d", policies)
+			}
+			shuffled := cloneNormalized(t, model)
+			for left, right := 0, len(shuffled.Connections)-1; left < right; left, right = left+1, right-1 {
+				shuffled.Connections[left], shuffled.Connections[right] = shuffled.Connections[right], shuffled.Connections[left]
+			}
+			again, repeatedDiagnostics := renderTerraformArtifact(context.Background(), shuffled, nil, DefaultLimits())
+			assertNoTargetErrors(t, repeatedDiagnostics)
+			if !reflect.DeepEqual(terraform, again) {
+				t.Fatal("redrive artifact depends on connection input order")
+			}
 		})
 	}
 }
@@ -181,6 +246,10 @@ func TestCloudFormationRedriveRejectsMoreThanTenSources(t *testing.T) {
 	}
 	if diagnosticByCode(t, diagnostics, "CLOUDFORMATION_SQS_REDRIVE_SOURCE_LIMIT").Source.NodeID != "queue_dlq" {
 		t.Fatal("redrive limit diagnostic lost exact DLQ identity")
+	}
+	artifact, diagnostics = renderTerraformArtifact(context.Background(), model, nil, DefaultLimits())
+	if artifact != nil || diagnosticByCode(t, diagnostics, "TARGET_SQS_REDRIVE_SOURCE_LIMIT").Source.NodeID != "queue_dlq" {
+		t.Fatal("Terraform oversized redrive scope was not refused at its DLQ")
 	}
 }
 

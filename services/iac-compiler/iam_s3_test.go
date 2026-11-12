@@ -62,6 +62,16 @@ func TestEventInvocationPermissionAcceptsOnlyExactGeneratedOwnerScope(t *testing
 					if first == nil || !reflect.DeepEqual(first, second) || !reflect.DeepEqual(diagnostics, againDiagnostics) {
 						t.Fatal("exact owner-scoped invocation permission is not reproducible")
 					}
+					denied := cloneNormalized(t, candidate)
+					setResourceValue(denied, statementID, "effect", stringValueConfig("deny"))
+					deniedBefore := cloneNormalized(t, denied)
+					deniedArtifact, deniedDiagnostics := render(denied)
+					if deniedArtifact != nil || !hasDiagnostic(deniedDiagnostics, "TARGET_GENERATED_POLICY_PROVENANCE_INVALID") {
+						t.Fatalf("generated Deny became an invocation grant: %#v", deniedDiagnostics)
+					}
+					if !reflect.DeepEqual(deniedBefore, denied) {
+						t.Fatal("refusal rewrote the Deny statement")
+					}
 					if test.name != "s3" {
 						return // The same matcher protects all three service grants.
 					}
@@ -101,6 +111,82 @@ func TestEventInvocationPermissionAcceptsOnlyExactGeneratedOwnerScope(t *testing
 				})
 			}
 		})
+	}
+}
+
+func TestEventBusScalarPoliciesRefuseLossyLowering(t *testing.T) {
+	for _, mutation := range []string{"none", "condition", "multiple-principals", "deny", "all-principals"} {
+		for _, target := range []string{"terraform", "cloudformation"} {
+			t.Run(mutation+"-"+target, func(t *testing.T) {
+				model := eventCustomBusPatternModel()
+				bus, _ := modelResource(model, "event_bus")
+				addPolicy(model, "bus_policy", "resource", bus, "aws.eventbridge.event-bus-owns-resource-policy", []string{"events:PutEvents"}, "provider-identity", []string{"111122223333"}, &bus, false, nil)
+				switch mutation {
+				case "condition":
+					statement, _ := modelResource(model, "bus_policy_statement")
+					condition := resource("bus_condition", "bus_condition", "aws.iam.policy-condition", configuration("aws.iam.policy-condition.configuration", map[string]ConfigurationValue{
+						"key": stringValueConfig("aws:PrincipalOrgID"), "operator": stringValueConfig("StringEquals"), "values": stringList("o-synthetic"),
+					}))
+					model.Resources = append(model.Resources, condition)
+					model.Connections = append(model.Connections, connection("bus_condition_owner", "aws.iam.statement-owns-condition", condition, statement, "aws.iam.policy-condition-membership.connection", nil))
+				case "multiple-principals":
+					setResourceValue(model, "bus_policy_statement", "principals", stringList("111122223333", "444455556666"))
+				case "deny":
+					setResourceValue(model, "bus_policy_statement", "effect", stringValueConfig("deny"))
+				case "all-principals":
+					setResourceValue(model, "bus_policy_statement", "principalKind", stringValueConfig("all-principals"))
+					setResourceValue(model, "bus_policy_statement", "principals", stringList("*"))
+				}
+				finalizeEventModel(model)
+				reader := &terraformRenderer{ctx: context.Background(), model: model, limits: DefaultLimits(), resourceNames: map[string]string{}}
+				reader.assignResourceNames()
+				documents := reader.collectPolicyDocuments()
+				assertNoTargetErrors(t, reader.diagnostics)
+				found := false
+				for _, document := range documents {
+					if document.Resource.ID != "bus_policy" {
+						continue
+					}
+					found = true
+					if len(document.Statements) != 1 || scalarEventBusGrant(document.Statements[0]) != (mutation == "none") {
+						t.Fatal("scalar lowering did not inspect the complete admitted statement")
+					}
+					if mutation == "none" {
+						for _, actions := range [][]string{nil, {"events:PutEvents", "events:DescribeEventBus"}} {
+							statement := document.Statements[0]
+							statement.Actions = actions
+							if scalarEventBusGrant(statement) {
+								t.Fatal("scalar lowering ignored action cardinality")
+							}
+						}
+					}
+				}
+				if !found {
+					t.Fatal("fixture did not reach the resource policy lowering boundary")
+				}
+				before := cloneNormalized(t, model)
+				var artifact *TargetArtifact
+				var diagnostics []Diagnostic
+				code := "TARGET_EVENT_BUS_POLICY_UNSUPPORTED"
+				if target == "cloudformation" {
+					code = cloudFormationDiagnosticCode(code)
+					artifact, diagnostics = renderCloudFormationArtifact(context.Background(), model, nil, DefaultLimits())
+				} else {
+					artifact, diagnostics = renderTerraformArtifact(context.Background(), model, nil, DefaultLimits())
+				}
+				if mutation == "none" {
+					assertNoTargetErrors(t, diagnostics)
+					if artifact == nil {
+						t.Fatal("exact scalar Allow grant refused")
+					}
+				} else if artifact != nil || diagnosticByCode(t, diagnostics, code).Source.NodeID != "bus_policy_statement" {
+					t.Fatalf("lossy policy lowering was not refused at its statement: %#v", diagnostics)
+				}
+				if !reflect.DeepEqual(before, model) {
+					t.Fatal("policy admission mutated caller-owned semantics")
+				}
+			})
+		}
 	}
 }
 
