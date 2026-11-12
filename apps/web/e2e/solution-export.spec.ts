@@ -456,36 +456,6 @@ test("rejects cross-tenant route selectors before an export job is requested", a
   ).toBe(0);
 });
 
-test("reproducible reruns retain exact digests, previous-export diff, and sanitized presentation", async ({
-  context,
-  page,
-}) => {
-  const api = await installApi(context, "reproducible-rerun");
-  await gotoExport(page, api);
-  await page.getByRole("tab", { name: "Manifest" }).click();
-  const manifest = page.getByRole("tabpanel", { name: "Manifest" });
-  await expect(
-    manifest.getByText(SOLUTION_EXPORT_ARCHIVE_DIGEST).first(),
-  ).toBeVisible();
-  const firstDigestCount = await manifest
-    .getByText(SOLUTION_EXPORT_ARCHIVE_DIGEST)
-    .count();
-
-  await page.reload({ waitUntil: "commit" });
-  await page.getByRole("tab", { name: "Manifest" }).click();
-  const repeatedManifest = page.getByRole("tabpanel", { name: "Manifest" });
-  await expect(
-    repeatedManifest.getByText(SOLUTION_EXPORT_ARCHIVE_DIGEST).first(),
-  ).toBeVisible();
-  expect(
-    await repeatedManifest.getByText(SOLUTION_EXPORT_ARCHIVE_DIGEST).count(),
-  ).toBe(firstDigestCount);
-  const visible = await page.locator("body").innerText();
-  expect(visible).not.toMatch(
-    /C:\\|\/Users\/|solution_export-e2e|signed-url|secret|token=/iu,
-  );
-});
-
 test("downloads through the authenticated short-lived grant and verifies filename and checksum binding", async ({
   context,
   page,

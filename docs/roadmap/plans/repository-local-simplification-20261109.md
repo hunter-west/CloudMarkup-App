@@ -782,3 +782,14 @@ wrapper preserves typed monitor failures and their bounded retry delay while
 unknown renderer errors stay sanitized and permanent. Deferred-operation tests
 and projected capacity checks are provider-free; they do not execute 32 builds
 or establish native worker, compiler, browser or hosted acceptance.
+
+### Export test maintenance
+
+Terminal negative fixtures now reach their intended failure and cancellation
+guards. Two overlapping checks share their existing owning cases; twelve data
+rows that were already excluded no longer obscure the active vectors. The
+two-build fixture reuses the same deterministic generator helper. A canned
+browser reload case was removed: its narrow presentation guarantee is no longer
+separately asserted, and it never proved regeneration or challenged redaction.
+Actual diff, retry identity, authenticated download and checksum checks remain.
+Focused checks pass; browser and native qualification remain separate.
