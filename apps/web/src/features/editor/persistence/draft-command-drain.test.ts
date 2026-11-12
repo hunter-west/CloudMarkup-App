@@ -667,10 +667,6 @@ describe("draft command drain", () => {
   it("joins one drain and retains the original command when the lease changes during acceptance", async () => {
     const original = await head(),
       drain = new DraftCommandDrain(original);
-    drain.enqueue(
-      move(original.draft.architectureDocument, "command_lease", 300),
-      "request-lease-0001",
-    );
     let proof = lease,
       calls = 0;
     const requests: DraftCommandRequest[] = [];
@@ -687,6 +683,12 @@ describe("draft command drain", () => {
       },
     };
     const first = drain.flush(transport);
+    // Same-turn edits must join an already published empty flush. This is the
+    // active command protocol's replacement for the retired snapshot drain.
+    drain.enqueue(
+      move(original.draft.architectureDocument, "command_lease", 300),
+      "request-lease-0001",
+    );
     expect(drain.flush(transport)).toBe(first);
     await expect(first).rejects.toMatchObject({
       reason: "editing-interrupted",
