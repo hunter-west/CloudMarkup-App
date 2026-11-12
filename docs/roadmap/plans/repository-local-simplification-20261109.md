@@ -963,3 +963,15 @@ The three existing attempt-identity negatives first establish a valid review and
 then require the exact uniqueness issue at the intended attempt field. A
 separate replay-authority length failure can no longer satisfy these assertions
 by itself. No case, production guard or replay authority is removed.
+
+### Networking evaluation fixture authority
+
+The frozen networking evaluation harness now declares fixed complete operation
+budgets of 1, 31, 3, 7 and 19 for its five existing scripted cases. Its former
+eight-operation allowance incorrectly relied on graph batches bypassing the
+aggregate planner limit. The production limit remains unchanged; authority is
+not derived from a model response. Frozen datasets, catalog authority, graph
+fixtures and expected diagnostics remain unchanged. Every observation-mutation
+negative now first establishes the expected passing deterministic baseline.
+Focused synthetic execution qualifies the harness and isolated refusals only,
+not model/provider, native PostgreSQL or deployment behavior.
