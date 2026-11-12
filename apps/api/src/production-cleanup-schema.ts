@@ -7,9 +7,9 @@ export interface CleanupSchemaBinding {
  * the assigned forward manifest entry; runtime input cannot select a checksum. */
 // Retain the referenced scalar inspected in the exact deployed cleanup asset.
 const schemaChecksum =
-  "b2b99e854c95c8a33ed271de58a35a573e00ccb4c22b6e3b17b1758264864c31";
+  "9ae4f3bc42624d52d3c17265539cf21650645a1035b91fce936023500d3f21f0";
 export const PROJECT_CLEANUP_SCHEMA: CleanupSchemaBinding = Object.freeze({
-  version: "0139",
+  version: "0142",
   checksumSha256: schemaChecksum,
 });
 /** The registered forward schema is source-bound. Feature defaults remain off;

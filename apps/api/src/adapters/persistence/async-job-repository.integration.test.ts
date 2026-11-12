@@ -438,7 +438,7 @@ integrationDescribe("async repository on isolated loopback PostgreSQL", () => {
     );
     expect(applied.rows.at(-3)?.["version"]).toBe("0098");
     expect(applied.rows.at(-2)?.["version"]).toBe("0138");
-    expect(applied.rows.at(-1)?.["version"]).toBe("0139");
+    expect(applied.rows.at(-1)?.["version"]).toBe("0142");
     expect(applied.rows).toHaveLength(expectedMigrationCount);
     const current = await database.query(
       sql("SELECT current_schema() AS schema"),

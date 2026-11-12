@@ -130,7 +130,7 @@ integrationDescribe(
       expect(applied.rows).toHaveLength(82);
       expect(applied.rows.at(-3)?.["version"]).toBe("0098");
       expect(applied.rows.at(-2)?.["version"]).toBe("0138");
-      expect(applied.rows.at(-1)?.["version"]).toBe("0139");
+      expect(applied.rows.at(-1)?.["version"]).toBe("0142");
     });
     it("roundtrips exact CloudFormation jobs, replays idempotently and rejects foreign principals and target substitution", async () => {
       const f = await persistedExportRunFixture(database, "cloudformation");

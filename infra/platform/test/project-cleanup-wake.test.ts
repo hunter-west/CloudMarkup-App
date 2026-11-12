@@ -145,7 +145,7 @@ describe("disabled durable cleanup wake preparation", () => {
       Environment: {
         Variables: Match.objectLike({
           CLOUDMARKUP_CLEANUP_WAKE_ENABLED: "false",
-          CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
+          CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0142",
           CLOUDMARKUP_PROJECT_CLEANUP_ENABLED: "true",
         }),
       },

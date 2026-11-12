@@ -97,11 +97,11 @@ suite("forward migration admission on genuine isolated PostgreSQL", () => {
       };
     });
 
-  it("upgrades the admitted 75-file predecessor through exact 0094-0098 and additive 0138/0139 with concurrent replay", async () => {
+  it("upgrades the admitted 75-file predecessor through exact 0094-0098 and isolated ordinary 0138-0142 fixtures with concurrent replay", async () => {
     const all = await loadHistoricalBetaMigrations(
       fileURLToPath(new URL("../../../migrations/", import.meta.url)),
     );
-    expect(all).toHaveLength(82);
+    expect(all).toHaveLength(85);
     const original = all.filter((migration) => migration.version <= "0093");
     expect(original).toHaveLength(75);
     await runMigrations(database, original);
@@ -136,7 +136,7 @@ suite("forward migration admission on genuine isolated PostgreSQL", () => {
     const all = await loadHistoricalBetaMigrations(
       fileURLToPath(new URL("../../../migrations/", import.meta.url)),
     );
-    expect(all).toHaveLength(82);
+    expect(all).toHaveLength(85);
     await runMigrations(database, all);
     const ledgerQuery = sql(
       "SELECT version,checksum_sha256 FROM cloudmarkup_schema_migrations ORDER BY version",
@@ -155,8 +155,8 @@ suite("forward migration admission on genuine isolated PostgreSQL", () => {
       ),
     ).rejects.toBeInstanceOf(RepositoryError);
     const failedSuccessor: LoadedMigration = {
-      version: "0139",
-      file: "0139_synthetic_later_failure.sql",
+      version: "0143",
+      file: "0143_synthetic_later_failure.sql",
       checksumSha256: digest("synthetic later failure"),
       statements: [
         "CREATE TABLE synthetic_later_failure (id integer PRIMARY KEY)",
@@ -165,7 +165,7 @@ suite("forward migration admission on genuine isolated PostgreSQL", () => {
     };
     await expect(
       runMigrations(database, [...all, failedSuccessor]),
-    ).rejects.toThrow();
+    ).rejects.toMatchObject({ code: "42703" });
     expect((await database.query(ledgerQuery)).rows).toEqual(committed.rows);
     const retained = await database.query(
       sql(

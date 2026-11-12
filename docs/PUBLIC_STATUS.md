@@ -137,3 +137,13 @@ The separate
 implements the scoped 60-day eligibility target on a local successor. Qualified
 restore ownership, ordinary-role/native admission, independent review and any
 irreversible retirement activation remain pending. No live deletion is enabled.
+
+The local schema-admission successor repairs the stale current bindings through
+`0142`: standalone profile/core-policy identity, production schema expectations,
+bundled migrator inventory and release guards. Historical migration bytes and
+the original unarmed ACL review remain intact; a separate source concordance
+records the changed consumers. Isolated ordinary database fixtures explicitly
+distinguish their namespace-adapted `0140` from the canonical migration. Focused
+source/setup checks pass, but the actual restricted export-composition check
+timed out at its unchanged limit with the pinned Go toolchain. Independent
+review, successor CI and native/composed release gates remain open.

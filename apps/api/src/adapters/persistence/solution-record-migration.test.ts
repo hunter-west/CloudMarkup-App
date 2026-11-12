@@ -164,6 +164,9 @@ describe("canonical solution-record migration", () => {
       "0137",
       "0138",
       "0139",
+      "0140",
+      "0141",
+      "0142",
     ]);
   });
 

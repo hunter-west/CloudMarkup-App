@@ -135,6 +135,9 @@ import migration0136 from "../../../apps/api/migrations/0136_model_private_runti
 import migration0137 from "../../../apps/api/migrations/0137_provider_direct_usage_journal_definitions.sql";
 import migration0138 from "../../../apps/api/migrations/0138_staff_credit_ai_access.sql";
 import migration0139 from "../../../apps/api/migrations/0139_staff_credit_export_access.sql";
+import migration0140 from "../../../apps/api/migrations/0140_beta_ai_usage_evidence.sql";
+import migration0141 from "../../../apps/api/migrations/0141_staff_provider_cost_scope.sql";
+import migration0142 from "../../../apps/api/migrations/0142_beta_ai_cleanup_checkpoints.sql";
 import bundledMigrationManifest from "../../../apps/api/migrations/manifest.json" with { type: "json" };
 
 interface ManifestEntry {
@@ -279,6 +282,9 @@ const sourceByFile: Readonly<Record<string, string>> = Object.freeze({
   "0137_provider_direct_usage_journal_definitions.sql": migration0137,
   "0138_staff_credit_ai_access.sql": migration0138,
   "0139_staff_credit_export_access.sql": migration0139,
+  "0140_beta_ai_usage_evidence.sql": migration0140,
+  "0141_staff_provider_cost_scope.sql": migration0141,
+  "0142_beta_ai_cleanup_checkpoints.sql": migration0142,
 });
 
 const sha256Pattern = /^[0-9a-f]{64}$/u;

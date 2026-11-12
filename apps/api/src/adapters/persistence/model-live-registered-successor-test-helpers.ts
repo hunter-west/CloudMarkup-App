@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { loadMigrations } from "./migrations.js";
+import { isolatedBetaFixtureMigrations } from "./historical-beta-migrations-test-helper.js";
 import { sql, type SqlExecutor } from "./sql.js";
 
 const contracts = {
@@ -191,6 +192,24 @@ const contracts = {
     manifest:
       "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
   },
+  "0140": {
+    count: 122,
+    statements: 1378,
+    manifest:
+      "32661b3ae68b2312d812892808ebe09ade08645522373a8647d9abc8d94dc937",
+  },
+  "0141": {
+    count: 123,
+    statements: 1384,
+    manifest:
+      "be90aef5db5986a0c5bbd9ddea4a5c0be9513fff052b0256ea455473bd628562",
+  },
+  "0142": {
+    count: 124,
+    statements: 1397,
+    manifest:
+      "6dddcc2517fa570d3869f936b97330d26a22e27a220ed713baf18077c36c3d5c",
+  },
 } as const;
 export type RegisteredEvaluationSuccessorVersion = keyof typeof contracts;
 export async function loadRegisteredEvaluationSuccessor(
@@ -201,7 +220,7 @@ export async function loadRegisteredEvaluationSuccessor(
     createHash("sha256").update(value).digest("hex");
   if (
     digest(await readFile(new URL("manifest.json", directory))) !==
-    "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47"
+    "77aa689bb5bc511a653e48da76fc9cda0fc9aa99853a9b61d40ff20304a7fa6c"
   )
     throw Error("The exact current manifest is required.");
   // Authenticating all source bytes precedes selecting a historical prefix.
@@ -219,7 +238,7 @@ export async function loadRegisteredEvaluationSuccessor(
     ),
   };
   if (
-    all.length !== 121 ||
+    all.length !== 124 ||
     selected.length !== contract.count ||
     selected.reduce(
       (sum, migration) => sum + migration.statements.length,
@@ -259,7 +278,10 @@ export async function requireRegisteredEvaluationSuccessor(
     latestVersion === "0136" ||
     latestVersion === "0137" ||
     latestVersion === "0138" ||
-    latestVersion === "0139"
+    latestVersion === "0139" ||
+    latestVersion === "0140" ||
+    latestVersion === "0141" ||
+    latestVersion === "0142"
       ? latestVersion
       : undefined;
   const migrations = await loadRegisteredEvaluationSuccessor(
@@ -311,7 +333,11 @@ export async function requireRegisteredEvaluationSuccessor(
     migrations[119]?.version === "0138" &&
     migrations[120]?.version === "0139"
       ? [...migrations.slice(0, 80), ...migrations.slice(-2)]
-      : migrations;
+      : version === undefined &&
+          latestVersion === "0142" &&
+          result.rows.length === 85
+        ? isolatedBetaFixtureMigrations(migrations)
+        : migrations;
   if (
     result.rowCount !== expected.length ||
     expected.some((migration, index) => {

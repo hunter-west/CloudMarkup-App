@@ -234,13 +234,13 @@ test("public-entry caller rejects a missing operator host before consuming expor
     },
   );
 });
-test("source receipt checks all 121 current canonical entries through 0139", async () => {
+test("source receipt checks all 124 current canonical entries through 0142", async () => {
   const receipt = await inspectMigrations();
-  assert.equal(receipt.count, 121);
-  assert.equal(receipt.lastVersion, "0139");
+  assert.equal(receipt.count, 124);
+  assert.equal(receipt.lastVersion, "0142");
   assert.equal(
     receipt.manifestSha256,
-    "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
+    "77aa689bb5bc511a653e48da76fc9cda0fc9aa99853a9b61d40ff20304a7fa6c",
   );
 });
 test("tampered and unregistered SQL cannot reach a database", async () => {
@@ -299,7 +299,7 @@ test("standalone inspection binds the canonical source and its two portable file
   assert.equal(receipt.owner, "cloudmarkup_admin");
   assert.equal(
     receipt.canonicalManifestSha256,
-    "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
+    "77aa689bb5bc511a653e48da76fc9cda0fc9aa99853a9b61d40ff20304a7fa6c",
   );
 });
 

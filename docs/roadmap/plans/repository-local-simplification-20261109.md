@@ -565,3 +565,28 @@ authorization and explicit dry-run eligibility. No financial/customer contract,
 unique usage, browser-recovery lifetime or historical migration changes.
 Restore-owner binding, native/ordinary-role admission and independent review
 remain required. No live grant, retirement caller, TTL or deletion is activated.
+
+### Current schema and historical fixture admission
+
+The formatter-only PR successor reached backend CI and exposed stale `0139`
+runtime/profile/release expectations after additive `0140` and `0141`. The local
+cleanup successor adds `0142`, so qualification now binds that complete current
+registry. The standalone profile retains its original identity and portable
+`0000`/`0127` bytes, and the core ACL keeps the same unarmed column/function
+grants. Production composition, scheduled-host expectations, migrator imports,
+release guards and handoff counts must agree with the same exact source.
+
+Historical evaluation prefixes retain their original counts, statements and
+digests. Ordinary isolated-schema tests select `0001`–`0098` plus the reviewed
+ordinary additions, excluding the protected `0099`–`0137` role topology. Because
+canonical `0140` explicitly targets `public`, its isolated fixture has a
+distinct filename and checksum and uses no public-schema names. It is fixture
+behavior, not evidence that the canonical migration was executed or admitted.
+Native public-schema, protected-role and restore qualification remain separate.
+
+The original ordinary ACL evidence is preserved. Its source successor records
+the changed consumers and new schema/permission proposal hashes without claiming
+native qualification or enabling optional accounting/staff/cleanup authority.
+The private overlay/source pin remains intentionally unadmitted until authentic
+successor public assets and exact composition receipts are available. No private
+repin, production schema operation, grant or deletion accompanies this repair.

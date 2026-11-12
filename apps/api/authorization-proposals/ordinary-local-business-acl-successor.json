@@ -1,0 +1,101 @@
+{
+  "kind": "ordinary-runtime-local-business-acl-successor.v1",
+  "sourceBase": "4a23c4b9010b0b690ba2a388a10d24e439677284",
+  "state": "REVIEW_ONLY_UNARMED",
+  "applied": false,
+  "nativeQualified": false,
+  "productionActivation": false,
+  "predecessorSha256": "a4a9962f4cd629cb08c759124de37cec1d39c29eed2b68cf94a0ffca957b470e",
+  "history": {
+    "count": 124,
+    "statements": 1397,
+    "tip": "0142",
+    "manifestSha256": "77aa689bb5bc511a653e48da76fc9cda0fc9aa99853a9b61d40ff20304a7fa6c"
+  },
+  "inputs": [
+    {
+      "path": "apps/api/migrations/manifest.json",
+      "sha256": "77aa689bb5bc511a653e48da76fc9cda0fc9aa99853a9b61d40ff20304a7fa6c"
+    },
+    {
+      "path": "apps/api/self-host-migrations/manifest.json",
+      "sha256": "f3308e99a951744b7363179f029a5e80617700e54fcb6826d45c87c653fe1f13"
+    },
+    {
+      "path": "apps/api/authorization-proposals/self-host-core-runtime-acl-v2.json",
+      "sha256": "d23a26b95cb8cb69359f373b1398aa80b78cb8eea2fad2c7755c9e12b8f2ef09"
+    },
+    {
+      "path": "apps/api/authorization-proposals/ordinary-local-business-acl.sql",
+      "sha256": "455e2233dca08f2f42a558b64a89f8989ee734d9cf174d384a8449d6b8008427"
+    },
+    {
+      "path": "apps/api/authorization-proposals/beta-ai-usage-evidence.sql",
+      "sha256": "a70b0284511bc6a40a65a2acacbb3b59cfc633f391a7457a685c4dc9471deb62"
+    },
+    {
+      "path": "apps/api/authorization-proposals/staff-provider-cost-report.sql",
+      "sha256": "c93fbfb9e6952783c8ac9d49f33ca53b9f912cf833a4ef44fe1ad96ff3918915"
+    },
+    {
+      "path": "apps/api/authorization-proposals/beta-ai-cleanup-checkpoints.sql",
+      "sha256": "1caf819007480676ea9483dda7d1ed72c14e3fe734fcc708c56221eba7e171a8"
+    }
+  ],
+  "changes": {
+    "apps/api/src/adapters/persistence/beta-ai-credit-meter.ts": {
+      "before": "c3a482abbabb7a94f7527dc44f11a52716f7d81f92c14fa7b3f2f205d5d7f46f",
+      "after": "cfc52cea06f86077109e4af337b14c44f8847c75f97481d33d13a6d96dca5de3",
+      "reason": "Retains observed provider usage and canonical financial replay; splits organization-scoped cleanup selection/execution. Additional accounting columns and cleanup storage require separate ordinary-role/native admission."
+    },
+    "apps/api/src/adapters/persistence/staff-accounts.ts": {
+      "before": "7271265451d2488b1205fc7bedefff2604c9114d67d971bdd028c83ad9e27c69",
+      "after": "d7c955bb2d244da2c16e61c5ffd29cf5c48e7d46aa8e65aea93f982174ea9364",
+      "reason": "Recognizes the distinct staff provider-cost read permission; no automatic enrollment or broad accounts.read authorization."
+    },
+    "apps/api/src/production-cleanup-schema.ts": {
+      "before": "e95d8f50ed118923c790ffc43d7870288414bd437f81cc67ef7209ce47c36bab",
+      "after": "b1188ce680fcc78c059b0931b61119baf51a72052cc07480382d294493b59a0c",
+      "reason": "Retains the exact version/checksum readiness refusal while binding the additive 0142 schema; no activation or deletion-authority change."
+    },
+    "apps/api/src/production-commercial-reads.ts": {
+      "before": "5f4f6c87fbf27056e42f708dce4e8d6e240bcf018a2d54d84c3a883753d1243e",
+      "after": "5c22ceccf38757c19e1b6c5cdd001387920905cd481c65032fc498ea6d4ba15c",
+      "reason": "Optionally runs the existing organization-authorized cleanup owner with current-session and restore admission. No qualified restore binding is supplied; customer balances and summaries remain independent."
+    },
+    "apps/api/src/production-composition.ts": {
+      "before": "34d21a069f33e9da4d3a03cb293c2a422f35ccce8765cd8ce7dda5ecdfb102a8",
+      "after": "97e5fb4ee12d2bc373cf50944b5b2fe3479dcb8884aeba6b52eecbdfe13c7aaa",
+      "reason": "Binds current schema 0142 and the explicit staff-report service; runtime permission deltas remain unadmitted and cleanup has no default restore owner."
+    },
+    "apps/api/src/beta-infrastructure-worker.ts": {
+      "before": "d818cf12722998a7f091be388b56652fffee600d0706e4af56f83fb3a628b4d9",
+      "after": "d02eae0e5701fa84355c9f272e5ee97220c4afb9672ac4b351e63ae33c488a8d",
+      "reason": "Retains the same known provider response across output/observation/financial failure paths without repeating the provider call or changing financial payloads."
+    },
+    "apps/api/src/production-cleanup-admission.test.ts": {
+      "before": "acf2552497be10e24ce1db358e81adadc09bd507c24eef595c1dda528b440057",
+      "after": "cadcb26bb4aeb0bd10c6002219b1259a9cda31dcbb9d8035e2e237ef1ff3e900",
+      "reason": "The existing cleanup-admission fixture follows the current 0142 environment expectation while retaining wrong-scope and negative admission cases."
+    }
+  },
+  "additions": {
+    "apps/api/migrations/0140_beta_ai_usage_evidence.sql": "0506cd7b7d3419e2be1addbbe930f4e74016dd33984b9c504829c71ee0ab64f2",
+    "apps/api/migrations/0141_staff_provider_cost_scope.sql": "358f79f5d19cd2e5540c03f3e72d1010bd726c5c82500e3174ef20ca3249b956",
+    "apps/api/migrations/0142_beta_ai_cleanup_checkpoints.sql": "9ae4f3bc42624d52d3c17265539cf21650645a1035b91fce936023500d3f21f0",
+    "apps/api/src/adapters/persistence/beta-ai-usage-observations.ts": "052e5623d19adf32f6c5195cf0773f7c104cc08234cdf01022ac09fb0fa86e24",
+    "apps/api/src/adapters/persistence/beta-ai-internal-cost-reader.ts": "1305ea1468685079020e7de32bd6b154bb62cac47c03a0e620bd0a173d14ff6f",
+    "apps/api/src/adapters/persistence/beta-ai-cost-evidence.ts": "88f7ccc16466d5d537b54b9e6708ccff915641940365ae596bfdb74203bb0b09",
+    "apps/api/src/adapters/persistence/beta-ai-cleanup-store.ts": "520109825a5303f20aa9571df0afdddc71c6e1255bb69a2faa80c7749ade8a6b",
+    "apps/api/src/adapters/persistence/staff-provider-costs.ts": "267db9538e5dcce6bc1f33d07b57727b89bb303092ef9f335095a26152926e4c",
+    "apps/api/src/application/beta-ai-cleanup-owner.ts": "9e9d960719e9010172d26a365336b630fefae7ee133043b05515ffb0303348f6",
+    "apps/api/src/application/beta-ai-cleanup-retention.ts": "e4048d50ad557f7958c1f97461b1f9beab75dff1c6233b8541826f5cb4486168",
+    "apps/api/src/production-beta-ai-cleanup.ts": "2ee07f5ddcc2e7726b408fdf9191ac927440b881aa5e0007096294d92f6d5076"
+  },
+  "limitations": [
+    "Preserves the complete predecessor review, historical migration bytes and all existing core grants. This concordance does not confer authority or certify unchanged optional runtime permissions.",
+    "The standalone core remains models-disabled; no staff principal is enrolled, cleanup control is not admitted and no retirement authority is activated.",
+    "Accounting evidence, scoped staff reads and cleanup checkpoints use separately reviewable explicit-column proposals. Existing protected-column, private-role and exact-source controls remain mandatory.",
+    "Native ordinary-role allow/deny/cross-tenant, trigger, concurrency, current-session, restore and exact public/private release admission remain unproved."
+  ]
+}

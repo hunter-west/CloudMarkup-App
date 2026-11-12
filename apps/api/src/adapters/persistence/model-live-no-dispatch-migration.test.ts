@@ -8,8 +8,8 @@ describe("additive live no-dispatch expiry migration", () => {
     const migrations = await loadMigrations(
       fileURLToPath(new URL("../../../migrations/", import.meta.url)),
     );
-    expect(migrations).toHaveLength(121);
-    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(1374);
+    expect(migrations).toHaveLength(124);
+    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(1397);
     const previous = {
       storageContractVersion: 1,
       migrations: migrations

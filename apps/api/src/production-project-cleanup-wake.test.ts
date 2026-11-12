@@ -25,7 +25,7 @@ function environment() {
     CLOUDMARKUP_ENVIRONMENT: "beta",
     AWS_REGION: region,
     CLOUDMARKUP_ACCOUNT_ID: account,
-    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
+    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0142",
     CLOUDMARKUP_PROJECT_CLEANUP_ENABLED: "true",
     CLOUDMARKUP_CLEANUP_WAKE_ENABLED: "true",
     CLOUDMARKUP_DATABASE_ARN: `arn:aws:rds:${region}:${account}:cluster:cloudmarkup-beta-postgresql`,
@@ -225,9 +225,9 @@ describe("inactive cleanup wake hosts and private envelopes", () => {
     };
     const rows = [
       {
-        version: "0139",
+        version: "0142",
         checksum_sha256:
-          "b2b99e854c95c8a33ed271de58a35a573e00ccb4c22b6e3b17b1758264864c31",
+          "9ae4f3bc42624d52d3c17265539cf21650645a1035b91fce936023500d3f21f0",
       },
     ];
     const database: SqlDatabase = {

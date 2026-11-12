@@ -4,7 +4,7 @@
   "engineMajor": 17,
   "owner": "cloudmarkup_admin",
   "bootstrapGrantor": "cloudmarkup_owner",
-  "canonicalManifestSha256": "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
+  "canonicalManifestSha256": "77aa689bb5bc511a653e48da76fc9cda0fc9aa99853a9b61d40ff20304a7fa6c",
   "identityMigration": {
     "version": "0000",
     "file": "0000_self_host_profile_identity.sql",
