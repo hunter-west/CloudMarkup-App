@@ -116,7 +116,7 @@
     "lint:repository": "eslint infra scripts evals eslint.config.mjs config/playwright/beta-smoke.config.ts vitest.config.ts --cache --cache-location .cache/eslint/ --cache-strategy content --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "docs:brand:check": "node scripts/check-document-brand.mjs",
+    "docs:brand:check": "node --test scripts/check-document-brand.test.mjs && node scripts/check-document-brand.mjs",
     "docs:brand:update": "node scripts/check-document-brand.mjs --write",
     "docs:links:check": "node scripts/check-markdown-links.mjs",
     "cdk:synth": "pnpm --filter @cloudmarkup/platform synth && node scripts/verify-cdk-template.mjs",
