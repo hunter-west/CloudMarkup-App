@@ -733,3 +733,14 @@ evidence and again by the model gateway; the redaction metadata reflects the
 detected transformation. No model or webhook capability is enabled by these
 corrections. Focused fake-store and DOM tests cover the reported sequences;
 native database, real browser/provider and hosted admission remain separate.
+
+### Persistence proof and test consolidation
+
+Verified read streams now yield owned buffers, so a retaining export reader sees
+the same bytes that were hashed even when its producer reuses storage. The
+receipt negative starts from a schema-valid successful export and changes only
+the retained archive binding. An unmapped-resource assertion now checks the
+diagram itself. Four overlapping cases were removed while retaining terminal
+principal/preview refusal, active-attempt protection, exact evaluated revision,
+wrong-environment refusal and admission-generation type checks. Native cases,
+production schemas, workflow selection and source-admission gates are unchanged.

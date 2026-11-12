@@ -195,6 +195,14 @@ describe("continuous conformance report projection", () => {
       solutionRevisionId: evaluatedSolutionRevision.id,
     };
     const projected = projectConformanceReportV1(report, projectionBinding);
+    expect(() =>
+      projectConformanceReportV1(report, {
+        ...projectionBinding,
+        environmentId: "environment.other",
+      }),
+    ).toThrow(
+      /does not match the authorized project, evaluated revision, and environment/u,
+    );
     const expectedPositions = new Map(
       approvedTopology.nodes.map(({ id, position }) => [id, position]),
     );

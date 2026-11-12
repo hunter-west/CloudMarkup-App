@@ -140,7 +140,7 @@ export function projectApprovedConformanceTopologyV1(
   return { edges, nodes };
 }
 
-export function assertConformanceReportProjectionBindingV1(
+function assertConformanceReportProjectionBindingV1(
   report: {
     readonly currentSolutionRevision: { readonly id: string };
     readonly environment: { readonly environmentId: string };
