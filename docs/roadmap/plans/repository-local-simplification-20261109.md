@@ -700,9 +700,14 @@ exact hosted admission and release acceptance remain separate gates.
 Object staging retains an owned copy of every streamed chunk before hashing, so
 buffer reuse cannot change the acknowledged bytes. Unsaved presentation
 preferences use a distinct conditional-write identity from the first saved row.
-Lifecycle retries pass the original project version to the durable receipt/CAS
-owner; deletion responses read version metadata without reopening draft content.
-Unexpected coded import errors retain the generic server-error boundary.
+A new opaque preference-validator namespace also rejects cached predecessor
+validators, which aliased the absent state and stored version one. Clients must
+read current preferences before an explicit retry; failed writes are not
+replayed automatically. Persisted numeric versions and the positive public sync
+version remain unchanged. Lifecycle retries pass the original project version to
+the durable receipt/CAS owner; deletion responses read version metadata without
+reopening draft content. Unexpected coded import errors retain the generic
+server-error boundary.
 
 Project and revision lists apply stable sort and continuation predicates before
 the SQL limit. Cursors bind the principal, organization, collection and

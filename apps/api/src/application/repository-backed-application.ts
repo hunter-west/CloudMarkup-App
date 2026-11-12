@@ -69,6 +69,9 @@ import {
 
 const DOCUMENT_IDEMPOTENCY_TIME = "2026-08-15T00:00:00.000Z";
 const MAX_DOCUMENT_BYTES = 4 * 1024 * 1024;
+// Predecessor v1 validators aliased absent preferences with the first saved row.
+// A distinct opaque namespace requires cached clients to read before editing.
+const PREFERENCES_ETAG_KIND = "preferences-state-v2";
 
 type RepositoryBackedApplicationOverrides = Pick<
   CloudMarkupApplication,
@@ -222,7 +225,7 @@ class RepositoryBackedApplication implements RepositoryBackedApplicationOverride
       };
       return {
         etag: etag(
-          "preferences",
+          PREFERENCES_ETAG_KIND,
           principal.principalId,
           found?.syncVersion ?? 0,
         ),
@@ -243,7 +246,7 @@ class RepositoryBackedApplication implements RepositoryBackedApplicationOverride
         await this.#repository.getPresentationPreferences(principal);
       const expectedVersion = current?.syncVersion ?? 0;
       const currentEtag = etag(
-        "preferences",
+        PREFERENCES_ETAG_KIND,
         principal.principalId,
         expectedVersion,
       );
@@ -262,7 +265,11 @@ class RepositoryBackedApplication implements RepositoryBackedApplicationOverride
         expectedVersion,
       );
       return {
-        etag: etag("preferences", principal.principalId, updated.syncVersion),
+        etag: etag(
+          PREFERENCES_ETAG_KIND,
+          principal.principalId,
+          updated.syncVersion,
+        ),
         value: { contractVersion: 1, ...updated },
       };
     } catch (error) {

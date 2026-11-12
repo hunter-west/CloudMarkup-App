@@ -6,9 +6,11 @@ import {
   type PresentationPreferencesV1,
 } from "@cloudmarkup/api-contract";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { QueryClient } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CloudMarkupQueryProvider } from "../api/index.js";
+import { QueryBackedPresentationPreferences } from "../api/presentation-preferences-remote.js";
 import {
   ExperiencePreferenceProvider,
   ModePreferenceProvider,
@@ -87,6 +89,111 @@ function renderPreferences(transport: ApiTransport) {
 describe("server-backed presentation preference providers", () => {
   beforeEach(() => {
     window.localStorage.clear();
+  });
+
+  it("requires an explicit fresh read after a cached predecessor validator conflicts", async () => {
+    const requests: ApiTransportRequest[] = [];
+    const queryClient = new QueryClient();
+    let legacyRead = true;
+    const preferences: PresentationPreferencesV1 = {
+      contextualLearningEnabled: false,
+      contractVersion: 1,
+      experienceMode: "professional",
+      syncVersion: 1,
+      updatedAt: "2026-08-15T12:00:00.000Z",
+    };
+    const transport: ApiTransport = (request) => {
+      requests.push(request);
+      if (request.method === "PUT") {
+        if (
+          request.headers["if-match"] ===
+          '"preferences:principal_preferences_test:v1"'
+        ) {
+          return Promise.resolve(
+            response(412, {
+              apiVersion: "v1",
+              error: {
+                code: "precondition_failed",
+                correlationId: "preference_cutover_test",
+                message: "Refresh preferences before trying again.",
+              },
+            }),
+          );
+        }
+        expect(request.headers["if-match"]).toBe(
+          '"preferences-state-v2:principal_preferences_test:v1"',
+        );
+        expect(JSON.parse(request.body ?? "null")).toEqual({
+          contextualLearningEnabled: false,
+          contractVersion: 1,
+          experienceMode: "guided",
+        });
+        return Promise.resolve(
+          response(
+            200,
+            {
+              apiVersion: "v1",
+              data: {
+                ...preferences,
+                experienceMode: "guided",
+                syncVersion: 2,
+              },
+            },
+            '"preferences-state-v2:principal_preferences_test:v2"',
+          ),
+        );
+      }
+      const old = legacyRead;
+      legacyRead = false;
+      return Promise.resolve(
+        response(
+          200,
+          {
+            apiVersion: "v1",
+            data: old
+              ? {
+                  ...preferences,
+                  contextualLearningEnabled: true,
+                  experienceMode: "guided",
+                }
+              : preferences,
+          },
+          old
+            ? '"preferences:principal_preferences_test:v1"'
+            : '"preferences-state-v2:principal_preferences_test:v1"',
+        ),
+      );
+    };
+    const remote = new QueryBackedPresentationPreferences(
+      createCloudMarkupClient({
+        baseUrl: "https://api.test.invalid",
+        transport,
+      }),
+      queryClient,
+    );
+    try {
+      await remote.load(actorId);
+      await expect(
+        remote.update(actorId, { experienceMode: "guided" }),
+      ).rejects.toMatchObject({ status: 412 });
+      expect(requests.map(({ method }) => method)).toEqual(["GET", "PUT"]);
+      expect(queryClient.getQueryCache().getAll()).toHaveLength(0);
+      const current = await remote.load(actorId);
+      expect(current.preferences).toEqual(preferences);
+      await expect(
+        remote.update(actorId, { experienceMode: "guided" }),
+      ).resolves.toMatchObject({
+        preferences: { contextualLearningEnabled: false, syncVersion: 2 },
+      });
+      expect(requests.map(({ method }) => method)).toEqual([
+        "GET",
+        "PUT",
+        "GET",
+        "PUT",
+      ]);
+    } finally {
+      queryClient.clear();
+    }
   });
 
   it("restores server values and serializes explicit writes with exact ETags", async () => {

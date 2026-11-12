@@ -236,10 +236,9 @@ describe("repository-backed local API boundary", () => {
       updatePresentationPreferences,
     });
 
-    await expect(
-      local.getPresentationPreferences(principal()),
-    ).resolves.toEqual({
-      etag: '"preferences:principal_local_owner:v4"',
+    const current = await local.getPresentationPreferences(principal());
+    expect(current).toEqual({
+      etag: '"preferences-state-v2:principal_local_owner:v4"',
       value: {
         contextualLearningEnabled: false,
         contractVersion: 1,
@@ -258,8 +257,20 @@ describe("repository-backed local API boundary", () => {
         },
         '"preferences:principal_local_owner:v4"',
       ),
+    ).rejects.toMatchObject({ code: "precondition_failed" });
+    expect(updatePresentationPreferences).not.toHaveBeenCalled();
+    await expect(
+      local.updatePresentationPreferences(
+        principal(),
+        {
+          contextualLearningEnabled: true,
+          contractVersion: 1,
+          experienceMode: "guided",
+        },
+        current.etag,
+      ),
     ).resolves.toMatchObject({
-      etag: '"preferences:principal_local_owner:v5"',
+      etag: '"preferences-state-v2:principal_local_owner:v5"',
       value: { contractVersion: 1, syncVersion: 5 },
     });
     expect(updatePresentationPreferences).toHaveBeenCalledWith(
@@ -272,7 +283,7 @@ describe("repository-backed local API boundary", () => {
     );
   });
 
-  it("distinguishes absent preferences and rejects stale or competing first writes", async () => {
+  it("rejects predecessor preference validators, stale updates and competing first writes", async () => {
     type Preferences = NonNullable<
       Awaited<ReturnType<CloudMarkupRepository["getPresentationPreferences"]>>
     >;
@@ -293,8 +304,12 @@ describe("repository-backed local API boundary", () => {
         Promise.resolve(stored.get(context.principalId) ?? null),
       updatePresentationPreferences: update,
     });
+    // The deployed predecessor issued v1 for an absent row, before any save.
+    const predecessorAbsentEtag = '"preferences:principal_local_owner:v1"';
     const initial = await local.getPresentationPreferences(principal());
-    expect(initial.etag).toBe('"preferences:principal_local_owner:v0"');
+    expect(initial.etag).toBe(
+      '"preferences-state-v2:principal_local_owner:v0"',
+    );
     expect(initial.value.syncVersion).toBe(1);
     const input = {
       contextualLearningEnabled: false,
@@ -321,9 +336,47 @@ describe("repository-backed local API boundary", () => {
     expect(
       (await local.getPresentationPreferences(principal())).value,
     ).toMatchObject({ contextualLearningEnabled: false, syncVersion: 1 });
+    const firstStored = structuredClone(stored.get(principal().principalId));
+    await expect(
+      local.updatePresentationPreferences(
+        principal(),
+        {
+          contextualLearningEnabled: true,
+          contractVersion: 1,
+          experienceMode: "guided",
+        },
+        predecessorAbsentEtag,
+      ),
+    ).rejects.toMatchObject({ code: "precondition_failed" });
+    expect(stored.get(principal().principalId)).toEqual(firstStored);
+    expect(update).toHaveBeenCalledTimes(2);
+
+    const fresh = await local.getPresentationPreferences(principal());
+    expect(fresh.etag).toBe('"preferences-state-v2:principal_local_owner:v1"');
+    const next = await local.updatePresentationPreferences(
+      principal(),
+      { ...input, contextualLearningEnabled: true },
+      fresh.etag,
+    );
+    expect(next.value).toMatchObject({
+      contextualLearningEnabled: true,
+      experienceMode: "professional",
+      syncVersion: 2,
+    });
+    expect(next.etag).not.toBe(fresh.etag);
+    await expect(
+      local.updatePresentationPreferences(principal(), input, fresh.etag),
+    ).rejects.toMatchObject({ code: "precondition_failed" });
+    expect(update).toHaveBeenCalledTimes(3);
+    expect(stored.get(principal().principalId)).toEqual({
+      contextualLearningEnabled: true,
+      experienceMode: "professional",
+      syncVersion: 2,
+      updatedAt: NOW,
+    });
     const other = principal("principal_other");
     const otherInitial = await local.getPresentationPreferences(other);
-    expect(otherInitial.etag).toBe('"preferences:principal_other:v0"');
+    expect(otherInitial.etag).toBe('"preferences-state-v2:principal_other:v0"');
     await expect(
       local.updatePresentationPreferences(other, input, initial.etag),
     ).rejects.toMatchObject({ code: "precondition_failed" });
