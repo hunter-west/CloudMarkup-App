@@ -919,3 +919,13 @@ constant. Its old 33-reference refusal predated the reviewed build-batch
 capacity alignment. Other-family ceilings, per-stage limits, production schemas
 and generated artifacts remain unchanged; this fixture correction does not
 establish integrated, native lifecycle or deployment acceptance.
+
+### Planner budgets and validation outcomes
+
+The planner applies the trusted operation budget to the complete normalized
+review proposal, including graph, assistant and summary operations. Application
+validation now reports failed security when successfully completed scanners
+return blocking dependency or secret findings. Nonblocking dependency warnings
+remain distinct. Focused synthetic checks preserve proposal-only authority,
+unchanged source documents and candidate-bound Evidence; no production profile
+or native execution is enabled.

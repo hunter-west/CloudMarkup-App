@@ -648,11 +648,16 @@ function buildOutcomes(
   const admissionFailed = result.diagnostics.some(
     ({ severity, source }) => severity === "error" && source === "admission",
   );
-  const securityFailed = result.diagnostics.some(
-    ({ severity, source }) =>
-      severity === "error" &&
-      (source === "dependency-scan" || source === "secret-scan"),
-  );
+  const securityFailed =
+    result.findings.some(
+      ({ severity, source }) =>
+        source === "secret" || severity === "high" || severity === "critical",
+    ) ||
+    result.diagnostics.some(
+      ({ severity, source }) =>
+        severity === "error" &&
+        (source === "dependency-scan" || source === "secret-scan"),
+    );
   const securityNotRun =
     stepOutcome(result, "dependency-scan") === "not-run" ||
     stepOutcome(result, "secret-scan") === "not-run";
