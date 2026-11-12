@@ -1100,14 +1100,14 @@ doubles do not establish native constraints, locking, rollback or rendering.
 Production implementations, historical migrations, financial policy and private
 test overrides are unchanged. No cases or duplicate executions were removed.
 
-### Accepted-line integration
+### Accepted-line integration before billing
 
 Local merge commits retain the published observation/networking ancestry and the
 separately reviewed compiler, EventBus and account corrections. The sole text
 conflict joined both appended plan sections without changing their content.
 Product and test paths retain their exact accepted source bytes; no test cases
-were added or removed by integration. The unreviewed billing successors stay on
-separate branches and are excluded.
+were added or removed by integration. At that checkpoint the billing successors
+remained on separate branches and were excluded.
 
 The accepted private documentation/overlay reference remains unchanged. The two
 pending execution-test bindings, both major duplicate overrides, authentic
@@ -1116,3 +1116,34 @@ version proposal is unapplied and its 16 golden-pair refreshes are unfinished.
 Go, authored-golden reproduction, native SQL/restore, browser, R1 and
 cleanup-owner acceptance remain separate gates. Local integration does not
 publish or deploy.
+
+### Billing provider boundary corrections
+
+Reconciliation permits signed debit adjustments while retaining nonnegative
+derived balances, safe integer totals and allocation bounds. Hosted top-up and
+subscription creation retain their original retry deadline through asynchronous
+current-account authorization and recheck it immediately before sending. Reads
+that reconcile an already-created session remain available after that deadline.
+The live-price test now admits valid historical evidence before changing only
+the refreshed price, and separately retains historical rejection before HTTP.
+
+The four existing owning suites passed all 95 cases with injected provider
+transport; the later Checkout deadline assertion also passed. No registrations
+were removed. These checks establish local boundary behavior, not payment,
+native database, hosted composition or integrated acceptance. The private top-up
+override now has its separately accepted matching assertion/hash port and
+remains present.
+
+### Accepted billing integration
+
+The next local merge retains the accepted integration and accepted billing
+public ancestry with the exact accepted private follow-up reference. All product
+and test files retain their reviewed bytes; only appended plan sections required
+text resolution. The timestamp replay correction and later commercial work stay
+on separate branches and are excluded from this candidate.
+
+No cases, overrides, pins or intake records are removed or replaced. The two
+pending execution-test bindings, authentic assets/intake/cold composition,
+provider-version proposal and 16 golden-pair refreshes remain open. Existing
+automatic CI continues on its published head; this local merge does not publish,
+rerun CI or qualify native, hosted, browser, restore or deployment acceptance.
