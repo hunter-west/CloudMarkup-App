@@ -862,16 +862,23 @@ describe("SelectedResourceInspector", () => {
       .getByText("Implementation", { selector: "span" })
       .closest("summary");
     if (implementation === null) throw new Error("Expected implementation.");
+    const workloadRegion = screen.getByRole("region", {
+      name: "Application behavior",
+    });
+    const workload = () => {
+      expect(workloadRegion).toBeInTheDocument();
+      return within(workloadRegion);
+    };
     fireEvent.click(implementation);
     fireEvent.click(screen.getByText("Inputs and outputs (optional)"));
     const purpose = "Validate a note and return its stable identifier.";
-    fireEvent.change(screen.getByLabelText(/^Purpose/u), {
+    fireEvent.change(workload().getByLabelText(/^Purpose/u), {
       target: { value: purpose },
     });
-    fireEvent.change(screen.getByLabelText(/^Inputs/u), {
+    fireEvent.change(workload().getByLabelText(/^Inputs/u), {
       target: { value: "noteId:uuid:internal:required" },
     });
-    fireEvent.change(screen.getByLabelText(/^Outputs/u), {
+    fireEvent.change(workload().getByLabelText(/^Outputs/u), {
       target: { value: "accepted:boolean:internal:required" },
     });
     fireEvent.click(
@@ -888,11 +895,11 @@ describe("SelectedResourceInspector", () => {
     await waitFor(() =>
       expect(screen.getByTestId("memory-value")).toHaveTextContent("512"),
     );
-    expect(screen.getByLabelText(/^Purpose/u)).toHaveValue(purpose);
-    expect(screen.getByLabelText(/^Inputs/u)).toHaveValue(
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue(purpose);
+    expect(workload().getByLabelText(/^Inputs/u)).toHaveValue(
       "noteId:uuid:internal:required",
     );
-    expect(screen.getByLabelText(/^Outputs/u)).toHaveValue(
+    expect(workload().getByLabelText(/^Outputs/u)).toHaveValue(
       "accepted:boolean:internal:required",
     );
     expect(screen.queryByLabelText("Prepared workload operation")).toBeNull();
@@ -914,19 +921,19 @@ describe("SelectedResourceInspector", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Undo inspector change" }),
     );
-    expect(screen.getByLabelText(/^Purpose/u)).toHaveValue("");
-    expect(screen.getByLabelText(/^Inputs/u)).toHaveValue("");
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue("");
+    expect(workload().getByLabelText(/^Inputs/u)).toHaveValue("");
     fireEvent.click(
       screen.getByRole("button", { name: "Redo inspector change" }),
     );
-    expect(screen.getByLabelText(/^Purpose/u)).toHaveValue(purpose);
-    fireEvent.change(screen.getByLabelText(/^Purpose/u), {
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue(purpose);
+    fireEvent.change(workload().getByLabelText(/^Purpose/u), {
       target: { value: "Keep this unsaved purpose." },
     });
     fireEvent.click(
       screen.getByRole("button", { name: "Undo inspector change" }),
     );
-    expect(screen.getByLabelText(/^Purpose/u)).toHaveValue(
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue(
       "Keep this unsaved purpose.",
     );
     expect(screen.getByRole("alert")).toHaveTextContent(
@@ -941,12 +948,12 @@ describe("SelectedResourceInspector", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Reload current purpose and I/O" }),
     );
-    expect(screen.getByLabelText(/^Purpose/u)).toHaveValue("");
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue("");
     expect(screen.queryByRole("alert")).toBeNull();
     fireEvent.click(
       screen.getByRole("button", { name: "Redo inspector change" }),
     );
-    expect(screen.getByLabelText(/^Purpose/u)).toHaveValue(purpose);
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue(purpose);
   });
 
   it("isolates local workload drafts when the selected operation changes", () => {

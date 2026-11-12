@@ -1502,3 +1502,25 @@ The unchanged private reference is 4574e549. The two execution bindings,
 authentic assets/intake/cold composition, browser/R1, SQL/restore,
 Go/authored-golden, provider-version and sixteen golden-pair refreshes,
 override-removal and cleanup-owner qualification remain open.
+
+### Workload purpose and I/O query scope
+
+The accepted browser/editor source union remains preserved at 67c0b3c4. Its
+selected workload regression case twice exceeded the unchanged five-second
+limit. A separate instrumented diagnostic completed all 41 original statements
+in 5.42 seconds, with 25 React commits and 99.7% event-loop utilization. This
+observed cumulative synchronous work, not a missing event in that execution; it
+does not establish host contention or exclude a performance regression.
+
+This test-only successor scopes thirteen repeated Purpose/Inputs/Outputs label
+queries to the Application behavior region and checks that it remains mounted.
+All original statement order, values, actions, waits, global role and absence
+assertions remain. The labels are now unique within their owning region rather
+than checked across unrelated regions on each query. Production and timeout
+settings are unchanged. The changed case passed once with the normal runner;
+diagnostic instrumentation is separate from acceptance evidence.
+
+The original timeouts, missing first-probe telemetry and corrected query-scope
+setup failure remain recorded. Exact successor review is required before
+publication. GCC-F1 and other queued findings remain excluded; all existing
+private, native, browser, composition and release gates stay open.
