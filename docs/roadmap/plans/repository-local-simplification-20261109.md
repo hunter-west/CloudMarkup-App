@@ -1548,3 +1548,25 @@ evidence, not provider acceptance or a demonstrated deployed bypass. Exact
 independent review and later integration remain pending; the current public CI
 candidate stays fixed. Native/browser, Go/golden, authentic intake/composition,
 the two execution bindings and cleanup-owner gates remain open.
+
+### Application build workload uniqueness
+
+The application source artifact now rejects duplicate build workload IDs before
+indexing envelopes for manifest validation. Each envelope's canonical digest,
+the manifest digest and the outer artifact digest remain independently checked.
+The existing result case covers a valid single workload, distinct workloads,
+incomplete manifest enumeration, and conflicting or identical duplicate workload
+envelopes with coherent hashes. No original case or assertion is removed.
+
+The predecessor accepted the conflicting duplicate result while its manifest
+advertised only the last envelope. This is an exported runtime-schema
+consistency defect; the unchanged build-request adapter separately checks the
+complete digest list and count. No execution bypass or deployed incident is
+established.
+
+This narrow successor starts from the accepted accounting/deadline/IAM union and
+excludes the separately frozen browser and editor corrections. Private source,
+generated artifacts, fixtures, runner authority and release gates stay
+protected. Independent review and later immutable integration remain required.
+Source-only checks do not establish browser, compiler, native or hosted
+acceptance.
