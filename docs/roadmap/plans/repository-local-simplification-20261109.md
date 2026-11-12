@@ -1159,3 +1159,26 @@ The domain's 43 and recovery suite's 98 cases passed; no registrations were
 added or removed. These are deterministic component checks, not native database,
 provider or browser-return proof. Both isolated native returned-copy mutation
 cases, financial policy, terminal implementations and canonical SQL stay intact.
+
+### Complete expiration summary with bounded details
+
+The expiration summary computes its total and next date over the complete
+authorized snapshot before limiting the detail list to 1,000 rows. The detail
+order remains expiration, start and grant identity, including historical rows;
+the returned `grantsTruncated` flag explicitly identifies an incomplete list.
+Existing fields retain their types. The interface has no internal callers or
+other implementations in the inspected source; external implementations must
+supply the added flag.
+
+Repeatable-read scope, current membership/role/principal authorization, trial
+admission, captured read time and reservation/event cutoffs remain unchanged.
+The existing next-date definition still includes a future expiration whose
+available amount is zero; only its previous accidental detail-page restriction
+is removed. Available-unit arithmetic and bounded integer refusal remain.
+
+The regression covers 1,000 versus 1,001 scoped grants, mixed availability,
+empty results, overflow and denied access with explicit SQL results. Its
+predecessor reports zero instead of ten. Source/query checks are bounded
+evidence; native PostgreSQL execution, snapshot isolation, roles and transaction
+behavior remain unqualified. No ledger, grant, migration or financial history is
+written, and no private override or intake binding is removed.

@@ -9,6 +9,7 @@ import type {
   TrustedCommercialAdministrationContext,
 } from "../../application/commercial-persistence.js";
 import type { AuthorizedOrganizationScope } from "../../application/persistence.js";
+import { CommercialPersistenceError } from "../../application/commercial-persistence.js";
 import { PostgresCommercialPersistenceRepository } from "./commercial-repositories.js";
 import type {
   SqlDatabase,
@@ -204,6 +205,187 @@ function grantSourceResults(subscription: SqlRow = monthlySubscriptionRow) {
 }
 
 describe("commercial PostgreSQL repository", () => {
+  it("keeps complete expiration totals while bounding historical grant details", async () => {
+    const asOf = "2026-08-03T12:00:00.000Z";
+    const windowEndsAt = "2026-08-31T00:00:00.000Z";
+    const grant = (id: string, overrides: SqlRow = {}): SqlRow => ({
+      ...grantBase,
+      credit_grant_id: id,
+      grant_kind: "promotional",
+      expiration_policy_kind: "expires-at",
+      expiration_policy_version: "expiry_test_v1",
+      grant_policy_version: "promotional-v1",
+      starts_at: "2026-08-01T00:00:00.000Z",
+      expires_at: "2026-08-10T00:00:00.000Z",
+      trial_grant_admitted: true,
+      adjustments: "0",
+      settled: "0",
+      active_reserved: "0",
+      ...overrides,
+    });
+    const current = grant("grant_current");
+    const mixed = [
+      current,
+      grant("grant_reserved", { active_reserved: "3" }),
+      grant("grant_exhausted", {
+        settled: "10",
+        expires_at: "2026-08-04T00:00:00.000Z",
+      }),
+      grant("grant_scheduled", {
+        starts_at: "2026-08-20T00:00:00.000Z",
+        expires_at: "2026-08-25T00:00:00.000Z",
+      }),
+      grant("grant_unresolved", {
+        expiration_policy_kind: "unresolved",
+        expires_at: null,
+      }),
+      grant("grant_trial_refused", {
+        trial_grant_admitted: false,
+        expires_at: "2026-08-05T00:00:00.000Z",
+      }),
+      grant("grant_adjusted", {
+        grant_kind: "administrative",
+        adjustments: "5",
+      }),
+    ];
+    // The SQL double supplies complete aggregates and a bounded detail page.
+    // Query-shape assertions below are not native PostgreSQL execution.
+    for (const scenario of [
+      {
+        historical: 1000,
+        current: [current],
+        total: "10",
+        next: current["expires_at"],
+        truncated: true,
+      },
+      {
+        historical: 999,
+        current: [current],
+        total: "10",
+        next: current["expires_at"],
+        truncated: false,
+      },
+      {
+        historical: 1000,
+        current: mixed,
+        total: "22",
+        next: mixed[2]?.["expires_at"],
+        truncated: true,
+      },
+      {
+        historical: 0,
+        current: [],
+        total: "0",
+        next: undefined,
+        truncated: false,
+      },
+    ]) {
+      const all = [
+        ...Array.from({ length: scenario.historical }, (_, i) =>
+          grant(`grant_old_${String(i).padStart(4, "0")}`, {
+            expires_at: "2026-08-02T00:00:00.000Z",
+          }),
+        ),
+        ...scenario.current,
+        grant("grant_foreign", {
+          organization_id: "organization_other",
+          credit_units: "9000",
+        }),
+      ];
+      const scoped = all.filter(
+        (row) => row["organization_id"] === organizationId,
+      );
+      const details = scoped.slice(0, 1000).map((row) => ({
+        ...row,
+        summary_expiring: scenario.total,
+        summary_next_expiration: scenario.next ?? null,
+        summary_grant_count: String(scoped.length),
+      }));
+      const database = new RecordingDatabase([
+        result(),
+        result([{ allowed: 1 }]),
+        result([{ as_of: asOf }]),
+        result(details),
+      ]);
+      const repository = new PostgresCommercialPersistenceRepository(database);
+      const summary = await repository.getCreditGrantExpirationSummary(
+        scope,
+        windowEndsAt,
+      );
+      expect(summary.expiringCreditUnits).toBe(scenario.total);
+      expect(summary).toMatchObject({
+        organizationId,
+        asOf,
+        windowEndsAt,
+        grantsTruncated: scenario.truncated,
+      });
+      expect(summary.nextExpirationAt).toBe(scenario.next);
+      expect(summary.grants).toHaveLength(Math.min(scoped.length, 1000));
+      expect(summary.grants.some((row) => row.id === "grant_foreign")).toBe(
+        false,
+      );
+      if (scenario.historical === 999)
+        expect(summary.grants[999]).toMatchObject({
+          id: "grant_current",
+          availableCreditUnits: "10",
+        });
+      expect(database.statements).toHaveLength(4);
+      expect(database.statements[0]?.text).toBe(
+        "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY",
+      );
+      expect(database.statements[1]?.values).toEqual([
+        membershipId,
+        principalId,
+        organizationId,
+        "commercial.summary.read",
+      ]);
+      expect(database.statements[2]?.values).toEqual([
+        membershipId,
+        principalId,
+        organizationId,
+      ]);
+      const query = database.statements[3];
+      expect(query?.values).toEqual([organizationId, asOf, windowEndsAt]);
+      expect(query?.text).toContain("WHERE grant_row.organization_id = $1");
+      expect(
+        query?.text.match(/allocation.organization_id = \$1/gu),
+      ).toHaveLength(2);
+      expect(query?.text).toContain("AND grant_row.created_at <= $2");
+      expect(query?.text).toContain("COUNT(*) OVER () AS summary_grant_count");
+      expect(query?.text).toContain("END) OVER () AS summary_expiring");
+      expect(query?.text).toContain("END) OVER () AS summary_next_expiration");
+      expect(query?.text).toContain("trial_grant_admitted");
+      expect(query?.text.match(/LIMIT/gu)).toHaveLength(1);
+      expect(query?.text.trim()).toMatch(
+        /ORDER BY grant_row\.expires_at NULLS LAST,\s*grant_row\.starts_at, grant_row\.credit_grant_id LIMIT 1000$/u,
+      );
+    }
+    const overflow = new RecordingDatabase([
+      result(),
+      result([{ allowed: 1 }]),
+      result([{ as_of: asOf }]),
+      result([
+        {
+          ...current,
+          summary_expiring: "9223372036854775808",
+          summary_grant_count: "1",
+          summary_next_expiration: current["expires_at"],
+        },
+      ]),
+    ]);
+    await expect(
+      new PostgresCommercialPersistenceRepository(
+        overflow,
+      ).getCreditGrantExpirationSummary(scope, windowEndsAt),
+    ).rejects.toMatchObject({ code: "invalid-input" });
+    const denied = new RecordingDatabase([result(), result()]);
+    await expect(
+      new PostgresCommercialPersistenceRepository(
+        denied,
+      ).getCreditGrantExpirationSummary(scope, windowEndsAt),
+    ).rejects.toBeInstanceOf(CommercialPersistenceError);
+    expect(denied.statements).toHaveLength(2);
+  });
   it("grants the exact current monthly period when its provider event became effective after period start", async () => {
     const database = new RecordingDatabase([
       ...grantSourceResults(),

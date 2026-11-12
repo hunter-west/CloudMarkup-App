@@ -4743,6 +4743,9 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
           readonly active_reserved: unknown;
           readonly adjustments: unknown;
           readonly settled: unknown;
+          readonly summary_expiring: unknown;
+          readonly summary_grant_count: unknown;
+          readonly summary_next_expiration: unknown;
         }
       >(
         sql(
@@ -4770,7 +4773,7 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
                AND (reservation.terminal_at IS NULL
                  OR reservation.terminal_at > $2)
              GROUP BY allocation.credit_grant_id
-           )
+           ), grant_rows AS (
            SELECT ((grant_row.grant_policy_version <> 'cloudmarkup-staff-trial-v1' AND (grant_row.grant_policy_version='cloudmarkup-staff-credits-v1' OR NOT EXISTS(SELECT 1 FROM organization_entitlement_snapshots trial_snapshot WHERE trial_snapshot.organization_id=grant_row.organization_id AND trial_snapshot.plan_version_id='planver_staff_trial_2026_10_06_v1')))
                 OR (grant_row.grant_policy_version='cloudmarkup-staff-trial-v1' AND grant_row.expires_at>clock_timestamp() AND EXISTS(SELECT 1 FROM organization_entitlement_snapshots trial_snapshot WHERE trial_snapshot.organization_id=grant_row.organization_id AND trial_snapshot.plan_version_id='planver_staff_trial_2026_10_06_v1' AND trial_snapshot.subscription_projection_id IS NULL AND trial_snapshot.expensive_operations_enabled AND trial_snapshot.effective_at<=clock_timestamp()))) AS trial_grant_admitted, grant_row.credit_grant_id, grant_row.organization_id,
                   grant_row.billing_account_id, grant_row.plan_version_id,
@@ -4788,13 +4791,40 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
            LEFT JOIN active_reservations USING (credit_grant_id)
            WHERE grant_row.organization_id = $1
              AND grant_row.created_at <= $2
+           ), grant_balances AS (
+             SELECT grant_rows.*,
+                    CASE WHEN starts_at <= $2
+                           AND (expires_at IS NULL OR expires_at > $2)
+                           AND expiration_policy_kind <> 'unresolved'
+                           AND trial_grant_admitted IS TRUE
+                         THEN GREATEST(
+                           (CASE WHEN grant_kind = 'administrative' THEN 0 ELSE credit_units END)
+                           + adjustments - settled - active_reserved, 0)
+                         ELSE 0 END AS summary_available
+             FROM grant_rows
+           )
+           SELECT grant_row.*,
+                  SUM(CASE WHEN expires_at > $2 AND expires_at <= $3
+                           THEN summary_available ELSE 0 END) OVER () AS summary_expiring,
+                  MIN(CASE WHEN expires_at > $2 AND expires_at <= $3
+                           THEN expires_at ELSE NULL END) OVER () AS summary_next_expiration,
+                  COUNT(*) OVER () AS summary_grant_count
+           FROM grant_balances grant_row
            ORDER BY grant_row.expires_at NULLS LAST,
                     grant_row.starts_at, grant_row.credit_grant_id LIMIT 1000`,
-          [scope.organizationId, asOf],
+          [scope.organizationId, asOf, windowEndsAt],
         ),
       );
-      let expiring = 0n;
-      let nextExpirationAt: string | undefined;
+      // Window aggregates precede LIMIT; details keep their existing bounded order.
+      const summary = result.rows[0];
+      const expiring = readInteger(summary?.summary_expiring ?? "0");
+      const totalGrants = readInteger(summary?.summary_grant_count ?? "0");
+      if (expiring < 0n || totalGrants < BigInt(result.rows.length)) {
+        return fail("invalid-input", "The expiration summary is invalid.");
+      }
+      const nextExpirationAt = readOptionalString(
+        summary?.summary_next_expiration,
+      );
       const grants = result.rows.map((grant) => {
         const kind = readString(
           grant.grant_kind,
@@ -4823,24 +4853,6 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
             : 0n;
         const expiredUnits =
           expired && !unresolved && remaining > 0n ? remaining : 0n;
-        if (
-          expiresAt !== undefined &&
-          Date.parse(expiresAt) > Date.parse(asOf) &&
-          Date.parse(expiresAt) <= Date.parse(windowEndsAt)
-        ) {
-          expiring += available;
-          nextExpirationAt =
-            nextExpirationAt === undefined ||
-            Date.parse(expiresAt) < Date.parse(nextExpirationAt)
-              ? expiresAt
-              : nextExpirationAt;
-        }
-        if (expiring > postgresBigintMaximum) {
-          return fail(
-            "invalid-input",
-            "The expiration summary exceeds storage bounds.",
-          );
-        }
         const expirationPolicyVersion = readOptionalString(
           grant.expiration_policy_version,
         );
@@ -4883,6 +4895,7 @@ export class PostgresCommercialPersistenceRepository implements CommercialPersis
         asOf,
         expiringCreditUnits: expiring.toString(),
         grants,
+        grantsTruncated: totalGrants > BigInt(grants.length),
         ...(nextExpirationAt === undefined ? {} : { nextExpirationAt }),
         organizationId: scope.organizationId,
         windowEndsAt,
