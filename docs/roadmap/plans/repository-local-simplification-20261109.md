@@ -1524,3 +1524,27 @@ The original timeouts, missing first-probe telemetry and corrected query-scope
 setup failure remain recorded. Exact successor review is required before
 publication. GCC-F1 and other queued findings remain excluded; all existing
 private, native, browser, composition and release gates stay open.
+
+### Canonical IPv4 readiness values
+
+The separate AWSROOT-F1 correction starts at published b67a5ee3. Its predecessor
+accepted padded IPv4 text such as `00.0.0.0/0` and returned no findings for
+otherwise-valid all-protocol ingress and egress rules. The shared CIDR parser
+now requires its parsed decimal octets and prefix to reproduce the input
+exactly. Noncanonical values receive the existing invalid-CIDR finding; saved
+values are not normalized. Canonical broad-access findings, prefix limits,
+numeric bounds, network alignment and input immutability remain.
+
+Two existing networking cases are extended without removing their assertions or
+adding registrations. All 43 networking validation/policy cases and 81 existing
+ELB/FSx consumer cases passed in two focused runs. The original two failing
+regressions are retained. Selected three-root type checking passed. No
+comparable full predecessor timing or performance improvement is claimed.
+
+Catalog descriptors, generated artifacts, schemas, compiler output, authority,
+financial behavior, private overlays and source pins are unchanged. GCC-F1 and
+all other audit corrections remain separate. This is local source/readiness
+evidence, not provider acceptance or a demonstrated deployed bypass. Exact
+independent review and later integration remain pending; the current public CI
+candidate stays fixed. Native/browser, Go/golden, authentic intake/composition,
+the two execution bindings and cleanup-owner gates remain open.

@@ -20,6 +20,7 @@ import {
   createNetworkRoutingRuleV1,
   createSecurityGroupPolicyRuleV1,
 } from "./validation/index.js";
+import { parseIpv4Cidr } from "./validation/networking-rules.js";
 
 type TestNode = ArchitectureDocumentV1["nodes"][number];
 type TestEdge = ArchitectureDocumentV1["edges"][number];
@@ -574,6 +575,30 @@ describe("AWS networking validation rules", () => {
         affected: [{ path: testCase.path }],
       });
       expect(finding?.autoFix, testCase.code).toBeUndefined();
+    }
+
+    for (const [value, minimum, maximum, expected] of [
+      ["0.0.0.0/0", 0, 32, { start: 0, end: 4294967295, prefix: 0 }],
+      [
+        "255.255.255.255/32",
+        0,
+        32,
+        { start: 4294967295, end: 4294967295, prefix: 32 },
+      ],
+      ["10.0.0.0/16", 16, 28, { start: 167772160, end: 167837695, prefix: 16 }],
+      ["10.0.0.0/28", 16, 28, { start: 167772160, end: 167772175, prefix: 28 }],
+      ["00.0.0.0/0", 0, 32, undefined],
+      ["010.0.0.0/24", 0, 32, undefined],
+      ["10.0.0.0/00", 0, 32, undefined],
+      ["0.0.0.0/00", 0, 32, undefined],
+      ["0.0.0.0/01", 0, 32, undefined],
+      ["10.0.0.1/24", 0, 32, undefined],
+      ["256.0.0.0/24", 0, 32, undefined],
+      ["0.0.0.0/33", 0, 32, undefined],
+      ["10.0.0.0/15", 16, 28, undefined],
+      ["10.0.0.0/29", 16, 28, undefined],
+    ] as const) {
+      expect(parseIpv4Cidr(value, minimum, maximum), value).toEqual(expected);
     }
   });
 
@@ -1489,6 +1514,101 @@ describe("AWS networking validation rules", () => {
     expect(
       result.findings.every((finding) => finding.autoFix === undefined),
     ).toBe(true);
+
+    for (const [code, severity, key, index] of [
+      [
+        "aws.validation.security-group-all-ingress-open",
+        "security-error",
+        "sourceIpv4Cidr",
+        1,
+      ],
+      [
+        "aws.validation.security-group-broad-egress",
+        "warning",
+        "destinationIpv4Cidr",
+        0,
+      ],
+    ] as const) {
+      expect(
+        result.findings.find((finding) => finding.code === code),
+      ).toMatchObject({
+        severity,
+        affected: [
+          {
+            kind: "configuration",
+            key,
+            path: `$.nodes[${String(index)}].semantic.configuration.values.${key}`,
+          },
+        ],
+      });
+    }
+    for (const [cidr, valid] of [
+      ["00.0.0.0/0", false],
+      ["0.00.0.0/0", false],
+      ["0.0.00.0/0", false],
+      ["0.0.0.00/0", false],
+      ["010.0.0.0/24", false],
+      ["10.0.0.0/24", true],
+      ["255.255.255.255/32", true],
+    ] as const) {
+      const updated = document(
+        candidate.nodes.map((entry) => {
+          if (entry.id === "sg") return entry;
+          const key =
+            entry.id === "ingress" ? "sourceIpv4Cidr" : "destinationIpv4Cidr";
+          const values = serviceConfigurationRecordSchema.shape.values.parse({
+            ...entry.semantic.configuration.values,
+            [key]: stringValue(cidr),
+          });
+          expect(
+            awsCatalogV1.validateConfiguration(
+              entry.semantic.serviceType,
+              values,
+            ).success,
+            cidr,
+          ).toBe(true);
+          return {
+            ...entry,
+            semantic: {
+              ...entry.semantic,
+              configuration: { ...entry.semantic.configuration, values },
+            },
+          };
+        }),
+        candidate.edges,
+      );
+      const before = structuredClone(updated);
+      const findings = report(
+        createSecurityGroupPolicyRuleV1(awsCatalogArtifactV1),
+        updated,
+        "production",
+      ).findings;
+      expect(findings, cidr).toHaveLength(valid ? 0 : 2);
+      if (!valid) {
+        for (const [key, index] of [
+          ["destinationIpv4Cidr", 0],
+          ["sourceIpv4Cidr", 1],
+        ] as const) {
+          expect(findings).toContainEqual(
+            expect.objectContaining({
+              code: "aws.validation.security-group-cidr-invalid",
+              severity: "error",
+              affected: [
+                expect.objectContaining({
+                  kind: "configuration",
+                  key,
+                  path: `$.nodes[${String(index)}].semantic.configuration.values.${key}`,
+                }),
+              ],
+            }),
+          );
+        }
+      }
+      expect(findings.every((finding) => finding.autoFix === undefined)).toBe(
+        true,
+      );
+      expect(updated).toEqual(before);
+    }
   });
 
   it("explains single-AZ and public-subnet Lambda VPC access without inventing fixes", () => {
