@@ -1623,6 +1623,14 @@ class ModelGatewayEngine implements ModelGateway {
         });
         response = parsedResponse.data;
       } catch (error) {
+        // Known provider usage must not depend on rejected-output storage.
+        await recordAttemptUsage({
+          attemptNumber: completedAttemptNumber,
+          completedAtMilliseconds: Date.now(),
+          providerUsage: providerResult.usage,
+          result: "invalid-output",
+          startedAtMilliseconds: completedAttemptStartedAtMilliseconds,
+        });
         if (
           (sanitized.data.operation === "operations.propose" &&
             sanitized.data.planningContext !== undefined) ||
@@ -1674,13 +1682,6 @@ class ModelGatewayEngine implements ModelGateway {
             retentionPolicyId: "cloudmarkup.invalid-model-proposal.v1",
           });
         }
-        await recordAttemptUsage({
-          attemptNumber: completedAttemptNumber,
-          completedAtMilliseconds: Date.now(),
-          providerUsage: providerResult.usage,
-          result: "invalid-output",
-          startedAtMilliseconds: completedAttemptStartedAtMilliseconds,
-        });
         throw error;
       }
       await recordCancellationUsage();
