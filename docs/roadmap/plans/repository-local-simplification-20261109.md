@@ -675,3 +675,22 @@ These changes require independent source review and normal integrated CI. Native
 SQL, filesystem/browser durability, exact hosted admission and release
 qualification remain separate; no production change or deletion is authorized by
 focused source tests.
+
+### Project-state follow-up
+
+The compact workload editor now verifies that its existing managed contracts
+round-trip through the same builder used for changes. Saved nullable fields,
+descriptions, storage semantics, failure outcomes and authorization remain
+unchanged when the compact form cannot represent them; both form resolution and
+direct preparation refuse such edits. Simple managed contracts remain editable.
+
+The shared client serializes validated numeric page/limit values alongside
+string cursors. Schema bounds and server pagination guards remain intact. The
+sensitive-action helper distinguishes operation failure from audit-delivery
+failure: a completed operation is never relabeled failed or rerun because its
+success event was not acknowledged. Delivery errors still reach the caller.
+
+Focused synthetic regressions also cover populated retained-history replay and
+valid revision-authority refusal fixtures. Editor ADR headers link their precise
+accepted partial successors. Native restore, provider calls, browser journeys,
+exact hosted admission and release acceptance remain separate gates.
