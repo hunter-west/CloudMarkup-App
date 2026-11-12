@@ -89,7 +89,18 @@ regeneration cases. The suite compares exact application-source, canonical
 contract, and application-manifest trees; parses emitted JSON and TypeScript;
 statically compiles every supported source-emitting virtual tree in ordinary
 tests; and joins Workload operations to handlers, contracts, generated tests,
-coverage, and provenance without executing generated content.
+coverage, and provenance. A bounded event-payload check evaluates only the
+generated pure validator with synthetic values in memory; handlers, SDK calls,
+and generated build/test commands remain outside this suite's execution.
+
+Bounded scalar-list payloads retain their declared item counts in generated
+types, validation, and synthetic fixtures. The correction changes previously
+invalid bounded-list output; payloads without list bounds retain their existing
+source bytes, descriptors, and goldens. Environment resource bindings must pair
+the canonical node with its exact normalized target key. Private-service
+endpoint declarations require every selected workload subnet's exact containment
+path to the same VPC as its route tables and endpoint; they are graph
+projections, not proof of live connectivity.
 
 Committed contract goldens use a test-only logical contract-ID/version filename
 projection. A unique readable name stays unsuffixed; a name that collides or

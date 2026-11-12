@@ -1550,6 +1550,7 @@ function resolveOperation(
 function resolveEnvironment(
   workload: WorkloadV2,
   normalized: NormalizedWorkload,
+  resources: readonly NormalizedResource[],
   context: ResolutionContext,
 ): readonly ResolvedEnvironmentBinding[] {
   const results: ResolvedEnvironmentBinding[] = [];
@@ -1593,9 +1594,13 @@ function resolveEnvironment(
         match.secretReference === undefined &&
         match.resource === undefined;
     } else {
+      const nodeId = canonical.value.nodeId;
+      const resource = resources.find((candidate) => candidate.id === nodeId);
       exactValue =
         exactValue &&
+        resource !== undefined &&
         match.resource?.nodeId === canonical.value.nodeId &&
+        match.resource.targetKey === resource.targetKey &&
         match.resource.attribute === canonical.value.attribute &&
         match.variableId === undefined &&
         match.secretReference === undefined;
@@ -3281,7 +3286,12 @@ function resolveWorkload(
       resource.deploymentKey,
       context,
     );
-  const environment = resolveEnvironment(workload, normalized, context);
+  const environment = resolveEnvironment(
+    workload,
+    normalized,
+    input.normalizedSolution.resources,
+    context,
+  );
   const extensionBoundary = resolveExtensionBoundary(
     workload,
     normalized,
