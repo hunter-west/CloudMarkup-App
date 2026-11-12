@@ -1329,3 +1329,76 @@ candidate and evidence are preserved. This separate accounting successor is
 unpublished; the accounting aggregate still requires independent review and
 explicit integration with the accepted public line. Existing native, browser,
 authentic intake/composition, override and cleanup-owner gates remain open.
+
+### Admitted proposal read deadline correction
+
+The proposal client now starts its existing ten-minute read budget as soon as
+the admission response identifies the job. Initial and terminal credit reads,
+status fetches and their complete response bodies share that remaining budget
+and caller cancellation. Late completion cannot publish stale credit data or
+turn an expired request into success. Poll pauses also respect the remaining
+budget. Timer and listener cleanup is explicit.
+
+The independent thirty-second admission POST and ten-second exact-job
+cancellation remain unchanged. An uncertain cancellation retains the original
+idempotency key; no automatic second POST or new financial authority is added.
+Ordinary optional-credit failures still display unavailable credit information.
+The deadline bounds admitted reads, with the existing cancellation cleanup
+following refusal; it is not proof of worker termination or financial release.
+
+Six new owning table rows cover initial credit, status and terminal credit
+fetch/body stalls, each with deadline, caller-abort and delayed wall-clock
+completion controls. Existing 26 cases remain. The predecessor fails all six;
+the correction passes the 32-case suite and the six extended late controls.
+These use synthetic transport and timers, not a browser or provider. No native,
+CI, release-admission or deployment acceptance is claimed. Independent review
+and integrated qualification remain with the existing coordinator.
+
+### Rejected-read deadline classification
+
+Independent review found that a late terminal-credit fetch/body rejection could
+remain optional and permit success when the deadline timer was throttled. The
+helper now checks caller cancellation first, then elapsed deadline, on its error
+exit before propagating an ordinary error. All other production bytes, including
+admission identity, shared read budget and exact-job cancellation, are retained.
+
+Two added owning rows preserve early optional errors and cover exact-deadline,
+late-rejection and caller-precedence controls for both fetch and body promises.
+They require one exact-job cleanup, retained recovery identity, no automatic
+second admission and unchanged thirty-/ten-second budgets. Separate status error
+races inside those rows ensure the optional-credit catch cannot mask the
+helper's cancellation precedence. All 32 preceding cases remain unchanged.
+
+The predecessor fails both new rows; all 34 cases pass, followed by the two
+extended rows passing again. These overlapping synthetic checks are not one
+repeated integrated run or native browser/provider proof. The earlier sealed
+candidate remains historical evidence. This narrow successor stays separate from
+accounting and IAM work, with independent review and existing release gates
+outstanding.
+
+### Proposed accounting, deadline and IAM integration
+
+This local union retains published browser/billing head 3df49355, the IAM
+reporting correction, the complete accounting lineage through its expiration
+precision successor, and the admitted-read deadline rejection successor. Both
+previously pending source verdicts arrived during preparation and are accepted
+within bounded source/synthetic scope. Their separate acceptance does not accept
+this combined candidate; its exact integration review remains required.
+
+Both text conflicts join appended plan sections verbatim. All non-plan source,
+test and fixture bytes match their named immutable constituents. Earlier status
+sections describe their historical checkpoints. No queued editor or other broad
+audit corrections enter this union. The private reference remains 4574e549.
+
+The published head and its automatic CI 43255604680 remain untouched. This local
+preparation does not publish, rerun CI, merge a release branch or deploy. The
+deadline bounds admitted reads, not admission plus cleanup or server execution.
+IAM changes affect report direction and severity, not authorization policy.
+Accounting checks preserve ledger, scope, idempotency and recovery boundaries.
+
+The two execution helper/test overlay bindings and authentic assets/intake/cold
+composition remain open. No override or deployed pin changes. Provider-version
+implementation and sixteen golden-pair refreshes remain unfinished. Native SQL,
+driver integration, browser/R1, restore, Go/authored-golden reproduction and
+cleanup-owner qualification remain unproven. The stopped localhost browser
+attempt is not retried; its child cleanup remains unverified.
