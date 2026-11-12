@@ -910,3 +910,12 @@ extension evaluation identifies its repair-patch and issue-transition evidence
 as scripted component scenarios, not production retry-controller exhaustion; its
 unused projection is removed while live workflow semantics remain covered. No
 provider, financial mutation, activation or native acceptance is implied.
+
+### Export aggregate boundary fixture
+
+The Async Job export fixture now accepts the reviewed aggregate ceiling of 34
+Evidence references and rejects the first overflow at 35 using the owning limit
+constant. Its old 33-reference refusal predated the reviewed build-batch
+capacity alignment. Other-family ceilings, per-stage limits, production schemas
+and generated artifacts remain unchanged; this fixture correction does not
+establish integrated, native lifecycle or deployment acceptance.

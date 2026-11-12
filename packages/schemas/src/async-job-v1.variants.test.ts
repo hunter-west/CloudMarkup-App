@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  SOLUTION_EXPORT_AGGREGATE_EVIDENCE_MAXIMUM,
   asyncJobInputV1Schema,
   asyncJobOutputV1Schema,
   asyncJobRecordV1Schema,
@@ -406,19 +407,43 @@ describe("Async Job v1 family and aggregate invariants", () => {
         },
       }).success,
     ).toBe(false);
+    expect(SOLUTION_EXPORT_AGGREGATE_EVIDENCE_MAXIMUM).toBe(34);
+    const atLimit = Array.from(
+      { length: SOLUTION_EXPORT_AGGREGATE_EVIDENCE_MAXIMUM },
+      (_, index) => ({
+        ...evidence,
+        evidenceId: `evidence.export.${String(index)}`,
+        record: {
+          ...evidence.record,
+          objectId: `object.evidence.export.${String(index)}`,
+        },
+      }),
+    );
     expect(
-      asyncJobOutputV1Schema.safeParse({
-        ...output,
-        evidenceRecords: Array.from({ length: 33 }, (_, index) => ({
+      asyncJobOutputV1Schema.parse({ ...output, evidenceRecords: atLimit })
+        .evidenceRecords,
+    ).toEqual(atLimit);
+    const overflow = asyncJobOutputV1Schema.safeParse({
+      ...output,
+      evidenceRecords: [
+        ...atLimit,
+        {
           ...evidence,
-          evidenceId: `evidence.export.${String(index)}`,
+          evidenceId: "evidence.export.overflow",
           record: {
             ...evidence.record,
-            objectId: `object.evidence.export.${String(index)}`,
+            objectId: "object.evidence.export.overflow",
           },
-        })),
-      }).success,
-    ).toBe(false);
+        },
+      ],
+    });
+    expect(overflow.error?.issues).toEqual([
+      expect.objectContaining({
+        code: "too_big",
+        maximum: SOLUTION_EXPORT_AGGREGATE_EVIDENCE_MAXIMUM,
+        path: ["evidenceRecords"],
+      }),
+    ]);
   });
 
   it("bounds cumulative runtime across retries", () => {
