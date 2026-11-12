@@ -351,19 +351,25 @@ integrationDescribe("hosted validation with real local PostgreSQL", () => {
       "membership-suspension",
       "principal-suspension",
     ] as const)(
-      `lifecycle ${operation} rejects %s after genuine draft metadata I/O`,
+      `lifecycle ${operation} rejects %s after genuine project metadata I/O`,
       async (change) => {
         const f = await lifecycleFixture();
         const before = await lifecycleState(f.projectId);
-        const readDraft = f.repository.getDraft.bind(f.repository);
+        // Lifecycle replies obtain draft versions inside the mutation transaction.
+        // Revoke after the current pre-transaction project read has completed.
+        const readProject = f.repository.getProject.bind(f.repository);
         let intercepted = 0;
-        const draftRead = vi
-          .spyOn(f.repository, "getDraft")
+        const projectRead = vi
+          .spyOn(f.repository, "getProject")
           .mockImplementation(async (scope, projectId) => {
-            const metadata = await readDraft(scope, projectId);
+            const metadata = await readProject(scope, projectId);
             if (projectId === f.projectId && intercepted === 0) {
               intercepted += 1;
-              expect(metadata).not.toBeNull();
+              expect(metadata).toMatchObject({
+                projectId: f.projectId,
+                lifecycleStatus: "active",
+                recordVersion: f.input.expectedRecordVersion,
+              });
               if (change === "demotion") {
                 await currentDatabase().query(
                   sql(
@@ -413,7 +419,7 @@ integrationDescribe("hosted validation with real local PostgreSQL", () => {
           expect(intercepted).toBe(1);
           expect(await lifecycleState(f.projectId)).toEqual(before);
         } finally {
-          draftRead.mockRestore();
+          projectRead.mockRestore();
         }
       },
     );

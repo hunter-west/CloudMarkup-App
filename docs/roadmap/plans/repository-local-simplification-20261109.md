@@ -873,3 +873,16 @@ preserved. The matching private helper after-image remains unapplied, and the
 private execution-suite copy stays in place until authentic source intake and
 cold composition qualify the shared suite and its profile. This preparation does
 not claim native execution or a runtime saving.
+
+### Lifecycle authorization CI fixture repair
+
+The six archive/delete revocation cases now inject their authority change after
+the genuine project-metadata read. The lifecycle retry correction had removed
+the earlier draft read; its stale interceptor never applied demotion or
+suspension. Current authority is still rechecked with project and authority
+locks inside the mutation transaction before receipts or writes. The existing
+denial, unchanged-state, lock, replay and role controls remain. Only the fixture
+boundary and its explicit starting-state assertion change; production
+authorization and historical migrations are unchanged. Focused synthetic proof
+remains distinct from the required native PostgreSQL rerun and integrated CI
+acceptance.
