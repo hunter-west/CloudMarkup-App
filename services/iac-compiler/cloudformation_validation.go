@@ -29,7 +29,7 @@ func (renderer *cloudFormationRenderer) validateCuratedModel() {
 	for _, diagnostic := range shared.diagnostics {
 		diagnostic.Code = cloudFormationDiagnosticCode(diagnostic.Code)
 		diagnostic.Message = strings.ReplaceAll(diagnostic.Message, "Terraform", "CloudFormation")
-		renderer.diagnostics = append(renderer.diagnostics, diagnostic)
+		renderer.diagnostics = retainTargetDiagnostic(renderer.diagnostics, renderer.limits.MaxDiagnostics, diagnostic)
 	}
 }
 
