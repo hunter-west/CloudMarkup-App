@@ -1005,3 +1005,20 @@ failure contexts/screenshots but no GitLab failure entries or trace archives.
 Local focused Playwright startup did not complete a test; loopback access failed
 with a socket-permission error, and the attempt was stopped without retry.
 Native browser qualification and the existing release gates remain open.
+
+### Browser fixture idempotency contract correction
+
+The command-save fixture now reuses the canonical API idempotency-key schema.
+Its approximate 16-to-128 non-whitespace check differed from the production
+8-to-128 ASCII identifier contract. Boundary checks cover both permitted
+lengths, both adjacent invalid lengths, prohibited characters and the prior
+mismatch. Existing command replay, current lease, version and content-binding
+controls remain unchanged. Neither browser spec changes, so all 29 registrations
+and 35 expanded browser cases remain; the separately proposed private spec port
+retains its exact public hash and private fixture. No production contract,
+persistence, timeout, retry, source intake or runtime authority changes.
+
+This is a fixture-fidelity correction, not a demonstrated production defect. The
+original browser artifacts, failed CI and stopped socket-permission attempt
+remain preserved. Bounded source/fixture checks do not qualify browser, native
+or hosted-composition acceptance. No browser retry or new CI was requested.

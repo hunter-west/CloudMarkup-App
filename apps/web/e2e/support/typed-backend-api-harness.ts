@@ -4,6 +4,7 @@ import {
   acquireProjectEditingLeaseV1Schema,
   applyDraftCommandResultV1Schema,
   applyDraftCommandV1Schema,
+  idempotencyKeySchema,
   mutateProjectEditingLeaseV1Schema,
   projectEditingLeaseProofV1Schema,
   type ApplyDraftCommandResultV1,
@@ -1347,7 +1348,7 @@ export class TypedBackendApiHarness {
     const key = headers["idempotency-key"];
     if (
       commandSave &&
-      (!command?.success || !key || !/^[^\s]{16,128}$/u.test(key))
+      (!command?.success || !idempotencyKeySchema.safeParse(key).success)
     ) {
       await fulfill(
         route,
