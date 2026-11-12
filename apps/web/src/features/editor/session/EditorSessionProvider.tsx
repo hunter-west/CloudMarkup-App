@@ -293,6 +293,12 @@ export interface EditorSessionProviderProps {
   ) => void;
   readonly recoveryNow?: () => string;
   readonly recoveryStore?: EditorRecoveryStoreV1;
+  /** Keep snapshot identity bound to the saved head when document comes from
+   * a separately verified command checkpoint. */
+  readonly recoverySeedDocument?: ArchitectureDocument;
+  readonly recoveryContainsSnapshot?: (
+    document: ArchitectureDocument,
+  ) => boolean;
   readonly recoveryWriterId?: string;
   readonly scopeKey?: string;
   readonly onDocumentChange?: (document: ArchitectureDocument) => void;
@@ -2461,6 +2467,8 @@ export function EditorSessionProvider({
   recoveryDownloadDiagnostic,
   recoveryNow,
   recoveryStore,
+  recoverySeedDocument,
+  recoveryContainsSnapshot,
   recoveryWriterId,
   scopeKey,
   onDocumentChange,
@@ -2486,7 +2494,13 @@ export function EditorSessionProvider({
           : effectiveScopeKey + ":" + documentScopeKey(initialLoad)
       }
       scopeKey={effectiveScopeKey}
-      seedDocument={seedDocument}
+      seedDocument={recoverySeedDocument ?? seedDocument}
+      {...(recoverySeedDocument === undefined || seedDocument === null
+        ? {}
+        : { initialDocument: seedDocument })}
+      {...(recoveryContainsSnapshot === undefined
+        ? {}
+        : { containsSnapshot: recoveryContainsSnapshot })}
       writerId={recoveryWriterId ?? fallbackRecoveryIdentity.writerId}
       {...(recoveryAutosaveDebounceMilliseconds === undefined
         ? {}

@@ -240,6 +240,20 @@ export class DraftCommandDrain {
     });
     // Editing lease tokens deliberately never enter exported recovery data.
   }
+  containsRecoveryDocument(document: ArchitectureDocument): boolean {
+    const digest = getArchitectureDocumentCanonicalHash(document);
+    return (
+      digest ===
+        getArchitectureDocumentCanonicalHash(
+          this.#confirmed.draft.architectureDocument,
+        ) ||
+      this.#pending.some(
+        (entry) =>
+          digest ===
+          getArchitectureDocumentCanonicalHash(entry.expectedDocument),
+      )
+    );
+  }
   flush(transport: DraftCommandTransport): Promise<CommandDraftHead> {
     if (this.#inFlight !== null) return this.#inFlight;
     const published = Promise.resolve().then(() => this.#drain(transport));

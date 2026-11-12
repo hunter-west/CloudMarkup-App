@@ -1402,3 +1402,42 @@ implementation and sixteen golden-pair refreshes remain unfinished. Native SQL,
 driver integration, browser/R1, restore, Go/authored-golden reproduction and
 cleanup-owner qualification remain unproven. The stopped localhost browser
 attempt is not retried; its child cleanup remains unverified.
+
+### Command and snapshot recovery after lease reacquisition
+
+The accepted accounting/deadline/IAM union is the parent of this separate
+browser correction. The published browser run reached 57 passing typed-backend
+cases and one failed-save recovery failure. Its retained archive contains one
+error context and screenshot, with no trace archive. The screen shows local
+recovery rejection after editing access is retried, rather than an absent lease
+button.
+
+The command checkpoint restores an unsaved document before mounting snapshot
+recovery. Previously that changed the expected snapshot seed digest, although
+the retained snapshot is bound to the saved server document. The route now
+supplies the saved seed separately. Verified command history determines the
+initial local document; a valid snapshot must match the original baseline or an
+exact replayed prefix before it can be replaced. Unaccounted and invalid
+snapshots remain blocked and retained. Snapshot unavailability does not replace
+verified commands with the older server document. Server writes still require
+explicit retry, current editing proof, the original command/request identity and
+version/content bindings. No recovery validation, lease, API or server
+authorization guard is relaxed, and no browser assertion, timeout or retry
+changes.
+
+Six added component rows cover matching, older, unaccounted, invalid, empty and
+unavailable snapshots. An existing ordered-command test gains baseline/prefix/
+final membership and unrelated-document refusal checks. All 76 existing cases in
+the four affected suites remain; 82 distinct cases pass across recorded focused
+runs. Three in-memory guard-removal controls fail at their intended assertions.
+The original reproduction, fixture/selector/type setup failures and corrected
+receipts remain recorded. No comparable performance improvement is established.
+
+This is source/component evidence with explicit storage, API and transport
+doubles. The historical deployed reload success used an older source without
+this command-recovery path; it does not establish a common defect or live data
+loss. Local browser execution remains stopped after the prior socket-permission
+failure. Exact independent review and ordinary integrated CI remain pending for
+this correction. Private source and both pending execution bindings are
+unchanged. Parked editor-form work is excluded. No publication, CI dispatch,
+override removal, native/provider action, merge or deployment occurred.

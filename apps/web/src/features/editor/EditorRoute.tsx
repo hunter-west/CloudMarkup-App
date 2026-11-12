@@ -1150,6 +1150,10 @@ function BackendEditorSession({
   const [mountedDocument, setMountedDocument] = useState<ArchitectureDocument>(
     () => parseArchitectureDocument(initialHead.draft.architectureDocument),
   );
+  const [commandRecoverySeed, setCommandRecoverySeed] = useState<{
+    document: ArchitectureDocument;
+    containsSnapshot: (document: ArchitectureDocument) => boolean;
+  }>();
   const catalogOpening = useMemo<EditorCatalogOpening>(() => {
     if (
       hasExactEditorCatalogBinding(mountedDocument, foundationEditorCatalog)
@@ -1305,6 +1309,7 @@ function BackendEditorSession({
       if (!isEditorScopeActive(activeScope)) return;
       headReference.current = nextHead;
       setHead(nextHead);
+      setCommandRecoverySeed(undefined);
       setMountedDocument(
         parseArchitectureDocument(nextHead.draft.architectureDocument),
       );
@@ -1557,11 +1562,17 @@ function BackendEditorSession({
           recovery !== null &&
           (recovery.pending.length > 0 || recovery.reviewRequired)
         ) {
-          saveDrain.current = DraftCommandDrain.restore(
+          const restored = DraftCommandDrain.restore(
             recovery,
             commandRecoveryHead,
           );
+          saveDrain.current = restored;
           setMountedDocument(recovery.document);
+          setCommandRecoverySeed({
+            document: commandRecoveryHead.draft.architectureDocument,
+            containsSnapshot: (snapshot) =>
+              restored.containsRecoveryDocument(snapshot),
+          });
           setMountGeneration((generation) => generation + 1);
           blockedReference.current = recovery.reviewRequired;
           setSaveState({
@@ -1814,6 +1825,11 @@ function BackendEditorSession({
       saveDrain.current = replacement;
       blockedReference.current = previous.reviewRequired;
       setMountedDocument(previous.document);
+      setCommandRecoverySeed({
+        document: commandRecoveryHead.draft.architectureDocument,
+        containsSnapshot: (snapshot) =>
+          replacement.containsRecoveryDocument(snapshot),
+      });
       setMountGeneration((value) => value + 1);
       setCommandRecoveryIssue(false);
       setSaveState({
@@ -2190,6 +2206,12 @@ function BackendEditorSession({
       preserveSessionOnRecoveryRebind
       recoveryCheckingFallback={<DevelopmentFixtureStatus serverBacked />}
       recoveryWriterId={runtimeIdentity.writerId}
+      {...(commandRecoverySeed === undefined
+        ? {}
+        : {
+            recoverySeedDocument: commandRecoverySeed.document,
+            recoveryContainsSnapshot: commandRecoverySeed.containsSnapshot,
+          })}
       scopeKey={scopeKey}
       {...(recoveryStore === undefined ? {} : { recoveryStore })}
     >

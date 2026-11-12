@@ -23,6 +23,7 @@ import {
 } from "./editor-recovery-context.js";
 import {
   createEditorRecoveryBindingV1,
+  prepareEditorRecoverySnapshotV1,
   serializeEditorRecoveryDiagnosticV1,
 } from "./editor-recovery-envelope.js";
 import type {
@@ -46,6 +47,10 @@ export interface EditorRecoveryCoordinatorProps {
   readonly now?: () => string;
   readonly scopeKey: string;
   readonly seedDocument: ArchitectureDocument | null;
+  /** A separately validated command replay. Snapshot validation still runs
+   * against seedDocument; it must not replace this newer initial document. */
+  readonly initialDocument?: ArchitectureDocument;
+  readonly containsSnapshot?: (document: ArchitectureDocument) => boolean;
   readonly store?: EditorRecoveryStoreV1;
   readonly writerId: string;
 }
@@ -236,6 +241,8 @@ export function EditorRecoveryCoordinator({
   now = DEFAULT_NOW,
   scopeKey,
   seedDocument,
+  initialDocument,
+  containsSnapshot,
   store,
   writerId,
 }: EditorRecoveryCoordinatorProps) {
@@ -251,7 +258,7 @@ export function EditorRecoveryCoordinator({
     recoveryEnabled
       ? null
       : {
-          document: seedDocument,
+          document: initialDocument ?? seedDocument,
           mountKey: `${scopeKey}:local-recovery-disabled`,
         },
   );
@@ -491,36 +498,65 @@ export function EditorRecoveryCoordinator({
         if (!active) {
           return;
         }
+        if (initialDocument !== undefined) {
+          const prepared = prepareEditorRecoverySnapshotV1(
+            binding,
+            initialDocument,
+          );
+          if (!prepared.ok) {
+            diagnosticReference.current = prepared.diagnostic;
+            setRecoveryState(
+              failedStatus(
+                "The restored command document does not match this recovery scope.",
+                prepared.diagnostic,
+              ),
+            );
+            return;
+          }
+        }
         const currentDocument = resolutionReference.current?.document ?? null;
         const rebasedLocalDocument =
           currentDocument !== null &&
           !sameRecoveryDocument(currentDocument, seedDocument)
             ? currentDocument
             : null;
+        const preferredDocument =
+          rebasedLocalDocument ?? initialDocument ?? null;
         switch (result.status) {
           case "empty":
-            activateAutosave(rebasedLocalDocument ?? seedDocument, null, {
+            activateAutosave(preferredDocument ?? seedDocument, null, {
               lastSavedAt: null,
               message:
-                rebasedLocalDocument === null
+                preferredDocument === null
                   ? "Local draft recovery is ready. Accepted Architecture Document changes will be saved in this browser."
                   : "Unsaved editor changes were rebound to the acknowledged server version and queued for local recovery.",
-              queueForCheckpoint: rebasedLocalDocument !== null,
+              queueForCheckpoint: preferredDocument !== null,
               recovered: false,
             });
             return;
           case "ready":
+            if (
+              initialDocument !== undefined &&
+              containsSnapshot?.(result.document) !== true
+            ) {
+              setRecoveryState(
+                failedStatus(
+                  "The retained local snapshot is outside the recovered command history. It was not replaced; keep this browser's recovery data for review.",
+                ),
+              );
+              return;
+            }
             activateAutosave(
-              rebasedLocalDocument ?? result.document,
+              preferredDocument ?? result.document,
               result.head,
               {
                 lastSavedAt: result.envelope.checkpoint.savedAt,
                 message:
-                  rebasedLocalDocument === null
+                  preferredDocument === null
                     ? "Recovered the latest validated local Architecture Document checkpoint."
                     : "Newer in-memory editor changes were preserved and queued over the exact-version local checkpoint.",
-                queueForCheckpoint: rebasedLocalDocument !== null,
-                recovered: rebasedLocalDocument === null,
+                queueForCheckpoint: preferredDocument !== null,
+                recovered: preferredDocument === null,
               },
             );
             return;
@@ -534,7 +570,7 @@ export function EditorRecoveryCoordinator({
             setRecoveryState(recoveryRequiredStatus(result));
             return;
           case "unavailable":
-            mountDocument(rebasedLocalDocument ?? seedDocument);
+            mountDocument(preferredDocument ?? seedDocument);
             setRecoveryState(
               result.code === "not-supported"
                 ? unsupportedStatus()
@@ -547,7 +583,9 @@ export function EditorRecoveryCoordinator({
           return;
         }
         const currentDocument =
-          resolutionReference.current?.document ?? seedDocument;
+          resolutionReference.current?.document ??
+          initialDocument ??
+          seedDocument;
         mountDocument(currentDocument);
         setRecoveryState(
           failedStatus(
@@ -563,6 +601,8 @@ export function EditorRecoveryCoordinator({
   }, [
     activateAutosave,
     binding,
+    containsSnapshot,
+    initialDocument,
     mountDocument,
     seedDocument,
     stageAutosaveForPruning,

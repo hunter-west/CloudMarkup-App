@@ -643,6 +643,17 @@ describe("draft command drain", () => {
     };
     await expect(drain.flush(transport)).rejects.toThrow("response-lost");
     expect(drain.recovery().pending).toHaveLength(2);
+    const restored = DraftCommandDrain.restore(drain.recovery(), original);
+    expect(
+      restored.containsRecoveryDocument(original.draft.architectureDocument),
+    ).toBe(true);
+    expect(restored.containsRecoveryDocument(local)).toBe(true);
+    expect(restored.containsRecoveryDocument(drain.recovery().document)).toBe(
+      true,
+    );
+    const outsideHistory = structuredClone(local);
+    required(outsideHistory.nodes[0]).presentation.position.x = 301;
+    expect(restored.containsRecoveryDocument(outsideHistory)).toBe(false);
     expect(
       required(drain.recovery().document.nodes[0]).presentation.position.x,
     ).toBe(400);
