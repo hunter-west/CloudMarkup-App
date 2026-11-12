@@ -2214,7 +2214,7 @@ suite("platform staff authority and accounting on PostgreSQL", () => {
     const f = await trialOperation();
     await typed.query(
       sql(
-        "INSERT INTO organization_subscription_projections(subscription_projection_id,organization_id,billing_account_id,billing_provider,provider_customer_reference,provider_subscription_reference,normalized_status,plan_version_id,billable_seat_quantity,effective_at,provider_environment) SELECT $3,$1,$2,'stripe',$4,$5,'active',v.plan_version_id,1,clock_timestamp(),'live' FROM commercial_plan_versions v JOIN commercial_plan_definitions d ON d.plan_id=v.plan_id WHERE d.plan_key='pro' ORDER BY v.version_number DESC LIMIT 1",
+        "INSERT INTO organization_subscription_projections(subscription_projection_id,organization_id,billing_account_id,billing_provider,provider_customer_reference,provider_subscription_reference,normalized_status,plan_version_id,billable_seat_quantity,effective_at,provider_environment) SELECT $3,$1,$2,'stripe',$4,$5,'active',v.plan_version_id,1,clock_timestamp(),CASE WHEN EXISTS(SELECT 1 FROM billing_provider_cutovers) THEN 'live' ELSE 'test' END FROM commercial_plan_versions v JOIN commercial_plan_definitions d ON d.plan_id=v.plan_id WHERE d.plan_key='pro' ORDER BY v.version_number DESC LIMIT 1",
         [
           f.t.organizationId,
           f.t.billingAccountId,

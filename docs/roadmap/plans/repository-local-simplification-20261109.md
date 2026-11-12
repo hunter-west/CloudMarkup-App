@@ -1036,3 +1036,32 @@ TypeScript compilation. Types, lint, build, local catalog-artifact checking,
 static security and secret scanning passed. These local source checks do not
 establish integrated CI, Go/native filesystem, provider or deployment
 acceptance.
+
+### Account and staff test guard reachability
+
+The account and staff audit corrections retain all 85 test registration sites
+and 96 expanded cases across eight owning files. Journal negatives now require
+the immutable-row error and include a constraint-valid authenticator update. The
+invitation test retains its wrong-token refusal and also uses the real
+application digest path. Membership rollback starts with an actual pending
+offer, observes its revocation before the injected audit failure, and verifies
+that membership, offer and receipt state roll back together. Both competing
+profile saves now establish a non-null username before explicit clearing.
+
+The raster limit negative contains a valid, independently checksummed PNG with
+ancillary padding; its exact-limit positive preserves the same canonical image.
+Staff preview negatives use independently parsed valid grant, receipt and trial
+values. Paid conversion selects the database's current provider mode, as the
+existing fixture helper does, without requiring another case to perform cutover.
+The dispatch-erasure check preserves its earlier constraint negative and adds a
+coherent revision/hash positive and isolated immutable-evidence negative while
+the journal is still leased and nonterminal. Savepoints preserve the original
+record, and an outer completion assertion prevents the coordinator's expected
+failure translation from swallowing test-assertion failures.
+
+The 12 pure staff-contract cases, eight-file type check, changed-file lint and
+bounded assertion-sensitivity probes passed. PostgreSQL's 78 cases and six
+native raster cases remain unrun locally; source and explicit SQL/transaction
+doubles do not establish native constraints, locking, rollback or rendering.
+Production implementations, historical migrations, financial policy and private
+test overrides are unchanged. No cases or duplicate executions were removed.

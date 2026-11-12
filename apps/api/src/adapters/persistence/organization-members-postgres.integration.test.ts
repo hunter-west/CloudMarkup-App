@@ -484,9 +484,10 @@ suite("organization membership lifecycle on isolated real PostgreSQL", () => {
     await expect(
       app.acceptForRecipient(target, first.id),
     ).rejects.toMatchObject({ code: "not_found" });
-    const legacy = await new OrganizationInvitationApplication({
+    const invitationApplication = new OrganizationInvitationApplication({
       repository: app,
-    }).create(
+    });
+    const legacy = await invitationApplication.create(
       f.owner,
       f.organizationId,
       { contractVersion: 1, role: "viewer", token: "b".repeat(42) + "A" },
@@ -500,6 +501,14 @@ suite("organization membership lifecycle on isolated real PostgreSQL", () => {
           .update("b".repeat(42) + "A")
           .digest("hex"),
       ),
+    ).rejects.toMatchObject({ code: "not_found" });
+    // The raw digest above remains an invalid-token control. The application
+    // supplies the actual domain-separated secret digest for this refusal.
+    await expect(
+      invitationApplication.accept(target, legacy.id, {
+        contractVersion: 1,
+        token: "b".repeat(42) + "A",
+      }),
     ).rejects.toMatchObject({ code: "not_found" });
     const fresh = await app.createForRecipient(
       f.owner,
@@ -617,17 +626,50 @@ suite("organization membership lifecycle on isolated real PostgreSQL", () => {
   it("rolls back membership, pending revocation and receipt when audit fails", async () => {
     const f = await fixture(),
       target = await principal(),
-      mid = await addMember(f.organizationId, target);
+      recipient = await principal(),
+      mid = await addMember(f.organizationId, target, "administrator");
+    const invitation = await app.createForRecipient(
+      target,
+      f.organizationId,
+      {
+        contractVersion: 1,
+        role: "viewer",
+        recipient: { kind: "user-id", userId: recipient.principalId },
+      },
+      id("rollback-offer"),
+    );
+    const readInvitation = async () =>
+      (
+        await database.query(
+          sql(
+            "SELECT to_jsonb(i) AS value FROM organization_invitations i WHERE organization_id=$1 AND invitation_id=$2",
+            [f.organizationId, invitation.id],
+          ),
+        )
+      ).rows[0]?.["value"];
+    const invitationBefore = await readInvitation();
+    expect(invitationBefore).toMatchObject({
+      lifecycle_state: "pending",
+      issuer_membership_id: mid,
+      revoked_at: null,
+    });
+    let revokedOffers = 0,
+      auditFailures = 0;
     const broken: SqlDatabase = {
       query: (s) => database.query(s),
       close: () => Promise.resolve(),
       transaction: (work) =>
         database.transaction((tx) =>
           work({
-            query: <T extends SqlRow>(statement: SqlStatement) => {
-              if (statement.text.includes("INSERT INTO audit_events"))
-                return Promise.reject(Error("Synthetic audit outage"));
-              return tx.query<T>(statement);
+            query: async <T extends SqlRow>(statement: SqlStatement) => {
+              if (statement.text.includes("INSERT INTO audit_events")) {
+                auditFailures++;
+                throw Error("Synthetic audit outage");
+              }
+              const result = await tx.query<T>(statement);
+              if (statement.text.includes("UPDATE organization_invitations"))
+                revokedOffers += result.rowCount;
+              return result;
             },
           }),
         ),
@@ -641,10 +683,13 @@ suite("organization membership lifecycle on isolated real PostgreSQL", () => {
         new PostgresOrganizationMembers(broken),
       ),
     ).rejects.toMatchObject({ code: "service_unavailable" });
+    expect(revokedOffers).toBe(1);
+    expect(auditFailures).toBe(1);
     expect((await members.own(target, f.organizationId)).value).toMatchObject({
-      role: "editor",
+      role: "administrator",
       version: 1,
     });
+    expect(await readInvitation()).toEqual(invitationBefore);
     expect(
       (
         await database.query(
