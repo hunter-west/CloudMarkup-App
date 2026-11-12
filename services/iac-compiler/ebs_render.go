@@ -60,5 +60,5 @@ func (r *cloudFormationRenderer) renderEbsResource(n NormalizedResource) {
 	}
 	r.addResource(r.logicalIDs[n.ID], res, SourceReference{Document: DocumentArchitecture, NodeID: n.ID})
 	h.ebsWarning(n)
-	r.diagnostics = append(r.diagnostics, h.diagnostics...)
+	r.retainDiagnostics(h.diagnostics)
 }

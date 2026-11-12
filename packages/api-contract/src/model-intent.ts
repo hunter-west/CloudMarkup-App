@@ -76,6 +76,7 @@ export const modelIntentResultV1Schema = z
   .strict()
   .superRefine((value, context) => {
     if (
+      (value.provenance === null && value.intentDocument !== null) ||
       (value.operation === "requirements.blocking-questions" &&
         value.intentDocument !== null) ||
       (value.operation === "intent.extract" &&

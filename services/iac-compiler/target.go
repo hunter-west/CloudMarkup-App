@@ -2,6 +2,22 @@ package compiler
 
 import "context"
 
+// A diagnostic budget may discard detail, but must never turn a failed render
+// into a successful artifact. Preserve the first error even if warnings filled
+// the budget before resource rendering reached it.
+func retainTargetDiagnostic(diagnostics []Diagnostic, limit int, incoming Diagnostic) []Diagnostic {
+	if limit < 1 {
+		limit = 1
+	}
+	if len(diagnostics) < limit {
+		return append(diagnostics, incoming)
+	}
+	if incoming.Severity == SeverityError && !hasErrorDiagnostics(diagnostics) {
+		diagnostics[len(diagnostics)-1] = incoming
+	}
+	return diagnostics
+}
+
 type cloudFormationTarget struct{}
 type terraformFoundationTarget struct{}
 

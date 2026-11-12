@@ -1,10 +1,12 @@
 import { readFileSync, writeFileSync } from "node:fs";
+import { runInNewContext } from "node:vm";
 
 import {
   existingApplicationFileV1Schema,
   type ApplicationGenerationResultV1,
 } from "@cloudmarkup/schemas";
 import { describe, expect, it } from "vitest";
+import ts from "typescript";
 
 import {
   CURRENT_APPLICATION_CATALOG,
@@ -251,6 +253,50 @@ describe("curated event application generator", () => {
         expect(unit).toContain("message-valid-2");
         expect(unit).toContain("commits a durable identity only after success");
         expect(unit).toContain("RAW_SECRET_MARKER");
+        const bounded = generate(pattern, { boundedPayloadLists: true });
+        expect(bounded.artifact.diagnostics).toEqual([]);
+        const generatedModule: {
+          validatePayload?: (value: unknown) => unknown;
+        } = {};
+        runInNewContext(
+          ts.transpileModule(sourceContent(bounded, "/generated/types.ts"), {
+            compilerOptions: { module: ts.ModuleKind.CommonJS },
+          }).outputText,
+          { exports: generatedModule },
+        );
+        const validate = generatedModule.validatePayload;
+        if (validate === undefined)
+          throw new Error("Missing payload validator.");
+        const payload = {
+          eventId: "fixture-event",
+          stringItems: ["a"],
+          integerItems: [1],
+          numberItems: [1.5],
+        };
+        expect(validate(payload)).toEqual(payload);
+        expect(validate({ ...payload, booleanItems: null })).toMatchObject({
+          booleanItems: null,
+        });
+        for (const [name, item, invalid] of [
+          ["stringItems", "a", 1],
+          ["integerItems", 1, 1.5],
+          ["numberItems", 1.5, "1"],
+          ["booleanItems", true, "true"],
+        ] as const) {
+          expect(
+            validate({ ...payload, [name]: [item, item, item] }),
+          ).toMatchObject({ [name]: [item, item, item] });
+          for (const value of [[], [item, item, item, item], [invalid]]) {
+            expect(() => validate({ ...payload, [name]: value })).toThrow();
+          }
+        }
+        const fixture = JSON.parse(
+          sourceContent(bounded, "/tests/fixtures/event_sqs_consumer_dlq.json"),
+        ) as { Records: { body: string }[] };
+        const fixturePayload: unknown = JSON.parse(
+          fixture.Records[0]?.body ?? "null",
+        );
+        expect(validate(fixturePayload)).toEqual(fixturePayload);
       } else if (pattern === "sns-fanout-consumer") {
         expect(handler).toContain("record.Sns.Message");
       } else if (pattern === "eventbridge-scheduled") {

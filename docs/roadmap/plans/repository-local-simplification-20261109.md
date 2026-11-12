@@ -893,6 +893,50 @@ authorization and historical migrations are unchanged. Focused synthetic proof
 remains distinct from the required native PostgreSQL rerun and integrated CI
 acceptance.
 
+### Account-contract consistency
+
+Pre-invocation Intent denials now require a null document as well as null
+provider provenance. Completed extraction and clarification controls, commercial
+route joins and pricing-field refusals remain. GitHub branch admission now
+matches the export service's restrictions on hidden and `.lock` components; the
+service still revalidates independently. The operator recovery-configuration
+test requires the exact fixed TypeError message, so appended input cannot
+satisfy a substring assertion.
+
+The existing owning cases reproduce both contract inconsistencies and pass after
+correction: 30 focused cases across four files, with no registrations removed or
+added. Types, lint, API-contract build, unchanged OpenAPI projection, static
+security and secret checks passed. Bounded parity and assertion probes remain
+separate evidence. These runtime refinements tighten invalid V1 inputs; they do
+not add authentication, financial or provider authority. Native account
+recovery, browser, provider, hosted composition and release acceptance remain
+separate gates.
+
+### Compiler emitter corrections
+
+Rendering now retains an error when earlier warnings fill the diagnostic budget.
+CloudFormation helper diagnostics share that bound and retain readiness
+warnings; S3 overlap errors keep their exact related-edge evidence. Generated
+permission matching requires Allow. Both EventBridge scalar-policy emitters
+refuse conditions, multiple values and Deny instead of silently discarding them;
+ordinary custom Deny policies remain supported by their existing policy-document
+emitters.
+
+SNS subscription and EventBridge event-pattern intermediaries participate in
+cycle detection. Scheduled rules remain independent of bus publications.
+Terraform emits one exact, at-most-ten-source allow policy per shared DLQ,
+preserving the existing single-source address. Embedded revision metadata now
+matches the existing TypeScript contract, and the CloudFormation Ref test helper
+requires a nonempty string. Existing cases remain, with targeted assertions and
+two additional owning-suite cases for distinct policy and routing boundaries.
+
+These Go changes and regressions remain source-only and require permitted
+compiler/golden qualification. No Go, native compiler, provider or deployment
+execution is claimed. The separate provider-version metadata correction remains
+an unapplied proposal: it requires a reviewed refresh of sixteen existing golden
+README/manifest pairs and their authentic complete-artifact digests. Existing
+goldens, historical fixtures, source pins and embedded schemas remain unchanged.
+
 ### Scoring and review input ownership
 
 Optional evaluation judges receive detached score and case inputs, so their
@@ -975,3 +1019,67 @@ fixtures and expected diagnostics remain unchanged. Every observation-mutation
 negative now first establishes the expected passing deterministic baseline.
 Focused synthetic execution qualifies the harness and isolated refusals only,
 not model/provider, native PostgreSQL or deployment behavior.
+
+### Compiler and generation boundaries
+
+The S3 policy/notification fixture exposed a CloudFormation dependency cycle
+between the Lambda function, its inline role policies and the notifying bucket.
+For this exact owned-bucket/role relationship, policy resources now use the
+validated bucket name and partition without a bucket-resource dependency.
+Bucket/object scopes, explicit Deny, invocation SourceAccount, encryption and
+permission-before-notification ordering remain. The owning golden case now
+checks resource cycles including explicit DependsOn edges; its existing policy,
+negative-admission and deterministic-order checks remain. The expected template
+is updated only at the five affected ARN expressions. Static JSON/source checks
+are not Go/compiler reproduction or provider acceptance; those qualifications
+remain open under the current execution restrictions.
+
+Event payload generation preserves scalar-list item bounds in the emitted type,
+validator, and synthetic fixture. Existing unbounded output and goldens remain
+unchanged. Exact environment node/target-key pairs are required, and endpoint
+reachability shares the existing selected-subnet containment proof with internet
+egress. Missing or conflicting VPC placement remains unresolved.
+
+The CLI prepares and checks the complete encoded response, including formatting
+and its final newline, before opening output. It rejects existing filesystem
+aliases and compares opened input/output identities before truncation. The
+original input limits, closed compiler boundary, structured diagnostics, and
+non-deployment authority remain. Existing tests now include output preservation,
+exact final-byte budgets and alias refusal; their Go/native execution remains
+unqualified under the current executor restrictions.
+
+The application-generator gate passed 145 tests with its existing opt-in
+performance baseline skipped, including unchanged goldens and in-memory
+TypeScript compilation. Types, lint, build, local catalog-artifact checking,
+static security and secret scanning passed. These local source checks do not
+establish integrated CI, Go/native filesystem, provider or deployment
+acceptance.
+
+### Account and staff test guard reachability
+
+The account and staff audit corrections retain all 85 test registration sites
+and 96 expanded cases across eight owning files. Journal negatives now require
+the immutable-row error and include a constraint-valid authenticator update. The
+invitation test retains its wrong-token refusal and also uses the real
+application digest path. Membership rollback starts with an actual pending
+offer, observes its revocation before the injected audit failure, and verifies
+that membership, offer and receipt state roll back together. Both competing
+profile saves now establish a non-null username before explicit clearing.
+
+The raster limit negative contains a valid, independently checksummed PNG with
+ancillary padding; its exact-limit positive preserves the same canonical image.
+Staff preview negatives use independently parsed valid grant, receipt and trial
+values. Paid conversion selects the database's current provider mode, as the
+existing fixture helper does, without requiring another case to perform cutover.
+The dispatch-erasure check preserves its earlier constraint negative and adds a
+coherent revision/hash positive and isolated immutable-evidence negative while
+the journal is still leased and nonterminal. Savepoints preserve the original
+record, and an outer completion assertion prevents the coordinator's expected
+failure translation from swallowing test-assertion failures.
+
+The 12 pure staff-contract cases, eight-file type check, changed-file lint and
+bounded assertion-sensitivity probes passed. PostgreSQL's 78 cases and six
+native raster cases remain unrun locally; source and explicit SQL/transaction
+doubles do not establish native constraints, locking, rollback or rendering.
+Production implementations, historical migrations, financial policy and private
+test overrides are unchanged. No cases or duplicate executions were removed.

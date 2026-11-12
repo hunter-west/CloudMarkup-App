@@ -318,6 +318,13 @@ func TestCloudFormationRejectsSensitiveOutputs(t *testing.T) {
 		t.Fatal("sensitive output produced a CloudFormation artifact")
 	}
 	diagnosticByCode(t, diagnostics, "CLOUDFORMATION_SENSITIVE_OUTPUT_UNSUPPORTED")
+	model.Workloads[0].ImplementationMode = "infrastructure-only"
+	limits := DefaultLimits()
+	limits.MaxDiagnostics = 1
+	artifact, diagnostics = renderCloudFormationArtifact(context.Background(), model, nil, limits)
+	if artifact != nil || len(diagnostics) != 1 || diagnostics[0].Code != "CLOUDFORMATION_SENSITIVE_OUTPUT_UNSUPPORTED" || diagnostics[0].Severity != SeverityError {
+		t.Fatalf("infrastructure warning hid sensitive-output refusal: %#v", diagnostics)
+	}
 }
 
 func cloudFormationNotesModel(mode string) *NormalizedSolution {
@@ -411,7 +418,9 @@ func arrayAtAny(t *testing.T, value map[string]any, key string) []any {
 
 func assertRef(t *testing.T, value any) {
 	t.Helper()
-	if reference, ok := value.(map[string]any); !ok || reference["Ref"] == "" {
+	reference, ok := value.(map[string]any)
+	name, isString := reference["Ref"].(string)
+	if !ok || !isString || name == "" {
 		t.Fatalf("value = %#v, want Ref", value)
 	}
 }

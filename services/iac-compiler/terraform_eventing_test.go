@@ -815,6 +815,76 @@ func eventS3LambdaModel() *NormalizedSolution {
 	return model
 }
 
+func TestEventFlowIncludesDeliveryIntermediaries(t *testing.T) {
+	for _, kind := range []string{"sns", "event-pattern", "schedule"} {
+		for _, target := range []string{"terraform", "cloudformation"} {
+			t.Run(kind+"-"+target, func(t *testing.T) {
+				model := eventScheduleModel()
+				if kind == "event-pattern" {
+					model = eventPatternTargetModel()
+				} else if kind == "sns" {
+					model = eventSNSFanoutModel()
+					removePolicy(model, "sns_queue_policy")
+					lambda, _ := modelResource(model, "lambda")
+					setResourceValue(model, "queue_subscription", "protocol", stringValueConfig("LAMBDA"))
+					setResourceValue(model, "queue_subscription", "rawMessageDelivery", boolValue(false))
+					mutateConnection(model, "edge_subscription_queue", func(edge *NormalizedConnection) {
+						edge.RelationshipType = "aws.sns.subscription-invokes-lambda"
+						edge.Target = reference(lambda)
+					})
+					addPolicy(model, "sns_permission", "service-grant", lambda, "aws.lambda.owns-invocation-permission", []string{"lambda:InvokeFunction"}, "service", []string{"sns.amazonaws.com"}, nil, true, []string{"edge_subscription_queue"})
+				}
+				finalizeEventModel(model)
+				render := func(candidate *NormalizedSolution) (*TargetArtifact, []Diagnostic) {
+					if target == "cloudformation" {
+						prepareCuratedCloudFormationModel(candidate)
+						return renderCloudFormationArtifact(context.Background(), candidate, nil, DefaultLimits())
+					}
+					return renderTerraformArtifact(context.Background(), candidate, nil, DefaultLimits())
+				}
+				positive, diagnostics := render(cloneNormalized(t, model))
+				assertNoTargetErrors(t, diagnostics)
+				if positive == nil {
+					t.Fatal("acyclic delivery control refused")
+				}
+				lambda, _ := modelResource(model, "lambda")
+				role, _ := modelResource(model, "role")
+				destination, _ := modelResource(model, "event_bus")
+				relationship, action := "aws.lambda.puts-events-on-eventbridge", "events:PutEvents"
+				if kind == "sns" {
+					destination, _ = modelResource(model, "fanout_topic")
+					relationship, action = "aws.lambda.publishes-to-sns", "sns:Publish"
+				}
+				model.Connections = append(model.Connections, connection("edge_return_event", relationship, lambda, destination, relationship+".connection", nil))
+				addPolicy(model, "return_permission", "generated-permission", role, "aws.iam.role-owns-generated-permission", []string{action}, "none", nil, &destination, true, []string{"edge_return_event"})
+				finalizeEventModel(model)
+				artifact, diagnostics := render(cloneNormalized(t, model))
+				if kind == "schedule" {
+					assertNoTargetErrors(t, diagnostics)
+					if artifact == nil {
+						t.Fatal("bus publications cannot trigger a scheduled rule")
+					}
+					return
+				}
+				code := "TARGET_EVENT_FLOW_CYCLE"
+				if target == "cloudformation" {
+					code = cloudFormationDiagnosticCode(code)
+				}
+				if artifact != nil || diagnosticByCode(t, diagnostics, code).Source.EdgeID == "" {
+					t.Fatalf("delivery cycle was not refused with its edge: %#v", diagnostics)
+				}
+				for left, right := 0, len(model.Connections)-1; left < right; left, right = left+1, right-1 {
+					model.Connections[left], model.Connections[right] = model.Connections[right], model.Connections[left]
+				}
+				again, repeated := render(cloneNormalized(t, model))
+				if again != nil || !reflect.DeepEqual(diagnostics, repeated) {
+					t.Fatal("cycle refusal depends on connection input order")
+				}
+			})
+		}
+	}
+}
+
 func eventScheduleModel() *NormalizedSolution {
 	model := eventBaseModel()
 	lambda, _ := modelResource(model, "lambda")

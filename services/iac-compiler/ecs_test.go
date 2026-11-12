@@ -130,6 +130,9 @@ func TestEcsBothTargetsDigestReferencesAndGolden(t *testing.T) {
 			if a == nil {
 				t.Fatal("missing artifact")
 			}
+			if diagnosticByCode(t, d, "ECS_READINESS_EXTERNAL").Severity != SeverityWarning {
+				t.Fatalf("%s lost its ECS readiness warning", target)
+			}
 			if !reflect.DeepEqual(before, m) {
 				t.Fatal("source mutated")
 			}
