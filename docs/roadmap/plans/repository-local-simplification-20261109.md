@@ -820,3 +820,13 @@ native and hosted activation remain separate. Two standalone
 sanitizer/compatibility setups now share their existing owning cases.
 Output-path negatives are independent, and the forged-artifact case refreshes
 its outer digest so it reaches the intended byte-binding guard.
+
+### Customer CI response-size evidence
+
+The existing actual-response-size rejection now supplies an allowed declared
+length and valid oversized repository-identity JSON. Fixture assertions prove
+that the response body is read and that parsing or identity mismatch cannot
+explain the rejection. The separate declared-size case, generic diagnostics,
+fetch options and token-redaction checks remain. This changes no generated
+workflow, admission limit or test count; focused execution uses a synthetic
+fetch and does not establish live GitHub or hosted acceptance.
