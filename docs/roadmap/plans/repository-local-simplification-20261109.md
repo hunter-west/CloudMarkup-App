@@ -607,3 +607,20 @@ statement checks by version. The canonical 124-migration registry, isolated
 exercise pending-maintenance isolation, retained cleanup replay and the real
 consumer assertion fragments with synthetic ledger rows; native SQL remains a
 separate gate. Original failed receipts and reviewed commits stay immutable.
+
+### Deployment test execution consolidation
+
+The complete public check runs API-contract tests once in its contracts phase;
+the later backend phase runs API and repository-export services. Standalone
+`test:backend` still includes API contracts. The main-only native workflow runs
+shared package-policy assertions once, retaining both actual package groups and
+the separate memory/normalization proofs. Release suites are listed explicitly
+instead of importing other test modules for side effects. No unique test case,
+native proof, negative control, timeout or release permission is removed.
+
+The prior CI log records 34 API-contract files / 313 cases executed twice. Its
+second-pass test-body durations total 1.344 seconds; this is not measured job
+time saved. Shared native package-policy executions drop from three to one. The
+private deployment policy also reuses its already completed workflow-policy
+suite instead of executing it again through CI validation. Workflow/job counts
+and source/native/release admission requirements remain unchanged.

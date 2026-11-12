@@ -1,9 +1,7 @@
-import "./beta-solution-export-admission.test.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import "./beta-sandbox-delivery-admission.test.mjs";
 
 import {
   BETA_RELEASE_EXPECTED,
@@ -34,6 +32,15 @@ function codes(findings) {
 }
 
 test("keeps exact release, receipt and bundled SQL pins aligned with the registered manifest", async () => {
+  const commands = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8"),
+  ).scripts["beta:release-gate:test"].split(/\s+/u);
+  for (const suite of [
+    "scripts/beta-release-gate-core.test.mjs",
+    "scripts/beta-sandbox-delivery-admission.test.mjs",
+    "scripts/beta-solution-export-admission.test.mjs",
+  ])
+    assert.equal(commands.filter((part) => part === suite).length, 1);
   const [
     manifest,
     gate,
