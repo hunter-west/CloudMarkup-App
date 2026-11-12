@@ -1833,6 +1833,13 @@ describe("deterministic Solution export", () => {
       ),
     );
     expect(localSolutionExportService.verify(artifact)).toEqual([]);
+    const entries = readDeterministicZip(artifact.zipBytes);
+    const paths = entries.map(({ path }) => path);
+    expect(paths).toEqual(paths.toSorted());
+    expect(createDeterministicZip(artifact.files)).toEqual(artifact.zipBytes);
+    expect(entries.map(({ bytes }) => bytes.byteLength)).toEqual(
+      artifact.files.map(({ bytes }) => bytes.byteLength),
+    );
   });
 
   it("is byte-identical across repeated runs and equivalent collection orderings", () => {
@@ -1848,18 +1855,6 @@ describe("deterministic Solution export", () => {
     expect(reordered.manifestDigest).toBe(first.manifestDigest);
     expect(reordered.zipDigest).toBe(first.zipDigest);
     expect(reordered.zipBytes).toEqual(first.zipBytes);
-  });
-
-  it("writes regular store-mode ZIP entries in deterministic UTF-16 order", () => {
-    const artifact = ready(generateSolutionExport(createExportRequest()));
-    const entries = readDeterministicZip(artifact.zipBytes);
-    const paths = entries.map(({ path }) => path);
-
-    expect(paths).toEqual(paths.toSorted());
-    expect(createDeterministicZip(artifact.files)).toEqual(artifact.zipBytes);
-    expect(entries.map(({ bytes }) => bytes.byteLength)).toEqual(
-      artifact.files.map(({ bytes }) => bytes.byteLength),
-    );
   });
 
   it("rejects traversal, absolute, platform-specific, ADS, and device paths", () => {

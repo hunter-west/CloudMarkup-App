@@ -760,3 +760,5 @@ obey the same per-file bound as payloads; independent verification and retained
 reconstruction enforce that bound too. Invalid JSON or undecodable verification
 content yields a bounded diagnostic without parser text. These changes do not
 publish artifacts, enable providers or qualify hosted/native release behavior.
+The checksum and ZIP round-trip assertions share one successful-export fixture,
+removing a duplicate generation while retaining order, sizes and exact bytes.
