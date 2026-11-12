@@ -270,6 +270,163 @@ it("does not poll an expired job when a throttled hidden tab becomes visible", a
   expect(fetcher.mock.calls[1]?.[1]?.method).toBe("DELETE");
 });
 
+it.each([
+  "initial-credit-fetch",
+  "initial-credit-body",
+  "status-fetch",
+  "status-body",
+  "terminal-credit-fetch",
+  "terminal-credit-body",
+])(
+  "bounds a pending %s and retains uncertain admission recovery",
+  async (phase) => {
+    vi.useFakeTimers();
+    for (const stop of ["deadline", "caller", "wall-clock"] as const) {
+      sessionStorage.clear();
+      const controller = new AbortController();
+      const input = args(controller.signal);
+      const onCredits =
+        vi.fn<(receipt: BetaInfrastructureJobCreditsV1 | null) => void>();
+      const failed = vi.fn<(error: unknown) => void>();
+      const succeeded = vi.fn();
+      let creditReads = 0;
+      let readSignal: AbortSignal | null | undefined;
+      let release: () => void = () => {
+        throw new Error("Pending boundary not reached");
+      };
+      const fetcher = vi.fn<typeof fetch>((url, init) => {
+        if (init?.method === "POST")
+          return Promise.resolve(response("running"));
+        if (init?.method === "DELETE")
+          return Promise.resolve(new Response(null, { status: 503 }));
+        if (typeof url !== "string")
+          throw new TypeError("Expected a request URL");
+        const isCredit = url.endsWith("/credits");
+        if (isCredit) creditReads += 1;
+        const current = isCredit
+          ? creditReads === 1
+            ? "initial-credit"
+            : "terminal-credit"
+          : "status";
+        const payload = isCredit
+          ? {
+              apiVersion: "v1",
+              data: {
+                contractVersion: 1,
+                jobId: "job_test",
+                state: creditReads === 1 ? "reserved" : "settled",
+                estimatedCreditUnits: "18",
+                maximumCreditUnits: "100",
+                ...(creditReads === 1 ? {} : { actualCreditUnits: "2" }),
+              },
+            }
+          : {
+              apiVersion: "v1",
+              data: {
+                contractVersion: 1,
+                id: "job_test",
+                architectureDigest: digest,
+                state: "succeeded",
+                result,
+              },
+            };
+        const healthy = new Response(JSON.stringify(payload));
+        if (!phase.startsWith(current)) return Promise.resolve(healthy);
+        readSignal = init?.signal;
+        // Deliberately ignore abort in the double: the client must settle even
+        // if a transport or body promise does not cooperate with its signal.
+        if (phase.endsWith("-fetch"))
+          return new Promise<Response>((resolve) => {
+            release = () => {
+              resolve(healthy);
+            };
+          });
+        vi.spyOn(healthy, "json").mockImplementation(
+          () =>
+            new Promise<unknown>((resolve) => {
+              release = () => {
+                resolve(payload);
+              };
+            }),
+        );
+        return Promise.resolve(healthy);
+      });
+      vi.stubGlobal("fetch", fetcher);
+      const pending = requestBetaInfrastructureProposal({
+        ...input,
+        onCredits,
+      }).then(succeeded, failed);
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(readSignal).toBeDefined();
+      expect(failed).not.toHaveBeenCalled();
+      if (stop === "deadline") {
+        await vi.advanceTimersByTimeAsync(597_999);
+        expect(failed).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(1);
+      } else if (stop === "caller") {
+        controller.abort();
+        await vi.advanceTimersByTimeAsync(0);
+      } else {
+        // A throttled tab can receive a late result before its timer runs.
+        vi.setSystemTime(Date.now() + 600_000);
+        release();
+        await vi.advanceTimersByTimeAsync(0);
+      }
+      expect(failed).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining(
+          stop === "caller" ? { name: "AbortError" } : { code: "ai.deadline" },
+        ),
+      );
+      await pending;
+      expect(succeeded).not.toHaveBeenCalled();
+      expect(readSignal?.aborted).toBe(true);
+      const cancellations = fetcher.mock.calls.filter(
+        ([, init]) => init?.method === "DELETE",
+      );
+      expect(cancellations).toHaveLength(1);
+      expect(cancellations[0]?.[0]).toBe(
+        "/api/v1/projects/project_test/beta-infrastructure-jobs/job_test",
+      );
+      expect(cancellations[0]?.[1]).toMatchObject({
+        cache: "no-store",
+        credentials: "same-origin",
+        keepalive: true,
+      });
+      expect(
+        new Headers(cancellations[0]?.[1]?.headers).get("authorization"),
+      ).toBe("Bearer synthetic-token");
+      expect(
+        fetcher.mock.calls.filter(([, init]) => init?.method === "POST"),
+      ).toHaveLength(1);
+      expect(
+        sessionStorage.getItem("cloudmarkup.beta-ai.pending-admissions.v1"),
+      ).toContain("identity");
+      const creditCallbacks = onCredits.mock.calls.length;
+      const requests = fetcher.mock.calls.length;
+      release();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(onCredits).toHaveBeenCalledTimes(creditCallbacks);
+      expect(fetcher).toHaveBeenCalledTimes(requests);
+      expect(vi.getTimerCount()).toBe(0);
+      fetcher.mockResolvedValue(response("succeeded"));
+      await expect(requestBetaInfrastructureProposal(args())).resolves.toEqual(
+        result,
+      );
+      const admissions = fetcher.mock.calls.filter(
+        ([, init]) => init?.method === "POST",
+      );
+      expect(admissions).toHaveLength(2);
+      expect(
+        new Headers(admissions[0]?.[1]?.headers).get("idempotency-key"),
+      ).toBe(new Headers(admissions[1]?.[1]?.headers).get("idempotency-key"));
+      expect(admissions.map(([, init]) => parsedBody(init?.body))).toEqual([
+        input.request,
+        input.request,
+      ]);
+    }
+  },
+);
+
 it("cancels the exact admitted server job when the user cancels while polling", async () => {
   vi.useFakeTimers();
   const fetch = vi

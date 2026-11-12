@@ -1219,3 +1219,27 @@ execution helper/test bindings, authentic assets/intake/cold composition,
 provider-version proposal and sixteen golden-pair refreshes remain open. Native
 SQL/restore, browser/R1, Go/authored-golden and cleanup-owner acceptance remain
 separate gates.
+
+### Admitted proposal read deadline correction
+
+The proposal client now starts its existing ten-minute read budget as soon as
+the admission response identifies the job. Initial and terminal credit reads,
+status fetches and their complete response bodies share that remaining budget
+and caller cancellation. Late completion cannot publish stale credit data or
+turn an expired request into success. Poll pauses also respect the remaining
+budget. Timer and listener cleanup is explicit.
+
+The independent thirty-second admission POST and ten-second exact-job
+cancellation remain unchanged. An uncertain cancellation retains the original
+idempotency key; no automatic second POST or new financial authority is added.
+Ordinary optional-credit failures still display unavailable credit information.
+The deadline bounds admitted reads, with the existing cancellation cleanup
+following refusal; it is not proof of worker termination or financial release.
+
+Six new owning table rows cover initial credit, status and terminal credit
+fetch/body stalls, each with deadline, caller-abort and delayed wall-clock
+completion controls. Existing 26 cases remain. The predecessor fails all six;
+the correction passes the 32-case suite and the six extended late controls.
+These use synthetic transport and timers, not a browser or provider. No native,
+CI, release-admission or deployment acceptance is claimed. Independent review
+and integrated qualification remain with the existing coordinator.
