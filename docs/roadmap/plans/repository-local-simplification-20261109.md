@@ -728,11 +728,12 @@ production automatic refresh remains unavailable.
 
 The workspace owns installation/repository selection, including remounts after
 delayed branch reads. Discovery and explicit import use that same selection.
-Quoted generic token assignments are redacted from optional interpretation
-evidence and again by the model gateway; the redaction metadata reflects the
-detected transformation. No model or webhook capability is enabled by these
-corrections. Focused fake-store and DOM tests cover the reported sequences;
-native database, real browser/provider and hosted admission remain separate.
+Quoted generic token assignments, including truncated values, are redacted from
+optional interpretation evidence and again by the model gateway; the metadata
+reflects the detected transformation. No model or webhook capability is enabled
+by these corrections. Focused fake-store and DOM tests cover the reported
+sequences; native database, real browser/provider and hosted admission remain
+separate.
 
 ### Persistence proof and test consolidation
 

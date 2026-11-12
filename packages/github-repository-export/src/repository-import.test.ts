@@ -528,6 +528,8 @@ describe("GitHub repository import and synchronization", () => {
       "synthetic-single",
       "synthetic-bare",
       "synthetic-escaped",
+      "synthetic-truncated-double",
+      "synthetic-truncated-single",
     ];
     const harness = await system({
       runner,
@@ -537,6 +539,8 @@ describe("GitHub repository import and synchronization", () => {
           "const other = {'token':'synthetic-single'};",
           "const token = 'synthetic-bare';",
           'const escaped = {"token":"before\\"synthetic-escaped"};',
+          'const partial = {"token":"synthetic-truncated-double',
+          "const otherPartial = {'token':'synthetic-truncated-single",
           "export const handler = () => settings;",
         ].join("\n"),
       },

@@ -823,7 +823,9 @@ describe("ModelGateway security grounding", () => {
             `Authorization: Basic ${basic}\n` +
             '{"token":"synthetic-quoted-token", "label":"public-context"}\n' +
             "{'token':'synthetic-single-token'}\n" +
-            '{"token":"before\\"synthetic-escaped-token"}',
+            '{"token":"before\\"synthetic-escaped-token"}\n' +
+            '{"token":"synthetic-truncated-double\n' +
+            "{'token':'synthetic-truncated-single",
           redaction: {
             categories: [],
             noSecretValues: true as const,
@@ -842,12 +844,14 @@ describe("ModelGateway security grounding", () => {
       "synthetic-quoted-token",
       "synthetic-single-token",
       "synthetic-escaped-token",
+      "synthetic-truncated-double",
+      "synthetic-truncated-single",
     ])
       expect(serialized).not.toContain(value);
     expect(serialized).toContain("public-context");
     expect(serialized).toContain("[REDACTED:SECRET]");
     expect(serialized).toContain("[REDACTED:CREDENTIAL]");
-    expect(redacted.summary.redactedValueCount).toBe(6);
+    expect(redacted.summary.redactedValueCount).toBe(8);
     const sanitized = parseRequestFor("repository.interpret", redacted.request);
     const redactionMetadata = sanitized.evidence[0]?.redaction;
     expect(redactionMetadata).toMatchObject({
