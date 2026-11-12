@@ -950,3 +950,10 @@ output without losing failed categories, nonrepairable errors or Evidence check
 statuses. Rejection and current-artifact safeguards remain. Focused pure and
 in-memory checks establish these library boundaries, not provider, compiler,
 native storage or deployment acceptance.
+
+### Duplicate-attempt assertion precision
+
+The three existing attempt-identity negatives first establish a valid review and
+then require the exact uniqueness issue at the intended attempt field. A
+separate replay-authority length failure can no longer satisfy these assertions
+by itself. No case, production guard or replay authority is removed.
