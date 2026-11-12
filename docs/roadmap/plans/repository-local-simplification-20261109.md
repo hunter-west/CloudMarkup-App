@@ -590,3 +590,20 @@ native qualification or enabling optional accounting/staff/cleanup authority.
 The private overlay/source pin remains intentionally unadmitted until authentic
 successor public assets and exact composition receipts are available. No private
 repin, production schema operation, grant or deletion accompanies this repair.
+
+### Independent cleanup and fixture corrections
+
+The independent review found that awaiting optional accounting maintenance could
+stall an otherwise healthy balance response. Commercial reads now neither start
+maintenance nor await its admission/storage. The separately awaited durable
+owner keeps its exact-page retry and authorization controls;
+execution/restore-owner admission remains required. No background Lambda promise
+or timeout race is used.
+
+Three native consumers also retained the old fixture tail positions. They now
+compare the complete requested/applied version sequence and look up historical
+statement checks by version. The canonical 124-migration registry, isolated
+85-entry layout and protected-prefix checks remain unchanged. Focused checks
+exercise pending-maintenance isolation, retained cleanup replay and the real
+consumer assertion fragments with synthetic ledger rows; native SQL remains a
+separate gate. Original failed receipts and reviewed commits stay immutable.

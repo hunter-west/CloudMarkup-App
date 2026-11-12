@@ -1,6 +1,4 @@
 import { PostgresBetaAiCreditMeter } from "./adapters/persistence/beta-ai-credit-meter.js";
-import { runProductionBetaAiCleanup } from "./production-beta-ai-cleanup.js";
-import type { CleanupRestoreAdmission } from "./adapters/persistence/beta-ai-cleanup-store.js";
 import {
   creditBalanceV1Schema,
   creditOverviewV1Schema,
@@ -67,8 +65,6 @@ function publicLedgerCursor(ledgerEntryId: string | undefined) {
 export function createProductionCommercialReads(options: {
   readonly database: SqlDatabase;
   readonly clock?: () => Date;
-  /** Server-owned restore admission; absent means cleanup stays inactive. */
-  readonly cleanupAdmission?: CleanupRestoreAdmission;
 }): Pick<
   CloudMarkupApplication,
   "getCreditBalance" | "getCreditOverview" | "getCurrentPlanEntitlements"
@@ -169,22 +165,9 @@ export function createProductionCommercialReads(options: {
               },
       });
       await database.context();
-      if (row["has_account"] && options.cleanupAdmission) {
-        // This bounded maintenance step cannot change/refuse the already read
-        // summary or block financial release/admission when cleanup is unavailable.
-        try {
-          await runProductionBetaAiCleanup({
-            database: options.database,
-            principal,
-            organizationId,
-            admission: options.cleanupAdmission,
-            ...(options.clock ? { clock: options.clock } : {}),
-          });
-        } catch {
-          /* Durable pending selection/outcomes are retried on a later admitted request. */
-        }
-        await database.context();
-      }
+      // Optional accounting maintenance belongs to its separately awaited,
+      // restore-admitted owner. Do not start it, race it or leave background
+      // writes behind a customer read; even admission/storage can remain pending.
       return overview;
     } catch (error) {
       if (error instanceof ApplicationError) throw error;

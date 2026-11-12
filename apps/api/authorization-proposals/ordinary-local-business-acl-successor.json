@@ -60,8 +60,8 @@
     },
     "apps/api/src/production-commercial-reads.ts": {
       "before": "5f4f6c87fbf27056e42f708dce4e8d6e240bcf018a2d54d84c3a883753d1243e",
-      "after": "5c22ceccf38757c19e1b6c5cdd001387920905cd481c65032fc498ea6d4ba15c",
-      "reason": "Optionally runs the existing organization-authorized cleanup owner with current-session and restore admission. No qualified restore binding is supplied; customer balances and summaries remain independent."
+      "after": "86232789e65c170256a59ceb3a85279066a31c2225eeeab177ffa70eaec82429",
+      "reason": "Customer summaries do not invoke optional cleanup or await its admission/storage. The separately awaited cleanup owner remains inactive pending an admitted execution and independent restore owner; no background work, timeout race, financial payload or privilege change."
     },
     "apps/api/src/production-composition.ts": {
       "before": "34d21a069f33e9da4d3a03cb293c2a422f35ccce8765cd8ce7dda5ecdfb102a8",

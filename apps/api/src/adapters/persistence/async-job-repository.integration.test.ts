@@ -271,7 +271,7 @@ integrationDescribe("async repository on isolated loopback PostgreSQL", () => {
   let database: PostgresDatabase;
   let openedDatabase: PostgresDatabase | undefined;
   let createdSchema = false;
-  let expectedMigrationCount = 0;
+  let expectedMigrationVersions: readonly string[] = [];
 
   beforeAll(async () => {
     const connectionString = localDatabaseUrl();
@@ -302,7 +302,7 @@ integrationDescribe("async repository on isolated loopback PostgreSQL", () => {
     const migrations = await loadHistoricalBetaMigrations(
       fileURLToPath(new URL("../../../migrations", import.meta.url)),
     );
-    expectedMigrationCount = migrations.length;
+    expectedMigrationVersions = migrations.map(({ version }) => version);
     await runMigrations(database, migrations);
     await runMigrations(database, migrations);
   }, 60_000);
@@ -436,10 +436,12 @@ integrationDescribe("async repository on isolated loopback PostgreSQL", () => {
     const applied = await database.query(
       sql("SELECT version FROM cloudmarkup_schema_migrations ORDER BY version"),
     );
-    expect(applied.rows.at(-3)?.["version"]).toBe("0098");
-    expect(applied.rows.at(-2)?.["version"]).toBe("0138");
-    expect(applied.rows.at(-1)?.["version"]).toBe("0142");
-    expect(applied.rows).toHaveLength(expectedMigrationCount);
+    expect(applied.rows.map((row) => row["version"])).toEqual(
+      expectedMigrationVersions,
+    );
+    expect(expectedMigrationVersions).toEqual(
+      expect.arrayContaining(["0098", "0138", "0139", "0140", "0141", "0142"]),
+    );
     const current = await database.query(
       sql("SELECT current_schema() AS schema"),
     );

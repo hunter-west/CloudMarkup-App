@@ -333,25 +333,28 @@ describe("production credit summary", () => {
       ).rejects.toMatchObject({ code: "service_unavailable" });
     },
   );
-  it("returns the unchanged customer balance when optional cleanup is unavailable", async () => {
+  it("returns the unchanged balance without starting pending cleanup admission or storage", async () => {
     const f = fixture();
     f.database.hasAccount = true;
     const expected = await f.app.getCreditOverview(principal, "org_credit");
     const cleanup = vi
       .spyOn(cleanupOwner, "runProductionBetaAiCleanup")
-      .mockRejectedValue(new Error("synthetic cleanup unavailable"));
+      .mockImplementation(() => new Promise(() => undefined));
+    const currentEpoch = vi.fn(() => new Promise<string>(() => undefined));
     try {
-      const app = createProductionCommercialReads({
+      // An older caller may still carry optional maintenance configuration.
+      // It must neither enter admission nor submit cleanup/storage work.
+      const options = {
         database: f.database,
         clock: () => new Date(now),
-        cleanupAdmission: {
-          currentEpoch: () => Promise.resolve("restore_fixture"),
-        },
-      });
+        cleanupAdmission: { currentEpoch },
+      };
+      const app = createProductionCommercialReads(options);
       expect(await app.getCreditOverview(principal, "org_credit")).toEqual(
         expected,
       );
-      expect(cleanup).toHaveBeenCalledOnce();
+      expect(currentEpoch).not.toHaveBeenCalled();
+      expect(cleanup).not.toHaveBeenCalled();
     } finally {
       cleanup.mockRestore();
     }

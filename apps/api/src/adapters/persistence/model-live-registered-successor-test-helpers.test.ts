@@ -91,6 +91,9 @@ it("isolates current ordinary fixtures without relabeling public-schema SQL as c
     fileURLToPath(new URL("../../../migrations/", import.meta.url)),
   );
   expect(isolated).toHaveLength(85);
+  expect(
+    isolated.find(({ version }) => version === "0098")?.statements,
+  ).toHaveLength(21);
   expect(isolated.slice(0, 80)).toEqual(canonical.slice(0, 80));
   expect(isolated.slice(80).map(({ version }) => version)).toEqual([
     "0138",

@@ -28,6 +28,11 @@ pending page by identity even when eligibility changes. Restart completed sweeps
 and revisit released-but-unresolved accounting. No provider, endpoint, schedule,
 customer pricing or staff cleanup authority is added.
 
+Maintenance is explicitly awaited by its own admitted caller, never by credit
+balance/overview responses. Those reads neither start maintenance nor leave
+background work after returning. No timeout race is used. An admitted execution
+owner and independent restore binding remain required before activation.
+
 The current-session lock/admission and canonical organization authorization
 guard every cleanup transaction. Permission tags and organization parameters do
 not authenticate a caller. Failures do not alter customer summary fields,
@@ -73,9 +78,10 @@ restart. A separate scheduled service adds authority and deployment cost that
 the bounded existing owner does not need. These alternatives are rejected.
 
 Durable metadata and canonical verification add storage and bounded SQL work.
-This is not a new financial ledger. The request path stays inactive until its
-restore owner is admitted. All-write-failure and response-before-first-durable-
-write windows remain explicit; missing usage is never zeroed or backfilled.
+This is not a new financial ledger. The maintenance path stays inactive until
+its execution and restore owners are admitted. All-write-failure and
+response-before-first-durable- write windows remain explicit; missing usage is
+never zeroed or backfilled.
 
 Rollback may disable the new owner while preserving additive tables and
 evidence. Never revert migration checksums, erase receipts or downgrade restored
