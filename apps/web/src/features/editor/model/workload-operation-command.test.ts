@@ -1,8 +1,13 @@
 import {
+  getApplicationContractRecordContentHash,
   getArchitectureDocumentHashes,
   parseArchitectureDocument,
+  validateArchitectureDocumentSemantics,
 } from "@cloudmarkup/domain";
-import type { ApplicationContractRecordV1 } from "@cloudmarkup/schemas";
+import {
+  applicationContractRecordV1Schema,
+  type ApplicationContractRecordV1,
+} from "@cloudmarkup/schemas";
 import { describe, expect, it } from "vitest";
 
 import { loadAwsEditorArchitectureDocument } from "../../../provider-catalog/aws-editor-fixture.js";
@@ -145,6 +150,36 @@ function expectManagedContractCollisionBlocked(
   expect(getArchitectureDocumentHashes(document)).toEqual(before);
 }
 
+function refreshContractReferences(
+  value: unknown,
+  contracts: readonly ApplicationContractRecordV1[],
+): unknown {
+  if (Array.isArray(value))
+    return value.map((item: unknown) =>
+      refreshContractReferences(item, contracts),
+    );
+  if (value === null || typeof value !== "object") return value;
+  const result: Record<string, unknown> = Object.fromEntries(
+    Object.entries(value).map(([key, item]: [string, unknown]) => [
+      key,
+      refreshContractReferences(item, contracts),
+    ]),
+  );
+  if (
+    typeof result["digest"] === "string" &&
+    typeof result["contractId"] === "string"
+  ) {
+    const record = contracts.find(
+      (item) =>
+        item.contractId === result["contractId"] &&
+        item.contractVersion === result["contractVersion"],
+    );
+    if (record)
+      result["digest"] = getApplicationContractRecordContentHash(record);
+  }
+  return result;
+}
+
 describe("workload operation command preparation", () => {
   it("prepares one atomic workload and Application Contract replacement", () => {
     const document = loadAwsEditorArchitectureDocument();
@@ -213,6 +248,29 @@ describe("workload operation command preparation", () => {
       },
       editable: true,
     });
+    const edited = prepareWorkloadOperationCommand({
+      commandId: "purpose_only_edit",
+      inverseCommandId: "purpose_only_undo",
+      document: prepared.previewDocument,
+      draft: { ...validDraft, description: "Save a reviewed note." },
+      operationId,
+      workloadId,
+    });
+    expect(
+      edited.previewDocument.applicationContracts.contracts.filter(
+        (contract) => contract.contractKind === "data-entity",
+      ),
+    ).toEqual(
+      prepared.previewDocument.applicationContracts.contracts.filter(
+        (contract) => contract.contractKind === "data-entity",
+      ),
+    );
+    expect(
+      managedContractForRole(
+        edited.previewDocument.applicationContracts.contracts,
+        "behavior",
+      ).description,
+    ).toBe("Save a reviewed note.");
   });
 
   it("records role-specific compact-editor ownership provenance", () => {
@@ -234,6 +292,148 @@ describe("workload operation command preparation", () => {
       });
     }
   });
+
+  it.each([
+    "nullable",
+    "field-description",
+    "storage",
+    "failure-outcomes",
+    "authorization",
+  ] as const)(
+    "refuses a purpose edit that would erase saved %s meaning",
+    (detail) => {
+      const original = prepare(
+        validDraft,
+        `enriched_${detail}`,
+      ).previewDocument;
+      const behavior = managedContractForRole(
+        original.applicationContracts.contracts,
+        "behavior",
+      );
+      const auth = applicationContractRecordV1Schema.parse({
+        contractKind: "auth",
+        contractId: "example.auth",
+        contractVersion: "1.0.0",
+        displayName: "Staff access",
+        provenance: {
+          ...behavior.provenance,
+          sourceReferenceIds: ["requirement_staff_access"],
+        },
+        authenticationMethod: "oidc",
+        claims: [],
+        roles: [
+          { roleId: "role_staff", displayName: "Staff", claimRequirements: [] },
+        ],
+      });
+      let contracts = original.applicationContracts.contracts.map((contract) =>
+        applicationContractRecordV1Schema.parse(
+          contract.contractKind === "data-entity" &&
+            contract.contractId.endsWith(
+              detail === "field-description" ? ".output" : ".input",
+            )
+            ? {
+                ...contract,
+                fields: contract.fields.map((field, index) =>
+                  index !== 0
+                    ? field
+                    : {
+                        ...field,
+                        ...(detail === "nullable" ? { nullable: true } : {}),
+                        ...(detail === "field-description"
+                          ? { description: "Retain this saved field meaning." }
+                          : {}),
+                      },
+                ),
+                ...(detail === "storage"
+                  ? {
+                      storageIntent: "persistent",
+                      supportedOperations: ["read"],
+                    }
+                  : {}),
+              }
+            : contract.contractKind === "behavior-operation"
+              ? {
+                  ...contract,
+                  ...(detail === "failure-outcomes"
+                    ? {
+                        failureOutcomes: [
+                          {
+                            category: "example.rejected",
+                            retryable: false,
+                            description: "Requires manual review.",
+                          },
+                        ],
+                      }
+                    : {}),
+                  ...(detail === "authorization"
+                    ? {
+                        authorization: {
+                          authContract: {
+                            contractId: auth.contractId,
+                            contractKind: "auth",
+                            contractVersion: auth.contractVersion,
+                            digest:
+                              getApplicationContractRecordContentHash(auth),
+                          },
+                          permittedRoleIds: ["role_staff"],
+                        },
+                      }
+                    : {}),
+                }
+              : contract,
+        ),
+      );
+      if (detail === "authorization") contracts.push(auth);
+      contracts = contracts.map((contract) =>
+        applicationContractRecordV1Schema.parse(
+          refreshContractReferences(contract, contracts),
+        ),
+      );
+      const document = parseArchitectureDocument(
+        refreshContractReferences(
+          {
+            ...original,
+            applicationContracts: {
+              ...original.applicationContracts,
+              contracts,
+            },
+          },
+          contracts,
+        ),
+      );
+      expect(validateArchitectureDocumentSemantics(document)).toEqual([]);
+      const before = structuredClone(document);
+      expect(
+        resolveWorkloadOperationDraft({
+          document,
+          fallbackDisplayName: "Fallback",
+          operationId,
+          workloadId,
+        }),
+      ).toMatchObject({ editable: false });
+      expect(() =>
+        prepareWorkloadOperationCommand({
+          commandId: `purpose_edit_${detail}`,
+          inverseCommandId: `purpose_edit_${detail}_undo`,
+          document,
+          draft: { ...validDraft, description: "Change only the purpose." },
+          operationId,
+          workloadId,
+        }),
+      ).toThrow(
+        expect.objectContaining({
+          name: "WorkloadOperationPreparationError",
+          issues: [
+            expect.objectContaining({
+              code: "existing-contract-not-editable",
+              path: "$.applicationContracts",
+            }),
+          ],
+        }),
+      );
+      expect(document).toEqual(before);
+    },
+  );
 
   it.each(managedContractCollisionRoles)(
     "refuses non-editor provenance at the managed %s identity",
