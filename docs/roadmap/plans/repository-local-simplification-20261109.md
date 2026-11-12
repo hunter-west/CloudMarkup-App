@@ -694,3 +694,23 @@ Focused synthetic regressions also cover populated retained-history replay and
 valid revision-authority refusal fixtures. Editor ADR headers link their precise
 accepted partial successors. Native restore, provider calls, browser journeys,
 exact hosted admission and release acceptance remain separate gates.
+
+### Persistence and list follow-up
+
+Object staging retains an owned copy of every streamed chunk before hashing, so
+buffer reuse cannot change the acknowledged bytes. Unsaved presentation
+preferences use a distinct conditional-write identity from the first saved row.
+Lifecycle retries pass the original project version to the durable receipt/CAS
+owner; deletion responses read version metadata without reopening draft content.
+Unexpected coded import errors retain the generic server-error boundary.
+
+Project and revision lists apply stable sort and continuation predicates before
+the SQL limit. Cursors bind the principal, organization, collection and
+requested ordering; timestamp continuations preserve database microseconds.
+Every page still requires current authorization. Old project cursors must
+restart the list; continuation does not promise a point-in-time snapshot across
+mutable pages. Project summaries no longer query environment counts they
+discard. Focused provider-free tests cover these boundaries; native SQL/roles,
+concurrency, filesystem durability and exact hosted composition remain
+unqualified. The ordinary-role source proposal records the new read paths
+without granting or activating additional permissions.

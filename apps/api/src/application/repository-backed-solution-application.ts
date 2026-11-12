@@ -22,6 +22,12 @@ import {
 import type { AiIntentAcceptancePortV1 } from "./ai-intent-acceptance.js";
 import { ApplicationError } from "./errors.js";
 import {
+  decodeListCursor,
+  encodeListCursor,
+  listBinding,
+  revisionListDirection,
+} from "./list-pagination.js";
+import {
   ObjectStoreError,
   RepositoryError,
   type AuthorizedOrganizationScope,
@@ -521,18 +527,39 @@ class RepositoryBackedSolutionApplication implements RepositoryBackedSolutionApp
         projectId,
         "projects.read",
       );
+      const direction = revisionListDirection(options.sort);
+      const binding = listBinding([
+        "revisions",
+        scope.organizationId,
+        principal.principalId,
+        projectId,
+        direction,
+      ]);
+      const after = decodeListCursor(options.cursor, binding, true);
       const records = await this.#repository.listRevisions(
         scope,
         projectId,
         options.limit,
+        {
+          direction,
+          extraRow: true,
+          ...(after === undefined ? {} : { after }),
+        },
       );
+      const page = records.slice(0, options.limit);
       const revisions = await Promise.all(
-        records.map((record) => this.#readRevision(scope, record)),
+        page.map((record) => this.#readRevision(scope, record)),
       );
-      if (options.sort === "createdAt") {
-        revisions.reverse();
-      }
+      const last = page.at(-1);
       return {
+        ...(records.length > options.limit && last !== undefined
+          ? {
+              nextCursor: encodeListCursor(binding, {
+                id: last.revisionId,
+                value: this.#paginationTimestamp(last.paginationCreatedAt),
+              }),
+            }
+          : {}),
         items: revisions.map(({ architectureDocument, ...summary }) => {
           void architectureDocument;
           return summary;
@@ -582,20 +609,43 @@ class RepositoryBackedSolutionApplication implements RepositoryBackedSolutionApp
         projectId,
         "projects.read",
       );
+      const direction = revisionListDirection(options.sort);
+      const binding = listBinding([
+        "solution-revisions",
+        scope.organizationId,
+        principal.principalId,
+        projectId,
+        direction,
+      ]);
+      const after = decodeListCursor(options.cursor, binding, true);
       const records = await this.#solutionRecords.list(scope, {
         limit: options.limit,
         projectId,
         recordKind: "solution-revision-manifest",
+        selection: {
+          direction,
+          extraRow: true,
+          ...(after === undefined ? {} : { after }),
+        },
       });
+      const page = records.slice(0, options.limit);
       const solutions = await Promise.all(
-        records.map((record) =>
+        page.map((record) =>
           this.#readSolutionRevision(scope, record, principal),
         ),
       );
-      if (options.sort === "createdAt") {
-        solutions.reverse();
-      }
-      return { items: solutions.map((solution) => solution.summary) };
+      const last = page.at(-1);
+      return {
+        items: solutions.map((solution) => solution.summary),
+        ...(records.length > options.limit && last !== undefined
+          ? {
+              nextCursor: encodeListCursor(binding, {
+                id: last.solutionRecordId,
+                value: this.#paginationTimestamp(last.paginationCreatedAt),
+              }),
+            }
+          : {}),
+      };
     } catch (error) {
       return mapPersistenceError(error);
     }
@@ -627,6 +677,15 @@ class RepositoryBackedSolutionApplication implements RepositoryBackedSolutionApp
     } catch (error) {
       return mapPersistenceError(error);
     }
+  }
+
+  #paginationTimestamp(value: string | undefined): string {
+    if (value === undefined)
+      throw new RepositoryError(
+        "invalid-input",
+        "Revision continuation metadata is unavailable.",
+      );
+    return value;
   }
 
   async #publishRevision(

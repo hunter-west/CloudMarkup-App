@@ -39,8 +39,30 @@ import {
   deriveInternalValidationRunId,
 } from "../application/repository-backed-solution-application.js";
 import type { RevisionValidation } from "../application/revision-validation.js";
+import type { RevisionListSelection } from "../application/list-pagination.js";
 
 const NOW = "2026-08-15T12:00:00.000Z";
+
+function selectedPage<T extends { readonly createdAt: string }>(
+  rows: readonly T[],
+  id: (row: T) => string,
+  limit: number,
+  selection?: RevisionListSelection,
+): T[] {
+  const ordered = [...rows].sort(
+    (a, b) =>
+      a.createdAt.localeCompare(b.createdAt) || id(a).localeCompare(id(b)),
+  );
+  if (selection?.direction !== "ASC") ordered.reverse();
+  const start =
+    selection?.after === undefined
+      ? 0
+      : ordered.findIndex((row) => id(row) === selection.after?.id) + 1;
+  return ordered.slice(
+    start,
+    start + limit + (selection?.extraRow === true ? 1 : 0),
+  );
+}
 
 function principal(): PrincipalContext {
   return {
@@ -168,6 +190,10 @@ describe("restart-safe repository-backed Solution Revision application", () => {
               compilerInputContractVersion: input.compilerInputContractVersion,
               contentSha256: input.contentSha256,
               createdAt: input.createdAt,
+              paginationCreatedAt: input.createdAt.replace(
+                /\.([0-9]{3})Z$/u,
+                ".$1000Z",
+              ),
               documentObjectId: object.objectId,
               graphSchemaVersion: input.graphSchemaVersion,
               ...(input.maximumCompilerVersionExclusive === undefined
@@ -209,9 +235,17 @@ describe("restart-safe repository-backed Solution Revision application", () => {
             revisionId: string,
           ) => Promise.resolve(revisions.get(revisionId) ?? null),
         ),
-        listRevisions: vi
-          .fn()
-          .mockImplementation(() => Promise.resolve([...revisions.values()])),
+        listRevisions: vi.fn<CloudMarkupRepository["listRevisions"]>(
+          (_scope, _project, limit, selection) =>
+            Promise.resolve(
+              selectedPage(
+                [...revisions.values()],
+                (row) => row.revisionId,
+                limit,
+                selection,
+              ),
+            ),
+        ),
         markObjectPublished: vi.fn(
           async (_scope: AuthorizedOrganizationScope, objectId: string) => {
             await Promise.resolve();
@@ -254,6 +288,7 @@ describe("restart-safe repository-backed Solution Revision application", () => {
               contentSha256: input.contentSha256,
               contractVersion: input.contractVersion,
               createdAt: NOW,
+              paginationCreatedAt: "2026-08-15T12:00:00.000000Z",
               createdByPrincipalId: scope.principalId,
               organizationId: scope.organizationId,
               projectId: input.projectId,
@@ -288,17 +323,20 @@ describe("restart-safe repository-backed Solution Revision application", () => {
             solutionRecordId: string,
           ) => Promise.resolve(records.get(solutionRecordId) ?? null),
         ),
-        list: vi
-          .fn()
-          .mockImplementation(() =>
-            Promise.resolve(
+        list: vi.fn<SolutionRecordRepository["list"]>((_scope, input) =>
+          Promise.resolve(
+            selectedPage(
               [...records.values()].filter(
                 (record) =>
                   objects.get(record.contentObjectId)?.lifecycleState ===
                   "published",
               ),
+              (row) => row.solutionRecordId,
+              input.limit,
+              input.selection,
             ),
           ),
+        ),
       };
       const ensureComplete = vi
         .fn<RevisionValidation["ensureComplete"]>()
@@ -707,6 +745,102 @@ describe("restart-safe repository-backed Solution Revision application", () => {
             created.summary.solutionRevisionId,
           ),
         ).rejects.toMatchObject({ code: "service_unavailable" });
+      }
+      if (!includeIntent && !includeTools && !interruptPublication) {
+        // Reuse the real publication fixture; both list owners must enumerate
+        // the complete history, not repeatedly reverse one newest subset.
+        project = { ...project, lifecycleStatus: "active" };
+        draft = { ...draft, draftVersion: 1 };
+        await firstProcess.createSolutionRevision(
+          principal(),
+          seed.projectId,
+          {
+            contractVersion: 1,
+            draftId: seed.draftId,
+            draftVersion: 1,
+            name: "Second baseline",
+          },
+          `"draft:${seed.draftId}:v1"`,
+          "second-solution-pagination",
+        );
+        for (const sort of ["createdAt", "-createdAt"]) {
+          for (const kind of ["revisions", "solutions"] as const) {
+            const ids: string[] = [];
+            let cursor: string | undefined;
+            let firstCursor: string | undefined;
+            for (let pageNumber = 0; pageNumber < 5; pageNumber++) {
+              const options = {
+                filters: {},
+                limit: 1,
+                sort,
+                ...(cursor === undefined ? {} : { cursor }),
+              };
+              const page =
+                kind === "revisions"
+                  ? await firstProcess.listRevisions(
+                      principal(),
+                      seed.projectId,
+                      options,
+                    )
+                  : await firstProcess.listSolutionRevisions(
+                      principal(),
+                      seed.projectId,
+                      options,
+                    );
+              ids.push(
+                ...page.items.map((item) =>
+                  "id" in item ? item.id : item.solutionRevisionId,
+                ),
+              );
+              firstCursor ??= page.nextCursor;
+              cursor = page.nextCursor;
+              if (cursor === undefined) break;
+            }
+            const expected = [
+              ...(kind === "revisions" ? revisions.keys() : records.keys()),
+            ].sort();
+            if (sort === "-createdAt") expected.reverse();
+            expect(ids).toEqual(expected);
+            expect(new Set(ids).size).toBe(ids.length);
+            expect(cursor).toBeUndefined();
+            expect(firstCursor).toBeDefined();
+            if (firstCursor === undefined)
+              throw new Error("Expected continuation");
+            const reversed = {
+              filters: {},
+              limit: 1,
+              sort: sort === "createdAt" ? "-createdAt" : "createdAt",
+              cursor: firstCursor,
+            };
+            await expect(
+              kind === "revisions"
+                ? firstProcess.listRevisions(
+                    principal(),
+                    seed.projectId,
+                    reversed,
+                  )
+                : firstProcess.listSolutionRevisions(
+                    principal(),
+                    seed.projectId,
+                    reversed,
+                  ),
+            ).rejects.toMatchObject({ code: "invalid_request" });
+            const crossed = { ...reversed, sort };
+            await expect(
+              kind === "revisions"
+                ? firstProcess.listSolutionRevisions(
+                    principal(),
+                    seed.projectId,
+                    crossed,
+                  )
+                : firstProcess.listRevisions(
+                    principal(),
+                    seed.projectId,
+                    crossed,
+                  ),
+            ).rejects.toMatchObject({ code: "invalid_request" });
+          }
+        }
       }
       const record = records.get(created.summary.solutionRevisionId);
       if (record === undefined)

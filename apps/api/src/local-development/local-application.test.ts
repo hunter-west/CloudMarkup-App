@@ -17,6 +17,7 @@ import type {
 import { architectureDocumentV3Schema } from "@cloudmarkup/schemas";
 
 import { InMemoryObjectStore } from "../adapters/persistence/memory-object-store.js";
+import { RepositoryError } from "../application/persistence.js";
 import { createRepositoryBackedLocalApplication } from "./local-application.js";
 import {
   createDocumentStageInput,
@@ -271,6 +272,66 @@ describe("repository-backed local API boundary", () => {
     );
   });
 
+  it("distinguishes absent preferences and rejects stale or competing first writes", async () => {
+    type Preferences = NonNullable<
+      Awaited<ReturnType<CloudMarkupRepository["getPresentationPreferences"]>>
+    >;
+    const stored = new Map<string, Preferences>();
+    const update = vi.fn<
+      CloudMarkupRepository["updatePresentationPreferences"]
+    >((context, input, expected) => {
+      const previous = stored.get(context.principalId);
+      if ((previous?.syncVersion ?? 0) !== expected) {
+        throw new RepositoryError("version-conflict", "Preferences changed.");
+      }
+      const next = { ...input, syncVersion: expected + 1, updatedAt: NOW };
+      stored.set(context.principalId, next);
+      return Promise.resolve(next);
+    });
+    const local = application({
+      getPresentationPreferences: (context) =>
+        Promise.resolve(stored.get(context.principalId) ?? null),
+      updatePresentationPreferences: update,
+    });
+    const initial = await local.getPresentationPreferences(principal());
+    expect(initial.etag).toBe('"preferences:principal_local_owner:v0"');
+    expect(initial.value.syncVersion).toBe(1);
+    const input = {
+      contextualLearningEnabled: false,
+      contractVersion: 1 as const,
+      experienceMode: "professional" as const,
+    };
+    const races = await Promise.allSettled([
+      local.updatePresentationPreferences(principal(), input, initial.etag),
+      local.updatePresentationPreferences(
+        principal(),
+        { ...input, contextualLearningEnabled: true },
+        initial.etag,
+      ),
+    ]);
+    expect(races.map(({ status }) => status)).toEqual([
+      "fulfilled",
+      "rejected",
+    ]);
+    expect(races[1]).toMatchObject({ reason: { code: "precondition_failed" } });
+    await expect(
+      local.updatePresentationPreferences(principal(), input, initial.etag),
+    ).rejects.toMatchObject({ code: "precondition_failed" });
+    expect(update).toHaveBeenCalledTimes(2);
+    expect(
+      (await local.getPresentationPreferences(principal())).value,
+    ).toMatchObject({ contextualLearningEnabled: false, syncVersion: 1 });
+    const other = principal("principal_other");
+    const otherInitial = await local.getPresentationPreferences(other);
+    expect(otherInitial.etag).toBe('"preferences:principal_other:v0"');
+    await expect(
+      local.updatePresentationPreferences(other, input, initial.etag),
+    ).rejects.toMatchObject({ code: "precondition_failed" });
+    await expect(
+      local.updatePresentationPreferences(other, input, otherInitial.etag),
+    ).resolves.toMatchObject({ value: { syncVersion: 1 } });
+  });
+
   it("rejects schema-valid full-document saves that replace server draft identity bindings", async () => {
     const seed = LOCAL_PROJECT_SEEDS[0];
     const document = createSeedArchitectureDocument(seed);
@@ -394,6 +455,148 @@ describe("repository-backed local API boundary", () => {
     }
     expect(updateDraft).not.toHaveBeenCalled();
   });
+  it("replays acknowledged lifecycle mutations after lost responses without reading deleted content", async () => {
+    for (const operation of ["archive", "delete"] as const) {
+      const actor = {
+        ...principal(),
+        authenticatedAt: "2026-08-15T12:19:00.000Z",
+      };
+      const scope: AuthorizedOrganizationScope = {
+        ...actor,
+        capabilities: ["projects.read", "projects.mutate", "projects.delete"],
+        membershipId: "membership_local_owner",
+        organizationId: "org_local",
+        roleKey: "owner",
+      };
+      let project: ProjectRecord = {
+        createdAt: NOW,
+        currentDraftId: "draft_local_notes_api",
+        currentDraftVersion: 7,
+        lifecycleStatus: "active",
+        name: "notes-api",
+        organizationId: "org_local",
+        projectId: "project_local_notes_api",
+        recordVersion: 1,
+        updatedAt: NOW,
+      };
+      let receipt:
+        Parameters<CloudMarkupRepository["deleteProject"]>[1] | undefined;
+      const mutate = vi.fn<CloudMarkupRepository["deleteProject"]>(
+        (_scope, request) => {
+          if (receipt?.idempotencyKey === request.idempotencyKey) {
+            if (receipt.requestSha256 !== request.requestSha256)
+              throw new RepositoryError(
+                "idempotency-conflict",
+                "Changed request.",
+              );
+            return Promise.resolve(project);
+          }
+          if (request.expectedRecordVersion !== project.recordVersion)
+            throw new RepositoryError("version-conflict", "Stale write.");
+          receipt = request;
+          project = {
+            ...project,
+            lifecycleStatus:
+              operation === "archive" ? "archived" : "deletion-pending",
+            recordVersion: 2,
+          };
+          throw new Error("synthetic committed response lost");
+        },
+      );
+      const getDraft = vi.fn().mockResolvedValue(null);
+      const resolveOrganizationScope = vi.fn().mockResolvedValue(scope);
+      const local = application({
+        archiveProject: mutate,
+        deleteProject: mutate,
+        getProject: vi.fn(() => Promise.resolve(project)),
+        getDraft,
+        listProjectEnvironments: vi.fn(() => Promise.resolve([])),
+        resolveOrganizationScope,
+      });
+      const invoke = (version = 1, key = "lifecycle-request") =>
+        operation === "archive"
+          ? local.archiveProject(
+              actor,
+              project.projectId,
+              { contractVersion: 1 },
+              `"project:${project.projectId}:v${String(version)}"`,
+              key,
+            )
+          : local.deleteProject(
+              actor,
+              project.projectId,
+              `"project:${project.projectId}:v${String(version)}"`,
+              key,
+            );
+      await expect(invoke()).rejects.toMatchObject({ status: 500 });
+      await expect(invoke()).resolves.toMatchObject({
+        etag: `"project:${project.projectId}:v2"`,
+        value: {
+          currentDraft: { version: 7 },
+          lifecycleStatus: project.lifecycleStatus,
+        },
+      });
+      expect(mutate.mock.calls[0]?.[1]).toEqual(mutate.mock.calls[1]?.[1]);
+      expect(getDraft).not.toHaveBeenCalled();
+      await expect(invoke(2)).rejects.toMatchObject({
+        code: "idempotency_key_reused",
+      });
+      await expect(invoke(1, "new-key")).rejects.toMatchObject({
+        code: "precondition_failed",
+      });
+      resolveOrganizationScope.mockResolvedValueOnce(null);
+      await expect(invoke()).rejects.toMatchObject({ code: "not_found" });
+      expect(mutate).toHaveBeenCalledTimes(4);
+    }
+  });
+
+  it("keeps repository project order and continuation without unused environment queries", async () => {
+    const scope: AuthorizedOrganizationScope = {
+      ...principal(),
+      capabilities: ["projects.read"],
+      membershipId: "membership_local_owner",
+      organizationId: "org_local",
+      roleKey: "owner",
+    };
+    const rows: ProjectRecord[] = ["z", "a"].map((id) => ({
+      createdAt: NOW,
+      currentDraftId: `draft_${id}`,
+      lifecycleStatus: "active",
+      name: id,
+      organizationId: scope.organizationId,
+      projectId: `project_${id}`,
+      recordVersion: 1,
+      updatedAt: NOW,
+    }));
+    const listProjects = vi.fn(() =>
+      Promise.resolve({
+        items: rows,
+        nextCursor: "continuation",
+      }),
+    );
+    const listProjectEnvironments = vi.fn();
+    const local = application({
+      resolveOrganizationScope: vi.fn(() => Promise.resolve(scope)),
+      listProjects,
+      getDraft: vi.fn(() => Promise.resolve(null)),
+      listProjectEnvironments,
+    });
+    const result = await local.listProjects(principal(), scope.organizationId, {
+      filters: {},
+      sort: "-name",
+      limit: 2,
+      cursor: "before",
+    });
+    expect(result.items.map(({ name }) => name)).toEqual(["z", "a"]);
+    expect(result.nextCursor).toBe("continuation");
+    expect(listProjects).toHaveBeenCalledWith(scope, {
+      sort: "-name",
+      limit: 2,
+      cursor: "before",
+    });
+    expect(listProjectEnvironments).not.toHaveBeenCalled();
+  });
+
   it("requires recent verified authentication before project deletion", async () => {
     const scope: AuthorizedOrganizationScope = {
       ...principal(),

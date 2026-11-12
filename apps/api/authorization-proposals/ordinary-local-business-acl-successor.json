@@ -77,6 +77,16 @@
       "before": "acf2552497be10e24ce1db358e81adadc09bd507c24eef595c1dda528b440057",
       "after": "cadcb26bb4aeb0bd10c6002219b1259a9cda31dcbb9d8035e2e237ef1ff3e900",
       "reason": "The existing cleanup-admission fixture follows the current 0142 environment expectation while retaining wrong-scope and negative admission cases."
+    },
+    "apps/api/src/adapters/persistence/repositories.ts": {
+      "before": "27a2334b0d34bac04e7e53e03ce0918cc9f23436fab003d9d66ceb723a1fd405",
+      "after": "835fe57a64c9e89deb43a0d28a122c237b38b1d6974161ec8bf8f6c840d7f268",
+      "reason": "Preserves receipt-before-CAS lifecycle authorization and original request identity; returns existing draft_version metadata without opening deleted content. Project/revision keysets sort before LIMIT and preserve scoped predicates and microsecond ties. Existing column grants cover these reads; native permission/transaction/restore qualification remains required. No grants or deletion activation change."
+    },
+    "apps/api/src/adapters/persistence/solution-record-repository.ts": {
+      "before": "f60649e3a763499077136346e017f05620877c11b39b34eadca51e7fc42cf4da",
+      "after": "0ece04449495f5a5b58be3ab2a890cda022334145db6b46824e6be9605be7215",
+      "reason": "Carries bounded, stable timestamp/ID continuation before LIMIT while retaining current membership, tenant, project, kind, subject and published-object filters. Existing read columns suffice; no financial or mutation authority is added. Native SQL, role and pagination qualification remains unrun."
     }
   },
   "additions": {
@@ -90,7 +100,8 @@
     "apps/api/src/adapters/persistence/staff-provider-costs.ts": "267db9538e5dcce6bc1f33d07b57727b89bb303092ef9f335095a26152926e4c",
     "apps/api/src/application/beta-ai-cleanup-owner.ts": "9e9d960719e9010172d26a365336b630fefae7ee133043b05515ffb0303348f6",
     "apps/api/src/application/beta-ai-cleanup-retention.ts": "e4048d50ad557f7958c1f97461b1f9beab75dff1c6233b8541826f5cb4486168",
-    "apps/api/src/production-beta-ai-cleanup.ts": "2ee07f5ddcc2e7726b408fdf9191ac927440b881aa5e0007096294d92f6d5076"
+    "apps/api/src/production-beta-ai-cleanup.ts": "2ee07f5ddcc2e7726b408fdf9191ac927440b881aa5e0007096294d92f6d5076",
+    "apps/api/src/application/list-pagination.ts": "dd26872b299a4b9a15cadf945886da71103d509c37072b51177fbbad5f84e90c"
   },
   "limitations": [
     "Preserves the complete predecessor review, historical migration bytes and all existing core grants. This concordance does not confer authority or certify unchanged optional runtime permissions.",

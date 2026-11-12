@@ -6,6 +6,7 @@ import {
   type ApplyDraftCommandV1,
   type ApplyDraftCommandResultV1,
   projectV1Schema,
+  projectSummaryV1Schema,
   type ArchiveProjectV1,
   type CreateProjectResultV1,
   type CreateProjectV1,
@@ -220,7 +221,11 @@ class RepositoryBackedApplication implements RepositoryBackedApplicationOverride
         updatedAt: this.#clock().toISOString(),
       };
       return {
-        etag: etag("preferences", principal.principalId, value.syncVersion),
+        etag: etag(
+          "preferences",
+          principal.principalId,
+          found?.syncVersion ?? 0,
+        ),
         value: { contractVersion: 1, ...value },
       };
     } catch (error) {
@@ -240,7 +245,7 @@ class RepositoryBackedApplication implements RepositoryBackedApplicationOverride
       const currentEtag = etag(
         "preferences",
         principal.principalId,
-        current?.syncVersion ?? 1,
+        expectedVersion,
       );
       if (expectedEtag !== currentEtag) {
         throw new ApplicationError(
@@ -281,24 +286,11 @@ class RepositoryBackedApplication implements RepositoryBackedApplicationOverride
         ...(options.cursor === undefined ? {} : { cursor: options.cursor }),
         ...(lifecycleStatus === undefined ? {} : { lifecycleStatus }),
         limit: options.limit,
+        ...(options.sort === undefined ? {} : { sort: options.sort }),
       });
       const items = await Promise.all(
-        result.items.map(async (record) => {
-          const project = await this.#mapProject(scope, record);
-          const { description, environmentCount, ...summary } = project;
-          void description;
-          void environmentCount;
-          return summary;
-        }),
+        result.items.map((record) => this.#mapProjectSummary(scope, record)),
       );
-      items.sort((left, right) =>
-        options.sort?.includes("name") === true
-          ? left.name.localeCompare(right.name)
-          : left.updatedAt.localeCompare(right.updatedAt),
-      );
-      if (options.sort?.startsWith("-") === true) {
-        items.reverse();
-      }
       return {
         items,
         ...(result.nextCursor === undefined
@@ -465,22 +457,28 @@ class RepositoryBackedApplication implements RepositoryBackedApplicationOverride
     idempotencyKey: string,
   ): Promise<VersionedResult<ProjectV1>> {
     try {
-      const { project, scope } = await this.#requireProjectScope(
+      const { scope } = await this.#requireProjectScope(
         principal,
         projectId,
         "projects.mutate",
       );
-      this.#requireProjectEtag(project, expectedEtag);
-      const draft = await this.#requireDraftMetadata(scope, projectId);
+      const expectedRecordVersion = this.#projectRequestVersion(
+        projectId,
+        expectedEtag,
+      );
       const archived = await this.#repository.archiveProject(scope, {
-        expectedRecordVersion: project.recordVersion,
+        expectedRecordVersion,
         idempotencyKey,
         projectId,
         requestSha256: sha256({ expectedEtag, input, projectId }),
       });
       return {
         etag: etag("project", projectId, archived.recordVersion),
-        value: await this.#mapProject(scope, archived, draft.draftVersion),
+        value: await this.#mapProject(
+          scope,
+          archived,
+          this.#lifecycleDraftVersion(archived),
+        ),
       };
     } catch (error) {
       return mapRepositoryError(error);
@@ -494,23 +492,29 @@ class RepositoryBackedApplication implements RepositoryBackedApplicationOverride
     idempotencyKey: string,
   ): Promise<VersionedResult<ProjectV1>> {
     try {
-      const { project, scope } = await this.#requireProjectScope(
+      const { scope } = await this.#requireProjectScope(
         principal,
         projectId,
         "projects.delete",
       );
       requireRecentAuthentication(principal, this.#clock());
-      this.#requireProjectEtag(project, expectedEtag);
-      const draft = await this.#requireDraftMetadata(scope, projectId);
+      const expectedRecordVersion = this.#projectRequestVersion(
+        projectId,
+        expectedEtag,
+      );
       const deleted = await this.#repository.deleteProject(scope, {
-        expectedRecordVersion: project.recordVersion,
+        expectedRecordVersion,
         idempotencyKey,
         projectId,
         requestSha256: sha256({ expectedEtag, projectId }),
       });
       return {
         etag: etag("project", projectId, deleted.recordVersion),
-        value: await this.#mapProject(scope, deleted, draft.draftVersion),
+        value: await this.#mapProject(
+          scope,
+          deleted,
+          this.#lifecycleDraftVersion(deleted),
+        ),
       };
     } catch (error) {
       return mapRepositoryError(error);
@@ -986,24 +990,39 @@ class RepositoryBackedApplication implements RepositoryBackedApplicationOverride
     record: ProjectRecord,
     knownDraftVersion?: number,
   ): Promise<ProjectV1> {
-    const draftVersion =
-      knownDraftVersion ??
-      (await this.#repository.getDraft(scope, record.projectId))
-        ?.draftVersion ??
-      1;
+    const summary = await this.#mapProjectSummary(
+      scope,
+      record,
+      knownDraftVersion,
+    );
     const environments = await this.#repository.listProjectEnvironments(
       scope,
       record.projectId,
     );
     return projectV1Schema.parse({
-      createdAt: record.createdAt,
-      currentDraft: { id: record.currentDraftId, version: draftVersion },
+      ...summary,
       ...(record.description === undefined
         ? {}
         : { description: record.description }),
       environmentCount: environments.filter(
         (environment) => environment.lifecycleStatus === "active",
       ).length,
+    });
+  }
+
+  async #mapProjectSummary(
+    scope: AuthorizedOrganizationScope,
+    record: ProjectRecord,
+    knownDraftVersion?: number,
+  ): Promise<ProjectSummaryV1> {
+    const draftVersion =
+      knownDraftVersion ??
+      (await this.#repository.getDraft(scope, record.projectId))
+        ?.draftVersion ??
+      1;
+    return projectSummaryV1Schema.parse({
+      createdAt: record.createdAt,
+      currentDraft: { id: record.currentDraftId, version: draftVersion },
       id: record.projectId,
       ...(record.latestRevisionId === undefined
         ? {}
@@ -1017,6 +1036,33 @@ class RepositoryBackedApplication implements RepositoryBackedApplicationOverride
       updatedAt: record.updatedAt,
       version: record.recordVersion,
     });
+  }
+
+  #lifecycleDraftVersion(record: ProjectRecord): number {
+    const version = record.currentDraftVersion;
+    if (version === undefined || !Number.isSafeInteger(version) || version < 1)
+      throw new RepositoryError(
+        "invalid-input",
+        "Project draft metadata is unavailable.",
+      );
+    return version;
+  }
+
+  #projectRequestVersion(projectId: string, expectedEtag: string): number {
+    // Receipt replay owns the comparison with current state. Bind the original
+    // request's version and identity without rejecting an already completed retry.
+    const prefix = `"project:${projectId}:v`;
+    const raw =
+      expectedEtag.startsWith(prefix) && expectedEtag.endsWith('"')
+        ? expectedEtag.slice(prefix.length, -1)
+        : "";
+    const version = Number(raw);
+    if (!/^[1-9][0-9]*$/u.test(raw) || !Number.isSafeInteger(version))
+      throw new ApplicationError(
+        "precondition_failed",
+        "The project changed. Refresh and try again.",
+      );
+    return version;
   }
 
   #requireProjectEtag(project: ProjectRecord, expectedEtag: string): void {
