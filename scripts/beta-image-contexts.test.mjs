@@ -1104,14 +1104,61 @@ test("runtime admission rejects effective directive overrides after safe declara
           `${recipe}${newline}# USER 0:0${newline}  # ordinary comment${newline}`,
         ),
       );
-      for (const directive of ["USER 0:0", 'ENTRYPOINT ["/bin/sh"]']) {
+      for (const prefix of ["", " ", "\t", " \t"]) {
+        assert.doesNotThrow(() =>
+          validate(`${recipe}${newline}${prefix}# ordinary comment${newline}`),
+        );
+        for (const directive of ["USER 0:0", 'ENTRYPOINT ["/bin/sh"]']) {
+          assert.throws(
+            () =>
+              validate(
+                `${recipe}${newline}${prefix}# synthetic continuation comment \\${newline}${directive}${newline}`,
+              ),
+            /CONTEXT_DOCKER_RUNTIME_UNSAFE/u,
+            `${contextId}: continued comment before ${directive}`,
+          );
+        }
+      }
+      // Unicode White_Space plus JS-only BOM; ASCII controls and DEL are also
+      // outside the admitted grammar. Both prefixes and token separators fail.
+      const unsupported = [
+        ...Array.from({ length: 33 }, (_, code) => code).filter(
+          (code) => ![9, 10, 13, 32].includes(code),
+        ),
+        0x7f,
+        0x85,
+        0xa0,
+        0x1680,
+        ...Array.from({ length: 11 }, (_, offset) => 0x2000 + offset),
+        0x2028,
+        0x2029,
+        0x202f,
+        0x205f,
+        0x3000,
+        0xfeff,
+      ].map((code) => String.fromCodePoint(code));
+      for (const whitespace of unsupported) {
+        for (const directive of ["USER 0:0", 'ENTRYPOINT ["/bin/sh"]']) {
+          for (const suffix of [
+            `${whitespace}# synthetic comment \\${newline}${directive}`,
+            `${whitespace}${directive}`,
+            directive.replace(" ", whitespace),
+          ]) {
+            assert.throws(
+              () => validate(`${recipe}${newline}${suffix}${newline}`),
+              /CONTEXT_DOCKER_RUNTIME_UNSAFE/u,
+            );
+          }
+        }
+      }
+      for (const suffix of [
+        "# ordinary\rUSER 0:0",
+        `RUN true \\ \t${newline}USER 0:0`,
+        `# comment \\ \t${newline}USER 0:0`,
+      ]) {
         assert.throws(
-          () =>
-            validate(
-              `${recipe}${newline}# synthetic continuation comment \\${newline}${directive}${newline}`,
-            ),
+          () => validate(`${recipe}${newline}${suffix}${newline}`),
           /CONTEXT_DOCKER_RUNTIME_UNSAFE/u,
-          `${contextId}: continued comment before ${directive}`,
         );
       }
     }

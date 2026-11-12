@@ -1357,6 +1357,17 @@ function assertDockerfile(
     );
   }
   const text = dockerfile.toString("utf8");
+  // These fixed, reviewed recipes support printable ASCII, horizontal tabs,
+  // and LF/CRLF only. Enforce this before any trim, regex or continuation pass:
+  // JavaScript and Docker do not recognize identical Unicode whitespace sets.
+  // Reject unsupported bytes/forms instead of normalizing them into authority.
+  if (/[^\t\n\r\x20-\x7e]|\r(?!\n)|\\[ \t]+\r?\n/u.test(text)) {
+    fail(
+      "CONTEXT_DOCKER_RUNTIME_UNSAFE",
+      "Dockerfile",
+      "Dockerfile requires printable ASCII, tabs, LF/CRLF and exact continuations",
+    );
+  }
   const frontendAuthority = REVIEWED_DOCKERFILE_FRONTEND_AUTHORITIES[contextId];
   const frontendDirectives = text.match(/^#\s*syntax\s*=.*$/gimu) ?? [];
   const firstLine = text.split(/\r?\n/u, 1)[0];
