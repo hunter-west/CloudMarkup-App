@@ -1441,3 +1441,64 @@ failure. Exact independent review and ordinary integrated CI remain pending for
 this correction. Private source and both pending execution bindings are
 unchanged. Parked editor-form work is excluded. No publication, CI dispatch,
 override removal, native/provider action, merge or deployment occurred.
+
+### Editor draft lifetime and Undo consistency
+
+Workload purpose and I/O drafts now survive unrelated configuration changes.
+Prepared workload commands are invalidated when the document content changes,
+without discarding typed input. Draft lifetime stays scoped to the selected
+workload and operation. A changed saved operation or configuration while dirty
+requires an explicit reload or decision to retain edits before review/save.
+Pristine and successfully saved owned forms read the current graph values, so
+Undo and Redo cannot leave a stale complete replacement ready to resubmit.
+
+Both reported failures reproduced in the existing component harnesses before the
+correction. All 39 owning cases pass afterward: the existing 37 remain, one
+history case gains same-node Undo/Redo, unrelated-node and dirty-conflict
+controls, and two cases cover workload draft preservation and operation
+selection isolation. The new cases protect unsaved core editor data and target
+identity, respectively; existing simple apply/undo, secret rejection, ownership
+and generated-read-only cases remain. These are local component checks, not
+browser acceptance. Comparable full-suite predecessor timing is unavailable.
+
+Domain command preparation, ownership, schema validation, preconditions and
+inverse history remain unchanged. The private source, published head and CI are
+untouched. This correction is a separate sibling of the accounting, deadline and
+IAM union. Render anchors and other queued editor findings are excluded. Exact
+independent review and later integration remain required; existing native,
+browser, source-intake/composition and release gates stay open.
+
+The parked correction was resumed after sealing the separate failed-save browser
+repair. Its final guarded React preview reset passes all 39 owning component
+cases, selected seven-root type checking and changed-file lint. The final owning
+run took 18.62 seconds; the prior same-command correction run took 16.31
+seconds. These single runs are not a performance benchmark, and a comparable
+complete predecessor run is unavailable. All 37 original cases and their
+existing assertions remain. The parked commit and browser correction branch are
+retained; this editor successor contains neither that browser repair nor the
+separately accepted accounting/deadline/IAM union. Later immutable integration
+is required.
+
+### Browser recovery and editor draft integration
+
+This local merge retains the accepted accounting/deadline/IAM union and the
+separately accepted browser-recovery and editor-draft corrections. All product
+and test files retain exact constituent bytes. The only conflict joined the
+accepted plan appends verbatim. This exact combined candidate still requires
+independent integration review before a coordinated public draft update.
+
+The browser artifact shows Recovery required but contains neither a trace ZIP
+nor the stored IndexedDB record proving the precise failed CI state. Source and
+component evidence support the binding correction. The earlier membership
+mutation fails at an ambiguous status query after incorrect editor mounting; it
+is sensitivity evidence, not a direct membership assertion or browser proof.
+
+The separate generation-workload uniqueness correction is excluded. All original
+cases, fixtures, private source and prior branch identities remain. No new CI,
+publication, native/browser execution or deployment occurred. The stopped local
+browser socket operation is not retried; child cleanup remains unverified.
+
+The unchanged private reference is 4574e549. The two execution bindings,
+authentic assets/intake/cold composition, browser/R1, SQL/restore,
+Go/authored-golden, provider-version and sixteen golden-pair refreshes,
+override-removal and cleanup-owner qualification remain open.
