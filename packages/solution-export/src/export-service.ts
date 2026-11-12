@@ -372,10 +372,23 @@ function addCandidate(
     );
     return;
   }
-  if (
-    canonicalSemanticDigest(candidate.mediaType, candidate.bytes) !==
-    candidate.semanticChecksum
-  ) {
+  let semanticChecksum: Sha256Digest;
+  try {
+    semanticChecksum = canonicalSemanticDigest(
+      candidate.mediaType,
+      candidate.bytes,
+    );
+  } catch {
+    state.diagnostics.push(
+      diagnostic(
+        "EXPORT_FILE_CONTENT_INVALID",
+        "Export file content cannot be decoded or normalized for its media type.",
+        candidate.path,
+      ),
+    );
+    return;
+  }
+  if (semanticChecksum !== candidate.semanticChecksum) {
     state.diagnostics.push(
       diagnostic(
         "EXPORT_FILE_SEMANTIC_CHECKSUM_MISMATCH",
@@ -2265,6 +2278,15 @@ export function verifySolutionExportArtifact(
   );
   const seen = new Set<string>();
   for (const file of files) {
+    if (file.bytes.byteLength > manifest.limits.maxFileBytes) {
+      diagnostics.push(
+        diagnostic(
+          "EXPORT_VERIFY_FILE_LIMIT_EXCEEDED",
+          "Verified export file exceeds its recorded individual byte limit.",
+          file.path,
+        ),
+      );
+    }
     const issue = inspectExportPath(file.path, manifest.limits.maxPathBytes);
     if (issue !== undefined) {
       diagnostics.push(diagnostic(issue.code, issue.message, file.path));
@@ -2289,10 +2311,20 @@ export function verifySolutionExportArtifact(
         ),
       );
     }
-    if (
-      canonicalSemanticDigest(file.mediaType, file.bytes) !==
-      file.semanticChecksum
-    ) {
+    let semanticChecksum: Sha256Digest;
+    try {
+      semanticChecksum = canonicalSemanticDigest(file.mediaType, file.bytes);
+    } catch {
+      diagnostics.push(
+        diagnostic(
+          "EXPORT_VERIFY_CONTENT_INVALID",
+          "Verified export file content cannot be decoded or normalized for its media type.",
+          file.path,
+        ),
+      );
+      return diagnostics;
+    }
+    if (semanticChecksum !== file.semanticChecksum) {
       diagnostics.push(
         diagnostic(
           "EXPORT_VERIFY_SEMANTIC_CHECKSUM_MISMATCH",
@@ -2314,7 +2346,20 @@ export function verifySolutionExportArtifact(
     );
   } else {
     const canonicalManifest = serializeCanonicalJson(manifest);
-    if (decodeUtf8(manifestFile.bytes) !== canonicalManifest) {
+    let manifestContent: string;
+    try {
+      manifestContent = decodeUtf8(manifestFile.bytes);
+    } catch {
+      diagnostics.push(
+        diagnostic(
+          "EXPORT_VERIFY_CONTENT_INVALID",
+          "Verified export manifest content must be valid UTF-8.",
+          SOLUTION_EXPORT_MANIFEST_PATH,
+        ),
+      );
+      return diagnostics;
+    }
+    if (manifestContent !== canonicalManifest) {
       diagnostics.push(
         diagnostic(
           "EXPORT_VERIFY_MANIFEST_CONTENT_MISMATCH",
@@ -2783,6 +2828,15 @@ export function generateSolutionExport(input: unknown): SolutionExportResultV1 {
       { id: "export-manifest", kind: "export" },
     ]),
   );
+  if (manifestCandidate.bytes.byteLength > request.target.limits.maxFileBytes) {
+    return blocked([
+      diagnostic(
+        "EXPORT_FILE_LIMIT_EXCEEDED",
+        "Export manifest exceeds the configured individual byte limit.",
+        SOLUTION_EXPORT_MANIFEST_PATH,
+      ),
+    ]);
+  }
   const files = [...payloadFiles, manifestCandidate].sort((left, right) =>
     compareUtf16(left.path, right.path),
   );

@@ -750,3 +750,13 @@ diagram itself. Four overlapping cases were removed while retaining terminal
 principal/preview refusal, active-attempt protection, exact evaluated revision,
 wrong-environment refusal and admission-generation type checks. Native cases,
 production schemas, workflow selection and source-admission gates are unchanged.
+
+### Export content and size boundaries
+
+The pure export assembler rejects prohibited assignments with quoted keys and
+inspects the already-supported CycloneDX JSON media type. Safe references and
+artifact bytes keep their existing digest conventions. Generated manifests now
+obey the same per-file bound as payloads; independent verification and retained
+reconstruction enforce that bound too. Invalid JSON or undecodable verification
+content yields a bounded diagnostic without parser text. These changes do not
+publish artifacts, enable providers or qualify hosted/native release behavior.
