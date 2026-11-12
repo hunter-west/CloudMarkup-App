@@ -3894,10 +3894,10 @@ describe("Solution Export API integration", () => {
   });
 
   it("retains accepted cancellation when an older processor returns a later success", async () => {
-    let signalReady = () => {
+    let signalReady: () => void = () => {
       throw new Error("The ready gate was not initialized.");
     };
-    let release = () => {
+    let release: () => void = () => {
       throw new Error("The publication gate was not initialized.");
     };
     const ready = new Promise<void>((resolve) => {
