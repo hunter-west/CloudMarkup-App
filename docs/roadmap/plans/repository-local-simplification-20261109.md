@@ -899,3 +899,14 @@ case. Existing promotion checks, historical datasets, held reports, disabled
 production profiles and downstream write authority remain unchanged. Focused
 regressions use synthetic adapters and in-memory stores; they establish no live
 provider, canonical-write or deployment acceptance.
+
+### Gateway usage and component evidence
+
+Known invalid-output usage is recorded before restricted proposal retention, so
+pending or failed retention cannot suppress that attempt's evidence. Output
+rejection, usage validation, invocation identity and safe diagnostics remain.
+Existing routing and Bedrock negatives now reach their intended guards. The
+extension evaluation identifies its repair-patch and issue-transition evidence
+as scripted component scenarios, not production retry-controller exhaustion; its
+unused projection is removed while live workflow semantics remain covered. No
+provider, financial mutation, activation or native acceptance is implied.

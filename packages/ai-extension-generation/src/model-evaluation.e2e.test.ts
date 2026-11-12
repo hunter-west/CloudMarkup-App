@@ -1267,7 +1267,6 @@ function runAssistantOperationProbes(): {
   readonly limit: ProbeRecord;
   readonly preservation: ProbeRecord;
   readonly schema: ProbeRecord;
-  readonly semanticProjection: unknown;
   readonly valid: ProbeRecord;
 } {
   const request = createNotesGenerationRequest({
@@ -1422,14 +1421,6 @@ function runAssistantOperationProbes(): {
       digestCanonicalValue(document) === digestCanonicalValue(original);
   }
 
-  const semanticProjection = result.diffs.map(
-    ({ category, operationIds, primary, technical }) => ({
-      category,
-      operationIds,
-      primary,
-      technical,
-    }),
-  );
   return {
     authority: probe(
       "assistant-no-mutation-authority",
@@ -1469,7 +1460,6 @@ function runAssistantOperationProbes(): {
       malformedKindsRejected: 2,
       validBatchDigest: digestCanonicalValue(batch),
     }),
-    semanticProjection,
     valid: probe(
       "assistant-domain-application",
       result.diffs.map(({ category }) => category).join(",") ===
@@ -2970,7 +2960,7 @@ function runCloudFormationProbes(): {
   };
 }
 function runRepairProbes(): {
-  readonly exhaustion: ProbeRecord;
+  readonly rejectedPatches: ProbeRecord;
   readonly issue: ProbeRecord;
   readonly success: ProbeRecord;
 } {
@@ -3061,11 +3051,12 @@ function runRepairProbes(): {
   }
 
   return {
-    exhaustion: probe(
-      "bounded-repair-exhaustion",
+    rejectedPatches: probe(
+      "scripted-repair-patch-rejections",
       rejectedRepairDigests.length === 2 && sha256Text(base) === originalDigest,
       {
-        maximumAttempts: 2,
+        controllerExecuted: false,
+        scriptedPatchCount: 2,
         originalDigest,
         rejectedRepairDigests,
       },
@@ -3087,7 +3078,7 @@ function runRepairProbes(): {
       },
     ),
     success: probe(
-      "bounded-repair-success",
+      "repair-patch-and-issue-transition",
       fixed.includes('status = "implemented"') &&
         !fixed.includes('status = "pending"') &&
         candidateContentSafetyDiagnostics(fixed, "application").length === 0 &&
@@ -3398,7 +3389,7 @@ async function buildProbeLedger(): Promise<{
     latency: [operational],
     "repair-effectiveness-without-rule-weakening": [
       repair.success,
-      repair.exhaustion,
+      repair.rejectedPatches,
     ],
     "same-ui-semantics-across-assistance-preferences": [uiSemantics],
     "security-policy-violations": [
@@ -3436,7 +3427,7 @@ async function buildProbeLedger(): Promise<{
     tokens: [operational],
     "unresolved-behavior-honesty": [
       repository.ambiguous,
-      repair.exhaustion,
+      repair.rejectedPatches,
       assistant.limit,
       ...plannerProbes,
     ],
@@ -3467,7 +3458,7 @@ const commonCaseProbeIds = [
 ] as const;
 
 const prompt38CaseIssueSeverityProbeIds = new Set<string>([
-  "bounded-repair-exhaustion",
+  "scripted-repair-patch-rejections",
   "repository-ambiguous-inference",
   "repository-designed-observed-mismatch",
 ]);
@@ -3488,7 +3479,7 @@ const validatorBackedScenarioBindings = {
     "application-ai-custom-success",
     "application-forbidden-dependency",
     "application-user-owned-preservation",
-    "bounded-repair-success",
+    "repair-patch-and-issue-transition",
     "ci-validator-backed-generation-chain",
   ]),
   "ambiguous-source-code-inference": scenarioBinding([
@@ -3531,7 +3522,7 @@ const validatorBackedScenarioBindings = {
   "excessive-resource-request": scenarioBinding([
     "assistant-atomic-invalid",
     "assistant-operation-limit-rejection",
-    "bounded-repair-exhaustion",
+    "scripted-repair-patch-rejections",
   ]),
   "external-existing-resource": scenarioBinding([
     "assistant-domain-application",
@@ -3567,14 +3558,14 @@ const validatorBackedScenarioBindings = {
   "repair-exhaustion": scenarioBinding([
     "application-ai-custom-security-failure",
     "application-forbidden-dependency",
-    "bounded-repair-exhaustion",
+    "scripted-repair-patch-rejections",
   ]),
   "repair-success": scenarioBinding([
     "application-ai-custom-security-failure",
     "application-ai-custom-success",
     "application-forbidden-dependency",
     "application-user-owned-preservation",
-    "bounded-repair-success",
+    "repair-patch-and-issue-transition",
   ]),
   "simple-serverless-api": scenarioBinding([
     "application-deterministic-preference",
@@ -3613,7 +3604,9 @@ const prompt38SafetyOutcomeProbeBindings = {
   "allow-listed-operations-only": [
     ["assistant-atomic-invalid", "assistant-domain-application"],
   ],
-  "bounded-repair": [["bounded-repair-exhaustion", "bounded-repair-success"]],
+  "bounded-repair": [
+    ["scripted-repair-patch-rejections", "repair-patch-and-issue-transition"],
+  ],
   "clarification-required": [
     [
       "planner-input-ambiguous-source-code-inference",
@@ -3681,7 +3674,7 @@ const prompt38SafetyOutcomeProbeBindings = {
   ],
   "unresolved-honestly": [
     [
-      "bounded-repair-exhaustion",
+      "scripted-repair-patch-rejections",
       "planner-input-event-driven-image-processing",
       "planner-input-excessive-resource-request",
       "planner-input-nonexistent-unsupported-services",
@@ -3697,7 +3690,7 @@ const prompt38SafetyOutcomeProbeBindings = {
 
 const prompt38GenerationTargetProbeBindings = {
   "ai-assisted-custom-source": [
-    ["application-ai-custom-success", "bounded-repair-exhaustion"],
+    ["application-ai-custom-success", "scripted-repair-patch-rejections"],
     ["application-ai-custom-security-failure"],
     ["application-forbidden-dependency"],
   ],
@@ -3770,6 +3763,7 @@ type Prompt38ObservedDisposition =
 interface Prompt38ObservedCaseExecution {
   readonly classification: Prompt38InputClassification;
   readonly disposition: Prompt38ObservedDisposition;
+  readonly dispositionSource: "scripted-repair-scenario" | "planner-component";
   readonly executionDigest: Sha256Digest;
   readonly observedIssueSeverity: Prompt38ObservedIssueSeverity;
   readonly issueSeverityProbeIds: readonly string[];
@@ -3778,7 +3772,9 @@ interface Prompt38ObservedCaseExecution {
   readonly safeErrorCodes: readonly string[];
 }
 
-function observedDispositionFor(
+// Repair dispositions describe scripted component scenarios, not an executed
+// production retry controller. The frozen scenario contract is unchanged.
+function componentDispositionFor(
   execution: Prompt38PlannerExecution,
 ): Prompt38ObservedDisposition {
   const { family, scenarioKind } = execution.classification;
@@ -3894,7 +3890,12 @@ function deriveObservedCaseExecution(
       "Prompt 38 observed case lacks actual issue-severity evidence.",
     );
   }
-  const disposition = observedDispositionFor(execution);
+  const disposition = componentDispositionFor(execution);
+  const dispositionSource =
+    execution.classification.family === "repair-success" ||
+    execution.classification.family === "repair-exhaustion"
+      ? ("scripted-repair-scenario" as const)
+      : ("planner-component" as const);
   const observedIssueSeverity = highestObservedIssueSeverity(
     issueSeverityEvidence.map(
       ({ observedIssueSeverity: severity }) => severity,
@@ -3913,6 +3914,7 @@ function deriveObservedCaseExecution(
   const basis = {
     classificationDigest: execution.classification.classificationDigest,
     disposition,
+    dispositionSource,
     observedIssueSeverity,
     issueSeverityEvidence,
     plannerEvidenceDigest: execution.evidenceDigest,
@@ -3923,6 +3925,7 @@ function deriveObservedCaseExecution(
   return {
     classification: execution.classification,
     disposition,
+    dispositionSource,
     executionDigest: digestCanonicalValue(basis),
     observedIssueSeverity,
     issueSeverityProbeIds: issueSeverityEvidence.map(({ id }) => id),
@@ -4250,7 +4253,7 @@ class ValidatorBackedPrompt38EvaluationAdapter implements ModelEvaluationAdapter
     return Promise.resolve(observation);
   }
 }
-describe("Prompt 38 validator-backed fake-model full-solution evaluation E2E", () => {
+describe("Prompt 38 component evaluation with scripted repair dispositions", () => {
   it("derives all 21 case results and 19 dimensions from deterministic pipeline evidence without activation authority", async () => {
     const { ledger, plannerExecutions, semanticProjectionDigest } =
       await buildProbeLedger();
@@ -4360,6 +4363,11 @@ describe("Prompt 38 validator-backed fake-model full-solution evaluation E2E", (
       ]),
     );
     expect(observedByScenario.size).toBe(21);
+    for (const scenario of ["repair-exhaustion", "repair-success"] as const) {
+      expect(observedByScenario.get(scenario)?.dispositionSource).toBe(
+        "scripted-repair-scenario",
+      );
+    }
 
     const caseBindingFailures = adapter.observedExecutions.flatMap(
       (execution) => {
