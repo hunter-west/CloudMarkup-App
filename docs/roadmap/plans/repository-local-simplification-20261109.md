@@ -1238,3 +1238,94 @@ effective cloud permissions. No native, provider, browser or CI execution is
 claimed. The correction is a local sibling of the deadline fix, separate from
 the published head and the frozen accounting review range; integration and all
 existing release gates remain outstanding.
+
+### Commercial timestamp replay correction
+
+Pricing, normalization-policy and model-usage replay compare declared timestamp
+fields as UTC instants at PostgreSQL microsecond precision. Equivalent UTC,
+explicit-offset and database representations retain one identity. SQL timestamp
+projections preserve fractional precision without changing stored values,
+parameters, authority predicates or locks. Nested attempt JSON, monetary fields
+and opaque identifiers remain exact. Inputs must carry an explicit ISO offset
+and fit database precision; ambiguous or over-precision inputs fail closed.
+
+Three focused predecessor replay failures are preserved. The corrected six-case
+suite retains every original statement and adds pricing, policy and usage replay
+controls, including true microsecond conflicts. Source-extracted probes verify
+offset crossings, fractional range ordering and unchanged SQL parameters. These
+use explicit SQL/transaction doubles and do not prove native encoding, locking,
+constraints or rollback. The original database timestamp helper, historical SQL
+and both isolated native returned-copy mutation cases remain unchanged.
+
+This local successor is separate from the accepted billing and integration
+objects. No provider, financial ledger, source intake, override, pin, CI or
+deployment state changes. Native/restore, browser, compiler, authentic
+composition and cleanup-owner qualifications remain separate.
+
+### Commercial read and recovery consistency
+
+Shared credit-state validation now requires each settlement debit to equal its
+validated allocation total. Both balance and usage readers refuse the same
+malformed state; valid partial and zero-cost settlements retain their behavior.
+This is validation of supplied immutable state, not a change to charging, ledger
+history or provider execution.
+
+The existing charged-release recovery row now starts with the coordinator's
+valid known-timeout release and retains its identity, status and conservation
+relationships while introducing the charge. Its schema-valid vector reaches
+financial integrity checking. The original kind/identity mismatch is retained
+separately inside that case. Both UI descriptions now name the actual manual
+refresh and bounded conflict retry, with callback assertions unchanged.
+
+The domain's 43 and recovery suite's 98 cases passed; no registrations were
+added or removed. These are deterministic component checks, not native database,
+provider or browser-return proof. Both isolated native returned-copy mutation
+cases, financial policy, terminal implementations and canonical SQL stay intact.
+
+### Complete expiration summary with bounded details
+
+The expiration summary computes its total and next date over the complete
+authorized snapshot before limiting the detail list to 1,000 rows. The detail
+order remains expiration, start and grant identity, including historical rows;
+the returned `grantsTruncated` flag explicitly identifies an incomplete list.
+Existing fields retain their types. The interface has no internal callers or
+other implementations in the inspected source; external implementations must
+supply the added flag.
+
+Repeatable-read scope, current membership/role/principal authorization, trial
+admission, captured read time and reservation/event cutoffs remain unchanged.
+The existing next-date definition still includes a future expiration whose
+available amount is zero; only its previous accidental detail-page restriction
+is removed. Available-unit arithmetic and bounded integer refusal remain.
+
+The regression covers 1,000 versus 1,001 scoped grants, mixed availability,
+empty results, overflow and denied access with explicit SQL results. Its
+predecessor reports zero instead of ten. Source/query checks are bounded
+evidence; native PostgreSQL execution, snapshot isolation, roles and transaction
+behavior remain unqualified. No ledger, grant, migration or financial history is
+written, and no private override or intake binding is removed.
+
+### Expiration detail precision correction
+
+Independent review found that precise SQL summary totals could disagree with
+detail availability and status after JavaScript truncated timestamps. The
+successor projects start/expiry decisions and the same available balance from
+SQL into the detail mapper. Snapshot, start, expiry and next-expiration text
+retain database microseconds; window validity is compared in SQL. Driver-decoded
+Date objects are no longer a basis for these decisions.
+
+The predecessor reproduces both one-microsecond contradictions. The owning suite
+now passes 22 cases, retaining all 21 previous cases, pagination limits,
+overflow, empty results and authorization controls. The additional case covers
+start/expiry and window boundaries, offset equivalence, truncated driver values
+and complete-page reconciliation. Extracted SQL-expression controls preserve
+funding rules and reject seven targeted guard mutations. These are bounded
+source/result-double checks, not native PostgreSQL or driver qualification.
+
+Only the expiration read method, its owning tests and this checkpoint change.
+Ledger and terminal semantics, tenant/account/event bindings, idempotency,
+canonical migrations and private source remain intact. The frozen expiration
+candidate and evidence are preserved. This separate accounting successor is
+unpublished; the accounting aggregate still requires independent review and
+explicit integration with the accepted public line. Existing native, browser,
+authentic intake/composition, override and cleanup-owner gates remain open.
