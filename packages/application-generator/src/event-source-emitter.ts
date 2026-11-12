@@ -89,6 +89,11 @@ function typeFor(field: ResolvedField): string {
 }
 
 function renderTypes(operation: ResolvedOperation): string {
+  // Preserve the exact existing source for payloads without collection bounds.
+  const hasListBounds = operation.entity.fields.some(
+    (field) =>
+      field.minimumItems !== undefined || field.maximumItems !== undefined,
+  );
   const fields = operation.entity.fields
     .map(
       (field) =>
@@ -104,6 +109,7 @@ export interface FieldDescriptor {
   readonly required: boolean;
   readonly nullable: boolean;
   readonly scalarType: string;
+${hasListBounds ? "  readonly minimumItems?: number;\n  readonly maximumItems?: number;\n" : ""}\
 }
 
 export const payloadFields: readonly FieldDescriptor[] = ${JSON.stringify(operation.entity.fields)};
@@ -138,6 +144,17 @@ export function validatePayload(value: unknown): EventPayload {
     if (!valueMatches(member, field.scalarType)) {
       throw new Error(\`Invalid field type: \${field.name}\`);
     }
+${
+  hasListBounds
+    ? `    if (Array.isArray(member) && (
+      (field.minimumItems !== undefined && member.length < field.minimumItems) ||
+      (field.maximumItems !== undefined && member.length > field.maximumItems)
+    )) {
+      throw new Error(\`Invalid field length: \${field.name}\`);
+    }
+`
+    : ""
+}\
   }
   return record as unknown as EventPayload;
 }
@@ -610,6 +627,16 @@ function payloadFixture(operation: ResolvedOperation): Record<string, unknown> {
   return Object.fromEntries(
     operation.entity.fields.map((field) => {
       const value = (() => {
+        if (field.scalarType.endsWith("-list")) {
+          const itemType = field.scalarType.slice(0, -5);
+          const item =
+            itemType === "boolean"
+              ? true
+              : itemType === "integer" || itemType === "number"
+                ? 1
+                : `fixture-${field.name}`;
+          return Array.from({ length: field.minimumItems ?? 0 }, () => item);
+        }
         switch (field.name) {
           case "bucket":
             return "fixture-image-input";
@@ -629,7 +656,6 @@ function payloadFixture(operation: ResolvedOperation): Record<string, unknown> {
             if (field.scalarType === "integer" || field.scalarType === "number")
               return 1;
             if (field.scalarType === "boolean") return true;
-            if (field.scalarType.endsWith("-list")) return [];
             return `fixture-${field.name}`;
         }
       })();
