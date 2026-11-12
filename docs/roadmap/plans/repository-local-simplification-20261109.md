@@ -830,3 +830,14 @@ explain the rejection. The separate declared-size case, generic diagnostics,
 fetch options and token-redaction checks remain. This changes no generated
 workflow, admission limit or test count; focused execution uses a synthetic
 fetch and does not establish live GitHub or hosted acceptance.
+
+### Host-repair isolation and lineage evidence
+
+The existing cross-tenant observation case retains foreign-plan refusal and
+separately selects a foreign invocation through a valid local plan. It asserts
+the journal-query parameters, no attempted writes and unchanged tenant state.
+The candidate-receipt case retains checksum refusal, then rehashes the altered
+predecessor and verifies schema-valid but incompatible lineage. Both changes
+extend existing cases without changing production code, historical SQL or clock
+contracts. Synthetic codec and assertion probes are distinct from the
+still-required native PostgreSQL restoration evidence.

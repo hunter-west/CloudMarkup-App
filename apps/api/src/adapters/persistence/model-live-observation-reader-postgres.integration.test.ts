@@ -365,7 +365,15 @@ integration(
     });
     it("cannot use another tenant's matching invocation identifier", async () => {
       const other = await fixture();
-      const selected = reader(other);
+      expect(other.scope.organizationId).not.toBe(settled.scope.organizationId);
+      const before = await Promise.all([state(settled), state(other)]);
+      const journalQueries: SqlStatement[] = [];
+      const selected = reader(other, {
+        beforeQuery(statement) {
+          if (statement.text.includes("AS journal_binding"))
+            journalQueries.push(statement);
+        },
+      });
       await expect(
         readStoredModelLiveObservationV2({
           ...selected.input,
@@ -374,6 +382,23 @@ integration(
         }),
       ).rejects.toBeInstanceOf(ModelLiveStoredObservationError);
       expect(selected.writes).toEqual([]);
+      expect(journalQueries).toEqual([]);
+
+      await expect(
+        readStoredModelLiveObservationV2({
+          ...selected.input,
+          invocationId: settled.journal.binding.invocationId,
+        }),
+      ).rejects.toBeInstanceOf(ModelLiveStoredObservationError);
+      expect(journalQueries).toHaveLength(1);
+      expect(journalQueries[0]?.values).toEqual([
+        other.scope.organizationId,
+        other.scope.projectId,
+        other.scope.userId,
+        settled.journal.binding.invocationId,
+      ]);
+      expect(selected.writes).toEqual([]);
+      expect(await Promise.all([state(settled), state(other)])).toEqual(before);
     });
     it.each([
       "journal",
