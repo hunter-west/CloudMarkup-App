@@ -115,7 +115,7 @@ func TestEventInvocationPermissionAcceptsOnlyExactGeneratedOwnerScope(t *testing
 }
 
 func TestEventBusScalarPoliciesRefuseLossyLowering(t *testing.T) {
-	for _, mutation := range []string{"none", "condition", "multiple-principals", "deny", "all-principals"} {
+	for _, mutation := range []string{"none", "condition", "multiple-principals", "deny", "all-principals", "architecture-node"} {
 		for _, target := range []string{"terraform", "cloudformation"} {
 			t.Run(mutation+"-"+target, func(t *testing.T) {
 				model := eventCustomBusPatternModel()
@@ -136,6 +136,13 @@ func TestEventBusScalarPoliciesRefuseLossyLowering(t *testing.T) {
 				case "all-principals":
 					setResourceValue(model, "bus_policy_statement", "principalKind", stringValueConfig("all-principals"))
 					setResourceValue(model, "bus_policy_statement", "principals", stringList("*"))
+				case "architecture-node":
+					role, ok := modelResource(model, "role")
+					if !ok || role.ServiceType != "aws.iam.role" {
+						t.Fatal("modeled-principal fixture must contain the referenced IAM role")
+					}
+					setResourceValue(model, "bus_policy_statement", "principalKind", stringValueConfig("architecture-node"))
+					setResourceValue(model, "bus_policy_statement", "principals", stringList(role.ID))
 				}
 				finalizeEventModel(model)
 				reader := &terraformRenderer{ctx: context.Background(), model: model, limits: DefaultLimits(), resourceNames: map[string]string{}}
@@ -152,6 +159,17 @@ func TestEventBusScalarPoliciesRefuseLossyLowering(t *testing.T) {
 						t.Fatal("scalar lowering did not inspect the complete admitted statement")
 					}
 					if mutation == "none" {
+						for _, principal := range []struct{ kind, value string }{
+							{"architecture-node", "111122223333"}, {"service", "111122223333"}, {"federated", "111122223333"}, {"none", "111122223333"}, {"all-principals", "111122223333"},
+							{"provider-identity", "arn:aws:iam::111122223333:role/synthetic"}, {"provider-identity", "*"}, {"provider-identity", ""},
+							{"provider-identity", "11112222333"}, {"provider-identity", "1111222233333"}, {"provider-identity", "11112222333x"},
+						} {
+							statement := document.Statements[0]
+							statement.PrincipalKind, statement.Principals = principal.kind, []string{principal.value}
+							if scalarEventBusGrant(statement) {
+								t.Fatal("scalar lowering accepted a non-account principal")
+							}
+						}
 						for _, actions := range [][]string{nil, {"events:PutEvents", "events:DescribeEventBus"}} {
 							statement := document.Statements[0]
 							statement.Actions = actions

@@ -985,6 +985,21 @@ by itself. No case, production guard or replay authority is removed.
 
 ### Compiler and generation boundaries
 
+EventBus scalar grants now admit only an explicit provider-identity principal
+containing a 12-digit account ID. Modeled role IDs, IAM ARNs and other principal
+kinds are refused instead of losing their typed meaning. The existing owning
+test retains both account-grant positives and Deny, condition, action and
+principal-cardinality refusals, and adds the modeled-role case for both targets.
+Ordinary IAM policy lowering remains unchanged. Source/synthetic controls do not
+establish Go rendering or provider acceptance.
+
+The unapplied provider-constraint proposal is rebound in a new local evidence
+artifact to its actual compiler predecessor. Its three source after-images are
+unchanged. The earlier inconsistent proposal is preserved as historical
+evidence; the 16 required golden-pair refreshes remain unperformed and the
+proposal is not applied. The isolated observation-reader correction remains on
+its own reviewed lineage pending an explicitly bound combined candidate.
+
 The S3 policy/notification fixture exposed a CloudFormation dependency cycle
 between the Lambda function, its inline role policies and the notifying bucket.
 For this exact owned-bucket/role relationship, policy resources now use the

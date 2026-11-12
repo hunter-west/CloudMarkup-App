@@ -406,7 +406,7 @@ func (renderer *cloudFormationRenderer) renderResourcePolicies(documents []terra
 		case "aws.eventbridge.event-bus":
 			for _, statement := range document.Statements {
 				if !scalarEventBusGrant(statement) {
-					renderer.error("CLOUDFORMATION_EVENT_BUS_POLICY_UNSUPPORTED", "EventBridge scalar grants require Allow, one exact action and one explicit principal, with no conditions or resource expressions.", SourceReference{Document: DocumentArchitecture, NodeID: statement.Resource.ID})
+					renderer.error("CLOUDFORMATION_EVENT_BUS_POLICY_UNSUPPORTED", "EventBridge scalar grants require Allow, one exact action and one explicit account ID, with no conditions or resource expressions.", SourceReference{Document: DocumentArchitecture, NodeID: statement.Resource.ID})
 					continue
 				}
 				logicalID := renderer.logicalIDs[document.Resource.ID]
