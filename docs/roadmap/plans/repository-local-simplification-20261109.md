@@ -793,3 +793,14 @@ browser reload case was removed: its narrow presentation guarantee is no longer
 separately asserted, and it never proved regeneration or challenged redaction.
 Actual diff, retry identity, authenticated download and checksum checks remain.
 Focused checks pass; browser and native qualification remain separate.
+
+### Export adapter cancellation and runner guidance
+
+The in-memory publication adapter preserves the canonical cancellation request
+when an older processor returns a later successful projection. It acknowledges
+cancellation without requeuing or publishing an artifact; immutable identity,
+state and timestamp guards remain. A deferred processor regression reproduces
+the previous conflict and covers the corrected queue and download behavior.
+Runner instructions now distinguish the existing fixed preparation step from
+non-root, capability-free validation. Executor code, approval requirements and
+production workers are unchanged; no container or provider execution is implied.

@@ -927,6 +927,7 @@ const FAILURE_DETAILS = {
 function fixture(
   options: {
     readonly applicationCodeRequired?: boolean;
+    readonly beforePublication?: (artifactId: string) => Promise<void>;
     readonly entitlementEnabled?: boolean;
     readonly failProcessorOnce?: boolean;
     readonly includeRevision?: boolean;
@@ -1089,6 +1090,7 @@ function fixture(
       stored,
       packaged.artifact,
     );
+    await options.beforePublication?.(verified.artifact.artifact.id);
     return options.publicationMutation === undefined
       ? verified
       : {
@@ -3889,6 +3891,80 @@ describe("Solution Export API integration", () => {
     });
     expect(terminal.data.artifact).toBeUndefined();
     expect(store.storedCounts()).toEqual({ artifacts: 0, jobs: 1 });
+  });
+
+  it("retains accepted cancellation when an older processor returns a later success", async () => {
+    let signalReady = () => {
+      throw new Error("The ready gate was not initialized.");
+    };
+    let release = () => {
+      throw new Error("The publication gate was not initialized.");
+    };
+    const ready = new Promise<void>((resolve) => {
+      signalReady = resolve;
+    });
+    const released = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let unpublishedArtifactId = "";
+    const { app, store, workflow } = fixture({
+      beforePublication: async (artifactId) => {
+        unpublishedArtifactId = artifactId;
+        signalReady();
+        await released;
+      },
+    });
+    const created = solutionExportJobResponseV1Schema.parse(
+      await (
+        await authorized(
+          app,
+          "/v1/projects/project_main/solution-export-jobs",
+          jsonPost(body("Late success cancellation race"), "late-race-create"),
+        )
+      ).json(),
+    );
+    const processing = workflow.runNext();
+    await Promise.race([
+      ready,
+      processing.then(() => {
+        throw new Error("The processor returned before its publication gate.");
+      }),
+    ]);
+    const canceled = await authorized(
+      app,
+      `/v1/projects/project_main/solution-export-jobs/${created.data.id}/cancel`,
+      jsonPost({ contractVersion: 1 }, "late-race-cancel"),
+    );
+    expect(canceled.status).toBe(200);
+    expect(
+      solutionExportJobResponseV1Schema.parse(await canceled.json()).data,
+    ).toMatchObject({
+      cancellation: { requestedAt: NOW, state: "requested" },
+      state: "cancellation-requested",
+    });
+    expect(COMPLETE).not.toBe(NOW);
+    release();
+    await expect(processing).resolves.toBe(true);
+    await expect(workflow.runNext()).resolves.toBe(false);
+    expect(workflow.queuedRequests()).toHaveLength(0);
+    const terminal = await store.getJob({
+      jobId: created.data.id,
+      organizationId: "org_main",
+      projectId: "project_main",
+    });
+    expect(terminal?.job).toMatchObject({
+      cancellation: { requestedAt: NOW, state: "acknowledged" },
+      completedAt: COMPLETE,
+      state: "canceled",
+    });
+    expect(terminal?.job.artifact).toBeUndefined();
+    expect(store.storedCounts()).toEqual({ artifacts: 0, jobs: 1 });
+    const grant = await authorized(
+      app,
+      `/v1/projects/project_main/solution-export-artifacts/${unpublishedArtifactId}/download-grants`,
+      jsonPost({ contractVersion: 1 }, "late-race-grant"),
+    );
+    expect(grant.status).toBe(404);
   });
 
   it("deduplicates an active cancellation and versions a new-key rerun after cancellation", async () => {
