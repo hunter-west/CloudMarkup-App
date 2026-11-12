@@ -887,6 +887,25 @@ authorization and historical migrations are unchanged. Focused synthetic proof
 remains distinct from the required native PostgreSQL rerun and integrated CI
 acceptance.
 
+### Account-contract consistency
+
+Pre-invocation Intent denials now require a null document as well as null
+provider provenance. Completed extraction and clarification controls, commercial
+route joins and pricing-field refusals remain. GitHub branch admission now
+matches the export service's restrictions on hidden and `.lock` components; the
+service still revalidates independently. The operator recovery-configuration
+test requires the exact fixed TypeError message, so appended input cannot
+satisfy a substring assertion.
+
+The existing owning cases reproduce both contract inconsistencies and pass after
+correction: 30 focused cases across four files, with no registrations removed or
+added. Types, lint, API-contract build, unchanged OpenAPI projection, static
+security and secret checks passed. Bounded parity and assertion probes remain
+separate evidence. These runtime refinements tighten invalid V1 inputs; they do
+not add authentication, financial or provider authority. Native account
+recovery, browser, provider, hosted composition and release acceptance remain
+separate gates.
+
 ### Compiler emitter corrections
 
 Rendering now retains an error when earlier warnings fill the diagnostic budget.
