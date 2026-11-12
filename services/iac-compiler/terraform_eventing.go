@@ -950,8 +950,11 @@ func (renderer *terraformRenderer) validateEventResourcePolicyDocument(document 
 
 // Both targets currently lower EventBusPolicy to the scalar grant form. Refuse
 // richer statements instead of dropping conditions, principals or Deny effects.
+// Its principal is an account ID, never a modeled node ID or an IAM ARN.
 func scalarEventBusGrant(statement terraformPolicyStatement) bool {
-	return statement.Effect == "allow" && len(statement.Actions) == 1 && len(statement.Principals) == 1 && statement.PrincipalKind != "none" && statement.PrincipalKind != "all-principals" && len(statement.Expressions) == 0 && len(statement.Conditions) == 0
+	return statement.Effect == "allow" && len(statement.Actions) == 1 && statement.PrincipalKind == "provider-identity" &&
+		len(statement.Principals) == 1 && len(statement.Principals[0]) == 12 && strings.Trim(statement.Principals[0], "0123456789") == "" &&
+		len(statement.Expressions) == 0 && len(statement.Conditions) == 0
 }
 
 func (renderer *terraformRenderer) renderEventResourcePolicies(documents []terraformPolicyDocument) {
@@ -982,7 +985,7 @@ func (renderer *terraformRenderer) renderEventResourcePolicies(documents []terra
 		case "aws.eventbridge.event-bus":
 			for index, statement := range document.Statements {
 				if !scalarEventBusGrant(statement) {
-					renderer.error("TARGET_EVENT_BUS_POLICY_UNSUPPORTED", "EventBridge scalar grants require Allow, one exact action and one explicit principal, with no conditions or resource expressions.", SourceReference{Document: DocumentArchitecture, NodeID: statement.Resource.ID})
+					renderer.error("TARGET_EVENT_BUS_POLICY_UNSUPPORTED", "EventBridge scalar grants require Allow, one exact action and one explicit account ID, with no conditions or resource expressions.", SourceReference{Document: DocumentArchitecture, NodeID: statement.Resource.ID})
 					continue
 				}
 				name := renderer.resourceNames[document.Resource.ID]

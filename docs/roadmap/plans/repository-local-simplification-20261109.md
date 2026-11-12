@@ -1022,6 +1022,22 @@ not model/provider, native PostgreSQL or deployment behavior.
 
 ### Compiler and generation boundaries
 
+EventBus scalar grants now admit only an explicit provider-identity principal
+containing a 12-digit account ID. Modeled role IDs, IAM ARNs and other principal
+kinds are refused instead of losing their typed meaning. The existing owning
+test retains both account-grant positives and Deny, condition, action and
+principal-cardinality refusals, and adds the modeled-role case for both targets.
+Ordinary IAM policy lowering remains unchanged. Source/synthetic controls do not
+establish Go rendering or provider acceptance.
+
+The unapplied provider-constraint proposal is rebound in a new local evidence
+artifact to its actual compiler predecessor. Its three source after-images are
+unchanged. The earlier inconsistent proposal is preserved as historical
+evidence; the 16 required golden-pair refreshes remain unperformed and the
+proposal is not applied. The local integration now retains the reviewed
+observation-reader and networking corrections with the compiler and account
+lines. Its combined source still requires independent integration review.
+
 The S3 policy/notification fixture exposed a CloudFormation dependency cycle
 between the Lambda function, its inline role policies and the notifying bucket.
 For this exact owned-bucket/role relationship, policy resources now use the
@@ -1083,3 +1099,20 @@ native raster cases remain unrun locally; source and explicit SQL/transaction
 doubles do not establish native constraints, locking, rollback or rendering.
 Production implementations, historical migrations, financial policy and private
 test overrides are unchanged. No cases or duplicate executions were removed.
+
+### Accepted-line integration
+
+Local merge commits retain the published observation/networking ancestry and the
+separately reviewed compiler, EventBus and account corrections. The sole text
+conflict joined both appended plan sections without changing their content.
+Product and test paths retain their exact accepted source bytes; no test cases
+were added or removed by integration. The unreviewed billing successors stay on
+separate branches and are excluded.
+
+The accepted private documentation/overlay reference remains unchanged. The two
+pending execution-test bindings, both major duplicate overrides, authentic
+source assets/intake and cold composition remain unresolved. The provider
+version proposal is unapplied and its 16 golden-pair refreshes are unfinished.
+Go, authored-golden reproduction, native SQL/restore, browser, R1 and
+cleanup-owner acceptance remain separate gates. Local integration does not
+publish or deploy.
