@@ -852,3 +852,13 @@ mutations; duplicate-key or unrelated failures cannot satisfy it. The separate
 exact stage-uniqueness assertion remains. Case counts, production accounting and
 historical migrations are unchanged. Native database proof remains separate from
 the focused unit and synthetic assertion checks.
+
+### Export reload coverage consolidation
+
+The existing authenticated-download browser case now checks the displayed
+archive digest before and after reloading the same job. It retains the real
+download-byte checksum and grant-header assertions without restoring a separate
+case or the redundant rerun fixture. The guide names that exact fixture-backed
+guarantee. This checks presentation of the same mocked job, not regeneration,
+database recovery or challenged redaction; browser execution remains a separate
+qualification gate.

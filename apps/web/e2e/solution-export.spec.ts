@@ -487,6 +487,19 @@ test("downloads through the authenticated short-lived grant and verifies filenam
     "Bearer local-development:solution_export-e2e",
   );
   expect(content?.headers["accept"]).toBe("application/zip");
+
+  await page.getByRole("tab", { name: "Manifest" }).click();
+  const manifestDigest = page
+    .getByRole("tabpanel", { name: "Manifest" })
+    .getByText(SOLUTION_EXPORT_ARCHIVE_DIGEST)
+    .first();
+  await expect(manifestDigest).toBeVisible();
+  const jobUrl = page.url();
+
+  await page.reload({ waitUntil: "commit" });
+  await expect(page).toHaveURL(jobUrl);
+  await page.getByRole("tab", { name: "Manifest" }).click();
+  await expect(manifestDigest).toBeVisible();
 });
 
 test("resumes an interrupted gateway response with the exact export request", async ({
