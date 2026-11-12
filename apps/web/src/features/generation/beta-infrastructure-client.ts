@@ -217,6 +217,8 @@ async function readBeforeProposalDeadline<T>(
     return result;
   } catch (error) {
     controller.abort();
+    signal.throwIfAborted();
+    if (Date.now() >= deadline) throw proposalDeadlineError(jobId);
     throw error;
   } finally {
     clearTimeout(timer);

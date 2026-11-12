@@ -1243,3 +1243,25 @@ the correction passes the 32-case suite and the six extended late controls.
 These use synthetic transport and timers, not a browser or provider. No native,
 CI, release-admission or deployment acceptance is claimed. Independent review
 and integrated qualification remain with the existing coordinator.
+
+### Rejected-read deadline classification
+
+Independent review found that a late terminal-credit fetch/body rejection could
+remain optional and permit success when the deadline timer was throttled. The
+helper now checks caller cancellation first, then elapsed deadline, on its error
+exit before propagating an ordinary error. All other production bytes, including
+admission identity, shared read budget and exact-job cancellation, are retained.
+
+Two added owning rows preserve early optional errors and cover exact-deadline,
+late-rejection and caller-precedence controls for both fetch and body promises.
+They require one exact-job cleanup, retained recovery identity, no automatic
+second admission and unchanged thirty-/ten-second budgets. Separate status error
+races inside those rows ensure the optional-credit catch cannot mask the
+helper's cancellation precedence. All 32 preceding cases remain unchanged.
+
+The predecessor fails both new rows; all 34 cases pass, followed by the two
+extended rows passing again. These overlapping synthetic checks are not one
+repeated integrated run or native browser/provider proof. The earlier sealed
+candidate remains historical evidence. This narrow successor stays separate from
+accounting and IAM work, with independent review and existing release gates
+outstanding.
