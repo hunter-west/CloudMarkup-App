@@ -1245,3 +1245,14 @@ untouched. This correction is a separate sibling of the accounting, deadline and
 IAM union. Render anchors and other queued editor findings are excluded. Exact
 independent review and later integration remain required; existing native,
 browser, source-intake/composition and release gates stay open.
+
+The parked correction was resumed after sealing the separate failed-save browser
+repair. Its final guarded React preview reset passes all 39 owning component
+cases, selected seven-root type checking and changed-file lint. The final owning
+run took 18.62 seconds; the prior same-command correction run took 16.31
+seconds. These single runs are not a performance benchmark, and a comparable
+complete predecessor run is unavailable. All 37 original cases and their
+existing assertions remain. The parked commit and browser correction branch are
+retained; this editor successor contains neither that browser repair nor the
+separately accepted accounting/deadline/IAM union. Later immutable integration
+is required.
