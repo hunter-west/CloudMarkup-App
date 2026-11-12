@@ -148,7 +148,6 @@ it.each([
         interval_count: 1,
         usage_type: "licensed",
       },
-      ...patch,
     };
     const subscription = {
       id: "sub_live_fixture",
@@ -173,14 +172,21 @@ it.each([
         ],
       },
     };
+    const refreshed = structuredClone(subscription);
+    const item = refreshed.items.data[0];
+    if (item === undefined) throw Error("Missing synthetic subscription item");
+    Object.assign(item.price, patch);
+    const fetchImplementation = vi.fn(() =>
+      Promise.resolve(Response.json(refreshed)),
+    );
     const provider = new StripeBillingProvider({
       apiKey: "sk_live_synthetic_fixture",
       stripeEnvironment: "live",
       verificationMode: "queued-events-only",
       signatureToleranceSeconds: 300,
-      fetchImplementation: () => Promise.resolve(Response.json(subscription)),
+      fetchImplementation,
     });
-    const result = await provider.resolveSubscriptionSnapshot({
+    const event = {
       providerEventReference: "evt_live_fixture",
       eventType: "customer.subscription.updated",
       eventPosition: "00000000001790856000:evt_live_fixture",
@@ -188,12 +194,29 @@ it.each([
       payloadSha256: "a".repeat(64),
       supported: true,
       providerEventData: subscription,
-    });
+    };
+    const result = await provider.resolveSubscriptionSnapshot(event);
+    expect(fetchImplementation).toHaveBeenCalledOnce();
+    expect(fetchImplementation).toHaveBeenCalledWith(
+      "https://api.stripe.com/v1/subscriptions/sub_live_fixture",
+      expect.objectContaining({ method: "GET" }),
+    );
     if (Object.keys(patch).length === 0)
       expect(result).toMatchObject({
         priceReference: REVIEWED_LIVE_STRIPE.pro.priceReference,
         normalizedStatus: "active",
       });
-    else expect(result).toBeNull();
+    else {
+      expect(result).toBeNull();
+      // Retain the distinct historical admission refusal before transport.
+      fetchImplementation.mockClear();
+      await expect(
+        provider.resolveSubscriptionSnapshot({
+          ...event,
+          providerEventData: refreshed,
+        }),
+      ).resolves.toBeNull();
+      expect(fetchImplementation).not.toHaveBeenCalled();
+    }
   },
 );

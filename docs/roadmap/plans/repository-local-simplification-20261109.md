@@ -1065,3 +1065,19 @@ native raster cases remain unrun locally; source and explicit SQL/transaction
 doubles do not establish native constraints, locking, rollback or rendering.
 Production implementations, historical migrations, financial policy and private
 test overrides are unchanged. No cases or duplicate executions were removed.
+
+### Billing provider boundary corrections
+
+Reconciliation permits signed debit adjustments while retaining nonnegative
+derived balances, safe integer totals and allocation bounds. Hosted top-up and
+subscription creation retain their original retry deadline through asynchronous
+current-account authorization and recheck it immediately before sending. Reads
+that reconcile an already-created session remain available after that deadline.
+The live-price test now admits valid historical evidence before changing only
+the refreshed price, and separately retains historical rejection before HTTP.
+
+The four existing owning suites passed all 95 cases with injected provider
+transport; the later Checkout deadline assertion also passed. No registrations
+were removed. These checks establish local boundary behavior, not payment,
+native database, hosted composition or integrated acceptance. The private top-up
+override requires the matching assertion/hash port and remains present.
