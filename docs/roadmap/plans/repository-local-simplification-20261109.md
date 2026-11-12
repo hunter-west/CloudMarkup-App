@@ -652,3 +652,26 @@ license-rejection assertion is shared upstream; the test copies are identical.
 Removing the private override still requires authentic successor source assets,
 the matching admitted pin and cold-composition evidence. No native gate, source
 guard, deployment permission or live setting changes with these corrections.
+
+### Application-state follow-up
+
+Adopted-resource deletion reports an unavailable inverse rather than inventing
+restoration authority; direct adopted-add refusal and ordinary inverse behavior
+remain. Job callbacks and completion retain the original attempt identity across
+awaits, including replacement claims that reuse a worker ID. Browser recovery
+owns both request and transaction failures before returning, retaining the prior
+checkpoint. Focused tests use synthetic jobs and IndexedDB stores only.
+
+Renderer 1.2.0 corrects the zero-summary budget above 50 nodes and is selected
+by new export profiles. Historical renderer pins 1.0.0 and 1.1.0 retain their
+exact behavior; saved revisions are not relabeled. The existing icon test now
+reaches both digest and sanitization boundaries. The retained-provider directory
+test uses healthy independent history so a corrupt pending file cannot mask its
+incarnation check. That filesystem test remains unrun here because the existing
+rename restriction was not retried. Current contributor guidance includes the
+build/bootstrap/permission sequence and the actual PG17 cleanup scope.
+
+These changes require independent source review and normal integrated CI. Native
+SQL, filesystem/browser durability, exact hosted admission and release
+qualification remain separate; no production change or deletion is authorized by
+focused source tests.

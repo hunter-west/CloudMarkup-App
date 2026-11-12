@@ -8,6 +8,7 @@ import {
   DIAGRAM_RENDERER_ID,
   DIAGRAM_RENDERER_VERSION,
   DIAGRAM_RENDERER_SFNT_VERSION,
+  DIAGRAM_RENDERER_BOUNDED_DETAIL_VERSION,
   diagramExportArtifactV1Schema,
   diagramExportRequestV1Schema,
   type DiagramExportArtifactV1,
@@ -62,6 +63,26 @@ export const diagramRendererSfntV1Pin: DiagramRendererPinV1 = Object.freeze({
   id: DIAGRAM_RENDERER_ID,
   version: DIAGRAM_RENDERER_SFNT_VERSION,
 });
+
+/** Corrected summary budget, explicitly versioned apart from historical output. */
+export const diagramRendererBoundedDetailV1Pin: DiagramRendererPinV1 =
+  Object.freeze({
+    digest: hashCanonicalValue({
+      ...rendererCommitment,
+      font: DIAGRAM_SFNT_FONT,
+      fontEncoding: DIAGRAM_SFNT_FONT_SOURCE,
+      renderer: {
+        id: DIAGRAM_RENDERER_ID,
+        version: DIAGRAM_RENDERER_BOUNDED_DETAIL_VERSION,
+      },
+      configurationSummaryPolicy: {
+        reduceDetailAboveNodes: 50,
+        reducedMaximum: 0,
+      },
+    }),
+    id: DIAGRAM_RENDERER_ID,
+    version: DIAGRAM_RENDERER_BOUNDED_DETAIL_VERSION,
+  });
 
 function metadataForText(
   path: DiagramExportFileMetadataV1["path"],
@@ -221,6 +242,16 @@ export function createSfntDiagramExportService(options: {
     rasterizer: options.rasterizer,
     font: DIAGRAM_SFNT_FONT,
     renderer: diagramRendererSfntV1Pin,
+  });
+}
+
+export function createBoundedDetailDiagramExportService(options: {
+  readonly rasterizer: DiagramPngRasterizer;
+}): DiagramExportServiceV1 {
+  return createBoundDiagramExportService({
+    rasterizer: options.rasterizer,
+    font: DIAGRAM_SFNT_FONT,
+    renderer: diagramRendererBoundedDetailV1Pin,
   });
 }
 

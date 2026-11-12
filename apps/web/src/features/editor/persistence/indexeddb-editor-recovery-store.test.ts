@@ -102,6 +102,72 @@ function checkpointRequest(
 }
 
 describe("IndexedDB editor recovery store", () => {
+  it("owns request and aborted-transaction failures in every recovery operation", async () => {
+    for (const operation of [
+      "load",
+      "checkpoint",
+      "discard",
+      "remediate",
+    ] as const) {
+      // The write controls get through the initial read before failing. Every
+      // failing request also rejects the independently observed transaction.
+      for (const successfulRequests of operation === "load" ? [0] : [0, 1]) {
+        const memory = new MemoryIndexedDb();
+        const store = createIndexedDbEditorRecoveryStore({
+          indexedDb: memory.factory,
+          createBroadcastChannel: null,
+          databaseName: "synthetic-request-abort",
+        });
+        const { binding, document } = createBinding("scope-request-abort");
+        const first = await store.checkpoint(
+          checkpointRequest(binding, document, null, "writer_one"),
+        );
+        if (first.status !== "stored")
+          throw new Error("Expected synthetic checkpoint");
+        const changed = movedDocument(document, 240, 320, "request_abort");
+        if (operation === "remediate")
+          memory.mutate(binding.scopeFingerprint, (record) => {
+            record.latest.canonicalDocument = "{broken";
+          });
+        const before = await store.load(binding);
+        memory.failRequestAfter(successfulRequests);
+        const result =
+          operation === "load"
+            ? await store.load(binding)
+            : operation === "checkpoint"
+              ? await store.checkpoint(
+                  checkpointRequest(binding, changed, first.head, "writer_one"),
+                )
+              : operation === "discard"
+                ? await store.discard({
+                    binding,
+                    expectedHead: first.head,
+                    writerId: "writer_one",
+                  })
+                : before.status === "rejected"
+                  ? await store.remediateRejected({
+                      action: "replace",
+                      binding,
+                      document: changed,
+                      expectedClassification: before.classification,
+                      expectedHead: first.head,
+                      savedAt: "2026-07-30T12:30:00.000Z",
+                      writerId: "writer_one",
+                    })
+                  : undefined;
+        expect(result).toMatchObject({
+          status: "unavailable",
+          code: "database-error",
+        });
+        // Let the aborted transaction and unhandled-rejection turn complete;
+        // Vitest must report no unhandled error and the prior bytes survive.
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(await store.load(binding)).toEqual(before);
+        store.close();
+      }
+    }
+  });
+
   it("uses strict CAS and retains one prior validated checkpoint for corrupt recovery", async () => {
     const memory = new MemoryIndexedDb();
     const store = createIndexedDbEditorRecoveryStore({

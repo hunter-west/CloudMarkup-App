@@ -741,6 +741,103 @@ describe("Graph command application", () => {
     );
   });
 
+  it.each(["node", "edge"] as const)(
+    "does not advertise an unsafe restoration inverse for an adopted %s",
+    async (kind) => {
+      const document = await representativeDocument();
+      const dependency = document.nodes[0];
+      if (dependency === undefined) throw new Error("Expected fixture node");
+      const generated = generatedNode(
+        "node_adopted",
+        "adopted_worker",
+        dependency.id,
+      );
+      if (generated.semantic.lifecycle.ownership !== "generated")
+        throw new Error("Expected generated fixture");
+      const node = {
+        ...generated,
+        semantic: {
+          ...generated.semantic,
+          lifecycle: {
+            ...generated.semantic.lifecycle,
+            provenance: {
+              ...generated.semantic.lifecycle.provenance,
+              dependentNodeIds: [],
+            },
+          },
+        },
+      };
+      const edge = {
+        ...userEdge("edge_adopted"),
+        semantic: {
+          ...userEdge("edge_adopted").semantic,
+          lifecycle: node.semantic.lifecycle,
+        },
+      };
+      const added = applyGraphCommand(document, {
+        ...commandEnvelope(document, "operation_add_adoption_fixture"),
+        ...(kind === "node"
+          ? { kind: "add-node", node }
+          : { kind: "add-edge", edge }),
+      }).document;
+      const adopted = deepFreeze(
+        applyGraphCommand(added, {
+          ...commandEnvelope(added, "operation_adopt_removal_fixture"),
+          kind: "adopt-generated-resource",
+          resource:
+            kind === "node"
+              ? { kind, nodeId: node.id }
+              : { kind, edgeId: edge.id },
+          expectedLifecycle: node.semantic.lifecycle,
+          adoptedBy: "actor_user",
+          adoptedAt: "2026-07-24T18:00:00Z",
+        }).document,
+      );
+      const before = serializeArchitectureDocumentV1(adopted);
+      const retainedNode = adopted.nodes.find((value) => value.id === node.id);
+      const retainedEdge = adopted.edges.find((value) => value.id === edge.id);
+      const removal = {
+        ...commandEnvelope(adopted, "operation_remove_adopted"),
+        ...(kind === "node"
+          ? { kind: "remove-node", nodeId: node.id, expectedNode: retainedNode }
+          : {
+              kind: "remove-edge",
+              edgeId: edge.id,
+              expectedEdge: retainedEdge,
+            }),
+      };
+      const removed = applyGraphCommand(adopted, removal);
+      expect(removed.inversion).toMatchObject({
+        kind: "unavailable",
+        reason: { code: "adopted_resource_restoration_requires_policy" },
+      });
+      expect(serializeArchitectureDocumentV1(adopted)).toBe(before);
+      expectApplicationIssue(
+        () =>
+          applyGraphCommand(removed.document, {
+            ...commandEnvelope(
+              removed.document,
+              "operation_forged_adopted_restore",
+            ),
+            ...(kind === "node"
+              ? { kind: "add-node", node: retainedNode }
+              : { kind: "add-edge", edge: retainedEdge }),
+          }),
+        "invalid_new_resource_ownership",
+      );
+      expect(
+        applyGraphCommand(adopted, {
+          ...commandEnvelope(adopted, "operation_adopted_batch"),
+          kind: "batch",
+          commands: [removal],
+        }).inversion,
+      ).toMatchObject({
+        kind: "unavailable",
+        reason: { code: "batch_contains_non_invertible_command" },
+      });
+    },
+  );
+
   it("requires adoption before generated semantic customization", async () => {
     const document = await representativeDocument();
     const application = document.nodes.find(

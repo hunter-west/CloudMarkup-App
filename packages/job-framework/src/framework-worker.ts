@@ -485,13 +485,27 @@ export class JobWorker {
     const checkpoint = resumableCheckpoint(claimed, handler);
 
     const attempt = activeAttempt(claimed);
+    const executionAttemptId = attempt.attemptId;
+    const executionJobId = claimed.jobId;
+    // Worker IDs can be reused. Only the attempt captured before dispatch may
+    // mutate this execution, even after an await observes a replacement claim.
+    const requiredExecution = async () => {
+      const latest = await this.#requiredJob(executionJobId);
+      if (activeAttempt(latest).attemptId !== executionAttemptId) {
+        throw new JobFrameworkError(
+          "job.execution-attempt-replaced",
+          "The job execution attempt has been replaced.",
+        );
+      }
+      return latest;
+    };
     let savedByThisExecution: AsyncJobCheckpointV1 | undefined;
     const handlerContext: JobHandlerContextV1 = {
       attemptNumber: attempt.attemptNumber,
       checkpoint,
       correlationId: claimed.correlationId,
       heartbeat: async () => {
-        const latest = await this.#requiredJob(claimed.jobId);
+        const latest = await requiredExecution();
         const active = activeAttempt(latest);
         const heartbeatAt = now(this.#dependencies.clock);
         const leaseExpiresAt = boundedLeaseExpiresAt(
@@ -514,7 +528,7 @@ export class JobWorker {
         }
         const result = applyAsyncJobLifecycleCommandV1(latest, {
           at: heartbeatAt,
-          attemptId: active.attemptId,
+          attemptId: executionAttemptId,
           expectedInputDigest: latest.inputDigest,
           expectedRecordVersion: latest.recordVersion,
           kind: "heartbeat",
@@ -529,17 +543,16 @@ export class JobWorker {
         );
       },
       isCancellationRequested: async () => {
-        const latest = await this.#dependencies.repository.get(claimed.jobId);
-        return latest?.cancellation.state === "requested";
+        const latest = await requiredExecution();
+        return latest.cancellation.state === "requested";
       },
       jobId: claimed.jobId,
       ownership: claimed.ownership,
       reportProgress: async (progress) => {
-        const latest = await this.#requiredJob(claimed.jobId);
-        const active = activeAttempt(latest);
+        const latest = await requiredExecution();
         const result = applyAsyncJobLifecycleCommandV1(latest, {
           at: now(this.#dependencies.clock),
-          attemptId: active.attemptId,
+          attemptId: executionAttemptId,
           expectedInputDigest: latest.inputDigest,
           expectedRecordVersion: latest.recordVersion,
           kind: "record-progress",
@@ -554,11 +567,10 @@ export class JobWorker {
         );
       },
       saveCheckpoint: async (newCheckpoint) => {
-        const latest = await this.#requiredJob(claimed.jobId);
-        const active = activeAttempt(latest);
+        const latest = await requiredExecution();
         const checkpointResult = applyAsyncJobLifecycleCommandV1(latest, {
           at: newCheckpoint.createdAt,
-          attemptId: active.attemptId,
+          attemptId: executionAttemptId,
           checkpoint: newCheckpoint,
           expectedInputDigest: latest.inputDigest,
           expectedRecordVersion: latest.recordVersion,
@@ -615,11 +627,10 @@ export class JobWorker {
       });
     }
 
-    const latest = await this.#requiredJob(claimed.jobId);
-    const latestAttempt = activeAttempt(latest);
+    const latest = await requiredExecution();
     const completedResult = applyAsyncJobLifecycleCommandV1(latest, {
       at: now(this.#dependencies.clock),
-      attemptId: latestAttempt.attemptId,
+      attemptId: executionAttemptId,
       expectedInputDigest: latest.inputDigest,
       expectedRecordVersion: latest.recordVersion,
       handler: registration,

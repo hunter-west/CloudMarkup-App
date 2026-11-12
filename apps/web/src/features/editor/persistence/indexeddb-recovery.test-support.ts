@@ -37,6 +37,7 @@ class MemoryTransaction {
   readonly #lostAcknowledgement: boolean;
   readonly #failBeforeCommit: boolean;
   readonly #readwrite: boolean;
+  readonly #failRequest: () => boolean;
   #aborted = false;
   #completed = false;
   #completionTimer: ReturnType<typeof setTimeout> | undefined;
@@ -48,7 +49,9 @@ class MemoryTransaction {
     lostAcknowledgement = false,
     failBeforeCommit = false,
     readwrite = false,
+    failRequest: () => boolean = () => false,
   ) {
+    this.#failRequest = failRequest;
     this.#lostAcknowledgement = lostAcknowledgement;
     this.#keyPath = keyPath;
     this.#records = records;
@@ -128,6 +131,9 @@ class MemoryTransaction {
         return;
       }
       try {
+        if (this.#failRequest()) {
+          throw new DOMException("Synthetic request failure.", "UnknownError");
+        }
         request.result = operation();
         request.onsuccess?.();
       } catch (error) {
@@ -182,6 +188,10 @@ export class MemoryIndexedDb {
   #keyPath = "scopeFingerprint";
   #loseNextCommit = false;
   #failNextCommit = false;
+  #requestsBeforeFailure: number | null = null;
+  public failRequestAfter(successfulRequests = 0): void {
+    this.#requestsBeforeFailure = successfulRequests;
+  }
   readonly #connections = new Set<IDBDatabase>();
   public failNextCommit(): void {
     this.#failNextCommit = true;
@@ -264,6 +274,12 @@ export class MemoryIndexedDb {
           lost,
           fail,
           mode === "readwrite",
+          () => {
+            if (this.#requestsBeforeFailure === null) return false;
+            if (this.#requestsBeforeFailure-- > 0) return false;
+            this.#requestsBeforeFailure = null;
+            return true;
+          },
         ).toIdbTransaction();
       },
     } as unknown as IDBDatabase;
