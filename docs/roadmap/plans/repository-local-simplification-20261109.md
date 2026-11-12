@@ -887,6 +887,31 @@ authorization and historical migrations are unchanged. Focused synthetic proof
 remains distinct from the required native PostgreSQL rerun and integrated CI
 acceptance.
 
+### Compiler emitter corrections
+
+Rendering now retains an error when earlier warnings fill the diagnostic budget.
+CloudFormation helper diagnostics share that bound and retain readiness
+warnings; S3 overlap errors keep their exact related-edge evidence. Generated
+permission matching requires Allow. Both EventBridge scalar-policy emitters
+refuse conditions, multiple values and Deny instead of silently discarding them;
+ordinary custom Deny policies remain supported by their existing policy-document
+emitters.
+
+SNS subscription and EventBridge event-pattern intermediaries participate in
+cycle detection. Scheduled rules remain independent of bus publications.
+Terraform emits one exact, at-most-ten-source allow policy per shared DLQ,
+preserving the existing single-source address. Embedded revision metadata now
+matches the existing TypeScript contract, and the CloudFormation Ref test helper
+requires a nonempty string. Existing cases remain, with targeted assertions and
+two additional owning-suite cases for distinct policy and routing boundaries.
+
+These Go changes and regressions remain source-only and require permitted
+compiler/golden qualification. No Go, native compiler, provider or deployment
+execution is claimed. The separate provider-version metadata correction remains
+an unapplied proposal: it requires a reviewed refresh of sixteen existing golden
+README/manifest pairs and their authentic complete-artifact digests. Existing
+goldens, historical fixtures, source pins and embedded schemas remain unchanged.
+
 ### Scoring and review input ownership
 
 Optional evaluation judges receive detached score and case inputs, so their
