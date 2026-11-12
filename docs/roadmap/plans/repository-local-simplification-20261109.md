@@ -862,3 +862,14 @@ case or the redundant rerun fixture. The guide names that exact fixture-backed
 guarantee. This checks presentation of the same mocked job, not regeneration,
 database recovery or challenged redaction; browser execution remains a separate
 qualification gate.
+
+### Execution-suite fixture profile preparation
+
+The execution suite now takes its synthetic pricing account from the existing
+test-only dispatch fixture owner. Its value is explicit for the distribution;
+production pricing schemas and account allowlists remain unchanged. All test
+registrations, assertions, native/compiler gates and focused selectors are
+preserved. The matching private helper after-image remains unapplied, and the
+private execution-suite copy stays in place until authentic source intake and
+cold composition qualify the shared suite and its profile. This preparation does
+not claim native execution or a runtime saving.
