@@ -834,9 +834,15 @@ fetch and does not establish live GitHub or hosted acceptance.
 ### Host-repair isolation and lineage evidence
 
 The existing cross-tenant observation case retains foreign-plan refusal and
-separately selects a foreign invocation through a valid local plan. It asserts
-the journal-query parameters, no attempted writes and unchanged tenant state.
-The candidate-receipt case retains checksum refusal, then rehashes the altered
+confirms that matching invocation-ID strings select only the authorized tenant's
+own settled observation. Its two native fixtures deliberately share the same ID;
+the former invocation-only refusal incorrectly treated that string as globally
+unique. The case now checks the own-record digest, both scoped journal reads,
+then rejects a schema-valid, rehashed foreign-scope binding after journal I/O.
+It retains no-write and unchanged-state checks for both tenants. Production
+authorization, SQL predicates and settlement behavior are unchanged; local
+source/synthetic checks do not establish PostgreSQL execution or isolation. The
+candidate-receipt case retains checksum refusal, then rehashes the altered
 predecessor and verifies schema-valid but incompatible lineage. Both changes
 extend existing cases without changing production code, historical SQL or clock
 contracts. Synthetic codec and assertion probes are distinct from the
