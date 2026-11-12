@@ -36,6 +36,7 @@ import { createApplicationBuildRunner } from "./runner.js";
 import {
   canonicalJson,
   compareUtf16,
+  outputPathIssue,
   sha256Digest,
   utf8Bytes,
 } from "./security.js";
@@ -1100,6 +1101,13 @@ describe("isolated application build runner", () => {
     );
     expect(zip).toBeDefined();
     expect(manifestArtifact).toBeDefined();
+    if (zip === undefined) throw new TypeError("Missing Lambda artifact.");
+    expect(`../${zip.path}`).toBe(
+      "../application/artifacts/workload_notes_api/function.zip",
+    );
+    expect(fixture.envelope.contract.expectedArtifact.handler).toBe(
+      "index.handler",
+    );
     const manifest = JSON.parse(
       Buffer.from(manifestArtifact?.bytesBase64 ?? "", "base64").toString(
         "utf8",
@@ -1122,7 +1130,7 @@ describe("isolated application build runner", () => {
     expect(manifest).toMatchObject({
       artifact: {
         archiveEntrypoint: "index.js",
-        checksum: zip?.checksum,
+        checksum: zip.checksum,
         handler: fixture.envelope.contract.expectedArtifact.handler,
         path: fixture.envelope.contract.expectedArtifact.path,
       },
@@ -1336,7 +1344,7 @@ describe("isolated application build runner", () => {
     expect(result.artifacts).toEqual([]);
   });
 
-  it("honors cancellation and always disposes", async () => {
+  it("honors cancellation before acquiring a workspace", async () => {
     const fixture = generatedFixture();
     const fake = fakeExecutor(producedFiles(fixture));
     const controller = new AbortController();
@@ -1346,8 +1354,97 @@ describe("isolated application build runner", () => {
       policy: fixture.buildPolicy,
     }).run(fixture.request, { signal: controller.signal });
     expect(result.state).toBe("cancelled");
-    expect(fake.session.disposed).toBe(true);
+    expect(result.artifacts).toEqual([]);
+    expect(fake.openedFiles).toEqual([]);
+    expect(fake.session.invocations).toEqual([]);
+    expect(fake.session.disposed).toBe(false);
   });
+
+  it.each(["reject", "return"] as const)(
+    "passes lifetime cancellation through deferred workspace acquisition (%s)",
+    async (completion) => {
+      const fixture = generatedFixture();
+      const fake = fakeExecutor(producedFiles(fixture));
+      const controller = new AbortController();
+      let signalReady: () => void = () => {
+        throw new Error("Gate not initialized.");
+      };
+      let release: () => void = () => {
+        throw new Error("Gate not initialized.");
+      };
+      const ready = new Promise<void>((resolve) => {
+        signalReady = resolve;
+      });
+      const released = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      let lifetimeSignal: AbortSignal | undefined;
+      const acquisitionFailure = new TypeError(
+        "Synthetic workspace acquisition cancelled.",
+      );
+      const running = createApplicationBuildRunner({
+        policy: fixture.buildPolicy,
+        executor: {
+          async open(input) {
+            lifetimeSignal = input.signal;
+            signalReady();
+            await released;
+            if (input.signal?.aborted === true && completion === "reject") {
+              await fake.session.dispose();
+              throw acquisitionFailure;
+            }
+            return fake.session;
+          },
+        },
+      }).run(fixture.request, { signal: controller.signal });
+      const settled = running.then(
+        (result) => ({ result, error: undefined }),
+        (error: unknown) => ({ result: undefined, error }),
+      );
+      await ready;
+      controller.abort();
+      release();
+      const outcome = await settled;
+      expect(lifetimeSignal).toBe(controller.signal);
+      if (completion === "reject") {
+        expect(outcome.error).toBe(acquisitionFailure);
+        expect(outcome.result).toBeUndefined();
+      } else {
+        expect(outcome.error).toBeUndefined();
+        expect(outcome.result?.state).toBe("cancelled");
+        expect(outcome.result?.artifacts).toEqual([]);
+      }
+      expect(fake.session.invocations).toEqual([]);
+      expect(fake.session.disposed).toBe(true);
+    },
+  );
+
+  it.each(["dependency-scan", "secret-scan"] as const)(
+    "preserves cancelled %s without demanding complete JSON",
+    async (step) => {
+      for (const stdout of ["", "{"]) {
+        const { result, session } = await runFixture({
+          [step]: {
+            exitCode: null,
+            outputBytes: stdout.length,
+            stderr: "",
+            stdout,
+            termination: "cancelled",
+          },
+        });
+        expect(result.state).toBe("cancelled");
+        expect(result.artifacts).toEqual([]);
+        expect(result.diagnostics.map(({ code }) => code)).toContain(
+          `application.build.${step}-failed`,
+        );
+        expect(result.diagnostics.map(({ code }) => code)).not.toContain(
+          "application.build.scan-results-malformed",
+        );
+        expect(session.invocations.at(-1)?.step).toBe(step);
+        expect(session.disposed).toBe(true);
+      }
+    },
+  );
 
   it("produces byte-identical ZIPs independent of input ordering", () => {
     const entries = [
@@ -1428,23 +1525,6 @@ describe("isolated application build runner", () => {
       expect(fake.session.invocations).toEqual([]);
     },
   );
-
-  it("keeps the Lambda artifact path compatible with Prompt 29 Terraform", async () => {
-    const { fixture, result } = await runFixture();
-    const artifact = result.artifacts.find(
-      (entry) => entry.mediaType === "application/zip",
-    );
-    expect(artifact?.path).toBe(
-      fixture.envelope.contract.expectedArtifact.path,
-    );
-    if (artifact === undefined) throw new TypeError("Missing Lambda artifact.");
-    expect(`../${artifact.path}`).toBe(
-      "../application/artifacts/workload_notes_api/function.zip",
-    );
-    expect(fixture.envelope.contract.expectedArtifact.handler).toBe(
-      "index.handler",
-    );
-  });
 
   it.each(["unit-tests", "dependency-scan"] as const)(
     "fails closed on malformed successful %s output",
@@ -1535,53 +1615,68 @@ describe("isolated application build runner", () => {
     expect(result.state).toBe("passed");
   });
 
-  it("blocks packaging on a high dependency finding", async () => {
-    const { result } = await runFixture({
-      "dependency-scan": ok(
-        JSON.stringify({
-          Results: [
-            {
-              Target: "application/pnpm-lock.yaml",
-              Vulnerabilities: [
+  it.each([
+    [0, "application.build.security-findings"],
+    [1, "application.build.dependency-scan-failed"],
+  ] as const)(
+    "blocks packaging on a high dependency finding (exit %s)",
+    async (exitCode, code) => {
+      const { result } = await runFixture({
+        "dependency-scan": {
+          ...ok(
+            JSON.stringify({
+              Results: [
                 {
-                  PkgName: "example-package",
-                  Severity: "HIGH",
-                  Title: "Reviewed high severity fixture",
-                  VulnerabilityID: "CVE-2026-0001",
+                  Target: "application/pnpm-lock.yaml",
+                  Vulnerabilities: [
+                    {
+                      PkgName: "example-package",
+                      Severity: "HIGH",
+                      Title: "Reviewed high severity fixture",
+                      VulnerabilityID: "CVE-2026-0001",
+                    },
+                  ],
                 },
               ],
-            },
-          ],
-        }),
-      ),
-    });
-    expect(result.state).toBe("failed");
-    expect(result.artifacts).toEqual([]);
-    expect(result.findings).toHaveLength(1);
-    expect(result.diagnostics.map(({ code }) => code)).toContain(
-      "application.build.security-findings",
-    );
-  });
+            }),
+          ),
+          exitCode,
+        },
+      });
+      expect(result.state).toBe("failed");
+      expect(result.artifacts).toEqual([]);
+      expect(result.findings).toHaveLength(1);
+      expect(result.diagnostics.map(({ code }) => code)).toContain(code);
+    },
+  );
 
   it("rejects unsafe and duplicate portable build output paths", async () => {
-    const { result } = await runFixture({}, undefined, (fixture) => [
-      ...producedFiles(fixture),
-      {
-        bytes: utf8Bytes("malicious"),
-        kind: "regular-file",
-        path: "application/dist/../credentials",
-      },
-      {
-        bytes: utf8Bytes("duplicate"),
-        kind: "regular-file",
-        path: "APPLICATION/dist/functions/notes_handler/index.js",
-      },
-    ]);
-    expect(result.state).toBe("failed");
-    expect(result.artifacts).toEqual([]);
-    expect(result.diagnostics.map(({ code }) => code)).toContain(
-      "application.build.output-file-unsafe",
-    );
+    for (const variant of ["traversal", "portable-duplicate"] as const) {
+      let path = "";
+      const { fixture, result } = await runFixture({}, undefined, (source) => {
+        path =
+          variant === "traversal"
+            ? "application/dist/../credentials"
+            : source.envelope.contract.compiledEntrypoint.toUpperCase();
+        return [
+          ...producedFiles(source),
+          { bytes: utf8Bytes("synthetic"), kind: "regular-file", path },
+        ];
+      });
+      if (!path.includes("..")) {
+        expect(outputPathIssue(path)).toBeUndefined();
+        expect(
+          producedFiles(fixture).some(
+            (file) => file.path.toLowerCase() === path.toLowerCase(),
+          ),
+        ).toBe(true);
+      }
+      expect(result.state).toBe("failed");
+      expect(result.artifacts).toEqual([]);
+      expect(result.diagnostics.map(({ code }) => code)).toContain(
+        "application.build.output-file-unsafe",
+      );
+    }
   });
 
   it("rejects forged report, artifact, and step evidence at the public schema boundary", async () => {
@@ -1594,20 +1689,24 @@ describe("isolated application build runner", () => {
     ).toBe(false);
     const artifact = result.artifacts[0];
     if (artifact === undefined) throw new TypeError("Missing build artifact.");
-    expect(
-      applicationBuildResultV1Schema.safeParse({
-        ...result,
-        artifacts: [
-          {
-            ...artifact,
-            bytesBase64: `${artifact.bytesBase64.slice(0, -4)}AAAA`,
-          },
-          ...result.artifacts.slice(1),
-        ],
-      }).success,
-    ).toBe(false);
     const { reportDigest, ...projection } = result;
     void reportDigest;
+    const tamperedBytes = Buffer.from(artifact.bytesBase64, "base64");
+    tamperedBytes[0] = (tamperedBytes[0] ?? 0) ^ 1;
+    const changedArtifactProjection = {
+      ...projection,
+      artifacts: [
+        { ...artifact, bytesBase64: tamperedBytes.toString("base64") },
+        ...result.artifacts.slice(1),
+      ],
+    };
+    const changedArtifact = applicationBuildResultV1Schema.safeParse({
+      ...changedArtifactProjection,
+      reportDigest: sha256Digest(canonicalJson(changedArtifactProjection)),
+    });
+    expect(
+      changedArtifact.error?.issues.map(({ path, code }) => ({ path, code })),
+    ).toEqual([{ path: ["artifacts", 0, "checksum"], code: "custom" }]);
     const forgedProjection = {
       ...projection,
       coverage: {

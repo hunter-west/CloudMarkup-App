@@ -804,3 +804,19 @@ the previous conflict and covers the corrected queue and download behavior.
 Runner instructions now distinguish the existing fixed preparation step from
 non-root, capability-free validation. Executor code, approval requirements and
 production workers are unchanged; no container or provider execution is implied.
+
+### Runner result and cancellation boundaries
+
+Required Terraform command unavailability now follows the same error
+classification as required extensions; optional analyzers retain their explicit
+warning behavior. Unsupported provider/source diagnostics use fixed text with
+retained file references. Application builds check cancellation before workspace
+acquisition, forward the transient signal, and classify incomplete scans by
+termination before demanding successful output. Acquisition rejection and
+partial cleanup remain executor responsibilities. The guide names all
+already-admitted generated families and distinguishes fixed Terraform staging
+from unprivileged validation. Fake-executor regressions cover these boundaries;
+native and hosted activation remain separate. Two standalone
+sanitizer/compatibility setups now share their existing owning cases.
+Output-path negatives are independent, and the forged-artifact case refreshes
+its outer digest so it reaches the intended byte-binding guard.
