@@ -929,3 +929,11 @@ return blocking dependency or secret findings. Nonblocking dependency warnings
 remain distinct. Focused synthetic checks preserve proposal-only authority,
 unchanged source documents and candidate-bound Evidence; no production profile
 or native execution is enabled.
+
+### Runtime accounting assertion precision
+
+The estimate regression now reaches independent input and output usage bounds
+with a matching primary attempt and a successful at-limit control. The two
+outbox retry rows compare all expected event kinds as Set members, including
+terminal latency. Existing reservation, no-charge, uniqueness and replay checks
+remain. These synthetic checks add no financial or production execution.
