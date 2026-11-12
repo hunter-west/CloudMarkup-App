@@ -262,3 +262,8 @@ evaluation/promotion campaign |
   - Proposed; restricted audience approved. Explicit staff and organization
     grants, current-session reauthorization and a separate read-only report;
     native authority/restore and release admission remain pending.
+
+- [Bounded accounting cleanup and operational retention](proposed-beta-ai-cleanup-retention.md)
+  - Proposed; source implementation and 60-day target authorized. Exact durable
+    checkpoints and completed-details eligibility; restore binding, native
+    admission and irreversible retirement activation remain pending.

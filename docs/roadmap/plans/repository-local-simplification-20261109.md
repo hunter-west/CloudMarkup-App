@@ -553,3 +553,15 @@ provider, accounting, permission, migration, pricing or retention behavior is
 changed by this follow-up. The previously reviewed candidate and evidence remain
 available; independent review of this successor and all retained release gates
 are still required.
+
+### Operational cleanup successor
+
+The earlier tentative 30-day discussion is superseded by the approved 60-day
+target for redundant completed operational details, scoped in the
+[cleanup retention proposal](../../adr/proposed-beta-ai-cleanup-retention.md).
+The successor separates meter selection from execution and adds durable
+checkpoint/receipt storage, canonical completion verification, current-session
+authorization and explicit dry-run eligibility. No financial/customer contract,
+unique usage, browser-recovery lifetime or historical migration changes.
+Restore-owner binding, native/ordinary-role admission and independent review
+remain required. No live grant, retirement caller, TTL or deletion is activated.

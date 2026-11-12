@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import * as cleanupOwner from "./production-beta-ai-cleanup.js";
 
 import {
   permissionsForRole,
@@ -332,6 +333,29 @@ describe("production credit summary", () => {
       ).rejects.toMatchObject({ code: "service_unavailable" });
     },
   );
+  it("returns the unchanged customer balance when optional cleanup is unavailable", async () => {
+    const f = fixture();
+    f.database.hasAccount = true;
+    const expected = await f.app.getCreditOverview(principal, "org_credit");
+    const cleanup = vi
+      .spyOn(cleanupOwner, "runProductionBetaAiCleanup")
+      .mockRejectedValue(new Error("synthetic cleanup unavailable"));
+    try {
+      const app = createProductionCommercialReads({
+        database: f.database,
+        clock: () => new Date(now),
+        cleanupAdmission: {
+          currentEpoch: () => Promise.resolve("restore_fixture"),
+        },
+      });
+      expect(await app.getCreditOverview(principal, "org_credit")).toEqual(
+        expected,
+      );
+      expect(cleanup).toHaveBeenCalledOnce();
+    } finally {
+      cleanup.mockRestore();
+    }
+  });
   it("does not interpret malformed presence evidence as an absent account", async () => {
     const f = fixture();
     f.database.hasAccount = "false";

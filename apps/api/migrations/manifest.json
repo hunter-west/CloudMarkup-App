@@ -615,6 +615,11 @@
       "version": "0141",
       "file": "0141_staff_provider_cost_scope.sql",
       "checksumSha256": "358f79f5d19cd2e5540c03f3e72d1010bd726c5c82500e3174ef20ca3249b956"
+    },
+    {
+      "checksumSha256": "9ae4f3bc42624d52d3c17265539cf21650645a1035b91fce936023500d3f21f0",
+      "file": "0142_beta_ai_cleanup_checkpoints.sql",
+      "version": "0142"
     }
   ]
 }
