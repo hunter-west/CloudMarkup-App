@@ -620,15 +620,39 @@ test("rejects undeclared members and nested source-control metadata", async (t) 
 });
 
 test("rejects member, monorepo-lock, and provider-index drift", async (t) => {
-  await t.test("member content", async () => {
-    await withFixture(async ({ app, root }) => {
-      await writeFile(resolve(app.contextRoot, "Dockerfile"), "changed\n");
-      await assert.rejects(
-        validateBetaImageContexts(root),
-        /CONTEXT_(?:SCHEMA_INVALID|SIZE_DRIFT|CONTENT_DRIFT)/u,
-      );
-    });
-  });
+  await t.test(
+    "member content and unreviewed license after refreshed hash",
+    async () => {
+      await withFixture(async ({ app, root }) => {
+        await writeFile(resolve(app.contextRoot, "Dockerfile"), "changed\n");
+        await assert.rejects(
+          validateBetaImageContexts(root),
+          /CONTEXT_(?:SCHEMA_INVALID|SIZE_DRIFT|CONTENT_DRIFT)/u,
+        );
+      });
+      await withFixture(async ({ app, root }) => {
+        const path = "offline/toolchain/package.json";
+        const file = resolve(app.contextRoot, path);
+        const manifest = JSON.parse(await readFile(file, "utf8"));
+        manifest.license = "UNREVIEWED";
+        const changed = canonicalJson(manifest);
+        await writeFile(file, changed);
+        const member = app.manifest.members.find(
+          (entry) => entry.path === path,
+        );
+        member.sha256 = sha256(changed);
+        member.sizeBytes = changed.byteLength;
+        await writeFile(
+          resolve(app.contextRoot, "image-inputs-v1.json"),
+          canonicalJson(app.manifest),
+        );
+        await assert.rejects(
+          validateBetaImageContexts(root),
+          /CONTEXT_TOOLCHAIN_DRIFT/u,
+        );
+      });
+    },
+  );
   await t.test("repository lock", async () => {
     await withFixture(async ({ root }) => {
       await writeFile(resolve(root, "pnpm-lock.yaml"), "changed\n");
