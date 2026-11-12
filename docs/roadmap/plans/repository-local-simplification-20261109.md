@@ -1219,3 +1219,22 @@ execution helper/test bindings, authentic assets/intake/cold composition,
 provider-version proposal and sixteen golden-pair refreshes remain open. Native
 SQL/restore, browser/R1, Go/authored-golden and cleanup-owner acceptance remain
 separate gates.
+
+### IAM Deny conformance direction correction
+
+The conformance evaluator now distinguishes Allow and Deny changes when
+classifying complete, comparable permission evidence. Added Allow or removed
+Deny produces expansion; removed Allow or added Deny produces reduction.
+Incomplete or incompatible evidence retains its unknown-evidence classification
+without inferring a direction from permission tuples. Explicit imported
+classifications, report binding and review-only remediation remain intact.
+
+The existing IAM owning case retains all its prior assertions and adds eight
+direction controls plus eight incomplete-evidence controls. All 17 owning cases
+pass; the predecessor demonstrably misclassified the added-Deny control.
+Registration and case counts remain 17, with no removed callback or parameter
+row. This changes report direction and severity, not authorization policy or
+effective cloud permissions. No native, provider, browser or CI execution is
+claimed. The correction is a local sibling of the deadline fix, separate from
+the published head and the frozen accounting review range; integration and all
+existing release gates remain outstanding.
