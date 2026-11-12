@@ -900,8 +900,13 @@ export class SeamlessAssistantWorkflowCoordinatorV1 {
   }
 
   public async decide(
-    request: AssistantWorkflowDecisionRequestV1,
+    suppliedRequest: AssistantWorkflowDecisionRequestV1,
   ): Promise<AssistantWorkflowDecisionResultV1> {
+    // Keep eligibility, authorization and persistence bound across both awaits.
+    const request = structuredClone(suppliedRequest);
+    if (!["accept", "reject"].includes(request.decision))
+      throw new Error("Assistant review decision is invalid.");
+    actorIdSchema.parse(request.requestedBy);
     const stored = await this.#requireStored(request.workflowId);
     const review = assertCurrentReview({
       record: stored.record,
