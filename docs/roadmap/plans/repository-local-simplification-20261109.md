@@ -975,3 +975,33 @@ fixtures and expected diagnostics remain unchanged. Every observation-mutation
 negative now first establishes the expected passing deterministic baseline.
 Focused synthetic execution qualifies the harness and isolated refusals only,
 not model/provider, native PostgreSQL or deployment behavior.
+
+### Browser fixture alignment after command saving
+
+The browser harness now accepts the editor's versioned draft-command POST,
+applies the public domain command, and returns the exact command receipt and
+updated Architecture/Workload envelope. Its owner, editing-lease, optimistic
+version, content-binding, failure and idempotent replay controls remain
+explicit. The legacy full-document fixture route remains available.
+Save-before-close, autosave, offline recovery and no-write assertions observe
+the command route. The autosave case checks the acquired lease proof and
+returned content digest.
+
+An unchanged persisted draft creates its first immutable revision from the
+confirmed version without an artificial draft write. The two existing import
+cases still require exact content/version/ETag binding and a completed revision
+list confirmation before import becomes available. The stale local-copy case
+uses a separate browser context for its remote writer, since same-origin tabs
+now share the command recovery checkpoint. The separate same-browser lease
+exclusion case remains unchanged; the two scenarios are not equivalent storage
+coverage. GitLab fixture routes now admit the supported list pagination query.
+
+All 29 browser registrations / 35 expanded cases in the two affected specs
+remain; no timeout, retry or production guard changes. Twenty-five bounded
+fixture/domain/recovery controls and four selected existing editor component
+cases pass. These are not browser acceptance. Original CI 43223352892 and its
+downloaded artifact remain preserved. The artifact contains eight typed-backend
+failure contexts/screenshots but no GitLab failure entries or trace archives.
+Local focused Playwright startup did not complete a test; loopback access failed
+with a socket-permission error, and the attempt was stopped without retry.
+Native browser qualification and the existing release gates remain open.

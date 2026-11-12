@@ -217,7 +217,7 @@ for (const width of [390]) {
         },
       );
       await context.route(
-        /\/typed-backend-api\/v1\/organizations\/org_local\/gitlab-connections(?:\/.*)?$/u,
+        /\/typed-backend-api\/v1\/organizations\/org_local\/gitlab-connections(?:\/[^?]*)?(?:\?[^#]*)?$/u,
         async (route) => {
           const path = new URL(route.request().url()).pathname;
           if (path.endsWith("/link-intents")) {
@@ -562,7 +562,7 @@ for (const width of [390]) {
         lost = false;
       const seenVersions: number[] = [];
       await context.route(
-        /\/typed-backend-api\/v1\/organizations\/org_local\/gitlab-connections(?:\/.*)?$/u,
+        /\/typed-backend-api\/v1\/organizations\/org_local\/gitlab-connections(?:\/[^?]*)?(?:\?[^#]*)?$/u,
         async (route) => {
           const path = new URL(route.request().url()).pathname;
           const data = path.endsWith("/projects")

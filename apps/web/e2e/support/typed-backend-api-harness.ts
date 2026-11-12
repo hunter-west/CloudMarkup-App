@@ -2,17 +2,23 @@ import { createHash, randomUUID } from "node:crypto";
 import {
   accountPhotoV1Schema,
   acquireProjectEditingLeaseV1Schema,
+  applyDraftCommandResultV1Schema,
+  applyDraftCommandV1Schema,
   mutateProjectEditingLeaseV1Schema,
   projectEditingLeaseProofV1Schema,
+  type ApplyDraftCommandResultV1,
 } from "@cloudmarkup/api-contract";
 
 import type { BrowserContext, Request, Route } from "@playwright/test";
 import {
+  applyGraphCommand,
   getArchitectureDocumentContentHash,
   getArchitectureDocumentVisualHash,
+  parseArchitectureDocument,
 } from "@cloudmarkup/domain";
 import {
   architectureDocumentV3Schema,
+  serializeCanonicalJson,
   serializeArchitectureDocumentV3,
   type ArchitectureDocumentV3,
 } from "@cloudmarkup/schemas";
@@ -179,6 +185,8 @@ function errorEnvelope(
   code:
     | "access_denied"
     | "authentication_required"
+    | "invalid_request"
+    | "idempotency_key_reused"
     | "not_found"
     | "precondition_failed"
     | "service_unavailable",
@@ -448,6 +456,14 @@ async function fulfill(
 }
 
 export class TypedBackendApiHarness {
+  readonly #commandReceipts = new Map<
+    string,
+    {
+      readonly requestDigest: string;
+      readonly etag: string;
+      readonly value: ApplyDraftCommandResultV1;
+    }
+  >();
   readonly #editingLeases = new Map<
     string,
     { leaseId: string; token: string; expiresAt: number }
@@ -561,6 +577,15 @@ export class TypedBackendApiHarness {
     return [...this.requests]
       .reverse()
       .find((request) => request.method === "PUT" && request.path === path);
+  }
+
+  latestDraftCommand(
+    projectId: string,
+  ): TypedBackendRecordedRequest | undefined {
+    const path = `/v1/projects/${projectId}/draft/commands`;
+    return [...this.requests]
+      .reverse()
+      .find((request) => request.method === "POST" && request.path === path);
   }
 
   requestCount(method: string, path: string): number {
@@ -802,6 +827,20 @@ export class TypedBackendApiHarness {
         method,
         decodeURIComponent(editingLeaseMatch[1] ?? ""),
         body,
+      );
+      return;
+    }
+    const commandMatch = /^\/v1\/projects\/([^/]+)\/draft\/commands$/u.exec(
+      path,
+    );
+    if (commandMatch !== null && method === "POST") {
+      await this.#draft(
+        route,
+        method,
+        decodeURIComponent(commandMatch[1] ?? ""),
+        body,
+        headers,
+        true,
       );
       return;
     }
@@ -1226,6 +1265,7 @@ export class TypedBackendApiHarness {
     projectId: string,
     body: unknown,
     headers: Readonly<Record<string, string>>,
+    commandSave = false,
   ): Promise<void> {
     const draft = this.#drafts.get(projectId);
     const project = this.#projects.get(projectId);
@@ -1243,7 +1283,7 @@ export class TypedBackendApiHarness {
       });
       return;
     }
-    if (method !== "PUT") {
+    if (method !== (commandSave ? "POST" : "PUT")) {
       await fulfill(
         route,
         404,
@@ -1251,7 +1291,10 @@ export class TypedBackendApiHarness {
       );
       return;
     }
-    if (this.#role !== "owner") {
+    if (
+      this.#role !== "owner" ||
+      (commandSave && project.lifecycleStatus !== "active")
+    ) {
       await fulfill(
         route,
         403,
@@ -1298,6 +1341,47 @@ export class TypedBackendApiHarness {
       );
       return;
     }
+    const command = commandSave
+      ? applyDraftCommandV1Schema.safeParse(body)
+      : undefined;
+    const key = headers["idempotency-key"];
+    if (
+      commandSave &&
+      (!command?.success || !key || !/^[^\s]{16,128}$/u.test(key))
+    ) {
+      await fulfill(
+        route,
+        400,
+        errorEnvelope("invalid_request", "Invalid command request."),
+      );
+      return;
+    }
+    const receiptKey = JSON.stringify([projectId, key]);
+    const requestDigest = command?.success
+      ? serializeCanonicalJson({
+          command: command.data.command,
+          contentBinding: command.data.contentBinding ?? null,
+          expectedEtag: headers["if-match"] ?? null,
+        })
+      : "";
+    const receipt = commandSave
+      ? this.#commandReceipts.get(receiptKey)
+      : undefined;
+    if (receipt !== undefined) {
+      if (receipt.requestDigest !== requestDigest) {
+        await fulfill(
+          route,
+          409,
+          errorEnvelope(
+            "idempotency_key_reused",
+            "The command request identity changed.",
+          ),
+        );
+      } else {
+        await fulfill(route, 200, data(receipt.value), { etag: receipt.etag });
+      }
+      return;
+    }
     if (headers["if-match"] !== draftEtag(draft)) {
       const digests = documentDigests(draft.document);
       await fulfill(
@@ -1327,15 +1411,78 @@ export class TypedBackendApiHarness {
       );
       return;
     }
-    const input = body as { readonly architectureDocument?: unknown };
-    draft.document = architectureDocumentV3Schema.parse(
-      input.architectureDocument,
-    );
+    let nextDocument: ArchitectureDocumentV3;
+    if (command?.success) {
+      const binding = command.data.contentBinding;
+      if (
+        binding !== undefined &&
+        binding.expectedContentDigest !==
+          getArchitectureDocumentContentHash(
+            parseArchitectureDocument(draft.document),
+          )
+      ) {
+        await fulfill(
+          route,
+          412,
+          errorEnvelope("precondition_failed", "The command baseline changed."),
+        );
+        return;
+      }
+      try {
+        nextDocument = applyGraphCommand(
+          parseArchitectureDocument(draft.document),
+          command.data.command,
+        ).document;
+      } catch {
+        await fulfill(
+          route,
+          400,
+          errorEnvelope(
+            "invalid_request",
+            "The graph command could not be applied.",
+          ),
+        );
+        return;
+      }
+      if (
+        binding !== undefined &&
+        binding.resultingContentDigest !==
+          getArchitectureDocumentContentHash(
+            parseArchitectureDocument(nextDocument),
+          )
+      ) {
+        await fulfill(
+          route,
+          400,
+          errorEnvelope("invalid_request", "The command result did not match."),
+        );
+        return;
+      }
+    } else {
+      const input = body as { readonly architectureDocument?: unknown };
+      nextDocument = architectureDocumentV3Schema.parse(
+        input.architectureDocument,
+      );
+    }
+    draft.document = nextDocument;
     draft.version += 1;
     draft.updatedAt = LATER;
     project.currentDraft = { id: draft.id, version: draft.version };
     project.updatedAt = LATER;
-    await fulfill(route, 200, data(this.#draftResponse(draft)), {
+    const value = command?.success
+      ? applyDraftCommandResultV1Schema.parse({
+          appliedCommandId: command.data.command.commandId,
+          draft: this.#draftResponse(draft),
+        })
+      : this.#draftResponse(draft);
+    if (command?.success) {
+      this.#commandReceipts.set(receiptKey, {
+        requestDigest,
+        etag: draftEtag(draft),
+        value: applyDraftCommandResultV1Schema.parse(value),
+      });
+    }
+    await fulfill(route, 200, data(value), {
       etag: draftEtag(draft),
     });
   }
