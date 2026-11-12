@@ -957,3 +957,26 @@ The three existing attempt-identity negatives first establish a valid review and
 then require the exact uniqueness issue at the intended attempt field. A
 separate replay-authority length failure can no longer satisfy these assertions
 by itself. No case, production guard or replay authority is removed.
+
+### Compiler and generation boundaries
+
+Event payload generation preserves scalar-list item bounds in the emitted type,
+validator, and synthetic fixture. Existing unbounded output and goldens remain
+unchanged. Exact environment node/target-key pairs are required, and endpoint
+reachability shares the existing selected-subnet containment proof with internet
+egress. Missing or conflicting VPC placement remains unresolved.
+
+The CLI prepares and checks the complete encoded response, including formatting
+and its final newline, before opening output. It rejects existing filesystem
+aliases and compares opened input/output identities before truncation. The
+original input limits, closed compiler boundary, structured diagnostics, and
+non-deployment authority remain. Existing tests now include output preservation,
+exact final-byte budgets and alias refusal; their Go/native execution remains
+unqualified under the current executor restrictions.
+
+The application-generator gate passed 145 tests with its existing opt-in
+performance baseline skipped, including unchanged goldens and in-memory
+TypeScript compilation. Types, lint, build, local catalog-artifact checking,
+static security and secret scanning passed. These local source checks do not
+establish integrated CI, Go/native filesystem, provider or deployment
+acceptance.
