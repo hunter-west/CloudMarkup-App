@@ -841,3 +841,14 @@ predecessor and verifies schema-valid but incompatible lineage. Both changes
 extend existing cases without changing production code, historical SQL or clock
 contracts. Synthetic codec and assertion probes are distinct from the
 still-required native PostgreSQL restoration evidence.
+
+### Sequence-receipt refusal evidence
+
+The historical-terminal test now requires zero SQL, database-transaction and
+authority-transaction calls as well as access denial. Its constructor negatives
+remain. The direct-SQL substitution case verifies the accepted request/decision
+baseline and requires the specific binding-validation error for each of its five
+mutations; duplicate-key or unrelated failures cannot satisfy it. The separate
+exact stage-uniqueness assertion remains. Case counts, production accounting and
+historical migrations are unchanged. Native database proof remains separate from
+the focused unit and synthetic assertion checks.

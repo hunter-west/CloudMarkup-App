@@ -8,7 +8,7 @@ import {
 } from "./model-live-seed-runtime-admission-codec.js";
 import { verifyModelAccountingCommonBinding } from "./model-commercial-accounting-codec.js";
 import { MODEL_SEED_ACCOUNTING_WINDOW_MAPPING } from "./model-live-seed-commercial-accounting-codec.js";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { aggregateModelUsageUnitsV1 } from "@cloudmarkup/domain";
 import { digestStructuredValue as digest } from "@cloudmarkup/model-gateway";
 import { modelLiveAccountingBindingSchema } from "./model-live-commercial-accounting-codec.js";
@@ -151,11 +151,18 @@ describe("first-seed canonical accounting binding", () => {
     const f = await seedAccountingFixture();
     const { routingDecision, ...binding } = f.binding;
     void routingDecision;
+    const query = vi.fn(() => Promise.reject(Error("Unexpected SQL")));
+    const transaction = vi.fn(() =>
+      Promise.reject(Error("Unexpected transaction")),
+    );
+    const runAuthorityTransaction = vi.fn(() =>
+      Promise.reject(Error("Unexpected authority transaction")),
+    );
     const options: ModelAccountingEngineOptions<SeedRuntimeAdmissionRecordV3> =
       {
         database: {
-          query: () => Promise.reject(Error("Unexpected SQL")),
-          transaction: () => Promise.reject(Error("Unexpected transaction")),
+          query,
+          transaction,
           close: () => Promise.resolve(),
         },
         scope: f.fixture.scope,
@@ -165,13 +172,16 @@ describe("first-seed canonical accounting binding", () => {
         parseRuntime: parseSeedRuntimeRecord,
         verifyRuntime: verifyModelAccountingCommonBinding,
         authorityTransactions: {
-          run: () => Promise.reject(Error("Unexpected authority transaction")),
+          run: runAuthorityTransaction,
         },
       };
     const engine = new PostgresModelCommercialAccountingEngine(options);
     await expect(
       engine.release({ event: f.fixture.input.event }),
     ).rejects.toMatchObject({ code: "access-denied" });
+    expect(query).not.toHaveBeenCalled();
+    expect(transaction).not.toHaveBeenCalled();
+    expect(runAuthorityTransaction).not.toHaveBeenCalled();
     expect(
       () =>
         new PostgresModelCommercialAccountingEngine(
