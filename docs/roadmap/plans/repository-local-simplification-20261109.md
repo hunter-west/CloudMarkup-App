@@ -624,3 +624,12 @@ time saved. Shared native package-policy executions drop from three to one. The
 private deployment policy also reuses its already completed workflow-policy
 suite instead of executing it again through CI validation. Workflow/job counts
 and source/native/release admission requirements remain unchanged.
+
+### Image-context validation corrections
+
+The shared source validator now checks the effective final-stage user and exact
+service entrypoint, rejecting later overrides and unsupported parser forms.
+Archive generation completes short writes and rejects invalid progress before
+hashing a chunk. Existing reviewed recipes and digest-only output remain
+supported. Focused synthetic regressions and fixture controls cover both paths;
+actual Docker execution and image inspection remain separate qualification.

@@ -38,8 +38,10 @@ import {
 } from "../infra/images/application-build/service/pnpm-store-index.mjs";
 
 const {
+  assertDockerfile,
   assertPnpmFetchContract,
   canonicalJson,
+  emitChunk,
   extractPinnedTarGzip,
   extractPinnedZip,
   fetchOciBytes,
@@ -192,11 +194,11 @@ writeFileSync("/workspace/output/result.json", JSON.stringify(result));
   COPY --chmod=0444 offline/apk/libcrypto3-3.5.9-r0.apk /opt/cloudmarkup/apk/libcrypto3-3.5.9-r0.apk
   COPY --chmod=0444 offline/apk/libssl3-3.5.9-r0.apk /opt/cloudmarkup/apk/libssl3-3.5.9-r0.apk
   RUN test "$(sha256sum /opt/cloudmarkup/apk/libcrypto3-3.5.9-r0.apk | cut -d ' ' -f 1)" = "6632d758d8f5e9ea3b650fe966f23bbf9a202f8b8dceecac93da135dec5e3689" && test "$(sha256sum /opt/cloudmarkup/apk/libssl3-3.5.9-r0.apk | cut -d ' ' -f 1)" = "05e3393fb95aa5751ca2f9d242f659f6cff82c1cc7767cc2df4a086f7ad01877" && /sbin/apk add --no-network --no-cache --repositories-file /dev/null --no-scripts --upgrade /opt/cloudmarkup/apk/libcrypto3-3.5.9-r0.apk /opt/cloudmarkup/apk/libssl3-3.5.9-r0.apk && /sbin/apk info -e "libcrypto3=3.5.9-r0" && /sbin/apk info -e "libssl3=3.5.9-r0" && rm -rf /opt/cloudmarkup/apk /opt/yarn-v1.22.22 /usr/local/lib/node_modules/npm && rm -f /usr/local/bin/docker-entrypoint.sh /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/yarn /usr/local/bin/yarnpkg && test ! -e /opt/cloudmarkup/apk && test ! -e /opt/yarn-v1.22.22 && test ! -e /usr/local/lib/node_modules/npm && test ! -e /usr/local/bin/docker-entrypoint.sh && test ! -L /usr/local/bin/docker-entrypoint.sh && test ! -e /usr/local/bin/npm && test ! -L /usr/local/bin/npm && test ! -e /usr/local/bin/npx && test ! -L /usr/local/bin/npx && test ! -e /usr/local/bin/yarn && test ! -L /usr/local/bin/yarn && test ! -e /usr/local/bin/yarnpkg && test ! -L /usr/local/bin/yarnpkg && test "$(/opt/cloudmarkup/toolchain/bin/trivy --version | head -n 1)" = "Version: 0.74.0"
-COPY service/application-build-service /usr/local/bin/application-build-service
+COPY service/application-build-service /opt/cloudmarkup/bin/application-build-service
 COPY offline/ /opt/cloudmarkup/offline/
 RUN chown -R 65532:65532 /opt/cloudmarkup && find /opt/cloudmarkup -xdev -type d -exec chmod 0555 {} + && test -z "$(find /opt/cloudmarkup -xdev -type d ! -perm 0555 -print -quit)" && test "$(stat -c '%a' /opt/cloudmarkup)" = "555"
 USER 65532:65532
-ENTRYPOINT ["/usr/local/bin/application-build-service"]
+ENTRYPOINT ["/opt/cloudmarkup/bin/application-build-service"]
 `;
   const toolchainPackage = await readFile(
     new URL(
@@ -346,11 +348,11 @@ FROM node:24.18.0-alpine3.24@sha256:a0b9bf06e4e6193cf7a0f58816cc935ff8c2a908f81e
 COPY --chmod=0444 offline/apk/libcrypto3-3.5.9-r0.apk /tmp/cloudmarkup-apk/libcrypto3-3.5.9-r0.apk
 COPY --chmod=0444 offline/apk/libssl3-3.5.9-r0.apk /tmp/cloudmarkup-apk/libssl3-3.5.9-r0.apk
 RUN /sbin/apk add --no-network --no-cache --repositories-file /dev/null --no-scripts --upgrade /tmp/cloudmarkup-apk/libcrypto3-3.5.9-r0.apk /tmp/cloudmarkup-apk/libssl3-3.5.9-r0.apk && /sbin/apk info -e "libcrypto3=3.5.9-r0" && /sbin/apk info -e "libssl3=3.5.9-r0" && rm -rf /usr/local/lib/node_modules/npm && rm -rf /opt/yarn-v1.22.22 && rm -f /usr/local/bin/docker-entrypoint.sh && test ! -e /usr/local/bin/npm && test ! -e /usr/local/bin/npx && test ! -e /usr/local/bin/yarn && test ! -e /usr/local/bin/yarnpkg && test ! -e /usr/local/bin/docker-entrypoint.sh
-COPY service/terraform-validation-service /usr/local/bin/terraform-validation-service
+COPY service/terraform-validation-service /opt/cloudmarkup/bin/terraform-validation-service
 COPY offline/ /opt/cloudmarkup/offline/
 RUN find /opt/cloudmarkup -xdev -type d -exec chmod 0555 {} + && test -z "$(find /opt/cloudmarkup -xdev -type d ! -perm 0555 -print -quit)" && test "$(stat -c '%a' /opt/cloudmarkup)" = "555"
 USER 65532:65532
-ENTRYPOINT ["/usr/local/bin/terraform-validation-service"]
+ENTRYPOINT ["/opt/cloudmarkup/bin/terraform-validation-service"]
 `;
   const terraformConfig = await readFile(
     new URL(
@@ -1055,6 +1057,88 @@ test("rejects secret-shaped files, links, and hard links", async (t) => {
   });
 });
 
+test("runtime admission rejects effective directive overrides after safe declarations", async () => {
+  for (const contextId of ["application-build", "terraform-validation"]) {
+    const base = new URL(`../infra/images/${contextId}/`, import.meta.url);
+    const manifest = JSON.parse(
+      await readFile(new URL("image-inputs-v1.json", base), "utf8"),
+    );
+    const dockerfile = await readFile(new URL("Dockerfile", base), "utf8");
+    const prefixes = manifest.generatedPrefixes.map(({ path }) => path);
+    const paths = new Set([
+      "image-inputs-v1.json",
+      ...manifest.members.map(({ path }) => path),
+      ...prefixes,
+    ]);
+    const validate = (text) =>
+      assertDockerfile(contextId, Buffer.from(text), paths, prefixes);
+    assert.doesNotThrow(() => validate(dockerfile));
+    for (const suffix of [
+      "USER 0:0",
+      "user root:root",
+      "USER 0000",
+      "USER ${RUNTIME_USER}",
+      'ENTRYPOINT ["/bin/sh"]',
+      "entrypoint /bin/sh",
+      `ENTRYPOINT ["/opt/cloudmarkup/bin/${contextId}-service", "--unreviewed"]`,
+      `ENTRYPOINT \\\n+ ["/bin/sh"]`,
+      "RUN <<EOF\nUSER 65532:65532\nEOF",
+    ]) {
+      assert.throws(
+        () => validate(`${dockerfile}\n${suffix}\n`),
+        /CONTEXT_DOCKER_RUNTIME_UNSAFE/u,
+        suffix,
+      );
+    }
+    assert.throws(
+      () => validate(dockerfile.replace(/\n/u, "\n# escape=`\n")),
+      /CONTEXT_DOCKER_RUNTIME_UNSAFE/u,
+    );
+  }
+});
+
+test("canonical archive writes complete chunks before hashing and rejects invalid progress", async () => {
+  const bytes = Buffer.from("reviewed archive bytes");
+  const hash = createHash("sha256");
+  const written = [];
+  await emitChunk(bytes, hash, {
+    write: async (chunk) => {
+      const count = Math.min(3, chunk.byteLength);
+      written.push(chunk.subarray(0, count));
+      return { bytesWritten: count };
+    },
+  });
+  assert.deepEqual(Buffer.concat(written), bytes);
+  assert.ok(written.length > 1);
+  assert.equal(hash.digest("hex"), sha256(bytes));
+  const digestOnly = createHash("sha256");
+  await emitChunk(bytes, digestOnly);
+  assert.equal(digestOnly.digest("hex"), sha256(bytes));
+  for (const count of [0, -1, 1.5, Number.NaN, bytes.length + 1]) {
+    const rejected = createHash("sha256");
+    await assert.rejects(
+      emitChunk(bytes, rejected, {
+        write: async () => ({ bytesWritten: count }),
+      }),
+      /CONTEXT_ARCHIVE_WRITE_INVALID/u,
+    );
+    assert.equal(rejected.digest("hex"), sha256(Buffer.alloc(0)));
+  }
+  let attempts = 0;
+  const interrupted = createHash("sha256");
+  await assert.rejects(
+    emitChunk(bytes, interrupted, {
+      write: async () => {
+        if (attempts++ === 0) return { bytesWritten: 1 };
+        throw new Error("synthetic write failure");
+      },
+    }),
+    /synthetic write failure/u,
+  );
+  assert.equal(attempts, 2);
+  assert.equal(interrupted.digest("hex"), sha256(Buffer.alloc(0)));
+});
+
 test("canonical context archive digest ignores mtime and absolute root", async () => {
   const roots = await Promise.all([
     mkdtemp(resolve(tmpdir(), "cloudmarkup-canonical-a-")),
@@ -1088,6 +1172,10 @@ test("canonical context archive digest ignores mtime and absolute root", async (
       await createCanonicalContextArchive(contexts[0]),
       await createCanonicalContextArchive(contexts[1]),
     );
+    const archive = resolve(roots[1], "canonical.tar");
+    const digest = await createCanonicalContextArchive(contexts[0], archive);
+    assert.equal(sha256(await readFile(archive)), digest);
+    assert.equal(digest, await createCanonicalContextArchive(contexts[0]));
   } finally {
     await Promise.all(
       roots.map((root) => rm(root, { force: true, recursive: true })),

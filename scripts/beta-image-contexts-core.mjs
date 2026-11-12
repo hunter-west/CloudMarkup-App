@@ -1429,14 +1429,48 @@ function assertDockerfile(
       "Dockerfile base images differ from the complete reviewed authority set",
     );
   }
+  // Admission checks the effective final stage, not an earlier safe directive.
+  // The reviewed recipes use the default escape and no heredocs. Refuse parser
+  // forms this fixed-input validator cannot interpret rather than misreading
+  // embedded text as a runtime instruction.
+  const logicalLines = text.replaceAll(/\\\r?\n/gu, " ").split(/\r?\n/gu);
+  let runtimeUser;
+  let runtimeEntrypoint;
+  for (const rawLine of logicalLines) {
+    const line = rawLine.trim();
+    if (
+      /^#\s*escape\s*=/iu.test(line) ||
+      (!line.startsWith("#") && line.includes("<<"))
+    ) {
+      fail(
+        "CONTEXT_DOCKER_RUNTIME_UNSAFE",
+        "Dockerfile",
+        "unsupported Dockerfile parser form",
+      );
+    }
+    if (/^FROM\s/iu.test(line)) {
+      runtimeUser = undefined;
+      runtimeEntrypoint = undefined;
+    } else if (/^USER\s/iu.test(line)) {
+      runtimeUser = line.replace(/^USER\s+/iu, "").trim();
+    } else if (/^ENTRYPOINT\s/iu.test(line)) {
+      try {
+        runtimeEntrypoint = JSON.parse(line.replace(/^ENTRYPOINT\s+/iu, ""));
+      } catch {
+        runtimeEntrypoint = undefined;
+      }
+    }
+  }
   if (
-    !/^USER\s+(?!0(?:\D|$)|root(?:\s|$))\S+/imu.test(text) ||
-    !/^ENTRYPOINT\s+/imu.test(text)
+    runtimeUser !== "65532:65532" ||
+    !Array.isArray(runtimeEntrypoint) ||
+    runtimeEntrypoint.length !== 1 ||
+    runtimeEntrypoint[0] !== `/opt/cloudmarkup/bin/${contextId}-service`
   ) {
     fail(
       "CONTEXT_DOCKER_RUNTIME_UNSAFE",
       "Dockerfile",
-      "non-root USER and fixed ENTRYPOINT are required",
+      "final stage must use the reviewed USER and exact exec-form service ENTRYPOINT",
     );
   }
   if (
@@ -1448,7 +1482,6 @@ function assertDockerfile(
       "remote ADD/download and all build mounts are forbidden",
     );
   }
-  const logicalLines = text.replaceAll(/\\\r?\n/gu, " ").split(/\r?\n/gu);
   for (const [lineIndex, rawLine] of logicalLines.entries()) {
     const line = rawLine.trim();
     if (!/^COPY\s+/iu.test(line)) continue;
@@ -4690,8 +4723,25 @@ function canonicalTarEntrySize(entry) {
 }
 
 async function emitChunk(chunk, hash, output) {
+  if (output !== undefined) {
+    let offset = 0;
+    while (offset < chunk.byteLength) {
+      const { bytesWritten } = await output.write(chunk.subarray(offset));
+      if (
+        !Number.isSafeInteger(bytesWritten) ||
+        bytesWritten <= 0 ||
+        bytesWritten > chunk.byteLength - offset
+      ) {
+        fail(
+          "CONTEXT_ARCHIVE_WRITE_INVALID",
+          "archive",
+          "archive write made invalid progress",
+        );
+      }
+      offset += bytesWritten;
+    }
+  }
   hash.update(chunk);
-  if (output !== undefined) await output.write(chunk);
 }
 
 export async function createCanonicalContextArchive(context, outputPath) {
@@ -5288,8 +5338,10 @@ export function formatBetaImageContextDigests(result, contextIds) {
 export const BETA_IMAGE_CONTEXT_SPECS = CONTEXT_SPECS;
 
 export const BETA_IMAGE_CONTEXT_TESTING = Object.freeze({
+  assertDockerfile,
   assertPnpmFetchContract,
   canonicalJson,
+  emitChunk,
   extractPinnedTarGzip,
   extractPinnedZip,
   fetchOciBytes,
