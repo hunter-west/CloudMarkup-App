@@ -13,6 +13,7 @@ import {
 } from "../../application/persistence.js";
 import { FilesystemObjectStore } from "./filesystem-object-store.js";
 import { InMemoryObjectStore } from "./memory-object-store.js";
+import { verifiedObjectStream } from "./object-store-common.js";
 
 const scope: AuthorizedOrganizationScope = {
   capabilities: ["projects.write"],
@@ -174,6 +175,28 @@ function contract(name: string, createStore: () => Promise<ObjectStore>): void {
     });
   });
 }
+
+it("retains verified streamed bytes when the producer reuses a mutable buffer", async () => {
+  const bytes = new TextEncoder().encode("immutable-export-content");
+  const body = async function* () {
+    const reused = new Uint8Array(1);
+    for (const byte of bytes) {
+      reused[0] = byte;
+      yield reused;
+    }
+    reused[0] = 255;
+    await Promise.resolve();
+  };
+  const input = inputFor(bytes);
+  expect(
+    await readAll(
+      verifiedObjectStream(body(), bytes.length, input.contentSha256),
+    ),
+  ).toEqual(bytes);
+  await expect(
+    readAll(verifiedObjectStream(body(), bytes.length, "0".repeat(64))),
+  ).rejects.toMatchObject({ code: "content-mismatch" });
+});
 
 contract("in-memory object store", () =>
   Promise.resolve(new InMemoryObjectStore()),

@@ -136,8 +136,11 @@ export async function* verifiedObjectStream(
         "The object size does not match its metadata.",
       );
     }
-    hash.update(chunk);
-    yield chunk;
+    // Retaining readers must see the same bytes that were verified even when
+    // the underlying producer reuses its buffer after the next iteration.
+    const owned = new Uint8Array(chunk);
+    hash.update(owned);
+    yield owned;
   }
   if (size !== expectedSize || hash.digest("hex") !== expectedSha256) {
     throw new ObjectStoreError(
