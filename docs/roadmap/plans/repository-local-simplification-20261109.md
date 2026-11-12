@@ -714,3 +714,22 @@ discard. Focused provider-free tests cover these boundaries; native SQL/roles,
 concurrency, filesystem durability and exact hosted composition remain
 unqualified. The ordinary-role source proposal records the new read paths
 without granting or activating additional permissions.
+
+### Repository import recovery follow-up
+
+The reserved import attempt now owns its initial progress write. A transient
+failure can reclaim the same import and snapshot through the existing attempt
+and version fence. Progress delivery after a successful commit cannot append a
+false failed-import event. Webhook refresh recovers the original baseline from
+the persisted import fingerprint before retrying; completed subscriptions do not
+become new imports after another subscription fails or an acknowledgement is
+lost. Manual requests remain distinct, existing receipts remain immutable, and
+production automatic refresh remains unavailable.
+
+The workspace owns installation/repository selection, including remounts after
+delayed branch reads. Discovery and explicit import use that same selection.
+Quoted generic token assignments are redacted from optional interpretation
+evidence and again by the model gateway; the redaction metadata reflects the
+detected transformation. No model or webhook capability is enabled by these
+corrections. Focused fake-store and DOM tests cover the reported sequences;
+native database, real browser/provider and hosted admission remain separate.

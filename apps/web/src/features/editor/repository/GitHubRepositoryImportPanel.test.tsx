@@ -14,6 +14,10 @@ const SHA = "a".repeat(40);
 const NEXT_SHA = "b".repeat(40);
 const DIGEST = `sha256:${"c".repeat(64)}`;
 const AT = "2026-08-25T12:00:00.000Z";
+const selectionProps = {
+  selection: { integrationId: "integration_github-test", repositoryId: 202 },
+  onRepositorySelectionChange: vi.fn(),
+};
 
 const installations: readonly GithubInstallationV1[] = [
   {
@@ -127,6 +131,7 @@ describe("GitHubRepositoryImportPanel", () => {
     const onConfigureWebhookRefresh = vi.fn(() => Promise.resolve());
     render(
       <GitHubRepositoryImportPanel
+        {...selectionProps}
         assistanceMode="professional"
         branches={branches}
         history={history}
@@ -200,6 +205,7 @@ describe("GitHubRepositoryImportPanel", () => {
     const onImport = vi.fn();
     render(
       <GitHubRepositoryImportPanel
+        {...selectionProps}
         assistanceMode="guided"
         branches={branches}
         history={[]}
@@ -226,6 +232,7 @@ it("shows unsupported module review evidence for a completed import without an e
     "Terraform modules were found. Module resources are not resolved during import; review the module code separately before relying on conformance.";
   render(
     <GitHubRepositoryImportPanel
+      {...selectionProps}
       assistanceMode="guided"
       branches={branches}
       installations={installations}
@@ -294,6 +301,7 @@ it("allows discovery before a saved revision and sends explicitly chosen paths a
     } satisfies GithubRepositoryDiscoveryV1),
   );
   const props = {
+    ...selectionProps,
     assistanceMode: "guided" as const,
     branches,
     history: [],

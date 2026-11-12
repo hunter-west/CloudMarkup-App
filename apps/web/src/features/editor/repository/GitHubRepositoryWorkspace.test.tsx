@@ -2,6 +2,8 @@ import type {
   CloudMarkupClient,
   CurrentPrincipalV1,
   GithubRepositoryImportV1,
+  GithubInstallationV1,
+  GithubRepositoryV1,
 } from "@cloudmarkup/api-contract";
 import { QueryClient } from "@tanstack/react-query";
 import {
@@ -126,12 +128,14 @@ function repositoryImportRecord() {
   };
 }
 
+type FixtureRequest = (operationId: string, input?: unknown) => unknown;
+
 function testClient(
   importState: GithubRepositoryImportV1["state"] = "succeeded",
   revisionResponse?: () => unknown,
 ) {
   const record = repositoryImportRecord();
-  const request = vi.fn((operationId: string) => {
+  const request = vi.fn<FixtureRequest>((operationId) => {
     switch (operationId) {
       case "solution-revisions.list":
         return revisionResponse === undefined
@@ -295,6 +299,213 @@ function renderImportWorkspace(
 }
 
 describe("GitHubRepositoryWorkspace", () => {
+  it("keeps the selected repository and installation through delayed branch/history remounts", async () => {
+    const fixture = testClient();
+    const base = fixture.request.getMockImplementation();
+    if (base === undefined) throw new Error("Missing request fixture");
+    const installed = (
+      base("github-installations.list") as { data: GithubInstallationV1[] }
+    ).data[0];
+    const repository = (
+      base("github-repositories.list") as { data: GithubRepositoryV1[] }
+    ).data[0];
+    if (installed === undefined || repository === undefined)
+      throw new Error("Missing source fixture");
+    const secondIntegration = "integration_second";
+    const sources = [
+      repository,
+      { ...repository, repositoryId: 43, name: "second-repository" },
+      {
+        ...repository,
+        repositoryId: 44,
+        name: "other-installation-repository",
+        integrationId: secondIntegration,
+        installationId: 4,
+      },
+    ];
+    const pendingRead = () => {
+      let release: ((value: unknown) => void) | undefined;
+      const promise = new Promise<unknown>((resolve) => {
+        release = resolve;
+      });
+      return {
+        promise,
+        resolve(value: unknown) {
+          if (release === undefined) throw new Error("Missing pending read");
+          release(value);
+        },
+      };
+    };
+    const branchReads = new Map([43, 44].map((id) => [id, pendingRead()]));
+    const historyReads = new Map([43, 44].map((id) => [id, pendingRead()]));
+    fixture.request.mockImplementation((operation, supplied) => {
+      const input = supplied as {
+        path?: { integrationId?: string; repositoryId?: number };
+        query?: { repositoryId?: string };
+        body?: {
+          integrationId: string;
+          repositoryId: number;
+          branch: string;
+          commitSha: string;
+        };
+      };
+      switch (operation) {
+        case "github-installations.list":
+          return {
+            apiVersion: "v1",
+            data: [
+              installed,
+              {
+                ...installed,
+                installationId: 4,
+                integrationId: secondIntegration,
+                accountLogin: "second-account",
+              },
+            ],
+          };
+        case "github-repositories.list":
+          return {
+            apiVersion: "v1",
+            data: sources.filter(
+              (source) => source.integrationId === input.path?.integrationId,
+            ),
+          };
+        case "github-repository-branches.list":
+          return (
+            branchReads.get(input.path?.repositoryId ?? 0)?.promise ??
+            base(operation)
+          );
+        case "github-repository-imports.list":
+          return (
+            historyReads.get(Number(input.query?.repositoryId))?.promise ?? {
+              apiVersion: "v1",
+              data: [],
+            }
+          );
+        case "github-repository-discovery.read":
+          return {
+            apiVersion: "v1",
+            data: {
+              ...input.body,
+              contractVersion: 1,
+              projectId,
+              branchHeadSha: input.body?.commitSha,
+              branchChangedSinceSelection: false,
+              treeSha: "b".repeat(40),
+              files: [
+                {
+                  path: "infrastructure/main.tf",
+                  gitBlobSha: "c".repeat(40),
+                  sizeBytes: 128,
+                },
+              ],
+            },
+          };
+        case "github-repository-imports.create":
+          return {
+            apiVersion: "v1",
+            data: { ...repositoryImportRecord(), ...input.body },
+          };
+        default:
+          return base(operation, supplied);
+      }
+    });
+    renderImportWorkspace(
+      fixture,
+      new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+    );
+    await screen.findByLabelText("Repository");
+    for (const selected of [sources[1], sources[2]]) {
+      if (selected === undefined)
+        throw new Error("Missing selected repository");
+      if (selected.integrationId === integrationId)
+        fireEvent.change(screen.getByLabelText("Repository"), {
+          target: { value: String(selected.repositoryId) },
+        });
+      else
+        fireEvent.change(screen.getByLabelText("GitHub App installation"), {
+          target: { value: selected.integrationId },
+        });
+      await screen.findByRole("heading", {
+        name: /Loading repository branches/u,
+      });
+      expect(
+        screen.queryByRole("button", { name: "Import pinned commit" }),
+      ).not.toBeInTheDocument();
+      const sha = (selected.repositoryId === 43 ? "c" : "d").repeat(40);
+      const branch = `branch-${String(selected.repositoryId)}`;
+      act(() => {
+        branchReads.get(selected.repositoryId)?.resolve({
+          apiVersion: "v1",
+          data: [{ name: branch, protected: false, sha }],
+        });
+        historyReads
+          .get(selected.repositoryId)
+          ?.resolve({ apiVersion: "v1", data: [] });
+      });
+      await screen.findByLabelText("Repository");
+      expect(screen.getByLabelText("Repository")).toHaveValue(
+        String(selected.repositoryId),
+      );
+      expect(screen.getByLabelText("GitHub App installation")).toHaveValue(
+        selected.integrationId,
+      );
+      expect(screen.getByLabelText("Branch")).toHaveValue(branch);
+      expect(screen.getByLabelText("Pinned commit SHA")).toHaveValue(sha);
+      expect(
+        screen.queryByRole("checkbox", {
+          name: "Select infrastructure/main.tf",
+        }),
+      ).not.toBeInTheDocument();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Discover repository files" }),
+      );
+      await screen.findByRole("checkbox", {
+        name: "Select infrastructure/main.tf",
+      });
+      expect(fixture.request).toHaveBeenLastCalledWith(
+        "github-repository-discovery.read",
+        {
+          path: { projectId },
+          body: {
+            contractVersion: 1,
+            integrationId: selected.integrationId,
+            repositoryId: selected.repositoryId,
+            branch,
+            commitSha: sha,
+            ignoredPaths: ["node_modules", ".terraform", "dist", ".env"],
+            selectedPaths: ["."],
+          },
+        },
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: "Import pinned commit" }),
+      );
+      await waitFor(() => {
+        expect(fixture.request).toHaveBeenCalledWith(
+          "github-repository-imports.create",
+          {
+            path: { projectId },
+            headers: { "idempotency-key": expect.any(String) as string },
+            body: {
+              contractVersion: 1,
+              integrationId: selected.integrationId,
+              repositoryId: selected.repositoryId,
+              branch,
+              commitSha: sha,
+              ignoredPaths: ["node_modules", ".terraform", "dist", ".env"],
+              selectedPaths: ["."],
+              requestedMode: "guided",
+            },
+          },
+        );
+      });
+      await screen.findByText(
+        /was imported without changing the approved design/u,
+      );
+    }
+  });
+
   it("keeps a first import disabled until a saved revision is confirmed by the server, then leaves importing explicit", async () => {
     let saved = false;
     let release: ((value: unknown) => void) | undefined;

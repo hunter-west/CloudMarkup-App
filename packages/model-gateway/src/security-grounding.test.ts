@@ -807,7 +807,7 @@ describe("ModelGateway security grounding", () => {
     );
   });
 
-  it("redacts AWS secret access keys and Basic authorization despite trusted flags", () => {
+  it("redacts AWS keys, quoted generic tokens and Basic authorization despite trusted flags", () => {
     const base = requestFor("repository.interpret");
     const secretOne = "oneSecretAccessKeyValue01234567890123456789";
     const secretTwo = "twoSecretAccessKeyValue01234567890123456789";
@@ -820,7 +820,10 @@ describe("ModelGateway security grounding", () => {
           content:
             `AWS_SECRET_ACCESS_KEY=${secretOne}\n` +
             `aws_secret_access_key: '${secretTwo}'\n` +
-            `Authorization: Basic ${basic}`,
+            `Authorization: Basic ${basic}\n` +
+            '{"token":"synthetic-quoted-token", "label":"public-context"}\n' +
+            "{'token':'synthetic-single-token'}\n" +
+            '{"token":"before\\"synthetic-escaped-token"}',
           redaction: {
             categories: [],
             noSecretValues: true as const,
@@ -835,9 +838,16 @@ describe("ModelGateway security grounding", () => {
     expect(serialized).not.toContain(secretOne);
     expect(serialized).not.toContain(secretTwo);
     expect(serialized).not.toContain(basic);
+    for (const value of [
+      "synthetic-quoted-token",
+      "synthetic-single-token",
+      "synthetic-escaped-token",
+    ])
+      expect(serialized).not.toContain(value);
+    expect(serialized).toContain("public-context");
     expect(serialized).toContain("[REDACTED:SECRET]");
     expect(serialized).toContain("[REDACTED:CREDENTIAL]");
-    expect(redacted.summary.redactedValueCount).toBe(3);
+    expect(redacted.summary.redactedValueCount).toBe(6);
     const sanitized = parseRequestFor("repository.interpret", redacted.request);
     const redactionMetadata = sanitized.evidence[0]?.redaction;
     expect(redactionMetadata).toMatchObject({

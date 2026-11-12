@@ -86,7 +86,7 @@ const secretPatterns = [
   {
     category: "secret-candidate" as const,
     pattern:
-      /(["']?(?:password|passwd|secret|client[_-]?secret|access[_-]?token|refresh[_-]?token|api[_-]?key|private[_-]?key|credential)["']?\s*:\s*)(["'])([^"'\r\n]+)\2/gi,
+      /(["']?\b(?:password|passwd|secret|token|client[_-]?secret|access[_-]?token|refresh[_-]?token|api[_-]?key|private[_-]?key|credential)\b["']?\s*[:=]\s*)(["'])((?:\\.|(?!\2)[^\\\r\n])*)\2/gi,
     replacement: "$1$2[REDACTED:SECRET]$2",
   },
   {
