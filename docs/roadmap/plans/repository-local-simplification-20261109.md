@@ -1139,3 +1139,23 @@ This local successor is separate from the accepted billing and integration
 objects. No provider, financial ledger, source intake, override, pin, CI or
 deployment state changes. Native/restore, browser, compiler, authentic
 composition and cleanup-owner qualifications remain separate.
+
+### Commercial read and recovery consistency
+
+Shared credit-state validation now requires each settlement debit to equal its
+validated allocation total. Both balance and usage readers refuse the same
+malformed state; valid partial and zero-cost settlements retain their behavior.
+This is validation of supplied immutable state, not a change to charging, ledger
+history or provider execution.
+
+The existing charged-release recovery row now starts with the coordinator's
+valid known-timeout release and retains its identity, status and conservation
+relationships while introducing the charge. Its schema-valid vector reaches
+financial integrity checking. The original kind/identity mismatch is retained
+separately inside that case. Both UI descriptions now name the actual manual
+refresh and bounded conflict retry, with callback assertions unchanged.
+
+The domain's 43 and recovery suite's 98 cases passed; no registrations were
+added or removed. These are deterministic component checks, not native database,
+provider or browser-return proof. Both isolated native returned-copy mutation
+cases, financial policy, terminal implementations and canonical SQL stay intact.
