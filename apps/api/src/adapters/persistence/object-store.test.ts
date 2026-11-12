@@ -80,7 +80,19 @@ function contract(name: string, createStore: () => Promise<ObjectStore>): void {
     it("stages, replays, publishes, and verifies immutable content", async () => {
       const store = await createStore();
       const bytes = new TextEncoder().encode('{"contractVersion":2}\n');
-      const input = inputFor(bytes);
+      const input: StageObjectInput = {
+        ...inputFor(bytes),
+        open: () =>
+          (async function* reusedBuffer() {
+            const buffer = new Uint8Array(1);
+            for (const byte of bytes) {
+              buffer[0] = byte;
+              yield buffer;
+            }
+            buffer[0] = 255;
+            await Promise.resolve();
+          })(),
+      };
 
       const staged = await store.stage(scope, input);
       const replayed = await store.stage(scope, input);
