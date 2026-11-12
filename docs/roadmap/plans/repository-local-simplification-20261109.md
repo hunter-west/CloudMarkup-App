@@ -1147,3 +1147,75 @@ pending execution-test bindings, authentic assets/intake/cold composition,
 provider-version proposal and 16 golden-pair refreshes remain open. Existing
 automatic CI continues on its published head; this local merge does not publish,
 rerun CI or qualify native, hosted, browser, restore or deployment acceptance.
+
+### Browser fixture alignment after command saving
+
+The browser harness now accepts the editor's versioned draft-command POST,
+applies the public domain command, and returns the exact command receipt and
+updated Architecture/Workload envelope. Its owner, editing-lease, optimistic
+version, content-binding, failure and idempotent replay controls remain
+explicit. The legacy full-document fixture route remains available.
+Save-before-close, autosave, offline recovery and no-write assertions observe
+the command route. The autosave case checks the acquired lease proof and
+returned content digest.
+
+An unchanged persisted draft creates its first immutable revision from the
+confirmed version without an artificial draft write. The two existing import
+cases still require exact content/version/ETag binding and a completed revision
+list confirmation before import becomes available. The stale local-copy case
+uses a separate browser context for its remote writer, since same-origin tabs
+now share the command recovery checkpoint. The separate same-browser lease
+exclusion case remains unchanged; the two scenarios are not equivalent storage
+coverage. GitLab fixture routes now admit the supported list pagination query.
+
+All 29 browser registrations / 35 expanded cases in the two affected specs
+remain; no timeout, retry or production guard changes. Twenty-five bounded
+fixture/domain/recovery controls and four selected existing editor component
+cases pass. These are not browser acceptance. Original CI 43223352892 and its
+downloaded artifact remain preserved. The artifact contains eight typed-backend
+failure contexts/screenshots but no GitLab failure entries or trace archives.
+Local focused Playwright startup did not complete a test; loopback access failed
+with a socket-permission error, and the attempt was stopped without retry.
+Native browser qualification and the existing release gates remain open.
+
+### Browser fixture idempotency contract correction
+
+The command-save fixture now reuses the canonical API idempotency-key schema.
+Its approximate 16-to-128 non-whitespace check differed from the production
+8-to-128 ASCII identifier contract. Boundary checks cover both permitted
+lengths, both adjacent invalid lengths, prohibited characters and the prior
+mismatch. Existing command replay, current lease, version and content-binding
+controls remain unchanged. Neither browser spec changes, so all 29 registrations
+and 35 expanded browser cases remain; the separately proposed private spec port
+retains its exact public hash and private fixture. No production contract,
+persistence, timeout, retry, source intake or runtime authority changes.
+
+This is a fixture-fidelity correction, not a demonstrated production defect. The
+original browser artifacts, failed CI and stopped socket-permission attempt
+remain preserved. Bounded source/fixture checks do not qualify browser, native
+or hosted-composition acceptance. No browser retry or new CI was requested.
+
+### Proposed browser and billing union
+
+This local candidate retains the accepted compiler, account and billing
+integration together with the isolated browser correction lineage. The browser
+validator correction and private spec port remain under independent review at
+preparation. This union is a proposal for exact integration review, not a
+publication or release-acceptance claim.
+
+All product, harness and spec files retain their exact constituent bytes. The
+sole conflict joined both appended plan sections verbatim. No test case,
+fixture, override, source pin or intake record is removed. Accounting timestamp,
+read, recovery and expiration corrections remain on separate excluded branches.
+
+CI 43223352892 on the published networking head ended with ten browser failures.
+The retained artifact contains six unavailable-resource save contexts and two
+already-saved version-one contexts, with no GitLab entries or trace archives. No
+corrected browser run, new CI or publication is performed by this union. The
+localhost socket-permission restriction remains stopped.
+
+The proposed private spec port retains its profile and public hash. The two
+execution helper/test bindings, authentic assets/intake/cold composition,
+provider-version proposal and sixteen golden-pair refreshes remain open. Native
+SQL/restore, browser/R1, Go/authored-golden and cleanup-owner acceptance remain
+separate gates.

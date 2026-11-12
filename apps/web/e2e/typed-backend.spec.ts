@@ -1,6 +1,8 @@
 import { writeFile } from "node:fs/promises";
 import {
   acquireProjectEditingLeaseV1Schema,
+  applyDraftCommandResponseV1Schema,
+  applyDraftCommandV1Schema,
   apiErrorEnvelopeV1Schema,
   createProjectResponseV1Schema,
   createProjectV1Schema,
@@ -8,7 +10,6 @@ import {
   createSolutionRevisionV1Schema,
   draftArchitectureDocumentResponseV1Schema,
   projectEditingLeaseResponseV1Schema,
-  saveDraftV1Schema,
   solutionRevisionListResponseV1Schema,
   solutionRevisionResponseV1Schema,
 } from "@cloudmarkup/api-contract";
@@ -173,7 +174,8 @@ test("recovers an early example-catalog project by creating an AWS canvas with L
   expect(
     api.requests.filter(
       (r) =>
-        r.method === "PUT" &&
+        (r.method === "PUT" ||
+          (r.method === "POST" && r.path.endsWith("/draft/commands"))) &&
         r.path.includes(TYPED_BACKEND_INFRASTRUCTURE_PROJECT_ID),
     ),
   ).toEqual([]);
@@ -379,7 +381,7 @@ for (const width of [1440, 390]) {
     expect(
       api.requests.filter(
         (request) =>
-          ["PUT", "PATCH"].includes(request.method) &&
+          ["PUT", "PATCH", "POST"].includes(request.method) &&
           request.path.includes("/draft"),
       ),
     ).toEqual([]);
@@ -910,6 +912,10 @@ test("keeps the authenticated editor header compact with accessible save details
     "PUT",
     `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/draft`,
   );
+  const commandsBefore = api.requestCount(
+    "POST",
+    `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/draft/commands`,
+  );
   await saveDetails.click();
   const details = page.getByRole("dialog", {
     name: "Save and recovery status",
@@ -930,6 +936,12 @@ test("keeps the authenticated editor header compact with accessible save details
       `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/draft`,
     ),
   ).toBe(writesBefore);
+  expect(
+    api.requestCount(
+      "POST",
+      `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/draft/commands`,
+    ),
+  ).toBe(commandsBefore);
 
   await page.getByRole("link", { name: "Skip to workspace status" }).focus();
   await page.keyboard.press("Enter");
@@ -1027,9 +1039,9 @@ test("saves before closing and reopens only the selected shared project", async 
     releaseSave = resolve;
   });
   await context.route(
-    /\/typed-backend-api\/v1\/projects\/[^/]+\/draft$/u,
+    /\/typed-backend-api\/v1\/projects\/[^/]+\/draft\/commands$/u,
     async (route) => {
-      if (route.request().method() === "PUT") {
+      if (route.request().method() === "POST") {
         saveStarted = true;
         await heldSave;
       }
@@ -1054,8 +1066,8 @@ test("saves before closing and reopens only the selected shared project", async 
     await expect(page.locator(".architecture-editor")).toHaveCount(0);
     expect(
       api.requestCount(
-        "PUT",
-        `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/draft`,
+        "POST",
+        `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/draft/commands`,
       ),
     ).toBe(1);
     const openProject = async (name: string) => {
@@ -1081,8 +1093,8 @@ test("saves before closing and reopens only the selected shared project", async 
     await expect(page).toHaveURL(`${organizationRoot}/projects`);
     expect(
       api.requestCount(
-        "PUT",
-        `/v1/projects/${TYPED_BACKEND_INFRASTRUCTURE_PROJECT_ID}/draft`,
+        "POST",
+        `/v1/projects/${TYPED_BACKEND_INFRASTRUCTURE_PROJECT_ID}/draft/commands`,
       ),
     ).toBe(0);
     await openProject("Notes API");
@@ -1110,15 +1122,49 @@ test("autosaves the atomic Architecture and Workload envelope and restores it af
   page,
 }) => {
   const api = await installApi(context);
+  const leaseResponse = page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST" &&
+      new URL(response.url()).pathname ===
+        TYPED_BACKEND_API_PREFIX +
+          `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/editing-lease`,
+  );
   await goto(page, editorPath(TYPED_BACKEND_NOTES_PROJECT_ID));
   await waitForBackendEditor(page, 1);
+  const leaseHttp = await leaseResponse;
+  const lease = projectEditingLeaseResponseV1Schema.parse(
+    await leaseHttp.json(),
+  ).data;
+  const acquisition = acquireProjectEditingLeaseV1Schema.parse(
+    leaseHttp.request().postDataJSON(),
+  );
+  expect(lease.state).toBe("owned");
+  if (lease.state !== "owned")
+    throw new Error("Autosave requires an owned editing lease.");
 
+  const savedResponse = page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST" &&
+      new URL(response.url()).pathname ===
+        TYPED_BACKEND_API_PREFIX +
+          `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/draft/commands`,
+  );
   await addLambda(page);
   await expectSavedVersion(page, 2);
 
-  const save = api.latestDraftSave(TYPED_BACKEND_NOTES_PROJECT_ID);
+  const save = api.latestDraftCommand(TYPED_BACKEND_NOTES_PROJECT_ID);
   expect(save?.headers["if-match"]).toBe('"draft:draft_notes:1"');
-  expect(save?.body).toMatchObject({
+  const command = applyDraftCommandV1Schema.parse(save?.body);
+  expect(command.editingLease).toEqual({
+    leaseId: lease.leaseId,
+    token: acquisition.token,
+  });
+  expect(save?.headers["idempotency-key"]).toMatch(/^draft-command:/u);
+  const saved = applyDraftCommandResponseV1Schema.parse(
+    await (await savedResponse).json(),
+  ).data;
+  expect(saved.appliedCommandId).toBe(command.command.commandId);
+  expect(saved.draft).toMatchObject({
     architectureDocument: {
       nodes: expect.arrayContaining([
         expect.objectContaining({ id: "node_lambda_function" }),
@@ -1130,8 +1176,12 @@ test("autosaves the atomic Architecture and Workload envelope and restores it af
         ]),
       },
     },
-    contractVersion: 1,
+    version: 2,
   });
+  expect(saved.draft.contentDigest).toBe(
+    command.contentBinding?.resultingContentDigest,
+  );
+  expect(api.latestDraftSave(TYPED_BACKEND_NOTES_PROJECT_ID)).toBeUndefined();
 
   const [heldLeaseResponse] = await Promise.all([
     page.waitForResponse(
@@ -1165,12 +1215,23 @@ test("autosaves the atomic Architecture and Workload envelope and restores it af
   ).toHaveCount(1);
 });
 
-test("preserves a paused stale tab as a copy after another editing session saves", async ({
+test("preserves a paused stale tab as a copy after another browser session saves", async ({
+  browser,
   context,
   page,
 }) => {
   const api = await installApi(context);
-  const secondPage = await context.newPage();
+  // A remote editing session must not load this browser's shared command checkpoint.
+  // Same-browser lease exclusion is exercised separately below.
+  const baseURL = test.info().project.use.baseURL;
+  if (baseURL === undefined)
+    throw new Error("The browser fixture requires its configured origin.");
+  const secondContext = await browser.newContext({
+    baseURL,
+    serviceWorkers: "block",
+  });
+  await api.install(secondContext);
+  const secondPage = await secondContext.newPage();
   try {
     api.setDraftSaveFailure("offline");
     await goto(page, editorPath(TYPED_BACKEND_NOTES_PROJECT_ID));
@@ -1235,7 +1296,7 @@ test("preserves a paused stale tab as a copy after another editing session saves
     );
     expect(copyRequest?.body).toMatchObject({ creationMode: "draft-copy" });
   } finally {
-    await secondPage.close();
+    await secondContext.close();
   }
 });
 
@@ -1253,8 +1314,8 @@ test("keeps failed saves in local recovery without silently overwriting the serv
     page.getByRole("status").filter({ hasText: "Offline recovery" }).first(),
   ).toBeVisible({ timeout: 15_000 });
   const failedSaveCount = api.requestCount(
-    "PUT",
-    `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/draft`,
+    "POST",
+    `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/draft/commands`,
   );
   expect(failedSaveCount).toBe(1);
 
@@ -1294,8 +1355,8 @@ test("keeps failed saves in local recovery without silently overwriting the serv
   await page.waitForTimeout(1_000);
   expect(
     api.requestCount(
-      "PUT",
-      `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/draft`,
+      "POST",
+      `/v1/projects/${TYPED_BACKEND_NOTES_PROJECT_ID}/draft/commands`,
     ),
   ).toBe(failedSaveCount);
 
@@ -1555,12 +1616,16 @@ test("keeps unsaved work in a recovery-only view when editing access expires", a
     fullPage: true,
   });
   const savesBefore = api.requests.filter(
-    (request) => request.method === "PUT" && request.path.endsWith("/draft"),
+    (request) =>
+      (request.method === "PUT" && request.path.endsWith("/draft")) ||
+      (request.method === "POST" && request.path.endsWith("/draft/commands")),
   ).length;
   await page.waitForTimeout(850);
   expect(
     api.requests.filter(
-      (request) => request.method === "PUT" && request.path.endsWith("/draft"),
+      (request) =>
+        (request.method === "PUT" && request.path.endsWith("/draft")) ||
+        (request.method === "POST" && request.path.endsWith("/draft/commands")),
     ),
   ).toHaveLength(savesBefore);
 });
@@ -1930,7 +1995,7 @@ for (const [width, startingPoint] of [
       const lease = projectEditingLeaseResponseV1Schema.parse(
         await leaseHttp.json(),
       ).data;
-      const acquisition = acquireProjectEditingLeaseV1Schema.parse(
+      acquireProjectEditingLeaseV1Schema.parse(
         leaseHttp.request().postDataJSON(),
       );
       expect(lease.state).toBe("owned");
@@ -2006,6 +2071,7 @@ for (const [width, startingPoint] of [
       expect(api.requestCount("POST", importsPath)).toBe(0);
       expect(api.requestCount("POST", revisionsPath)).toBe(0);
       expect(api.requestCount("PUT", draftPath)).toBe(0);
+      expect(api.requestCount("POST", draftPath + "/commands")).toBe(0);
       await page.screenshot({
         path: testInfo.outputPath("first-import-needs-revision.png"),
         fullPage: true,
@@ -2071,18 +2137,11 @@ for (const [width, startingPoint] of [
         ).toBeEnabled();
         expect(api.requestCount("POST", importsPath)).toBe(0);
 
-        const draftSave = api.latestDraftSave(projectId);
-        expect(draftSave).toBeDefined();
-        const savedInput = saveDraftV1Schema.parse(draftSave?.body);
-        expect(savedInput.architectureDocument).toEqual(
+        // An unchanged, already-persisted draft has no command to send.
+        expect(api.latestDraftSave(projectId)).toBeUndefined();
+        expect(api.latestDraftCommand(projectId)).toBeUndefined();
+        expect(revision.revision.architectureDocument).toEqual(
           initialDraft.architectureDocument,
-        );
-        expect(savedInput.editingLease).toEqual({
-          leaseId: lease.leaseId,
-          token: acquisition.token,
-        });
-        expect(draftSave?.headers["if-match"]).toBe(
-          '"draft:' + initialDraft.id + ':1"',
         );
         expect(
           createSolutionRevisionV1Schema.parse(
@@ -2091,11 +2150,15 @@ for (const [width, startingPoint] of [
         ).toEqual({
           contractVersion: 1,
           draftId: initialDraft.id,
-          draftVersion: 2,
-          name: "Solution revision 2",
+          draftVersion: initialDraft.version,
+          name: "Solution revision " + String(initialDraft.version),
         });
         expect(revisionHttp.request().headers()["if-match"]).toBe(
-          '"draft:' + initialDraft.id + ':2"',
+          '"draft:' +
+            initialDraft.id +
+            ":" +
+            String(initialDraft.version) +
+            '"',
         );
         expect(revisionHttp.request().headers()["idempotency-key"]).toMatch(
           /^solution-revision:/u,
@@ -2103,9 +2166,10 @@ for (const [width, startingPoint] of [
         expect(revision.summary).toMatchObject({
           projectId,
           sourceDraftId: initialDraft.id,
-          sourceDraftVersion: 2,
+          sourceDraftVersion: initialDraft.version,
         });
-        expect(api.requestCount("PUT", draftPath)).toBe(1);
+        expect(api.requestCount("PUT", draftPath)).toBe(0);
+        expect(api.requestCount("POST", draftPath + "/commands")).toBe(0);
         expect(api.requestCount("POST", revisionsPath)).toBe(1);
 
         releaseConfirmation?.();
@@ -2162,7 +2226,8 @@ for (const [width, startingPoint] of [
               request.method !== "GET" && request.path.includes("/github-"),
           ),
         ).toEqual([]);
-        expect(api.requestCount("PUT", draftPath)).toBe(1);
+        expect(api.requestCount("PUT", draftPath)).toBe(0);
+        expect(api.requestCount("POST", draftPath + "/commands")).toBe(0);
         expect(api.requestCount("POST", revisionsPath)).toBe(1);
         await expect
           .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
@@ -2403,6 +2468,12 @@ for (const width of [1440, 390]) {
         api.requestCount(
           "PUT",
           "/v1/projects/" + TYPED_BACKEND_INFRASTRUCTURE_PROJECT_ID + "/draft",
+        ),
+      ).toBe(0);
+      expect(
+        api.requestCount(
+          "POST",
+          `/v1/projects/${TYPED_BACKEND_INFRASTRUCTURE_PROJECT_ID}/draft/commands`,
         ),
       ).toBe(0);
       expect(seeded).toEqual(before);
