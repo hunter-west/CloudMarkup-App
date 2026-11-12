@@ -77,6 +77,7 @@ export function findSecretPatterns(
   text,
   path = "unknown",
   maximum = SECRET_SCAN_LIMITS.maximumFindings + 1,
+  reviewedFixtureExceptions = new Set(),
 ) {
   const findings = [];
   const newlineOffsets = [];
@@ -103,11 +104,17 @@ export function findSecretPatterns(
   patterns: for (const { label, pattern } of SECRET_PATTERNS) {
     pattern.lastIndex = 0;
     for (const match of text.matchAll(pattern)) {
+      const matchDigest = createHash("sha256").update(match[0]).digest("hex");
+      if (
+        reviewedFixtureExceptions.has([path, label, matchDigest].join("\u0000"))
+      ) {
+        continue;
+      }
       const line = lineAt(match.index);
       findings.push({
         label,
         line,
-        matchDigest: createHash("sha256").update(match[0]).digest("hex"),
+        matchDigest,
         path,
       });
       if (findings.length >= maximum) break patterns;
@@ -199,11 +206,11 @@ export async function scanSecretDirectory(
     }
     scannedFiles += 1;
     findings.push(
-      ...findSecretPatterns(content.toString("utf8"), displayPath).filter(
-        ({ label, matchDigest }) =>
-          !reviewedFixtureExceptions.has(
-            [displayPath, label, matchDigest].join("\u0000"),
-          ),
+      ...findSecretPatterns(
+        content.toString("utf8"),
+        displayPath,
+        limits.maximumFindings - findings.length + 1,
+        reviewedFixtureExceptions,
       ),
     );
     if (findings.length > limits.maximumFindings) {
