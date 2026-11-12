@@ -1,11 +1,7 @@
 import { createHash } from "node:crypto";
-import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import {
-  loadMigrations,
-  runMigrations,
-  type LoadedMigration,
-} from "./migrations.js";
+import { runMigrations, type LoadedMigration } from "./migrations.js";
+import { loadRegisteredEvaluationSuccessor } from "./model-live-registered-successor-test-helpers.js";
 import { PostgresDatabase } from "./postgres-driver.js";
 import { sql } from "./sql.js";
 
@@ -58,9 +54,7 @@ suite(
         max: 1,
       });
       opened.add(bootstrap);
-      migrations = await loadMigrations(
-        fileURLToPath(new URL("../../../migrations/", import.meta.url)),
-      );
+      migrations = await loadRegisteredEvaluationSuccessor("0142");
       const migration = migrations.find(({ version }) => version === "0127");
       const start = migration?.statements.find((statement) =>
         statement.includes("DO $cm_private_bootstrap_owner_edge$"),
@@ -157,7 +151,7 @@ suite(
       expect(retained.rows).toEqual([{ roles: 0, schemas: 0 }]);
     });
 
-    it("upgrades 108 to all 121 migrations and verifies every helper owner and ACL", async () => {
+    it("upgrades the frozen 108-migration prefix to the current registry and verifies every helper owner and ACL", async () => {
       await runMigrations(admin, migrations);
       await runMigrations(admin, migrations);
       const ledger = await admin.query(
@@ -165,10 +159,17 @@ suite(
           "SELECT version,checksum_sha256 FROM cloudmarkup_schema_migrations ORDER BY version",
         ),
       );
-      expect(ledger.rows).toHaveLength(121);
       expect(
-        ledger.rows.map((row) => String(row["checksum_sha256"]).trim()),
-      ).toEqual(migrations.map(({ checksumSha256 }) => checksumSha256));
+        ledger.rows.map((row) => ({
+          version: String(row["version"]),
+          checksumSha256: String(row["checksum_sha256"]).trim(),
+        })),
+      ).toEqual(
+        migrations.map(({ version, checksumSha256 }) => ({
+          version,
+          checksumSha256,
+        })),
+      );
       expect(await graphCount()).toBe(4);
       await admin.query(sql(finalGuard));
     }, 120_000);

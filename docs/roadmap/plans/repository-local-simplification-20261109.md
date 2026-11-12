@@ -762,3 +762,12 @@ content yields a bounded diagnostic without parser text. These changes do not
 publish artifacts, enable providers or qualify hosted/native release behavior.
 The checksum and ZIP round-trip assertions share one successful-export fixture,
 removing a duplicate generation while retaining order, sizes and exact bytes.
+
+### Current migration consumer assertions
+
+The remaining migration-preservation consumers use the existing checksum-pinned
+current-registry loader. Their distinct historical prefix hashes and statement
+checks remain intact. The separately gated bootstrap fixture compares the full
+ordered version/checksum ledger after its repeated migration runs. Source-level
+assertion probes cover the stale-count failures and altered-history refusals;
+native bootstrap, PostgreSQL and integrated CI acceptance remain separate.
