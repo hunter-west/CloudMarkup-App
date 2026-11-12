@@ -491,6 +491,112 @@ describe("application reachability binding v1", () => {
     expect(wrongService.artifact.workloads[0]?.assumptions[0]?.state).toBe(
       "unresolved",
     );
+    const baseline = networkSolution({
+      requirement: "s3",
+      includeEndpoint: true,
+    });
+    const otherVpc = resource("vpc_other", "aws.ec2.vpc");
+    const otherZone = resource(
+      "zone_other",
+      "aws.ec2.availability-zone",
+      undefined,
+      undefined,
+      {},
+      {
+        id: "vpc_other",
+        relationshipType: "aws.ec2.vpc-contains-availability-zone",
+      },
+    );
+    const otherZoneEdge = connection(
+      "edge_other_zone",
+      "vpc_other",
+      "zone_other",
+      "aws.ec2.vpc-contains-availability-zone",
+    );
+    for (const topology of [
+      "missing-parent",
+      "missing-backing-edge",
+      "other-vpc",
+      "mixed-vpcs",
+      "same-vpc",
+    ] as const) {
+      const multiple = topology === "mixed-vpcs" || topology === "same-vpc";
+      const zoneId =
+        topology === "same-vpc" ? "availability_zone_a" : "zone_other";
+      const subnetId = multiple ? "subnet_private_b" : "subnet_private_a";
+      const selected = resource(
+        subnetId,
+        "aws.ec2.subnet",
+        undefined,
+        undefined,
+        {},
+        topology === "missing-parent"
+          ? undefined
+          : {
+              id: zoneId,
+              relationshipType: "aws.ec2.availability-zone-contains-subnet",
+            },
+      );
+      const changed = {
+        ...baseline,
+        resources: [
+          ...baseline.resources.filter(({ id }) => multiple || id !== subnetId),
+          ...(topology === "missing-backing-edge"
+            ? baseline.resources.filter(({ id }) => id === subnetId)
+            : [selected]),
+          otherVpc,
+          otherZone,
+          ...(multiple
+            ? [resource("association_b", "aws.ec2.route-table-association")]
+            : []),
+        ],
+        connections: [
+          ...baseline.connections.filter(
+            ({ id }) =>
+              multiple || id !== "edge_availability_zone_private_subnet",
+          ),
+          otherZoneEdge,
+          ...(topology === "missing-backing-edge" ||
+          topology === "missing-parent"
+            ? []
+            : [
+                connection(
+                  "edge_selected_subnet",
+                  zoneId,
+                  subnetId,
+                  "aws.ec2.availability-zone-contains-subnet",
+                ),
+              ]),
+          ...(multiple
+            ? [
+                connection(
+                  "edge_lambda_subnet_b",
+                  "lambda_network",
+                  subnetId,
+                  "aws.lambda.vpc-access-uses-subnet",
+                ),
+                connection(
+                  "edge_association_table_b",
+                  "association_b",
+                  "route_table_private_a",
+                  "aws.ec2.route-table-owns-subnet-association",
+                ),
+                connection(
+                  "edge_association_subnet_b",
+                  "association_b",
+                  subnetId,
+                  "aws.ec2.route-table-association-targets-subnet",
+                ),
+              ]
+            : []),
+        ],
+      };
+      const result = deriveApplicationReachabilityBindingV1(changed);
+      expect(
+        result.artifact.workloads[0]?.assumptions[0]?.state,
+        topology,
+      ).toBe(topology === "same-vpc" ? "declared" : "unresolved");
+    }
   });
 
   it.each([

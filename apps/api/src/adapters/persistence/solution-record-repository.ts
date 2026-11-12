@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { assertListPosition } from "../../application/list-pagination.js";
 
 import type {
   AuthorizedOrganizationScope,
@@ -185,6 +186,9 @@ function mapSolutionRecord(row: SolutionRecordRow): SolutionRecordMetadata {
     contentSha256: readString(row.content_sha256),
     contractVersion: readPositiveInteger(row.contract_version),
     createdAt: readTimestamp(row.created_at),
+    ...(row["pagination_created_at"] === undefined
+      ? {}
+      : { paginationCreatedAt: readString(row["pagination_created_at"]) }),
     createdByPrincipalId: readString(row.created_by_principal_id),
     organizationId: readString(row.organization_id),
     ...(previousSolutionRecordId === undefined
@@ -560,9 +564,14 @@ export class PostgresSolutionRecordRepository implements SolutionRecordRepositor
     if (input.subjectId !== undefined) {
       assertIdentifier(input.subjectId);
     }
+    const direction = input.selection?.direction ?? "DESC";
+    if (!["ASC", "DESC"].includes(direction)) return invalidInput();
+    if (input.selection?.after !== undefined)
+      assertListPosition(input.selection.after, true);
     const result = await this.#database.query<SolutionRecordRow>(
       sql(
-        `SELECT ${recordColumns}
+        `SELECT ${recordColumns},
+                to_char(r.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS pagination_created_at
          FROM memberships m
          JOIN solution_records r
            ON r.organization_id = m.organization_id
@@ -578,7 +587,9 @@ export class PostgresSolutionRecordRepository implements SolutionRecordRepositor
            AND m.lifecycle_status = 'active'
            AND ($5::varchar IS NULL OR r.record_kind = $5)
            AND ($6::varchar IS NULL OR r.subject_id = $6)
-         ORDER BY r.created_at DESC, r.solution_record_id
+           AND ($8::timestamptz IS NULL OR (r.created_at, r.solution_record_id COLLATE "C") ${direction === "ASC" ? ">" : "<"}
+             ($8::timestamptz, $9::varchar COLLATE "C"))
+         ORDER BY r.created_at ${direction}, r.solution_record_id COLLATE "C" ${input.selection?.direction ?? "ASC"}
          LIMIT $7`,
         [
           scope.membershipId,
@@ -587,7 +598,9 @@ export class PostgresSolutionRecordRepository implements SolutionRecordRepositor
           input.projectId,
           input.recordKind ?? null,
           input.subjectId ?? null,
-          input.limit,
+          input.limit + (input.selection?.extraRow === true ? 1 : 0),
+          input.selection?.after?.value ?? null,
+          input.selection?.after?.id ?? null,
         ],
       ),
     );

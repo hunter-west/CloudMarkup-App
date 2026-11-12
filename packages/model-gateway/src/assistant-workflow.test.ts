@@ -24,6 +24,7 @@ import {
   type AssistantCommercialPlanningPortV1,
   type AssistantWorkflowAuthorizationDecisionV1,
   type AssistantWorkflowAuthorizationV1,
+  type AssistantWorkflowDecisionRequestV1,
   type AssistantWorkflowReviewAuthorizationRequestV1,
 } from "./assistant-workflow.js";
 import {
@@ -720,6 +721,117 @@ describe("SeamlessAssistantWorkflowCoordinatorV1", () => {
         ?.executionAssumptions.timeout,
     ).toEqual({ kind: "duration", milliseconds: 50_000 });
     expect(test.authorization.reviewCalls).toBe(3);
+  });
+  it("binds a review decision before storage and authorization awaits", async () => {
+    for (const boundary of ["authorization", "storage"] as const) {
+      const test = harness(() =>
+        Promise.resolve({ activeIssues: [blockingIssue()], evidenceIds: [] }),
+      );
+      const initial = await test.coordinator.start(startRequest());
+      const candidate = (await test.store.load(initial.workflowId))
+        ?.candidateArchitecture;
+      if (initial.review === null || candidate == null)
+        throw new Error("Missing reviewable candidate.");
+      const blocked = await test.coordinator.edit({
+        operationBatch: issueEditBatch(
+          candidate,
+          46_000,
+          "blocked_review_edit",
+        ),
+        requestedAt: "2026-08-22T12:04:00.000Z",
+        requestedBy: "user_test",
+        reviewDigest: digestStructuredValue(initial.review),
+        reviewId: initial.review.reviewId,
+        workflowId: initial.workflowId,
+      });
+      expect(blocked.state).toBe("needs-user-input");
+      if (blocked.review === null) throw new Error("Missing blocked review.");
+      const request: {
+        -readonly [
+          K in keyof AssistantWorkflowDecisionRequestV1
+        ]: AssistantWorkflowDecisionRequestV1[K];
+      } = {
+        decision: "reject",
+        reason: "Keep the blocked candidate rejected.",
+        requestedBy: "user_test",
+        reviewDigest: digestStructuredValue(blocked.review),
+        reviewId: blocked.review.reviewId,
+        workflowId: blocked.workflowId,
+      };
+      await expect(
+        test.coordinator.decide({ ...request, decision: "accept" }),
+      ).rejects.toThrow("unresolved input");
+      await expect(
+        test.coordinator.decide({
+          ...request,
+          decision: "edit" as AssistantWorkflowDecisionRequestV1["decision"],
+        }),
+      ).rejects.toThrow("decision is invalid");
+      await expect(
+        test.coordinator.decide({ ...request, requestedBy: "" }),
+      ).rejects.toThrow();
+      expect(test.authorization.reviewCalls).toBe(1);
+      let markEntered: () => void = () => undefined;
+      const entered = new Promise<void>((resolve) => {
+        markEntered = resolve;
+      });
+      let release: () => void = () => undefined;
+      const released = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      const originalAuthorize = test.authorization.authorizeReview.bind(
+        test.authorization,
+      );
+      const authorization = vi
+        .spyOn(test.authorization, "authorizeReview")
+        .mockImplementation(async (input) => {
+          if (boundary === "authorization") {
+            markEntered();
+            await released;
+          }
+          return originalAuthorize(input);
+        });
+      const originalLoad = test.store.load.bind(test.store);
+      const load = vi.spyOn(test.store, "load");
+      if (boundary === "storage") {
+        load.mockImplementationOnce(async (workflowId) => {
+          const stored = await originalLoad(workflowId);
+          markEntered();
+          await released;
+          return stored;
+        });
+      }
+      try {
+        const deciding = test.coordinator.decide(request);
+        await entered;
+        request.decision = "accept";
+        request.reason = "Changed during the awaited boundary.";
+        release();
+        const result = await deciding;
+        expect(authorization).toHaveBeenCalledTimes(1);
+        expect(authorization).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: "reject",
+            requestedBy: "user_test",
+          }),
+        );
+        expect(result.writeAuthority).toBe("none");
+        expect(result.candidateArchitecture).toBeNull();
+        expect(result.record.state).toBe("rejected");
+        expect(result.record.review?.decision).toMatchObject({
+          state: "rejected",
+          reason: "Keep the blocked candidate rejected.",
+          decidedBy: "user_test",
+        });
+        expect((await test.store.load(blocked.workflowId))?.record).toEqual(
+          result.record,
+        );
+      } finally {
+        release();
+        authorization.mockRestore();
+        load.mockRestore();
+      }
+    }
   });
   it("retains issue identity and marks a superseded edit issue stale instead of deleting it", async () => {
     let assessments = 0;

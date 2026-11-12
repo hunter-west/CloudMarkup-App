@@ -110,9 +110,31 @@ test("public source checks retain SQL/SDK contracts and bounded browser failure 
   ]);
   assert.equal(browserFailures.with["retention-days"], 1);
   assert.ok(scripts["check:public:quality"].includes("pnpm security:audit"));
+  assert.ok(scripts["ci:validate"].includes("pnpm ci:validate:customer"));
+  for (const name of [
+    "check:e2e:customer-workflow",
+    "check:e2e:continuous-conformance",
+    "check:beta:quality",
+  ]) {
+    assert.equal(scripts[name].split("pnpm ci:validate").length - 1, 1);
+    assert.ok(!scripts[name].includes("pnpm ci:validate:customer"));
+  }
   assert.ok(scripts["check:public"].includes("pnpm test:public:backend"));
   assert.ok(scripts["test:public:backend"].startsWith("pnpm test:backend"));
   assert.ok(scripts["test:backend"].includes("--project=api"));
+  assert.equal(
+    scripts["test:public:backend"],
+    "pnpm test:backend:services --exclude=**/model-live-historical-importer-upgrade-postgres.integration.test.ts",
+  );
+  assert.equal(
+    scripts["test:backend:services"],
+    "vitest run --project=api --project=github-repository-export --maxWorkers=1 --testTimeout=30000 --hookTimeout=120000",
+  );
+  assert.match(scripts["test:contracts"], /--project=api-contract\b/u);
+  assert.ok(
+    scripts["check:public"].indexOf("pnpm test:public:contracts") <
+      scripts["check:public"].indexOf("pnpm test:public:backend"),
+  );
   for (const file of [
     "apps/api/src/production-model-live-execution-postgres.integration.test.ts",
     "apps/api/src/adapters/persistence/model-live-seed-stage-postgres.integration.test.ts",

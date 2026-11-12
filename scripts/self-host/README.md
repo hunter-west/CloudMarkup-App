@@ -19,6 +19,60 @@ live model-provider invocation is established. Billing, repository delivery,
 conformance and project erasure require separate profile/permission/factory
 admission. A successful container start alone is not application readiness.
 
+## Prepare a fresh installation
+
+From a fresh public clone, run this dependency-free command with Node 24.18.0:
+
+```powershell
+node scripts/self-host/prepare.mjs C:/CloudMarkupPrivate
+```
+
+Use a **new absolute directory outside the repository**, under an existing
+private parent. Linux operators can use an equivalent absolute path. The command
+verifies the current canonical and standalone migration sources and writes
+`runtime.json`, `operator.json`, `provisioning.json`, `owner.json` and
+`self-host.env` with matching source hashes and owner identity. It creates empty
+secret directories, but no credentials, database, containers or approvals.
+Existing directories are refused; incomplete output is preserved after failure.
+Keep the directory private using the host's access controls.
+
+Append `--exports` to select the existing infrastructure-only CloudFormation
+export adapter. Its settings come from the compiled image; it needs no model
+key. Model providers remain disabled. See
+[configured services](CONFIGURED_MODELS.md) for the supported provider contract
+and its separate qualification requirements.
+
+Fill the reviewed Node and Go image digests in `self-host.env`. You can now
+build the shared image before creating any runtime secret files:
+
+```powershell
+node --env-file=C:/CloudMarkupPrivate/self-host.env scripts/self-host/self-host.mjs build
+```
+
+The build uses the existing Dockerfile, source context, two immutable base image
+pins and the application image name. Every supplied configuration or secret path
+must remain outside the repository/build context, with regular, unsymlinked
+existing ancestry. Missing external files and directories are allowed during
+build; no credential contents are read. Keep other private files out of the
+checkout as well. On Windows, use paths without trailing dots or spaces in a
+component; Windows and Node can resolve those spellings differently. Runtime
+commands still require every documented private file and PostgreSQL image pin.
+Compose consumes the built image and no longer contains a second build
+declaration.
+
+Review the generated source bindings against `bootstrap.mjs inspect`. Before the
+corresponding privileged stage, set the two migration acknowledgements in
+`operator.json` to `true`, set `provisioning.json`'s `acknowledge` to that one
+stage, and set `owner.json`'s `acknowledgeInitializeLocalOwner` to `true` only
+for initialization. Generated documents intentionally fail privileged parsing
+until reviewed. Follow the ordered operator stages below; startup does not
+perform them. Regenerate into a new directory when source bindings change, then
+compare and review; do not overwrite an existing installation.
+
+Use `--env-file=C:/CloudMarkupPrivate/self-host.env` in the remaining commands
+below, or copy that non-secret environment file to `scripts/self-host/.env` to
+use their shorter example path.
+
 ## Prerequisites and private configuration
 
 Use an already approved Docker Desktop installation with its WSL 2 backend and
@@ -37,7 +91,8 @@ Errors remain fatal. Do not bind the durable root to NTFS, a Windows share, a
 symlink or the container's ephemeral image layer. Native Windows directory fsync
 is unsupported; synthetic host tests do not establish Linux durability.
 
-Copy `scripts/self-host/.env.example` to `scripts/self-host/.env`; the root
+Use the generated `self-host.env`, or manually copy
+`scripts/self-host/.env.example` to `scripts/self-host/.env`; the root
 `.env.example` belongs to the separate seeded development workflow. Set actual
 reviewed image digests for the compatible Debian bookworm Node/Go bases and the
 admitted PostgreSQL 17 image. The current demo uses `postgres:17.11-alpine3.24`;
@@ -98,8 +153,8 @@ root.
 
 ## Inspect, build and bootstrap
 
-Run these read-only inspections at the repository root in PowerShell before
-creating the private JSON documents below:
+Run these read-only inspections at the repository root in PowerShell to review
+the source bindings in the generated private documents:
 
 ```powershell
 node scripts/self-host/self-host.mjs inspect
@@ -107,15 +162,13 @@ node scripts/self-host/bootstrap.mjs inspect
 ```
 
 Use the actual canonical, installation-profile and runtime-ACL hashes from these
-receipts. This section prepares the operator inputs; build, PostgreSQL startup
-and privileged application commands appear only after every required private
-file has been prepared in the next section.
+receipts. The image can be built with the two base-image pins alone, as shown
+above. PostgreSQL startup and privileged application commands require every
+private file described below.
 
 `inspect` is dependency-free: it reports pinned tools, lockfile SHA-256 and the
-current canonical migration manifest/hash. This successor has **121**
-migrations, last **0139**, manifest SHA-256
-`163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47`. The
-canonical manifest remains the authority on an integrated successor.
+current canonical migration manifest/hash. Use that receipt and the generated
+configuration from the same checkout; do not copy a hash from an older guide.
 
 Select `cloudmarkup-standalone-pg17-v1` explicitly. Canonical 0127 remains
 restricted to its protected PostgreSQL 16/RDS topology, with every hosted
@@ -150,25 +203,12 @@ outside the source/build context; `.env` selects
 at `/run/secrets/migrator_password`. The API receives neither that credential
 nor the bootstrap superuser password.
 
-Create `operator.json` outside the repository. This is a synthetic structure;
-replace the profile checksum placeholder with
-`installationProfile.manifestSha256` from your actual `inspect` receipt:
-
-```json
-{
-  "host": "postgres",
-  "port": 5432,
-  "database": "cloudmarkup",
-  "user": "cloudmarkup_admin",
-  "passwordFile": "/run/secrets/migrator_password",
-  "tls": "disable",
-  "manifestSha256": "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
-  "migrationProfile": "cloudmarkup-standalone-pg17-v1",
-  "profileManifestSha256": "<copy the exact inspected profile hash>",
-  "acknowledgeCanonicalMigrations": true,
-  "acknowledgeStandaloneProfile": true
-}
-```
+The generated `operator.json` binds the current canonical and
+installation-profile hashes. It selects the dedicated `cloudmarkup_admin`
+migrator with the mounted `/run/secrets/migrator_password`, PostgreSQL service
+`postgres:5432`, database `cloudmarkup`, and `cloudmarkup-standalone-pg17-v1`.
+Review the source before setting both migration acknowledgement fields to
+`true`.
 
 `tls: disable` is restricted to the private local Compose network. External
 databases require the runtime's verified TLS configuration. Review the complete
@@ -233,28 +273,13 @@ procedure. See PostgreSQL's
 and
 [role password catalog](https://www.postgresql.org/docs/17/catalog-pg-authid.html).
 
-Create the private `provisioning.json` selected by
-`CLOUDMARKUP_PROVISIONING_CONFIGURATION_SOURCE`. Copy all three actual hashes
-from `node scripts/self-host/bootstrap.mjs inspect`; placeholders are refused.
-Review the complete source inputs before each permission operation. Set
-`acknowledge` to the one stage about to run (`admin`, `restore-roles`, `roles`,
-`acl`, or `check`). A configuration approved for one stage cannot authorize
-another.
-
-```json
-{
-  "host": "postgres",
-  "port": 5432,
-  "database": "cloudmarkup",
-  "tls": "disable",
-  "migrationProfile": "cloudmarkup-standalone-pg17-v1",
-  "canonicalManifestSha256": "<canonical.manifestSha256>",
-  "profileManifestSha256": "<installationProfile.manifestSha256>",
-  "aclManifestSha256": "<runtimeAclManifestSha256>",
-  "capabilityProfile": "local-editor-core-v1",
-  "acknowledge": "admin"
-}
-```
+The generated `provisioning.json` is selected by
+`CLOUDMARKUP_PROVISIONING_CONFIGURATION_SOURCE`. Its current canonical, profile
+and core ACL hashes come from `bootstrap.mjs inspect`. Review the complete
+source inputs, then replace `acknowledge: "review-required"` with the one stage
+about to run (`admin`, `restore-roles`, `roles`, `acl`, or `check`). A document
+approved for one stage cannot authorize another. The core capability profile
+does not enable provider-direct dispatch.
 
 Admin provisioning uses the actual `cloudmarkup_owner` bootstrap superuser to
 create the migrator and five isolated policy-target logins in the dedicated
@@ -266,30 +291,11 @@ NOCREATEDB, NOREPLICATION and NOBYPASSRLS. ACL activation uses only
 exact pinned column/function grants inside one transaction. It does not run
 hosted PG16 historical-marker admission or weaken its guards.
 
-Create private `owner.json`, selected by
-`CLOUDMARKUP_OWNER_CONFIGURATION_SOURCE`:
-
-```json
-{
-  "host": "postgres",
-  "port": 5432,
-  "database": "cloudmarkup",
-  "user": "cloudmarkup_admin",
-  "passwordFile": "/run/secrets/migrator_password",
-  "tls": "disable",
-  "canonicalManifestSha256": "<canonical.manifestSha256>",
-  "profileManifestSha256": "<installationProfile.manifestSha256>",
-  "acknowledgeInitializeLocalOwner": true,
-  "owner": {
-    "principalId": "principal_local_owner",
-    "ownerDisplayName": "Local owner",
-    "organizationId": "org_local_owner",
-    "organizationDisplayName": "Personal",
-    "slug": "local-owner",
-    "membershipId": "membership_local_owner"
-  }
-}
-```
+The generated `owner.json`, selected by
+`CLOUDMARKUP_OWNER_CONFIGURATION_SOURCE`, uses the same migrator and source
+hashes. Its `principal_local_owner` identity matches `runtime.json`. Review its
+local principal, workspace and membership names before setting
+`acknowledgeInitializeLocalOwner` to `true`.
 
 The declared owner initializer creates the owner principal, workspace, canonical
 roles and membership atomically, only in the exact installed profile and empty
@@ -308,18 +314,18 @@ RLS/trigger allow/deny journeys, browser cookie/session behavior, provider jobs,
 native services and container/storage acceptance still own release
 qualification.
 
-### Check all private inputs before the first build
+### Check all private inputs before PostgreSQL startup
 
 Complete the pinned image references and private paths in
-`scripts/self-host/.env`. Before `build` or `postgres:start`, the current
-launcher requires these six regular private files to exist outside the
-repository: runtime configuration, PostgreSQL owner password, migrator password,
-`operator.json`, `provisioning.json` and `owner.json`. Both the runtime-secrets
-directory and its database subdirectory must also exist. Prepare the five
-runtime password files and owner proof as described above; match all references,
-principal IDs and inspected hashes. Missing files are refused even before build;
-later creation is not an implicit launcher step. Do not copy this guide's
-placeholders as actual hashes or passwords.
+`scripts/self-host/.env`. Before `postgres:start` and privileged/runtime
+commands, the launcher requires these six regular private files to exist outside
+the repository: runtime configuration, PostgreSQL owner password, migrator
+password, `operator.json`, `provisioning.json` and `owner.json`. Both the
+runtime-secrets directory and its database subdirectory must also exist. Prepare
+the five runtime password files and owner proof as described above; match all
+references, principal IDs and inspected hashes. Missing runtime files are
+refused before those commands; the image-only build does not read them. Do not
+copy this guide's placeholders as actual hashes or passwords.
 
 ### Apply the first-install stages in order
 
@@ -383,10 +389,10 @@ installed candidate; it does not establish acceptance in advance.
 Transport requires the exact running application image to carry
 `com.cloudmarkup.browser-auth-mode=local-owner`. The shared Dockerfile derives
 that label and the Vite selection from the same constrained build argument; the
-normal launcher/Compose build supplies the local-owner default. The label is
-trusted build metadata, not cryptographic proof of the bundle. A missing or
-Cognito label refuses transport. Qualify the actual matched image and browser;
-changing a label cannot establish readiness. There is one application artifact.
+normal launcher build supplies the local-owner default. The label is trusted
+build metadata, not cryptographic proof of the bundle. A missing or Cognito
+label refuses transport. Qualify the actual matched image and browser; changing
+a label cannot establish readiness. There is one application artifact.
 
 For each byte stream, the launcher checks Compose project/service/user/running
 state and the pinned full container/image/start identity. Fixed non-TTY

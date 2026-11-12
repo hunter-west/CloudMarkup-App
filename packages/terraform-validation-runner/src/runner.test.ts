@@ -736,6 +736,45 @@ describe("Terraform validation runner", () => {
     );
   });
 
+  it.each(["fmt", "init", "validate"] as const)(
+    "does not attest passing validation when required %s is unavailable",
+    async (step) => {
+      const executor = new FakeExecutor(
+        () =>
+          new FakeSession((invocation) =>
+            invocation.step === step
+              ? {
+                  exitCode: null,
+                  outputBytes: 0,
+                  stderr: "",
+                  stdout: "",
+                  termination: "unavailable",
+                }
+              : successByStep[invocation.step],
+          ),
+      );
+      const corePolicy = terraformValidationPolicyV1Schema.parse({
+        ...policy(),
+        scanner: undefined,
+        tflint: undefined,
+      });
+      const result = await runner(executor, corePolicy).run(request());
+      expect(result.state).toBe("error");
+      expect(result.diagnostics.map(({ code }) => code)).toContain(
+        "terraform.validation.required-tool-unavailable",
+      );
+      expect(
+        result.evidenceRecords
+          .flatMap(({ checks }) => checks)
+          .find(
+            ({ checkId }) =>
+              checkId === "cloudmarkup.evidence.terraform-static-validation",
+          )?.status,
+      ).toBe("error");
+      expect(executor.sessions[0]?.disposed).toBe(true);
+    },
+  );
+
   it.each([
     [
       `terraform { required_providers { random = { source = "hashicorp/random" version = "3.0.0" } } }`,
@@ -757,6 +796,17 @@ describe("Terraform validation runner", () => {
       `data "external" "bad" { program = ["helper"] }`,
       "terraform.validation.external-data-forbidden",
     ],
+    [
+      `provider "${"a".repeat(600)}" {}`,
+      "terraform.validation.provider-unsupported",
+    ],
+    ...[500, 600].map(
+      (length) =>
+        [
+          `terraform { required_providers { custom = { source = "${"a".repeat(length)}" version = "1.0.0" } } }`,
+          "terraform.validation.source-unsupported",
+        ] as const,
+    ),
   ] as const)(
     "rejects unsafe or unsupported HCL before execution",
     async (content, code) => {
@@ -767,6 +817,11 @@ describe("Terraform validation runner", () => {
       expect(result.state).toBe("failed");
       expect(result.diagnostics.map((entry) => entry.code)).toContain(code);
       expect(executor.sessions).toHaveLength(0);
+      expect(
+        result.diagnostics.every(({ summary }) => summary.length <= 500),
+      ).toBe(true);
+      expect(JSON.stringify(result.diagnostics)).not.toContain("a".repeat(100));
+      expect(result.diagnostics[0]?.references).toEqual(references());
     },
   );
 
@@ -818,6 +873,11 @@ describe("Terraform validation runner", () => {
     expect(serialized).not.toContain("C:\\Users");
     expect(serialized).not.toContain("abcdefghijklmnopqrstuvwxyz");
     expect(result.diagnostics[0]?.references).toEqual(references());
+    expect(
+      sanitizeToolText(
+        " /tmp/workspace/main.tf Bearer abcdefghijklmnopqrstuvwxyz ",
+      ),
+    ).toBe("[path] [redacted]");
   });
 
   it("runs a provider-neutral networking organization-policy pack through the approved evaluator seam", async () => {
@@ -1047,13 +1107,6 @@ describe("Terraform validation runner", () => {
         modules: [approvedModule, approvedModule],
       }).success,
     ).toBe(false);
-  });
-  it("sanitizes standalone text deterministically", () => {
-    expect(
-      sanitizeToolText(
-        " /tmp/workspace/main.tf Bearer abcdefghijklmnopqrstuvwxyz ",
-      ),
-    ).toBe("[path] [redacted]");
   });
 });
 

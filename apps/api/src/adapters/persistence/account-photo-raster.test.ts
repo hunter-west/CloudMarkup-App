@@ -1,4 +1,5 @@
 import { Resvg } from "@resvg/resvg-js";
+import { MAX_ACCOUNT_PHOTO_BYTES_V1 } from "@cloudmarkup/api-contract";
 import { deflateSync } from "node:zlib";
 import { expect, it } from "vitest";
 import { canonicalAccountPhoto } from "./account-photo-raster.js";
@@ -50,11 +51,25 @@ it("rejects corruption, trailing content, oversized bytes and noncanonical base6
   const valid = png(),
     corrupt = Buffer.from(valid);
   corrupt[45] = (corrupt[45] ?? 0) ^ 1;
+  const padded = (size: number) => {
+    const metadata = Buffer.alloc(size - valid.length - 12, "a");
+    Buffer.from("fixture\0").copy(metadata);
+    return Buffer.concat([
+      valid.subarray(0, 33),
+      chunk("tEXt", metadata),
+      valid.subarray(33),
+    ]);
+  };
+  expect(
+    canonicalAccountPhoto(uri(padded(MAX_ACCOUNT_PHOTO_BYTES_V1))),
+  ).toEqual(canonicalAccountPhoto(uri(valid)));
+  const oversized = padded(MAX_ACCOUNT_PHOTO_BYTES_V1 + 1);
+  expect(oversized.length).toBe(MAX_ACCOUNT_PHOTO_BYTES_V1 + 1);
   for (const value of [
     uri(corrupt),
     uri(valid.subarray(0, -1)),
     uri(Buffer.concat([valid, Buffer.from("<script>")])),
-    uri(Buffer.alloc(184321)),
+    uri(oversized),
     uri(valid) + "=",
     "data:image/png;base64,AAAA",
   ])

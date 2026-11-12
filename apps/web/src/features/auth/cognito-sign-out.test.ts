@@ -5,6 +5,7 @@ import { EXPERIENCE_PREFERENCE_STORAGE_NAMESPACE } from "../../preferences/exper
 import { MODE_PREFERENCE_STORAGE_NAMESPACE } from "../../preferences/mode-preference.js";
 import { NAVIGATION_PREFERENCE_STORAGE_NAMESPACE } from "../../shell/navigation-preference.js";
 import { EDITOR_RECOVERY_INDEXED_DB_NAME } from "../editor/persistence/indexeddb-editor-recovery-store.js";
+import { DRAFT_COMMAND_RECOVERY_DATABASE } from "../editor/persistence/draft-command-checkpoint.js";
 import type { CognitoBrowserAuthSession } from "./cognito-browser-auth.js";
 import {
   performCognitoSignOut,
@@ -148,13 +149,23 @@ describe("Cognito browser sign-out", () => {
     expect(deleteDatabase).toHaveBeenCalledWith(
       EDITOR_RECOVERY_INDEXED_DB_NAME,
     );
+    expect(deleteDatabase).toHaveBeenNthCalledWith(
+      2,
+      DRAFT_COMMAND_RECOVERY_DATABASE,
+    );
+    expect(deleteDatabase).toHaveBeenCalledTimes(2);
     expect(environment.assignLocation).toHaveBeenCalledOnce();
     expect(environment.publishSignOut).toHaveBeenCalledOnce();
   });
 
-  it.each(["blocked", "error"] as const)(
-    "leaves the session, query cache, preferences, and navigation unchanged when IndexedDB deletion is %s",
-    async (failure) => {
+  it.each([
+    { failure: "blocked", database: EDITOR_RECOVERY_INDEXED_DB_NAME },
+    { failure: "error", database: EDITOR_RECOVERY_INDEXED_DB_NAME },
+    { failure: "blocked", database: DRAFT_COMMAND_RECOVERY_DATABASE },
+    { failure: "error", database: DRAFT_COMMAND_RECOVERY_DATABASE },
+  ] as const)(
+    "does not report clear/sign-out success when $database deletion is $failure",
+    async ({ failure, database }) => {
       const preferenceKey = `${MODE_PREFERENCE_STORAGE_NAMESPACE}:principal_beta`;
       window.localStorage.setItem(preferenceKey, "guided");
       const queryClient = new QueryClient();
@@ -165,9 +176,11 @@ describe("Cognito browser sign-out", () => {
         onerror: null,
         onsuccess: null,
       } as unknown as IDBOpenDBRequest;
-      const deleteDatabase = vi.fn(() => {
+      const deleteDatabase = vi.fn((name: string) => {
         queueMicrotask(() => {
-          if (failure === "blocked") {
+          if (name !== database) {
+            deleteRequest.onsuccess?.(new Event("success"));
+          } else if (failure === "blocked") {
             deleteRequest.onblocked?.(
               new Event("blocked") as IDBVersionChangeEvent,
             );
@@ -205,6 +218,12 @@ describe("Cognito browser sign-out", () => {
       expect(window.localStorage.getItem(preferenceKey)).toBe("guided");
       expect(environment.assignLocation).not.toHaveBeenCalled();
       expect(environment.publishSignOut).not.toHaveBeenCalled();
+      // A blocked native deletion may finish later. It must not turn the
+      // already rejected sign-out operation into reported success.
+      deleteRequest.onsuccess?.(new Event("success"));
+      await Promise.resolve();
+      expect(auth.clearSession).not.toHaveBeenCalled();
+      expect(environment.assignLocation).not.toHaveBeenCalled();
     },
   );
 
@@ -231,5 +250,19 @@ describe("Cognito browser sign-out", () => {
     expect(environment.assignLocation).toHaveBeenCalledWith(
       "https://cognito.example.test/logout",
     );
+  });
+  it("does not claim local deletion when browser storage is unavailable", async () => {
+    const auth = authSession(),
+      environment = browserEnvironment({ confirmClear: true });
+    await expect(
+      performCognitoSignOut({
+        clearLocalRecovery: true,
+        environment,
+        queryClient: new QueryClient(),
+        session: auth.session,
+      }),
+    ).rejects.toThrow("browser storage is unavailable");
+    expect(auth.clearSession).not.toHaveBeenCalled();
+    expect(environment.assignLocation).not.toHaveBeenCalled();
   });
 });

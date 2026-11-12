@@ -416,7 +416,7 @@ function requestResult<T>(request: IDBRequest<T>): Promise<T> {
 }
 
 function transactionCompletion(transaction: IDBTransaction): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
+  const completion = new Promise<void>((resolve, reject) => {
     transaction.oncomplete = () => {
       resolve();
     };
@@ -439,6 +439,10 @@ function transactionCompletion(transaction: IDBTransaction): Promise<void> {
       );
     };
   });
+  // Observe rejection immediately: a request can fail before its caller awaits
+  // transaction completion. The original promise still rejects to every await.
+  void completion.catch(() => undefined);
+  return completion;
 }
 
 function openDatabase(
@@ -608,6 +612,7 @@ class IndexedDbEditorRecoveryStore implements IndexedDbEditorRecoveryStoreV1 {
       };
     }
 
+    let completion: Promise<void> | undefined;
     try {
       // Once load has opened the database, begin the write transaction before
       // the first await. This lets pagehide/unmount flush establish an active
@@ -617,7 +622,7 @@ class IndexedDbEditorRecoveryStore implements IndexedDbEditorRecoveryStoreV1 {
         EDITOR_RECOVERY_INDEXED_DB_STORE_NAME,
         "readwrite",
       );
-      const completion = transactionCompletion(transaction);
+      completion = transactionCompletion(transaction);
       const objectStore = transaction.objectStore(
         EDITOR_RECOVERY_INDEXED_DB_STORE_NAME,
       );
@@ -726,6 +731,8 @@ class IndexedDbEditorRecoveryStore implements IndexedDbEditorRecoveryStoreV1 {
         head: stored.head,
       };
     } catch (error) {
+      // Own both request and transaction lifecycles before returning failure.
+      await completion?.catch(() => undefined);
       return unavailableFrom(error);
     }
   }
@@ -733,13 +740,14 @@ class IndexedDbEditorRecoveryStore implements IndexedDbEditorRecoveryStoreV1 {
   public async discard(
     request: EditorRecoveryDiscardRequest,
   ): Promise<EditorRecoveryDiscardResult> {
+    let completion: Promise<void> | undefined;
     try {
       const database = await this.#database();
       const transaction = database.transaction(
         EDITOR_RECOVERY_INDEXED_DB_STORE_NAME,
         "readwrite",
       );
-      const completion = transactionCompletion(transaction);
+      completion = transactionCompletion(transaction);
       const objectStore = transaction.objectStore(
         EDITOR_RECOVERY_INDEXED_DB_STORE_NAME,
       );
@@ -779,6 +787,8 @@ class IndexedDbEditorRecoveryStore implements IndexedDbEditorRecoveryStoreV1 {
       });
       return { status: "discarded" };
     } catch (error) {
+      // Own both request and transaction lifecycles before returning failure.
+      await completion?.catch(() => undefined);
       return unavailableFrom(error);
     }
   }
@@ -786,13 +796,14 @@ class IndexedDbEditorRecoveryStore implements IndexedDbEditorRecoveryStoreV1 {
   public async load(
     binding: EditorRecoveryBindingV1,
   ): Promise<EditorRecoveryLoadResult> {
+    let completion: Promise<void> | undefined;
     try {
       const database = await this.#database();
       const transaction = database.transaction(
         EDITOR_RECOVERY_INDEXED_DB_STORE_NAME,
         "readonly",
       );
-      const completion = transactionCompletion(transaction);
+      completion = transactionCompletion(transaction);
       const rawRecord = await requestResult<unknown>(
         transaction
           .objectStore(EDITOR_RECOVERY_INDEXED_DB_STORE_NAME)
@@ -808,6 +819,8 @@ class IndexedDbEditorRecoveryStore implements IndexedDbEditorRecoveryStoreV1 {
         ? loadStoredRecord(inspected.record, binding)
         : inspected.rejection;
     } catch (error) {
+      // Own both request and transaction lifecycles before returning failure.
+      await completion?.catch(() => undefined);
       return unavailableFrom(error);
     }
   }
@@ -823,13 +836,14 @@ class IndexedDbEditorRecoveryStore implements IndexedDbEditorRecoveryStoreV1 {
       return { status: "rejected", diagnostic: prepared.diagnostic };
     }
 
+    let completion: Promise<void> | undefined;
     try {
       const database = await this.#database();
       const transaction = database.transaction(
         EDITOR_RECOVERY_INDEXED_DB_STORE_NAME,
         "readwrite",
       );
-      const completion = transactionCompletion(transaction);
+      completion = transactionCompletion(transaction);
       const objectStore = transaction.objectStore(
         EDITOR_RECOVERY_INDEXED_DB_STORE_NAME,
       );
@@ -943,6 +957,8 @@ class IndexedDbEditorRecoveryStore implements IndexedDbEditorRecoveryStoreV1 {
         head: stored.head,
       };
     } catch (error) {
+      // Own both request and transaction lifecycles before returning failure.
+      await completion?.catch(() => undefined);
       return unavailableFrom(error);
     }
   }

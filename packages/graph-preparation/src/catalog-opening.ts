@@ -5,6 +5,7 @@ import {
 } from "@cloudmarkup/domain";
 import {
   parseGraphCommandV1,
+  type GraphCommandV1,
   type GraphCommandActionV1,
 } from "@cloudmarkup/schemas";
 
@@ -28,6 +29,8 @@ export interface EditorCatalogOpening {
   /** The source is never changed. Only a validated, lossless candidate is returned. */
   readonly document: ArchitectureDocument;
   readonly issues: readonly CatalogOpeningIssue[];
+  /** Actual validated operation; a final snapshot is never command evidence. */
+  readonly command?: GraphCommandV1;
 }
 
 /** Opening a mutable draft is separate from approving an immutable export.
@@ -227,7 +230,12 @@ export function prepareEditorCatalogOpening(
   if (blockers.length > 0)
     return { status: "unavailable", document: source, issues };
   if (actions.length === 0)
-    return { status: "compatible", document: candidate, issues };
+    return {
+      status: "compatible",
+      document: candidate,
+      issues,
+      command: bindingCommand,
+    };
   if (actions.length > 255)
     return unavailable(
       "This project needs more schema changes than one atomic adaptation supports. Request a reviewed staged migration; the saved project is retained.",
@@ -240,6 +248,7 @@ export function prepareEditorCatalogOpening(
   try {
     return {
       status: "review-required",
+      command: batch,
       document: applyGraphCommand(source, batch).document,
       issues,
     };

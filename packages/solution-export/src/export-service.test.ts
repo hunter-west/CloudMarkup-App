@@ -854,6 +854,62 @@ describe("retained Solution export reconstruction", () => {
         zipDigest: sha256Digest(zipBytes),
       }),
     ).toThrow("integrity verification");
+
+    const manifestPath = "cloudmarkup/cloudmarkup.manifest.json";
+    const largestPayload = Math.max(
+      ...restored.files
+        .filter(({ path }) => path !== manifestPath)
+        .map(({ bytes }) => bytes.byteLength),
+    );
+    expect(
+      restored.files.find(({ path }) => path === manifestPath)?.bytes
+        .byteLength,
+    ).toBeGreaterThan(largestPayload);
+    for (const maxFileBytes of [largestPayload, largestPayload - 1]) {
+      const manifest = {
+        ...restored.manifest,
+        limits: { ...restored.manifest.limits, maxFileBytes },
+      };
+      const manifestBytes = encodeUtf8(serializeCanonicalJson(manifest));
+      const manifestDigest = sha256Digest(manifestBytes);
+      const files = restored.files.map((file) =>
+        file.path === manifestPath
+          ? {
+              ...file,
+              bytes: manifestBytes,
+              checksum: manifestDigest,
+              semanticChecksum: canonicalSemanticDigest(
+                file.mediaType,
+                manifestBytes,
+              ),
+            }
+          : file,
+      );
+      const boundedZip = createDeterministicZip(files);
+      const rebound = {
+        ...restored,
+        manifest,
+        manifestDigest,
+        files,
+        zipBytes: boundedZip,
+        zipDigest: sha256Digest(boundedZip),
+      };
+      expect(
+        localSolutionExportService
+          .verify(rebound)
+          .map(({ code, path }) => ({ code, path })),
+      ).toEqual(
+        files
+          .filter(({ bytes }) => bytes.byteLength > maxFileBytes)
+          .map(({ path }) => ({
+            code: "EXPORT_VERIFY_FILE_LIMIT_EXCEEDED",
+            path,
+          })),
+      );
+      expect(() => restoreSolutionExportArtifact(retained(rebound))).toThrow(
+        "The retained Solution export failed integrity verification.",
+      );
+    }
   });
 });
 
@@ -1777,6 +1833,13 @@ describe("deterministic Solution export", () => {
       ),
     );
     expect(localSolutionExportService.verify(artifact)).toEqual([]);
+    const entries = readDeterministicZip(artifact.zipBytes);
+    const paths = entries.map(({ path }) => path);
+    expect(paths).toEqual(paths.toSorted());
+    expect(createDeterministicZip(artifact.files)).toEqual(artifact.zipBytes);
+    expect(entries.map(({ bytes }) => bytes.byteLength)).toEqual(
+      artifact.files.map(({ bytes }) => bytes.byteLength),
+    );
   });
 
   it("is byte-identical across repeated runs and equivalent collection orderings", () => {
@@ -1792,18 +1855,6 @@ describe("deterministic Solution export", () => {
     expect(reordered.manifestDigest).toBe(first.manifestDigest);
     expect(reordered.zipDigest).toBe(first.zipDigest);
     expect(reordered.zipBytes).toEqual(first.zipBytes);
-  });
-
-  it("writes regular store-mode ZIP entries in deterministic UTF-16 order", () => {
-    const artifact = ready(generateSolutionExport(createExportRequest()));
-    const entries = readDeterministicZip(artifact.zipBytes);
-    const paths = entries.map(({ path }) => path);
-
-    expect(paths).toEqual(paths.toSorted());
-    expect(createDeterministicZip(artifact.files)).toEqual(artifact.zipBytes);
-    expect(entries.map(({ bytes }) => bytes.byteLength)).toEqual(
-      artifact.files.map(({ bytes }) => bytes.byteLength),
-    );
   });
 
   it("rejects traversal, absolute, platform-specific, ADS, and device paths", () => {
@@ -1909,6 +1960,67 @@ describe("deterministic Solution export", () => {
       });
       expect(result.state).toBe("blocked");
     }
+    const manySmallFiles = createExportRequest({
+      mode: "infrastructure-only",
+      supplementalFiles: Array.from({ length: 32 }, (_, index) =>
+        supplementalText(
+          `evidence/small-${String(index)}.txt`,
+          "safe evidence",
+        ),
+      ),
+    });
+    const artifact = ready(generateSolutionExport(manySmallFiles));
+    const manifestPath = "cloudmarkup/cloudmarkup.manifest.json";
+    const largestPayload = Math.max(
+      ...artifact.files
+        .filter(({ path }) => path !== manifestPath)
+        .map(({ bytes }) => bytes.byteLength),
+    );
+    const manifestBytes =
+      artifact.files.find(({ path }) => path === manifestPath)?.bytes
+        .byteLength ?? 0;
+    expect(manifestBytes).toBeGreaterThan(largestPayload);
+    const result = generateSolutionExport({
+      ...manySmallFiles,
+      target: {
+        ...manySmallFiles.target,
+        limits: {
+          ...manySmallFiles.target.limits,
+          maxFileBytes: largestPayload,
+        },
+      },
+    });
+    expect(result.state).toBe("blocked");
+    expect(result).not.toHaveProperty("artifact");
+    expect(result.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: "EXPORT_FILE_LIMIT_EXCEEDED",
+        path: manifestPath,
+      }),
+    );
+  });
+
+  it("blocks malformed supplemental JSON with a safe diagnostic instead of throwing", () => {
+    const content = '{"review":"synthetic-parser-marker"';
+    const supplemental = {
+      ...supplementalText("evidence/review.json", content),
+      mediaType: "application/json" as const,
+    };
+    const result = generateSolutionExport(
+      createExportRequest({
+        mode: "infrastructure-only",
+        supplementalFiles: [supplemental],
+      }),
+    );
+    expect(result.state).toBe("blocked");
+    expect(result).not.toHaveProperty("artifact");
+    expect(result.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: "EXPORT_FILE_CONTENT_INVALID",
+        path: supplemental.path,
+      }),
+    );
+    expect(JSON.stringify(result)).not.toContain("synthetic-parser-marker");
   });
 
   it("never silently overwrites user-owned or modified generated files", () => {
@@ -1991,6 +2103,72 @@ describe("deterministic Solution export", () => {
         ],
       });
       expect(result.state).toBe("blocked");
+    }
+    for (const [mediaType, path, value, code] of [
+      [
+        "application/json",
+        "evidence/review.json",
+        '{"password":"ThisMustNeverShip123"}',
+        "EXPORT_CONTENT_SECRET_VALUE",
+      ],
+      [
+        "application/yaml",
+        "evidence/review.yaml",
+        "'api-key': 'ThisMustNeverShip123'",
+        "EXPORT_CONTENT_SECRET_VALUE",
+      ],
+      [
+        "application/vnd.cyclonedx+json",
+        "evidence/review.cdx.json",
+        '{"note":"-----BEGIN ' + 'PRIVATE KEY-----"}',
+        "EXPORT_CONTENT_PRIVATE_KEY",
+      ],
+    ] as const) {
+      const supplemental = {
+        ...supplementalText(path, value),
+        mediaType,
+        semanticChecksum: canonicalSemanticDigest(mediaType, encodeUtf8(value)),
+      };
+      const result = generateSolutionExport({
+        ...base,
+        supplementalFiles: [supplemental],
+      });
+      expect(result.state).toBe("blocked");
+      expect(result).not.toHaveProperty("artifact");
+      expect(result.diagnostics).toContainEqual(
+        expect.objectContaining({ code, path }),
+      );
+      expect(JSON.stringify(result.diagnostics)).not.toContain(value);
+    }
+    for (const [mediaType, path, value] of [
+      [
+        "application/json",
+        "evidence/review.json",
+        '{"password":{"Ref":"PasswordParameter"},"api_key":"${API_KEY}"}',
+      ],
+      [
+        "application/yaml",
+        "evidence/review.yaml",
+        "'password': '${PASSWORD_PARAMETER}'",
+      ],
+      [
+        "application/vnd.cyclonedx+json",
+        "evidence/review.cdx.json",
+        '{"bomFormat":"CycloneDX","specVersion":"1.6"}\n',
+      ],
+    ] as const) {
+      const supplemental = {
+        ...supplementalText(path, value),
+        mediaType,
+        semanticChecksum: canonicalSemanticDigest(mediaType, encodeUtf8(value)),
+      };
+      const artifact = ready(
+        generateSolutionExport({ ...base, supplementalFiles: [supplemental] }),
+      );
+      expect(artifact.files.find((file) => file.path === path)?.bytes).toEqual(
+        encodeUtf8(value),
+      );
+      expect(localSolutionExportService.verify(artifact)).toEqual([]);
     }
     for (const path of [
       "application/node_modules/package.txt",
@@ -2117,5 +2295,33 @@ describe("deterministic Solution export", () => {
     expect(zipDiagnostics.map(({ code }) => code)).toContain(
       "EXPORT_VERIFY_ZIP_CORRUPT",
     );
+    const manifestPath = "cloudmarkup/cloudmarkup.manifest.json";
+    for (const bytes of [
+      encodeUtf8('{"synthetic-invalid-json"'),
+      new Uint8Array([255]),
+    ]) {
+      const invalidContent = {
+        ...artifact,
+        files: artifact.files.map((file) =>
+          file.path === manifestPath
+            ? {
+                ...file,
+                bytes,
+                checksum: sha256Digest(bytes),
+              }
+            : file,
+        ),
+      };
+      const diagnostics = localSolutionExportService.verify(invalidContent);
+      expect(diagnostics).toContainEqual(
+        expect.objectContaining({
+          code: "EXPORT_VERIFY_CONTENT_INVALID",
+          path: manifestPath,
+        }),
+      );
+      expect(JSON.stringify(diagnostics)).not.toContain(
+        "synthetic-invalid-json",
+      );
+    }
   });
 });

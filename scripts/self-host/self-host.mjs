@@ -8,9 +8,19 @@ import {
   open,
   readdir,
   readFile,
+  realpath,
   unlink,
 } from "node:fs/promises";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import {
+  basename,
+  dirname,
+  isAbsolute,
+  join,
+  parse,
+  relative,
+  resolve,
+  sep,
+} from "node:path";
 import { createServer } from "node:net";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -36,20 +46,17 @@ export async function cli(main) {
     process.exitCode = 1;
   }
 }
-export async function privateFile(path) {
+export async function privateFile(path, { allowMissing = false } = {}) {
   if (!path || !isAbsolute(path)) fail("A private absolute file is required.");
-  let current = resolve(path);
-  const leaf = await lstat(current);
-  if (!leaf.isFile() || leaf.isSymbolicLink())
-    fail("A regular private file is required.");
-  while (true) {
-    const state = await lstat(current);
-    if (state.isSymbolicLink())
-      fail("Symlinked private configuration is refused.");
-    const parent = dirname(current);
-    if (parent === current) break;
-    current = parent;
+  let leaf;
+  try {
+    leaf = await lstat(path);
+  } catch (error) {
+    if (!allowMissing || error.code !== "ENOENT") throw error;
   }
+  if (leaf && (!leaf.isFile() || leaf.isSymbolicLink()))
+    fail("A regular private file is required.");
+  await privateDirectory(dirname(path), { allowMissing });
   return path;
 }
 export async function sha256(path) {
@@ -625,10 +632,14 @@ async function foregroundTransport() {
     await transport.stop();
   }
 }
-export function composeArgs(args, env = process.env) {
+function composeProject(env) {
   const project = env.CLOUDMARKUP_SELF_HOST_PROJECT ?? "cloudmarkup-self-host";
   if (!/^[a-z0-9][a-z0-9_-]{0,62}$/.test(project))
     fail("Invalid Compose project.");
+  return project;
+}
+export function composeArgs(args, env = process.env) {
+  const project = composeProject(env);
   if (env.CLOUDMARKUP_RETAINED_HISTORY_VOLUME)
     fail("Retained history is not admitted by the standalone core profile.");
   const retained = env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY;
@@ -712,11 +723,11 @@ export async function doctor(exec = run) {
     durableMount: "Docker-managed named volume; actual runtime probe required",
   };
 }
-export function validateImagePins(env = process.env) {
+export function validateImagePins(env = process.env, { runtime = true } = {}) {
   for (const key of [
     "CLOUDMARKUP_NODE_IMAGE",
     "CLOUDMARKUP_GO_IMAGE",
-    "CLOUDMARKUP_POSTGRES_IMAGE",
+    ...(runtime ? ["CLOUDMARKUP_POSTGRES_IMAGE"] : []),
   ]) {
     if (
       typeof env[key] !== "string" ||
@@ -725,19 +736,43 @@ export function validateImagePins(env = process.env) {
       fail("Reviewed immutable image references are required.");
   }
 }
-export async function validatePrivateLocations(env = process.env) {
+// Building the shared image needs source and toolchain pins, never operator
+// credentials or runtime mounts. Keep the Dockerfile as the sole build recipe.
+export async function buildArgs(env = process.env) {
+  validateImagePins(env, { runtime: false });
+  const image =
+    env.CLOUDMARKUP_SELF_HOST_IMAGE ?? "cloudmarkup-self-host:local";
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9./:_-]{0,511}$/u.test(image))
+    fail("A valid local application image name is required.");
+  // Missing runtime files are fine; supplied paths must never enter COPY . .
+  // Validate here as well as at CLI dispatch so printed build arguments cannot
+  // describe an unsafe build that a caller might execute later.
+  await validatePrivateLocations(env, { runtime: false });
+  return [
+    "build",
+    "--file",
+    join(root, "scripts/self-host/Dockerfile"),
+    "--tag",
+    image,
+    "--build-arg",
+    `NODE_IMAGE=${env.CLOUDMARKUP_NODE_IMAGE}`,
+    "--build-arg",
+    `GO_IMAGE=${env.CLOUDMARKUP_GO_IMAGE}`,
+    root,
+  ];
+}
+export async function validatePrivateLocations(
+  env = process.env,
+  { runtime = true } = {},
+) {
   if (
-    env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY !== undefined ||
-    env.CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE !== undefined
+    runtime &&
+    (env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY !== undefined ||
+      env.CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE !== undefined)
   ) {
     composeArgs([], env);
-    await outsideRepository(env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY);
-    await privateDirectory(env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY);
-    await outsideRepository(
-      env.CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE,
-    );
-    await privateFile(env.CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE);
   }
+  const options = { allowMissing: !runtime };
   for (const key of [
     "CLOUDMARKUP_SELF_HOST_CONFIGURATION_SOURCE",
     "CLOUDMARKUP_POSTGRES_OWNER_PASSWORD_FILE",
@@ -745,14 +780,25 @@ export async function validatePrivateLocations(env = process.env) {
     "CLOUDMARKUP_OPERATOR_CONFIGURATION_SOURCE",
     "CLOUDMARKUP_PROVISIONING_CONFIGURATION_SOURCE",
     "CLOUDMARKUP_OWNER_CONFIGURATION_SOURCE",
+    ...(env.CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE === undefined
+      ? []
+      : ["CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE"]),
   ]) {
-    await outsideRepository(env[key]);
-    await privateFile(env[key]);
+    if (!runtime && env[key] === undefined) continue;
+    await outsideRepository(env[key], options);
+    await privateFile(env[key], options);
   }
-  await outsideRepository(env.CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY);
-  await privateDirectory(env.CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY);
-  await outsideRepository(env.CLOUDMARKUP_DATABASE_SECRETS_DIRECTORY);
-  await privateDirectory(env.CLOUDMARKUP_DATABASE_SECRETS_DIRECTORY);
+  for (const key of [
+    "CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY",
+    "CLOUDMARKUP_DATABASE_SECRETS_DIRECTORY",
+    ...(env.CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY === undefined
+      ? []
+      : ["CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY"]),
+  ]) {
+    if (!runtime && env[key] === undefined) continue;
+    await outsideRepository(env[key], options);
+    await privateDirectory(env[key], options);
+  }
 }
 export async function exclusive(work, env = process.env) {
   const directory = stateDirectory(env);
@@ -769,7 +815,7 @@ export async function exclusive(work, env = process.env) {
   }
 }
 export function stateDirectory(env = process.env) {
-  return join(root, ".cache/self-host", composeArgs([], env)[2]);
+  return join(root, ".cache/self-host", composeProject(env));
 }
 export async function assertNoIncompleteRestore(env = process.env) {
   try {
@@ -906,30 +952,80 @@ async function restoreVolumeMarker(complete) {
     await directory.close();
   }
 }
-export async function outsideRepository(path) {
+function insideDirectory(directory, path) {
+  const rel = relative(directory, path);
+  return (
+    !rel || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
+  );
+}
+async function canonicalLocation(path) {
+  const missing = [];
+  let current = path;
+  while (true) {
+    try {
+      return resolve(await realpath(current), ...missing);
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+      const parent = dirname(current);
+      if (parent === current) throw error;
+      missing.unshift(basename(current));
+      current = parent;
+    }
+  }
+}
+export async function outsideRepository(path, { allowMissing = false } = {}) {
   if (!path || !isAbsolute(path))
     fail("An absolute external backup path is required.");
-  const result = resolve(path),
-    rel = relative(root, result);
-  if (!rel || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel)))
+  // Win32 consumers can remove trailing dots/spaces where Node's native path
+  // lookup reports ENOENT. Do not admit that ambiguous spelling as a new path.
+  if (
+    process.platform === "win32" &&
+    path
+      .split(/[\\/]/u)
+      .some((part) => part !== "." && part !== ".." && /[. ]$/u.test(part))
+  )
+    fail(
+      "Windows private paths cannot have trailing-dot or trailing-space components.",
+    );
+  const result = resolve(path);
+  if (insideDirectory(root, result))
     fail("Backups must be outside the repository/build context.");
-  await privateDirectory(dirname(result));
+  if (insideDirectory(await realpath(root), await canonicalLocation(path)))
+    fail("Backups must be outside the repository/build context.");
+  // Check the supplied spelling before normalization can erase link/.. .
+  await privateDirectory(dirname(path), { allowMissing });
   return result;
 }
-export async function privateDirectory(path) {
+export async function privateDirectory(path, { allowMissing = false } = {}) {
   if (!path || !isAbsolute(path))
     fail("A private absolute directory is required.");
-  let current = resolve(path);
+  let current = path;
   while (true) {
-    const state = await lstat(current);
-    if (!state.isDirectory() || state.isSymbolicLink())
+    // Preserve raw link/.. ancestry, but lstat the link itself rather than
+    // following a trailing directory separator on POSIX.
+    const rootLength = parse(current).root.length;
+    while (
+      current.length > rootLength &&
+      (current.endsWith(sep) || current.endsWith("/"))
+    )
+      current = current.slice(0, -1);
+    let state;
+    try {
+      state = await lstat(current);
+    } catch (error) {
+      if (!allowMissing || error.code !== "ENOENT") throw error;
+    }
+    if (state && (!state.isDirectory() || state.isSymbolicLink()))
       fail("A regular unsymlinked directory is required.");
     const parent = dirname(current);
     if (parent === current) break;
     current = parent;
   }
 }
-export async function main(command = process.argv[2]) {
+export async function main(
+  command = process.argv[2],
+  { buildEnvironment = process.env, buildRunner = run } = {},
+) {
   if (command === "transport") {
     await foregroundTransport();
     return;
@@ -988,14 +1084,16 @@ export async function main(command = process.argv[2]) {
     ].includes(command)
   )
     fail("Unknown self-host command.");
+  if (command === "build") {
+    const args = await buildArgs(buildEnvironment);
+    await doctor(buildRunner);
+    await exclusive(() => buildRunner(args), buildEnvironment);
+    return;
+  }
   await doctor();
   validateImagePins();
   await validatePrivateLocations();
   await exclusive(async () => {
-    if (command === "build") {
-      await compose(["build", "app"]);
-      return;
-    }
     if (command === "postgres:start") {
       await compose(["up", "--detach", "--wait", "postgres"]);
       return;

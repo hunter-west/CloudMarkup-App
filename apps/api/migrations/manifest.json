@@ -605,6 +605,21 @@
       "version": "0139",
       "file": "0139_staff_credit_export_access.sql",
       "checksumSha256": "b2b99e854c95c8a33ed271de58a35a573e00ccb4c22b6e3b17b1758264864c31"
+    },
+    {
+      "version": "0140",
+      "file": "0140_beta_ai_usage_evidence.sql",
+      "checksumSha256": "0506cd7b7d3419e2be1addbbe930f4e74016dd33984b9c504829c71ee0ab64f2"
+    },
+    {
+      "version": "0141",
+      "file": "0141_staff_provider_cost_scope.sql",
+      "checksumSha256": "358f79f5d19cd2e5540c03f3e72d1010bd726c5c82500e3174ef20ca3249b956"
+    },
+    {
+      "checksumSha256": "9ae4f3bc42624d52d3c17265539cf21650645a1035b91fce936023500d3f21f0",
+      "file": "0142_beta_ai_cleanup_checkpoints.sql",
+      "version": "0142"
     }
   ]
 }

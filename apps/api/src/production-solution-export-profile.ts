@@ -4,10 +4,10 @@ import { dirname, join } from "node:path";
 
 import {
   createDiagramIconSetV1,
-  diagramRendererSfntV1Pin,
+  diagramRendererBoundedDetailV1Pin,
   DIAGRAM_SFNT_FONT_SOURCE,
   createSfntResvgDiagramRasterizer,
-  createSfntDiagramExportService,
+  createBoundedDetailDiagramExportService,
 } from "@cloudmarkup/diagram-export";
 import { awsCatalogArtifactV1 } from "@cloudmarkup/provider-aws/catalog";
 import { serializeCanonicalJson } from "@cloudmarkup/schemas";
@@ -160,7 +160,7 @@ export function createProductionSolutionExportTargetSettings(assets: {
           }),
         },
         diagramRenderer: {
-          adapter: diagramRendererSfntV1Pin,
+          adapter: diagramRendererBoundedDetailV1Pin,
           limitsDigest: digest(defaultDiagram.output),
           profileDigest: solutionExportDiagramProfileDigest(defaultDiagram),
           profileId: "cloudmarkup.diagram.presentation",
@@ -293,8 +293,8 @@ export async function loadProductionSolutionExportProfile(
     diagram: {
       catalog: awsCatalogArtifactV1,
       iconSet,
-      renderer: diagramRendererSfntV1Pin,
-      service: createSfntDiagramExportService({ rasterizer }),
+      renderer: diagramRendererBoundedDetailV1Pin,
+      service: createBoundedDetailDiagramExportService({ rasterizer }),
     },
   };
 }

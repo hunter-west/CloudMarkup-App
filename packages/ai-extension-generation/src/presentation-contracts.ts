@@ -30,6 +30,7 @@ import {
 import { z } from "zod";
 
 import {
+  compareUtcInstants,
   digestCanonicalValue,
   portablePathKey,
 } from "./presentation-support.js";
@@ -257,7 +258,10 @@ export const candidateArtifactOriginV1Schema = z.discriminatedUnion("kind", [
           });
         }
         editIds.add(edit.editId);
-        if (priorEditedAt !== undefined && edit.editedAt < priorEditedAt) {
+        if (
+          priorEditedAt !== undefined &&
+          compareUtcInstants(edit.editedAt, priorEditedAt) < 0
+        ) {
           context.addIssue({
             code: "custom",
             message: "User modifications must remain in chronological order.",

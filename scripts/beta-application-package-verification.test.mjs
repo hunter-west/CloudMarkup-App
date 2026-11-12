@@ -239,6 +239,22 @@ test("public-main package verification uses no credentials or deployment authori
     /github.repository == 'hunter-west\/CloudMarkup-App'.*github.ref == 'refs\/heads\/main'.*github.event_name == 'push'/,
   );
   assert.equal(job.environment, undefined);
+  const policyStep = job.steps.find(
+    (step) => step.name === "Verify acquisition and workflow boundaries",
+  );
+  assert.equal(policyStep.if, "matrix.group == 'http-and-storage'");
+  assert.equal(
+    policyStep.run,
+    "node --test scripts/beta-application-package-verification.test.mjs",
+  );
+  assert.ok(
+    workflow.jobs.memory.steps.every(
+      (step) =>
+        !String(step.run ?? "").includes(
+          "scripts/beta-application-package-verification.test.mjs",
+        ),
+    ),
+  );
   const cache = job.steps.find(
     (step) => step.name === "Restore hash-verified public Go tools",
   );

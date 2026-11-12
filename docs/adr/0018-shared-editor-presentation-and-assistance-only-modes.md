@@ -6,7 +6,9 @@
 - **Supersedes:** ADR-0006 only for mode-specific editor density, control
   layout, workflow staging, and disclosure defaults
 - **Refines:** ADR-0014 and ADR-0016
-- **Superseded by:** None
+- **Superseded by:** [ADR-0024](0024-canvas-first-on-demand-editor-surfaces.md)
+  only for desktop Inspector and Workspace geometry, initial open state, and
+  resize behavior; shared modes and semantic parity remain in force
 
 ## Context
 

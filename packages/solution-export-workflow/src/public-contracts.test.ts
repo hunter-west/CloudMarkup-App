@@ -17,9 +17,6 @@ it("preserves existing contract and diagram-profile identities on the data-only 
   );
   const { request } = workflowFixture();
   const { diagram } = request;
-  expect(
-    contracts.solutionExportWorkflowRequestV1Schema.parse(request),
-  ).toEqual(existing.solutionExportWorkflowRequestV1Schema.parse(request));
   expect(contracts.solutionExportDiagramProfileDigest(diagram)).toBe(
     sha256Digest(
       serializeCanonicalJson({

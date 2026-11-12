@@ -1,3 +1,8 @@
+import type {
+  CleanupIdentity,
+  CleanupOutcome,
+  CleanupPage,
+} from "../../application/beta-ai-cleanup-owner.js";
 import { createHash } from "node:crypto";
 import { ENTITLEMENT_POLICY_VERSION } from "@cloudmarkup/domain";
 import type { BetaConverseUsage } from "@cloudmarkup/model-gateway";
@@ -9,7 +14,39 @@ import {
 } from "../../application/beta-ai-pricing.js";
 import { PostgresCommercialPersistenceRepository } from "./commercial-repositories.js";
 import { sql, type SqlDatabase } from "./sql.js";
+import {
+  BetaAiUsageConflict,
+  completeBetaAiRelease,
+  recordBetaAiUsageObservation,
+  readBetaAiAccountingStatus,
+  type BetaAiReleaseAccounting,
+} from "./beta-ai-usage-observations.js";
 
+/** Carries the SAME response for an explicit in-process retry if all evidence
+ * stores remain unavailable. It is not a durable queue or a crash guarantee. */
+export class BetaAiFinancialReleasePending extends Error {
+  readonly identity: BetaAiCreditIdentity;
+  readonly knownUsage: BetaConverseUsage | undefined;
+  readonly accounting: BetaAiReleaseAccounting["accounting"];
+  readonly financial: "pending" | "conflict";
+  constructor(
+    identity: BetaAiCreditIdentity,
+    knownUsage: BetaConverseUsage | undefined,
+    accounting: BetaAiReleaseAccounting["accounting"],
+    financial: "pending" | "conflict",
+    cause: unknown,
+  ) {
+    super(
+      "Beta AI financial release needs reconciliation; do not invoke the provider again.",
+      { cause },
+    );
+    this.name = "BetaAiFinancialReleasePending";
+    this.identity = Object.freeze({ ...identity });
+    this.knownUsage = knownUsage ? Object.freeze({ ...knownUsage }) : undefined;
+    this.accounting = accounting;
+    this.financial = financial;
+  }
+}
 export type BetaAiPurpose = "proposal" | "application-source";
 export interface BetaAiCreditIdentity {
   readonly jobId: string;
@@ -284,7 +321,18 @@ export class PostgresBetaAiCreditMeter {
       usage,
     };
   }
+  async observe(identity: BetaAiCreditIdentity, usage: BetaConverseUsage) {
+    assertIdentity(identity);
+    await recordBetaAiUsageObservation(
+      this.#reservationDatabase,
+      { ...identity, reservationId: betaAiReservationId(identity) },
+      usage,
+    );
+  }
   async record(identity: BetaAiCreditIdentity, evidence: BetaAiRecordedUsage) {
+    // Also protects existing callers that record a durable output directly.
+    // Customer ceilings still govern delivery/settlement, never observation.
+    await this.observe(identity, evidence.usage);
     const reservationId = betaAiReservationId(identity);
     const held = requiredRow(
       (
@@ -461,13 +509,175 @@ export class PostgresBetaAiCreditMeter {
     }
     return rows.rows.length;
   }
-  async release(identity: BetaAiCreditIdentity) {
+  /** Selection has no financial/evidence writes. The owner must durably retain
+   * this exact page before execution; outcomes keep released-but-unresolved
+   * invocations eligible on later sweeps. No provider is invoked. */
+  async selectReleasedAccounting(
+    organizationId: string,
+    afterReservationId: string | null = null,
+  ): Promise<CleanupPage> {
+    if (
+      !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u.test(organizationId) ||
+      (afterReservationId !== null &&
+        !/^beta-ai\.[a-f0-9]{64}$/u.test(afterReservationId))
+    )
+      throw new Error("The accounting cleanup cursor is invalid.");
+    const rows = await this.#reservationDatabase.query(
+      sql(
+        "SELECT i.reservation_id,i.project_id,i.job_id,i.purpose,i.request_sha256 FROM beta_ai_invocations i " +
+          "JOIN credit_reservations r ON r.organization_id=i.organization_id AND r.reservation_id=i.reservation_id " +
+          "LEFT JOIN beta_ai_cleanup_outcomes c ON c.organization_id=i.organization_id AND c.reservation_id=i.reservation_id " +
+          "AND c.restore_epoch=(SELECT restore_epoch FROM beta_ai_cleanup_control WHERE organization_id=i.organization_id) " +
+          "WHERE i.organization_id=$1 AND r.status='released' AND i.state<>'settled' " +
+          "AND (i.state<>'released' OR c.verification_sha256 IS NULL) " +
+          "AND ($2::text IS NULL OR i.reservation_id>$2) ORDER BY i.reservation_id LIMIT 25",
+        [organizationId, afterReservationId],
+      ),
+    );
+    const identities = rows.rows.map((row) => {
+      const identity: CleanupIdentity = {
+        organizationId,
+        reservationId: String(row["reservation_id"]),
+        projectId: String(row["project_id"]),
+        jobId: String(row["job_id"]),
+        purpose: row["purpose"] as BetaAiPurpose,
+        requestSha256: String(row["request_sha256"]),
+      };
+      assertIdentity(identity);
+      if (
+        !["proposal", "application-source"].includes(identity.purpose) ||
+        betaAiReservationId(identity) !== identity.reservationId
+      )
+        throw new BetaAiUsageConflict(
+          "The cleanup invocation identity conflicts.",
+        );
+      return Object.freeze(identity);
+    });
+    return {
+      identities,
+      nextCursor:
+        identities.length === 25
+          ? (identities.at(-1)?.reservationId ?? null)
+          : null,
+    };
+  }
+  /** Execute only an exact identity retained by the authenticated durable owner.
+   * Existing release/replay retains the financial payload and idempotency key. */
+  async reconcileReleasedAccountingIdentity(
+    identity: CleanupIdentity,
+  ): Promise<CleanupOutcome> {
+    assertIdentity(identity);
+    if (
+      !["proposal", "application-source"].includes(identity.purpose) ||
+      betaAiReservationId(identity) !== identity.reservationId
+    )
+      throw new BetaAiUsageConflict(
+        "The cleanup invocation identity conflicts.",
+      );
+    try {
+      const terminal = await this.#reservationDatabase.query(
+        sql(
+          "SELECT r.status AS financial_status FROM credit_reservations r JOIN beta_ai_invocations i " +
+            "ON i.organization_id=r.organization_id AND i.reservation_id=r.reservation_id " +
+            "WHERE i.organization_id=$1 AND i.reservation_id=$2 AND i.project_id=$3 AND i.job_id=$4 AND i.purpose=$5 AND i.request_sha256=$6 " +
+            "AND r.project_id=i.project_id AND r.job_id=i.job_id AND r.request_sha256=i.request_sha256",
+          [
+            identity.organizationId,
+            identity.reservationId,
+            identity.projectId,
+            identity.jobId,
+            identity.purpose,
+            identity.requestSha256,
+          ],
+        ),
+      );
+      if (
+        terminal.rows.length !== 1 ||
+        terminal.rows[0]?.["financial_status"] !== "released"
+      )
+        throw new BetaAiUsageConflict(
+          "Cleanup requires the same already released reservation.",
+        );
+      return {
+        ...identity,
+        financial: "released",
+        ...(await this.release(identity)),
+      };
+    } catch (error) {
+      return {
+        ...identity,
+        financial:
+          error instanceof BetaAiFinancialReleasePending
+            ? error.financial
+            : "conflict",
+        cleanup: "pending",
+        accounting:
+          error instanceof BetaAiFinancialReleasePending
+            ? error.accounting
+            : error instanceof BetaAiUsageConflict
+              ? "conflict"
+              : "unresolved",
+      };
+    }
+  }
+  /** Bounded evidence persistence independent of financial success. Errors here
+   * cannot suppress the existing release/replay operation. */
+  async #preserveAfterFinancialFailure(
+    identity: BetaAiCreditIdentity,
+    usage?: BetaConverseUsage,
+  ) {
+    try {
+      if (!usage)
+        return await readBetaAiAccountingStatus(this.#reservationDatabase, {
+          ...identity,
+          reservationId: betaAiReservationId(identity),
+        });
+      await this.observe(identity, usage);
+      return "known" as const;
+    } catch (error) {
+      return error instanceof BetaAiUsageConflict
+        ? ("conflict" as const)
+        : ("unresolved" as const);
+    }
+  }
+  async release(
+    identity: BetaAiCreditIdentity,
+    knownUsage?: BetaConverseUsage,
+  ): Promise<BetaAiReleaseAccounting> {
+    assertIdentity(identity);
+    try {
+      return await this.#release(identity, knownUsage);
+    } catch (error) {
+      const accounting = await this.#preserveAfterFinancialFailure(
+        identity,
+        knownUsage,
+      );
+      const code =
+        typeof error === "object" && error !== null && "code" in error
+          ? error.code
+          : undefined;
+      throw new BetaAiFinancialReleasePending(
+        identity,
+        knownUsage,
+        accounting,
+        code === "reservation-terminal" || code === "idempotency-conflict"
+          ? "conflict"
+          : "pending",
+        error,
+      );
+    }
+  }
+  async #release(
+    identity: BetaAiCreditIdentity,
+    knownUsage?: BetaConverseUsage,
+  ): Promise<BetaAiReleaseAccounting> {
     const reservationId = betaAiReservationId(identity);
     const row = requiredRow(
       (
         await this.#reservationDatabase.query(
           sql(
-            `SELECT state FROM beta_ai_invocations WHERE organization_id=$1 AND reservation_id=$2 AND project_id=$3 AND job_id=$4 AND purpose=$5 AND request_sha256=$6`,
+            "SELECT state FROM beta_ai_invocations WHERE organization_id=$1 AND reservation_id=$2 " +
+              "AND project_id=$3 AND job_id=$4 AND purpose=$5 AND request_sha256=$6",
             [
               identity.organizationId,
               reservationId,
@@ -480,36 +690,61 @@ export class PostgresBetaAiCreditMeter {
         )
       ).rows,
     );
-    if (row["state"] === "settled" || row["state"] === "released") return;
-    const pricing = await this.reservedPricing(identity);
-    await this.#ledger.releaseReservation(
-      {
-        actorId: "beta-ai-meter",
-        authority: "internal-accounting",
-        correlationId: identity.jobId,
-        organizationId: identity.organizationId,
-      },
-      {
-        chargingPolicyVersion: pricing.chargingPolicyVersion,
-        chargingScenario:
-          row["state"] === "reserved"
-            ? "user-cancelled-before-invocation"
-            : "cloudmarkup-internal-failure",
-        idempotencyKey: "beta-ai:release:" + reservationId,
-        ledgerEntryId: "ledger.release." + reservationId,
-        reasonCode: "beta-ai.output-unavailable",
-        requestId: reservationId,
-        requestSha256: identity.requestSha256,
-        reservationId,
-      },
-    );
-    await this.#reservationDatabase.query(
-      sql(
-        `UPDATE beta_ai_invocations SET state='released',terminal_at=clock_timestamp(),usage_recorded_at=NULL,
-       provider_request_id=NULL,input_tokens=NULL,output_tokens=NULL,cached_input_tokens=NULL,output_object_id=NULL,output_sha256=NULL
-       WHERE organization_id=$1 AND reservation_id=$2 AND state IN ('reserved','dispatched','usage-recorded')`,
-        [identity.organizationId, reservationId],
-      ),
-    );
+    // Preserve the original financial payload and idempotency key. No new
+    // observation-specific read/write is required before a healthy release.
+    if (row["state"] !== "settled" && row["state"] !== "released") {
+      const pricing = await this.reservedPricing(identity);
+      const release = () =>
+        this.#ledger.releaseReservation(
+          {
+            actorId: "beta-ai-meter",
+            authority: "internal-accounting",
+            correlationId: identity.jobId,
+            organizationId: identity.organizationId,
+          },
+          {
+            chargingPolicyVersion: pricing.chargingPolicyVersion,
+            chargingScenario:
+              row["state"] === "reserved"
+                ? "user-cancelled-before-invocation"
+                : "cloudmarkup-internal-failure",
+            idempotencyKey: "beta-ai:release:" + reservationId,
+            ledgerEntryId: "ledger.release." + reservationId,
+            reasonCode: "beta-ai.output-unavailable",
+            requestId: reservationId,
+            requestSha256: identity.requestSha256,
+            reservationId,
+          },
+        );
+      try {
+        await release();
+      } catch {
+        // Persist the SAME response even if the financial transaction failed.
+        // Replay the identical canonical operation once. Its existing terminal
+        // branch accepts only matching request/key/payload plus ledger evidence;
+        // it never refunds twice. No status-only operational terminal write.
+        await this.#preserveAfterFinancialFailure(identity, knownUsage);
+        await release();
+      }
+    }
+    try {
+      if (row["state"] === "settled") {
+        if (knownUsage) await this.observe(identity, knownUsage);
+        return { cleanup: "complete", accounting: "known" };
+      }
+      return await completeBetaAiRelease(
+        this.#reservationDatabase,
+        { ...identity, reservationId },
+        knownUsage,
+      );
+    } catch (error) {
+      // The ledger terminal outcome is already durable. Leave retained usage
+      // untouched and make the separate accounting/cleanup outcome explicit.
+      return {
+        cleanup: "pending",
+        accounting:
+          error instanceof BetaAiUsageConflict ? "conflict" : "unresolved",
+      };
+    }
   }
 }

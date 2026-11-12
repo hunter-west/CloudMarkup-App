@@ -1,6 +1,23 @@
+import { readFile } from "node:fs/promises";
+
+import { intentDocumentV1Schema } from "@cloudmarkup/schemas";
 import { describe, expect, it } from "vitest";
 
 import { modelIntentResultV1Schema } from "./model-intent.js";
+
+async function validIntentDocument() {
+  return intentDocumentV1Schema.parse(
+    JSON.parse(
+      await readFile(
+        new URL(
+          "../../test-fixtures/fixtures/intent-document/v1/valid/representative.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    ) as unknown,
+  );
+}
 
 function completedCommercial() {
   return {
@@ -36,7 +53,7 @@ function completedCommercial() {
 }
 
 describe("Prompt 35 safe Intent API/UI contract", () => {
-  it("returns clarification, route, credits, safe provenance, and optional technical usage in one flow", () => {
+  it("returns clarification, route, credits, safe provenance, and optional technical usage in one flow", async () => {
     const parsed = modelIntentResultV1Schema.parse({
       assumptions: [],
       commercial: completedCommercial(),
@@ -80,9 +97,24 @@ describe("Prompt 35 safe Intent API/UI contract", () => {
     expect(parsed).not.toHaveProperty("operatingBufferBasisPoints");
     expect(parsed).not.toHaveProperty("rawPrompt");
     expect(parsed).not.toHaveProperty("rawResponse");
+
+    const extraction = {
+      ...parsed,
+      intentDocument: await validIntentDocument(),
+      operation: "intent.extract",
+    };
+    expect(modelIntentResultV1Schema.parse(extraction).intentDocument).toEqual(
+      extraction.intentDocument,
+    );
+    expect(
+      modelIntentResultV1Schema.safeParse({
+        ...extraction,
+        intentDocument: null,
+      }).success,
+    ).toBe(false);
   });
 
-  it("represents a stable commercial denial without provider provenance or model output", () => {
+  it("represents a stable commercial denial without provider provenance or model output", async () => {
     const parsed = modelIntentResultV1Schema.parse({
       assumptions: [],
       commercial: {
@@ -121,6 +153,22 @@ describe("Prompt 35 safe Intent API/UI contract", () => {
     });
     expect(parsed.provenance).toBeNull();
     expect(parsed.intentDocument).toBeNull();
+
+    const deniedOutput = modelIntentResultV1Schema.safeParse({
+      ...parsed,
+      intentDocument: await validIntentDocument(),
+    });
+    expect(deniedOutput.success).toBe(false);
+    if (deniedOutput.success)
+      throw new TypeError("Denied model output must be rejected.");
+    expect(deniedOutput.error.issues).toEqual([
+      expect.objectContaining({
+        code: "custom",
+        message:
+          "Only a provider-completed Intent extraction carries an Intent document.",
+        path: ["intentDocument"],
+      }),
+    ]);
   });
 
   it("rejects secret pricing fields and mismatched route provenance", () => {

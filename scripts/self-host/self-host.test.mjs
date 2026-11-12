@@ -10,20 +10,23 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join, resolve, sep, toNamespacedPath } from "node:path";
 import { createConnection, createServer } from "node:net";
 import test from "node:test";
 import { promisify } from "node:util";
 import {
   auditObjects,
   admitLocalOwnerTransport,
+  buildArgs,
   composeArgs,
   containerVersion,
   doctor,
+  main,
   outsideRepository,
   operatorInvocation,
   privateFile,
   root,
+  stateDirectory,
   stopAndVerify,
   startLocalOwnerTransport,
   transportConfigurationProgram,
@@ -33,6 +36,227 @@ import {
   validateImagePins,
   validatePrivateLocations,
 } from "./self-host.mjs";
+
+test("image build uses the shared Dockerfile and only pinned build inputs, without runtime credentials", async () => {
+  const env = {
+    CLOUDMARKUP_NODE_IMAGE: `node:24.18.0-bookworm-slim@sha256:${"a".repeat(64)}`,
+    CLOUDMARKUP_GO_IMAGE: `golang:1.26.8-bookworm@sha256:${"b".repeat(64)}`,
+  };
+  assert.deepEqual(await buildArgs(env), [
+    "build",
+    "--file",
+    join(root, "scripts/self-host/Dockerfile"),
+    "--tag",
+    "cloudmarkup-self-host:local",
+    "--build-arg",
+    `NODE_IMAGE=${env.CLOUDMARKUP_NODE_IMAGE}`,
+    "--build-arg",
+    `GO_IMAGE=${env.CLOUDMARKUP_GO_IMAGE}`,
+    root,
+  ]);
+  assert.deepEqual(
+    await buildArgs({
+      ...env,
+      CLOUDMARKUP_POSTGRES_IMAGE: "not-a-runtime-pin",
+      CLOUDMARKUP_SELF_HOST_CONFIGURATION_SOURCE: join(
+        tmpdir(),
+        "cm-uncreated/runtime.json",
+      ),
+      CLOUDMARKUP_POSTGRES_OWNER_PASSWORD_FILE: join(
+        tmpdir(),
+        "cm-uncreated/password",
+      ),
+    }),
+    await buildArgs(env),
+  );
+  assert.throws(() => validateImagePins(env), /immutable image/);
+  const configuredImage = "localhost:5000/cloudmarkup:Review_A";
+  assert.equal(
+    (
+      await buildArgs({ ...env, CLOUDMARKUP_SELF_HOST_IMAGE: configuredImage })
+    )[4],
+    configuredImage,
+  );
+  const incompleteModels = {
+    ...env,
+    CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY: join(
+      tmpdir(),
+      "cm-uncreated-dispatch",
+    ),
+  };
+  assert.deepEqual(await buildArgs(incompleteModels), await buildArgs(env));
+  assert.equal(stateDirectory(incompleteModels), stateDirectory(env));
+  assert.throws(() => composeArgs([], incompleteModels), /Configured models/);
+  for (const bad of [
+    { ...env, CLOUDMARKUP_NODE_IMAGE: "node:latest" },
+    { ...env, CLOUDMARKUP_GO_IMAGE: "golang:latest" },
+    { ...env, CLOUDMARKUP_SELF_HOST_IMAGE: "--output=other" },
+    { ...env, CLOUDMARKUP_SELF_HOST_IMAGE: "image;command" },
+  ])
+    await assert.rejects(buildArgs(bad));
+});
+
+test("build dispatch rejects supplied private paths before any Docker command and retains credential-free locking", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "cm-build-guard-"));
+  const inContext = await mkdtemp(join(root, "local-operator-fixture-"));
+  const marker = "SYNTHETIC BUILD-CONTEXT MARKER; NOT A CREDENTIAL";
+  const file = join(directory, "operator.txt");
+  const markerFile = join(inContext, "postgres-owner.txt");
+  const env = {
+    CLOUDMARKUP_NODE_IMAGE: `node:24.18.0-bookworm-slim@sha256:${"a".repeat(64)}`,
+    CLOUDMARKUP_GO_IMAGE: `golang:1.26.8-bookworm@sha256:${"b".repeat(64)}`,
+    CLOUDMARKUP_SELF_HOST_PROJECT: basename(directory).toLowerCase(),
+  };
+  const state = stateDirectory(env);
+  const calls = [];
+  const buildRunner = async (args) => {
+    calls.push(args);
+    if (args[0] === "info") return "linux";
+    if (args[0] === "compose") return "2.0.0";
+    assert.equal(args[0], "build");
+    assert.equal(
+      (await readFile(join(state, "operator.lock"), "utf8")).trim(),
+      String(process.pid),
+    );
+    return "synthetic build";
+  };
+  try {
+    await writeFile(file, marker);
+    await writeFile(markerFile, marker);
+    for (const key of [
+      "CLOUDMARKUP_SELF_HOST_CONFIGURATION_SOURCE",
+      "CLOUDMARKUP_POSTGRES_OWNER_PASSWORD_FILE",
+      "CLOUDMARKUP_MIGRATOR_PASSWORD_FILE",
+      "CLOUDMARKUP_OPERATOR_CONFIGURATION_SOURCE",
+      "CLOUDMARKUP_PROVISIONING_CONFIGURATION_SOURCE",
+      "CLOUDMARKUP_OWNER_CONFIGURATION_SOURCE",
+      "CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY",
+      "CLOUDMARKUP_DATABASE_SECRETS_DIRECTORY",
+      "CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY",
+      "CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE",
+    ]) {
+      const buildEnvironment = { ...env, [key]: markerFile };
+      await assert.rejects(
+        buildArgs(buildEnvironment),
+        /outside.*build context/,
+      );
+      await assert.rejects(
+        main("build", { buildEnvironment, buildRunner }),
+        /outside.*build context/,
+      );
+    }
+    for (const path of [
+      "",
+      "relative/operator.txt",
+      42,
+      inContext,
+      toNamespacedPath(markerFile),
+      ...(process.platform === "win32"
+        ? [
+            root + "." + sep + "package.json",
+            root + "." + sep + "uncreated/operator.txt",
+            root + " " + sep + "uncreated/operator.txt",
+          ]
+        : []),
+    ]) {
+      await assert.rejects(
+        main("build", {
+          buildEnvironment: {
+            ...env,
+            CLOUDMARKUP_SELF_HOST_CONFIGURATION_SOURCE: path,
+          },
+          buildRunner,
+        }),
+      );
+    }
+    await assert.rejects(
+      main("build", {
+        buildEnvironment: {
+          ...env,
+          CLOUDMARKUP_SELF_HOST_CONFIGURATION_SOURCE: directory,
+        },
+        buildRunner,
+      }),
+      /private file/,
+    );
+    await assert.rejects(
+      main("build", {
+        buildEnvironment: {
+          ...env,
+          CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY: file,
+        },
+        buildRunner,
+      }),
+      /unsymlinked directory/,
+    );
+    await assert.rejects(
+      main("build", {
+        buildEnvironment: { ...env, CLOUDMARKUP_NODE_IMAGE: "node:latest" },
+        buildRunner,
+      }),
+      /immutable image/,
+    );
+    assert.deepEqual(calls, []);
+
+    await main("build", { buildEnvironment: env, buildRunner });
+    const safe = {
+      ...env,
+      CLOUDMARKUP_SELF_HOST_CONFIGURATION_SOURCE: join(
+        directory,
+        "uncreated/runtime.json",
+      ),
+      CLOUDMARKUP_POSTGRES_OWNER_PASSWORD_FILE: file,
+      CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY: join(
+        directory,
+        "uncreated/runtime-secrets",
+      ),
+      CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE: join(
+        directory,
+        "uncreated/dispatch.json",
+      ),
+    };
+    await main("build", { buildEnvironment: safe, buildRunner });
+    assert.equal(calls.filter((args) => args[0] === "build").length, 2);
+    assert.equal(
+      JSON.stringify(await buildArgs(safe)).includes(directory),
+      false,
+    );
+    await assert.rejects(validatePrivateLocations(safe), /Configured models/);
+    await assert.rejects(validatePrivateLocations(env), /absolute external/);
+    await writeFile(
+      join(state, "operator.lock"),
+      "synthetic competing operator",
+      { flag: "wx" },
+    );
+    await assert.rejects(
+      main("build", { buildEnvironment: env, buildRunner }),
+      { code: "EEXIST" },
+    );
+    assert.equal(calls.filter((args) => args[0] === "build").length, 2);
+    await assert.rejects(
+      main("build", {
+        buildEnvironment: {
+          ...env,
+          CLOUDMARKUP_SELF_HOST_PROJECT: "invalid/project",
+        },
+        buildRunner,
+      }),
+      /Invalid Compose project/,
+    );
+    assert.equal(calls.filter((args) => args[0] === "build").length, 2);
+    assert.equal(await readFile(markerFile, "utf8"), marker);
+    assert.equal(await readFile(file, "utf8"), marker);
+  } finally {
+    assert.ok(resolve(inContext).startsWith(resolve(root) + sep));
+    assert.ok(
+      resolve(state).startsWith(resolve(root, ".cache/self-host") + sep),
+    );
+    assert.ok(resolve(directory).startsWith(resolve(tmpdir()) + sep));
+    await rm(inContext, { recursive: true, force: true });
+    await rm(state, { recursive: true, force: true });
+    await rm(directory, { recursive: true, force: true });
+  }
+});
 
 test("operator routing admits only the closed privileged stages and keeps restore preparation outside runtime startup", () => {
   for (const [command, service, stage] of [
@@ -646,6 +870,8 @@ test("build validation refuses configured leaf links into the source context", a
     await writeFile(file, "synthetic configuration");
     await mkdir(secrets);
     const env = {
+      CLOUDMARKUP_NODE_IMAGE: `node:24.18.0-bookworm-slim@sha256:${"a".repeat(64)}`,
+      CLOUDMARKUP_GO_IMAGE: `golang:1.26.8-bookworm@sha256:${"b".repeat(64)}`,
       CLOUDMARKUP_SELF_HOST_CONFIGURATION_SOURCE: file,
       CLOUDMARKUP_OPERATOR_CONFIGURATION_SOURCE: file,
       CLOUDMARKUP_PROVISIONING_CONFIGURATION_SOURCE: file,
@@ -675,11 +901,18 @@ test("build validation refuses configured leaf links into the source context", a
       "CLOUDMARKUP_OWNER_CONFIGURATION_SOURCE",
       "CLOUDMARKUP_POSTGRES_OWNER_PASSWORD_FILE",
       "CLOUDMARKUP_MIGRATOR_PASSWORD_FILE",
-    ])
+      "CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE",
+    ]) {
       await assert.rejects(
-        validatePrivateLocations({ ...env, [key]: linkedFile }),
-        /private file/,
+        buildArgs({ ...env, [key]: linkedFile }),
+        /outside.*build context|private file/,
       );
+      if (key !== "CLOUDMARKUP_PROVIDER_DISPATCH_CONFIGURATION_SOURCE")
+        await assert.rejects(
+          validatePrivateLocations({ ...env, [key]: linkedFile }),
+          /outside.*build context|private file/,
+        );
+    }
     const linkedDirectory = join(directory, "linked-directory");
     await symlink(
       root,
@@ -691,14 +924,39 @@ test("build validation refuses configured leaf links into the source context", a
         ...env,
         CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY: linkedDirectory,
       }),
-      /unsymlinked directory/,
+      /outside.*build context|unsymlinked directory/,
     );
+    for (const key of [
+      "CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY",
+      "CLOUDMARKUP_DATABASE_SECRETS_DIRECTORY",
+      "CLOUDMARKUP_PROVIDER_DISPATCH_DIRECTORY",
+    ])
+      await assert.rejects(buildArgs({ ...env, [key]: linkedDirectory }));
+    const externalLink = join(directory, "external-link");
+    await symlink(
+      secrets,
+      externalLink,
+      process.platform === "win32" ? "junction" : "dir",
+    );
+    for (const path of [
+      externalLink + sep + "missing" + sep + "operator.txt",
+      externalLink + sep + ".." + sep + "operator.txt",
+    ])
+      await assert.rejects(
+        buildArgs({ ...env, CLOUDMARKUP_OPERATOR_CONFIGURATION_SOURCE: path }),
+        /unsymlinked directory/,
+      );
+    for (const path of [externalLink + sep, externalLink + sep + sep])
+      await assert.rejects(
+        buildArgs({ ...env, CLOUDMARKUP_RUNTIME_SECRETS_DIRECTORY: path }),
+        /unsymlinked directory/,
+      );
     await assert.rejects(
       validatePrivateLocations({
         ...env,
         CLOUDMARKUP_DATABASE_SECRETS_DIRECTORY: linkedDirectory,
       }),
-      /unsymlinked directory/,
+      /outside.*build context|unsymlinked directory/,
     );
   } finally {
     await rm(directory, { recursive: true, force: true });

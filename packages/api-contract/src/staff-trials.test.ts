@@ -7,6 +7,9 @@ import {
   staffAccountListSchema,
   staffAccountDetailV1Schema,
   staffAccountDetailSchema,
+  staffCreditGrantV1Schema,
+  staffActionReceiptV1Schema,
+  staffTrialV1Schema,
 } from "./staff-accounts.js";
 const grant = {
   contractVersion: 1,
@@ -122,6 +125,42 @@ describe("versioned unprovisioned staff account preview", () => {
     expect(staffAccountDetailV1Schema.safeParse(detail).success).toBe(false);
   });
   it("cannot advertise spendable funds or existing authority in an unprovisioned preview", () => {
+    const creditGrant = staffCreditGrantV1Schema.parse({
+      id: "grant_synthetic",
+      creditUnits: "100",
+      availableCreditUnits: "100",
+      reservedCreditUnits: "0",
+      consumedCreditUnits: "0",
+      expiresAt: "2026-12-01T00:00:00.000Z",
+      createdAt: "2026-11-01T00:00:00.000Z",
+      actorPrincipalId: "principal_synthetic",
+      reason: "Synthetic preview refusal",
+    });
+    const receipt = staffActionReceiptV1Schema.parse({
+      contractVersion: 1,
+      actionId: "action_synthetic",
+      organizationId: preview.organizationId,
+      billingAccountId: preview.billingAccountId,
+      actorPrincipalId: creditGrant.actorPrincipalId,
+      action: "grant-credits",
+      creditUnits: creditGrant.creditUnits,
+      creditGrantId: creditGrant.id,
+      expensiveOperationsEnabled: null,
+      reason: creditGrant.reason,
+      occurredAt: creditGrant.createdAt,
+      accountVersion: 1,
+    });
+    const trial = staffTrialV1Schema.parse({
+      contractVersion: 1,
+      id: "trial_synthetic",
+      creditGrantId: creditGrant.id,
+      startsAt: creditGrant.createdAt,
+      expiresAt: creditGrant.expiresAt,
+      state: "active",
+      creditUnits: creditGrant.creditUnits,
+      availableCreditUnits: creditGrant.availableCreditUnits,
+      reservedCreditUnits: creditGrant.reservedCreditUnits,
+    });
     for (const changed of [
       { availableCreditUnits: "1" },
       { reservedCreditUnits: "1" },
@@ -129,9 +168,9 @@ describe("versioned unprovisioned staff account preview", () => {
       { account: { ...preview, subscriptionState: "active" } },
       { account: { ...preview, version: 1 } },
       { account: { ...preview, organizationVersion: 0 } },
-      { trial: { state: "active" } },
-      { history: [{}] },
-      { grants: [{}] },
+      { trial },
+      { history: [receipt] },
+      { grants: [creditGrant] },
     ])
       expect(
         staffAccountDetailSchema.safeParse({ ...detail, ...changed }).success,

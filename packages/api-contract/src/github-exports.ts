@@ -52,7 +52,10 @@ export const githubBranchNameSchema = z
       !value.endsWith(".") &&
       !value.includes("..") &&
       !value.includes("//") &&
-      !hasForbiddenGitBranchCharacter(value),
+      !hasForbiddenGitBranchCharacter(value) &&
+      !value
+        .split("/")
+        .some((part) => part.startsWith(".") || part.endsWith(".lock")),
     "Must be a safe Git branch name.",
   );
 const githubDestinationFolderSchema = z

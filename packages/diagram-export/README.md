@@ -37,6 +37,14 @@ successor is version 1.1.0 and uses digest-verified TrueType reconstructions of
 the same locked Inter fonts. Its caller supplies immutable local font paths; no
 filesystem traversal or system-font discovery is permitted. A request and its
 immutable revision must pin the selected version exactly. Production
-CloudFormation exports use the successor because native Resvg cannot render the
+CloudFormation exports require SFNT fonts because native Resvg cannot render the
 historical WOFF2 files as font files. Original pins are retained for historical
 compatibility and are not silently upgraded.
+
+New export profiles select `diagramRendererBoundedDetailV1Pin` /
+`createBoundedDetailDiagramExportService`, version 1.2.0. It retains the same
+SFNT font requirements and omits configuration summaries above 50 nodes, while
+preserving every node, edge and stable identity. Versions 1.0.0 and 1.1.0 retain
+their historical large-graph summary behavior and exact pins; saved revisions
+are never relabeled. Native and exact composed-release admission remain required
+before rolling out the new profile.

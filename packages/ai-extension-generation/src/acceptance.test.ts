@@ -2979,6 +2979,9 @@ describe("candidate review decisions", () => {
     "rejects duplicate attempt %s values",
     async (field) => {
       const { review } = await readyReviewFixture();
+      expect(candidateReviewRecordV1Schema.safeParse(review).success).toBe(
+        true,
+      );
       const first = review.attempts[0];
       if (first === undefined) throw new Error("Missing fixture attempt.");
       const repairAttempt = candidateAttemptV1Schema.parse({
@@ -3005,9 +3008,15 @@ describe("candidate review decisions", () => {
         },
       });
 
-      expect(
-        candidateReviewRecordV1Schema.safeParse(duplicateReview).success,
-      ).toBe(false);
+      const parsed = candidateReviewRecordV1Schema.safeParse(duplicateReview);
+      expect(parsed.success).toBe(false);
+      expect(parsed.error?.issues).toContainEqual(
+        expect.objectContaining({
+          code: "custom",
+          message: `Candidate attempt ${field} values must be unique.`,
+          path: ["attempts", 1, field],
+        }),
+      );
     },
   );
 

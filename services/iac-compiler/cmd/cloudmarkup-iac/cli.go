@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"flag"
@@ -82,16 +83,25 @@ func runCLI(ctx context.Context, args []string, stdin io.Reader, stdout io.Write
 		succeeded = normalized.Succeeded()
 	}
 
-	output, closeOutput, err := openOutput(*outputPath, stdout)
+	var encoded bytes.Buffer
+	encoder := json.NewEncoder(&encoded)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(result); err != nil {
+		fmt.Fprintln(stderr, "cloudmarkup-iac: could not encode result")
+		return 1
+	}
+	if encoded.Len() > *maximumOutputBytes {
+		fmt.Fprintln(stderr, "cloudmarkup-iac: result exceeds the approved output limit")
+		return 1
+	}
+	output, closeOutput, err := openOutput(*outputPath, stdout, architecture, workload, solution)
 	if err != nil {
 		fmt.Fprintln(stderr, "cloudmarkup-iac: could not open output")
 		return 1
 	}
 	defer closeOutput()
-	encoder := json.NewEncoder(output)
-	encoder.SetEscapeHTML(false)
-	encoder.SetIndent("", "  ")
-	if err := encoder.Encode(result); err != nil {
+	if _, err := encoded.WriteTo(output); err != nil {
 		fmt.Fprintln(stderr, "cloudmarkup-iac: could not write result")
 		return 1
 	}
@@ -134,13 +144,13 @@ func runTerraformHCLInspector(args []string, stdin io.Reader, stdout io.Writer, 
 		fmt.Fprintln(stderr, "cloudmarkup-iac: inspection output exceeds the approved limit")
 		return 1
 	}
-	output, closeOutput, err := openOutput(*outputPath, stdout)
+	output, closeOutput, err := openOutput(*outputPath, stdout, input)
 	if err != nil {
 		fmt.Fprintln(stderr, "cloudmarkup-iac: could not open output")
 		return 1
 	}
 	defer closeOutput()
-	if _, err := output.Write(append(encoded, '\n')); err != nil {
+	if written, err := output.Write(append(encoded, '\n')); err != nil || written != len(encoded)+1 {
 		fmt.Fprintln(stderr, "cloudmarkup-iac: could not write result")
 		return 1
 	}
@@ -167,15 +177,38 @@ func openInput(path string, stdin io.Reader, required bool) (io.Reader, func(), 
 	return file, func() { _ = file.Close() }, nil
 }
 
-func openOutput(path string, stdout io.Writer) (io.Writer, func(), error) {
+func openOutput(path string, stdout io.Writer, inputs ...io.Reader) (io.Writer, func(), error) {
 	if path == "-" {
 		return stdout, func() {}, nil
 	}
-	file, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o600)
+	// Compare the opened objects before truncation, including aliases introduced
+	// after the early path check. The input handles remain open through writing.
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0o600)
 	if err != nil {
 		return nil, func() {}, err
 	}
-	return file, func() { _ = file.Close() }, nil
+	closeFile := func() { _ = file.Close() }
+	outputInfo, err := file.Stat()
+	if err != nil {
+		closeFile()
+		return nil, func() {}, err
+	}
+	for _, input := range inputs {
+		inputFile, ok := input.(*os.File)
+		if !ok {
+			continue
+		}
+		inputInfo, statErr := inputFile.Stat()
+		if statErr != nil || os.SameFile(outputInfo, inputInfo) {
+			closeFile()
+			return nil, func() {}, fmt.Errorf("output identity could not be separated from input")
+		}
+	}
+	if err := file.Truncate(0); err != nil {
+		closeFile()
+		return nil, func() {}, err
+	}
+	return file, closeFile, nil
 }
 
 func outputOverwritesInput(output string, inputs []string) bool {
@@ -186,6 +219,10 @@ func outputOverwritesInput(output string, inputs []string) bool {
 	if err != nil {
 		return true
 	}
+	outputInfo, outputErr := os.Stat(output)
+	if outputErr != nil && !os.IsNotExist(outputErr) {
+		return true
+	}
 	for _, input := range inputs {
 		if input == "" || input == "-" {
 			continue
@@ -193,6 +230,12 @@ func outputOverwritesInput(output string, inputs []string) bool {
 		inputAbsolute, err := filepath.Abs(input)
 		if err != nil || filepath.Clean(inputAbsolute) == filepath.Clean(outputAbsolute) {
 			return true
+		}
+		if outputErr == nil {
+			inputInfo, inputErr := os.Stat(input)
+			if inputErr == nil && os.SameFile(outputInfo, inputInfo) {
+				return true
+			}
 		}
 	}
 	return false

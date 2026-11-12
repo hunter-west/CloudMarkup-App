@@ -1801,6 +1801,18 @@ function candidateAssessmentFor(input: {
   const assistantOperations: AssistantOperationV1[] = [];
   const assistantDiffs: AssistantReviewDiffV1[] = [];
   let candidate = input.request.architecture;
+  const assertOperationBudget = (additionalOperations: number) => {
+    const maximum = context.assistantLimits?.maximumOperations;
+    if (
+      maximum !== undefined &&
+      assistantOperations.length + additionalOperations > maximum
+    ) {
+      throw new SolutionProposalPlannerError(
+        "cloudmarkup.solution-planner.resource-limit-exceeded",
+        "The complete proposal exceeded its exact Assistant operation limit.",
+      );
+    }
+  };
   const applyReviewedAssistantBatch = (
     batch: Parameters<typeof applyAssistantOperationBatchV1>[0]["batch"],
   ) => {
@@ -1819,6 +1831,7 @@ function candidateAssessmentFor(input: {
         `Assistant operation kind ${disallowed.kind} is outside the exact planning allowlist.`,
       );
     }
+    assertOperationBudget(batch.operations.length);
     const operationIds = batch.operations.map(({ operationId }) => operationId);
     const applied = applyAssistantOperationBatchV1({
       batch: batch,
@@ -1882,6 +1895,7 @@ function candidateAssessmentFor(input: {
         // The workflow independently rejects incomplete review coverage.
         return projected.success ? [projected.data] : [];
       });
+      assertOperationBudget(operations.length);
       candidate = architectureDocumentV3Schema.parse(
         applyGraphCommand(candidate, proposedBatch.batch).document,
       );
@@ -1917,11 +1931,7 @@ function candidateAssessmentFor(input: {
     // Summary resources are untrusted mutations too. Project each into the
     // same permitted, preconditioned and diffed command path used by batches.
     for (const resource of summary.externalResources) {
-      if (
-        context.assistantLimits === undefined ||
-        assistantOperations.length + 1 >
-          context.assistantLimits.maximumOperations
-      ) {
+      if (context.assistantLimits === undefined) {
         throw new SolutionProposalPlannerError(
           "cloudmarkup.solution-planner.resource-limit-exceeded",
           "The complete proposal exceeded its exact Assistant operation limit.",

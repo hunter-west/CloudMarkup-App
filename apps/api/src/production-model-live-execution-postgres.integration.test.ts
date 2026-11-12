@@ -53,6 +53,7 @@ import {
   type SqlStatement,
 } from "./adapters/persistence/sql.js";
 import { modelLiveProposalValidationReceiptV2Schema } from "./adapters/persistence/model-live-proposal-validation-codec.js";
+import { syntheticBedrockPricingAccountId } from "./production-model-live-dispatch-test-helpers.js";
 
 // SQL leases and CountTokens must use real time. Only the reviewed offer clock
 // is translated into its frozen fixture window; rates, SDK projection and
@@ -309,7 +310,7 @@ integration("actual live execution composition", () => {
     const pricing = bedrockGlobalPricingEvidenceV1Schema.parse({
       contractVersion: 1,
       policyId: "cloudmarkup.bedrock-global-full-window.v1",
-      accountId: "000000000000",
+      accountId: syntheticBedrockPricingAccountId,
       environment: "beta",
       sourceRegion: "us-east-1",
       endpoint: "bedrock-runtime",

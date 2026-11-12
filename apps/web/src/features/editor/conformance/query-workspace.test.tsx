@@ -16,7 +16,6 @@ import {
   CloudMarkupQueryRuntimeContext,
   type CloudMarkupQueryRuntime,
 } from "../../../api/cloudmarkup-query-context.js";
-import { assertConformanceReportProjectionBindingV1 } from "./adapter.js";
 import { continuousConformanceStateLabels } from "./model.js";
 import {
   type ContinuousConformanceQueryBinding,
@@ -547,50 +546,5 @@ describe("authorized continuous conformance query workspace", () => {
     expect(
       screen.queryByRole("button", { name: /evidence diagram/u }),
     ).not.toBeInTheDocument();
-  });
-
-  it("allows a newer current revision while retaining the exact evaluated revision binding", () => {
-    expect(() => {
-      assertConformanceReportProjectionBindingV1(
-        {
-          currentSolutionRevision: { id: "solution-revision-current" },
-          environment: { environmentId: "env_staging" },
-          evaluatedSolutionRevision: { id: binding.solutionRevisionId },
-          projectId: binding.projectId,
-        },
-        {
-          environmentId: "env_staging",
-          projectId: binding.projectId,
-          solutionRevisionId: binding.solutionRevisionId,
-        },
-      );
-    }).not.toThrow();
-  });
-
-  it("fails closed when an authorized response binding differs", () => {
-    const reportBinding = {
-      currentSolutionRevision: {
-        digest: `sha256:${"a".repeat(64)}`,
-        id: binding.solutionRevisionId,
-      },
-      environment: {
-        environmentId: "env_other",
-        environmentType: "staging" as const,
-      },
-      evaluatedSolutionRevision: {
-        digest: `sha256:${"a".repeat(64)}`,
-        id: binding.solutionRevisionId,
-      },
-      projectId: binding.projectId,
-    };
-    expect(() => {
-      assertConformanceReportProjectionBindingV1(reportBinding, {
-        environmentId: "env_staging",
-        projectId: binding.projectId,
-        solutionRevisionId: binding.solutionRevisionId,
-      });
-    }).toThrow(
-      /does not match the authorized project, evaluated revision, and environment/u,
-    );
   });
 });

@@ -139,16 +139,16 @@ describe("application build CodeBuild sandbox", () => {
         "s3:PutObject",
       ]),
     );
-    expect(allowedActions).not.toEqual(
-      expect.arrayContaining([
-        "sts:AssumeRole",
-        "iam:PassRole",
-        "secretsmanager:GetSecretValue",
-        "cloudformation:CreateStack",
-        "lambda:UpdateFunctionCode",
-        "codebuild:StartBuild",
-      ]),
-    );
+    for (const action of [
+      "sts:AssumeRole",
+      "iam:PassRole",
+      "secretsmanager:GetSecretValue",
+      "cloudformation:CreateStack",
+      "lambda:UpdateFunctionCode",
+      "codebuild:StartBuild",
+    ]) {
+      expect(allowedActions).not.toContain(action);
+    }
     const serialized = JSON.stringify(policies);
     expect(serialized).toContain(
       "artifacts/v1/organizations/application-build/inputs/",

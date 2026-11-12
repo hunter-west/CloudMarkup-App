@@ -20,7 +20,7 @@ import { PostgresModelLiveCommercialAccounting } from "./model-live-commercial-a
 import { identifyLiveProposalValidationReceipt } from "./model-live-proposal-validation-codec.js";
 import { readProductionModelLiveObservationV2 } from "../../production-model-live-observation.js";
 import { prepareProductionModelLiveProposalValidation } from "../../production-model-live-proposal-validation.js";
-import { loadMigrations } from "./migrations.js";
+import { loadRegisteredEvaluationSuccessor } from "./model-live-registered-successor-test-helpers.js";
 import { sql } from "./sql.js";
 
 const configured = process.env["CLOUDMARKUP_TEST_DATABASE_URL"]?.trim();
@@ -135,11 +135,7 @@ integration("durable current Intent evaluation receipts", () => {
     return { ...f, input, validator, accounting, receipts };
   }
   it("preserves all 46 historical SQL files and extends only the two receipt guards", async () => {
-    const migrations = await loadMigrations(
-      fileURLToPath(new URL("../../../migrations", import.meta.url)),
-    );
-    expect(migrations).toHaveLength(121);
-    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(1374);
+    const migrations = await loadRegisteredEvaluationSuccessor("0142");
     const prior = {
       storageContractVersion: 1,
       migrations: migrations

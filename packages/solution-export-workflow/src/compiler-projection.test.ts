@@ -33,7 +33,6 @@ const rejectedTerraformPackagePaths = [
   "..\\application\\artifacts\\workload_notes_api\\function.zip",
   "../application/./artifacts/workload_notes_api/function.zip",
   "../application/artifacts/../workload_notes_api/function.zip",
-  "../application/artifacts//workload_notes_api/function.zip",
   "../application/artifacts/workload_notes_api/nested/function.zip",
   "../application/artifacts/workload_notes_api/function.zip.bak",
   `../application/artifacts/${"a".repeat(129)}/function.zip`,
@@ -50,17 +49,15 @@ describe("Go compiler result projection", () => {
     },
   );
 
-  it.each(
-    rejectedTerraformPackagePaths.filter(
-      (path) =>
-        path !== "../application/artifacts//workload_notes_api/function.zip",
-    ),
-  )("rejects the non-canonical Terraform package path %s", (path) => {
-    expect(
-      solutionExportTerraformApplicationPackagePathV1Schema.safeParse(path)
-        .success,
-    ).toBe(false);
-  });
+  it.each(rejectedTerraformPackagePaths)(
+    "rejects the non-canonical Terraform package path %s",
+    (path) => {
+      expect(
+        solutionExportTerraformApplicationPackagePathV1Schema.safeParse(path)
+          .success,
+      ).toBe(false);
+    },
+  );
 
   it("accepts compiler package paths only when they bind the workload and final artifact", () => {
     const fixture = multiWorkloadEventWorkflowFixture();

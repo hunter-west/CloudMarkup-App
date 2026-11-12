@@ -89,7 +89,7 @@ func (renderer *terraformRenderer) validateS3Accuracy() {
 			if !s3FiltersOverlap(left, right) {
 				continue
 			}
-			renderer.diagnostics = append(renderer.diagnostics, Diagnostic{
+			renderer.diagnostics = retainTargetDiagnostic(renderer.diagnostics, renderer.limits.MaxDiagnostics, Diagnostic{
 				Code: "TARGET_S3_NOTIFICATION_FILTERS_OVERLAP", Severity: SeverityError,
 				Message: "Direct S3 notifications for the same event family have overlapping filterPrefix and filterSuffix values. Review both routes without inferring a destination or rewriting filters.",
 				Source:  SourceReference{Document: DocumentArchitecture, EdgeID: right.connection.ID},

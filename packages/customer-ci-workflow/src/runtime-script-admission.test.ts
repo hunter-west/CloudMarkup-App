@@ -179,8 +179,14 @@ function executeRepositoryVisibilityAdmission(
     "  console.log('FAKE_FETCH_OPTIONS_OK');",
     "  if (fakeScenario.failure === 'network') throw new Error('simulated-network-failure');",
     "  if (fakeScenario.failure === 'timeout') throw new DOMException('simulated-timeout', 'TimeoutError');",
-    "  const raw = fakeScenario.oversizedBody ? 'x'.repeat(262145) : JSON.stringify(fakeScenario.body ?? fakeCanonicalResponse);",
-    "  return { headers: { get: (name) => name.toLowerCase() === 'content-length' ? String(fakeScenario.declaredLength ?? Buffer.byteLength(raw, 'utf8')) : null }, ok: true, redirected: fakeScenario.redirected ?? false, text: async () => raw, url: fakeScenario.responseUrl ?? fakeRequestUrl };",
+    "  const response = fakeScenario.body ?? fakeCanonicalResponse;",
+    "  const raw = JSON.stringify(fakeScenario.oversizedBody ? { ...response, description: 'x'.repeat(262144) } : response);",
+    "  if (fakeScenario.oversizedBody) {",
+    "    const { description, ...identity } = JSON.parse(raw);",
+    "    if (typeof description !== 'string' || JSON.stringify(identity) !== JSON.stringify(fakeCanonicalResponse) || Buffer.byteLength(raw, 'utf8') <= 262144) throw new Error('The oversized repository fixture must retain valid identity JSON.');",
+    "    console.log('FAKE_OVERSIZED_IDENTITY_OK');",
+    "  }",
+    "  return { headers: { get: (name) => name.toLowerCase() === 'content-length' ? String(fakeScenario.declaredLength ?? Buffer.byteLength(raw, 'utf8')) : null }, ok: true, redirected: fakeScenario.redirected ?? false, text: async () => { console.log('FAKE_RESPONSE_TEXT_READ'); return raw; }, url: fakeScenario.responseUrl ?? fakeRequestUrl };",
     "};",
   ].join("\n");
   return executeNodeBody(
@@ -768,15 +774,21 @@ describe("generated private-repository admission", () => {
       { responseUrl: "https://api.github.test/rewritten" },
     ],
     ["oversized declared response", { declaredLength: 262145 }],
-    ["oversized actual response", { oversizedBody: true }],
+    [
+      "oversized actual response",
+      { declaredLength: 262144, oversizedBody: true },
+    ],
     ["network failure", { failure: "network" }],
     ["timeout", { failure: "timeout" }],
   ] satisfies readonly (readonly [string, RepositoryFetchScenario])[])(
     "rejects %s with only the generic failure",
     (_label, scenario) => {
-      expectGenericRepositoryRejection(
-        executeRepositoryVisibilityAdmission(scenario),
-      );
+      const result = executeRepositoryVisibilityAdmission(scenario);
+      expectGenericRepositoryRejection(result);
+      if ("oversizedBody" in scenario) {
+        expect(result.stdout).toContain("FAKE_OVERSIZED_IDENTITY_OK");
+        expect(result.stdout).toContain("FAKE_RESPONSE_TEXT_READ");
+      }
     },
   );
 

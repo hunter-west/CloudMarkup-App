@@ -477,6 +477,13 @@ const noEvidenceReferencesSchema = z
 const boundedEvidenceReferencesSchema = z
   .array(asyncJobEvidenceReferenceV1Schema)
   .max(32);
+
+// The solution-export family retains one record per supported workload build,
+// plus at most two infrastructure validation records. Other families keep
+// their existing evidence ceilings.
+export const SOLUTION_EXPORT_APPLICATION_BUILD_BATCH_MAXIMUM = 32;
+export const SOLUTION_EXPORT_AGGREGATE_EVIDENCE_MAXIMUM =
+  SOLUTION_EXPORT_APPLICATION_BUILD_BATCH_MAXIMUM + 2;
 const requiredEvidenceReferencesSchema = z
   .array(asyncJobEvidenceReferenceV1Schema)
   .min(1)
@@ -575,7 +582,9 @@ export const combinedExportPackagingJobOutputV1Schema = z
 export const solutionExportOrchestrationJobOutputV1Schema = z
   .object({
     contractVersion: z.literal(1),
-    evidenceRecords: boundedEvidenceReferencesSchema,
+    evidenceRecords: z
+      .array(asyncJobEvidenceReferenceV1Schema)
+      .max(SOLUTION_EXPORT_AGGREGATE_EVIDENCE_MAXIMUM),
     family: z.literal("solution-export-orchestration"),
     verifiedPackage: artifactForPurpose("export-package"),
   })

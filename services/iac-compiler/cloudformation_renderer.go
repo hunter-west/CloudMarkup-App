@@ -113,7 +113,7 @@ func renderCloudFormationArtifact(ctx context.Context, model *NormalizedSolution
 	}
 	policyReader.assignResourceNames()
 	documents := policyReader.collectPolicyDocuments()
-	renderer.diagnostics = append(renderer.diagnostics, policyReader.diagnostics...)
+	renderer.retainDiagnostics(policyReader.diagnostics)
 	if renderer.hasErrors() {
 		return nil, renderer.diagnostics
 	}
@@ -489,19 +489,21 @@ func (renderer *cloudFormationRenderer) connectionInt(connection NormalizedConne
 }
 
 func (renderer *cloudFormationRenderer) error(code string, message string, source SourceReference) {
-	if len(renderer.diagnostics) < renderer.limits.MaxDiagnostics {
-		renderer.diagnostics = append(renderer.diagnostics, Diagnostic{Code: code, Severity: SeverityError, Message: message, Source: source})
-	}
+	renderer.diagnostics = retainTargetDiagnostic(renderer.diagnostics, renderer.limits.MaxDiagnostics, Diagnostic{Code: code, Severity: SeverityError, Message: message, Source: source})
 }
 
 func (renderer *cloudFormationRenderer) warning(code string, message string, source SourceReference) {
-	if len(renderer.diagnostics) < renderer.limits.MaxDiagnostics {
-		renderer.diagnostics = append(renderer.diagnostics, Diagnostic{Code: code, Severity: SeverityWarning, Message: message, Source: source})
-	}
+	renderer.diagnostics = retainTargetDiagnostic(renderer.diagnostics, renderer.limits.MaxDiagnostics, Diagnostic{Code: code, Severity: SeverityWarning, Message: message, Source: source})
 }
 
 func (renderer *cloudFormationRenderer) hasErrors() bool {
 	return hasErrorDiagnostics(renderer.diagnostics)
+}
+
+func (renderer *cloudFormationRenderer) retainDiagnostics(diagnostics []Diagnostic) {
+	for _, diagnostic := range diagnostics {
+		renderer.diagnostics = retainTargetDiagnostic(renderer.diagnostics, renderer.limits.MaxDiagnostics, diagnostic)
+	}
 }
 
 func (renderer *cloudFormationRenderer) renderReadme() string {

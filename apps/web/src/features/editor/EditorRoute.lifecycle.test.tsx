@@ -6,12 +6,17 @@ import {
   type ProjectV1,
 } from "@cloudmarkup/api-contract";
 import {
+  applyGraphCommand,
   parseIntentDocument,
   getArchitectureDocumentHashes,
   parseArchitectureDocument,
   type ArchitectureDocument,
 } from "@cloudmarkup/domain";
-import { digestCanonicalValue } from "@cloudmarkup/schemas";
+import {
+  digestCanonicalValue,
+  parseGraphCommandV1,
+  type GraphCommandV1,
+} from "@cloudmarkup/schemas";
 import { createSyntheticAiPreviewCandidate } from "../generation/ai-intent-preview-test-helpers.js";
 import { QueryClient } from "@tanstack/react-query";
 import {
@@ -41,9 +46,10 @@ import {
 import { EditorRoute } from "./EditorRoute.js";
 import type { AcceptRepositoryGraph } from "./repository/GitHubRepositoryWorkspace.js";
 import { loadFoundationArchitectureDocument } from "./model/index.js";
+import { DraftCommandCheckpoint } from "./persistence/draft-command-checkpoint.js";
 
 // Isolate route/cache/save coordination from the separately tested canvas and
-// domain command engine. This leaf simulates their onDocumentChange boundary.
+// domain command engine. This leaf emits the actual command before its document event.
 vi.mock("./session/index.js", async () => {
   const { createContext, useContext, useState } = await import("react");
   const Context = createContext<ArchitectureDocument | null>(null);
@@ -52,16 +58,26 @@ vi.mock("./session/index.js", async () => {
       children,
       document,
       onDocumentChange,
+      onCommandApplied,
+      createId,
     }: {
       children: ReactNode;
       document: ArchitectureDocument;
       onDocumentChange?: (value: ArchitectureDocument) => void;
+      onCommandApplied?: (
+        command: GraphCommandV1,
+        value: ArchitectureDocument,
+      ) => void;
+      createId: () => string;
     }) => {
       const [current, setCurrent] = useState(document);
       return (
         <Context.Provider value={current}>
           <output aria-label="Mounted architecture">
             {current.documentId}
+          </output>
+          <output aria-label="Mounted node position">
+            {current.nodes[0]?.presentation.position.x}
           </output>
           <output aria-label="Mounted node label">
             {current.nodes[0]?.presentation.label}
@@ -72,20 +88,27 @@ vi.mock("./session/index.js", async () => {
           <button
             type="button"
             onClick={() => {
-              const next = parseArchitectureDocument({
-                ...current,
-                nodes: current.nodes.map((node, index) =>
-                  index === 0
-                    ? {
-                        ...node,
-                        presentation: {
-                          ...node.presentation,
-                          label: "Edited node",
-                        },
-                      }
-                    : node,
-                ),
+              const node = required(current.nodes[0]);
+              const command = parseGraphCommandV1({
+                schemaVersion: 1,
+                commandId: createId(),
+                inverseCommandId: createId(),
+                origin: "user",
+                target: {
+                  documentId: current.documentId,
+                  architectureId: current.architectureId,
+                  revisionId: current.revision.revisionId,
+                },
+                kind: "move-node",
+                nodeId: node.id,
+                expectedPosition: node.presentation.position,
+                position: {
+                  ...node.presentation.position,
+                  x: node.presentation.position.x + 40,
+                },
               });
+              const next = applyGraphCommand(current, command).document;
+              onCommandApplied?.(command, next);
               setCurrent(next);
               onDocumentChange?.(next);
             }}
@@ -354,18 +377,52 @@ function setup(
   const request =
     selection?.request ??
     vi.fn<MetadataRequest>().mockRejectedValue(new Error("Unexpected request"));
+  const serverHeads = new Map<string, DraftArchitectureDocumentV1>();
   const client = {
     request: (operation: string, input: { path: { projectId: string } }) =>
       operation.startsWith("project-editing-leases.")
         ? leaseRequest(operation, input)
         : request(operation, input),
-    requestWithMetadata: (
+    requestWithMetadata: async (
       operation: string,
-      input: { path: { projectId: string } },
-    ) =>
-      operation === "drafts.get"
-        ? readDraft(input)
-        : requestWithMetadata(operation, input),
+      input: {
+        path: { projectId: string };
+        body?: { command: GraphCommandV1 };
+        headers?: { "if-match": string };
+      },
+    ) => {
+      if (operation === "drafts.get") {
+        const value = await readDraft(input);
+        serverHeads.set(value.metadata.etag, value.data.data);
+        return value;
+      }
+      const ack = (await requestWithMetadata(operation, input)) as ReturnType<
+        typeof response
+      >;
+      if (operation !== "drafts.apply-command") return ack;
+      const before = serverHeads.get(required(input.headers)["if-match"]);
+      expect(before).toBeDefined();
+      const document = applyGraphCommand(
+        required(before).architectureDocument,
+        required(input.body).command,
+      ).document;
+      const accepted = {
+        ...ack.data.data,
+        architectureDocument: document,
+        contentDigest: getArchitectureDocumentHashes(document).contentHash,
+      };
+      serverHeads.set(ack.metadata.etag, accepted);
+      return {
+        ...ack,
+        data: {
+          ...ack.data,
+          data: {
+            appliedCommandId: required(input.body).command.commandId,
+            draft: accepted,
+          },
+        },
+      };
+    },
   } as unknown as CloudMarkupClient;
   window.history.replaceState(
     null,
@@ -402,6 +459,55 @@ afterEach(() => {
 });
 
 describe("one active project editor per workspace", () => {
+  it("keeps rejected recovery paused through a failed or pending reset and installs the new server drain only after acknowledgement", async () => {
+    vi.spyOn(DraftCommandCheckpoint.prototype, "load").mockRejectedValue(
+      new Error("Invalid synthetic command checkpoint"),
+    );
+    const pending = deferred<undefined>();
+    const reset = vi
+      .spyOn(DraftCommandCheckpoint.prototype, "reset")
+      .mockRejectedValueOnce(
+        new Error("Synthetic reset acknowledgement unavailable"),
+      )
+      .mockReturnValueOnce(pending.promise);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const f = setup();
+    await screen.findByRole("region", { name: "Command recovery review" });
+    f.readDraft.mockResolvedValue(response(draft("project_a", 2)));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reset recovery to saved draft" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent("Reload failed"),
+    );
+    expect(f.queryClient.getQueryData(draftKey("project_a"))).toMatchObject({
+      draft: { version: 1 },
+    });
+    expect(
+      screen.queryByRole("button", { name: "Simulate document change" }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reset recovery to saved draft" }),
+    );
+    await waitFor(() => {
+      expect(reset).toHaveBeenCalledTimes(2);
+    });
+    expect(
+      screen.getByRole("region", { name: "Command recovery review" }),
+    ).toBeInTheDocument();
+    expect(f.requestWithMetadata).not.toHaveBeenCalled();
+    await act(async () => {
+      pending.resolve(undefined);
+      await pending.promise;
+    });
+    await screen.findByRole("button", { name: "Simulate document change" });
+    expect(f.queryClient.getQueryData(draftKey("project_a"))).toMatchObject({
+      draft: { version: 2 },
+    });
+    expect(
+      screen.queryByRole("region", { name: "Command recovery review" }),
+    ).not.toBeInTheDocument();
+  });
   it("opens an older AWS project without writing on read, then saves and reloads with the current catalog", async () => {
     const document = parseArchitectureDocument({
       ...loadManualNotesApiArchitectureDocument(),
@@ -419,16 +525,17 @@ describe("one active project editor per workspace", () => {
     const save = vi
       .fn<MetadataRequest>()
       .mockImplementation((operation, input) => {
-        expect(operation).toBe("drafts.save");
+        expect(operation).toBe("drafts.apply-command");
         const request = input as {
-          body: { architectureDocument: unknown };
+          body: { command: GraphCommandV1 };
           headers: { "if-match": string };
         };
-        expect(request.headers["if-match"]).toBe(head(oldDraft).etag);
+        expect(request.headers["if-match"]).toBe(head(saved).etag);
         saved = draft(
           "project_a",
-          2,
-          parseArchitectureDocument(request.body.architectureDocument),
+          saved.version + 1,
+          applyGraphCommand(saved.architectureDocument, request.body.command)
+            .document,
         );
         return Promise.resolve(response(saved));
       });
@@ -445,7 +552,7 @@ describe("one active project editor per workspace", () => {
       screen.getByRole("button", { name: "Simulate document change" }),
     );
     await waitFor(() => {
-      expect(save).toHaveBeenCalledOnce();
+      expect(save).toHaveBeenCalledTimes(2);
     });
     const written = parseArchitectureDocument(saved.architectureDocument);
     expect(written.catalog).toEqual(awsEditorCatalog.identity);
@@ -562,11 +669,11 @@ describe("one active project editor per workspace", () => {
     const save = vi
       .fn<MetadataRequest>()
       .mockImplementation((operation, input) => {
-        expect(operation).toBe("drafts.save");
-        saved = parseArchitectureDocument(
-          (input as { body: { architectureDocument: unknown } }).body
-            .architectureDocument,
-        );
+        expect(operation).toBe("drafts.apply-command");
+        saved = applyGraphCommand(
+          original,
+          (input as { body: { command: GraphCommandV1 } }).body.command,
+        ).document;
         return Promise.resolve(response(draft("project_a", 2, saved)));
       });
     setup(
@@ -793,16 +900,20 @@ describe("one active project editor per workspace", () => {
     expect(
       screen.getByRole("button", { name: "Saving and closing…" }),
     ).toBeDisabled();
-    expect(request).toHaveBeenCalledWith("drafts.save", {
+    expect(request).toHaveBeenCalledWith("drafts.apply-command", {
       body: {
-        architectureDocument: expect.any(Object) as unknown,
+        command: expect.any(Object) as unknown,
+        contentBinding: expect.any(Object) as unknown,
         contractVersion: 1,
         editingLease: {
           leaseId: "projectlease_00000000-0000-4000-8000-000000000001",
           token: expect.any(String) as unknown,
         },
       },
-      headers: { "if-match": head(draft("project_a")).etag },
+      headers: {
+        "if-match": head(draft("project_a")).etag,
+        "idempotency-key": expect.any(String) as unknown,
+      },
       path: { projectId: "project_a" },
     });
     await act(async () => {
@@ -1242,8 +1353,11 @@ describe("saved editor repository acceptance", () => {
         screen.getByLabelText("Repository review error"),
       ).toHaveTextContent("Editing changed while the review was running"),
     );
-    expect(screen.getByLabelText("Mounted node label")).toHaveTextContent(
-      "Edited node",
+    expect(screen.getByLabelText("Mounted node position")).toHaveTextContent(
+      String(
+        required(draft("project_a").architectureDocument.nodes[0]).presentation
+          .position.x + 40,
+      ),
     );
     expect(f.readDraft).toHaveBeenCalledTimes(reads);
     expect(f.requestWithMetadata).not.toHaveBeenCalled();
@@ -1346,13 +1460,13 @@ describe("explicit requirements selection at revision creation", () => {
         body: {
           contractVersion: 1,
           draftId: "draft_project_a",
-          draftVersion: 2,
-          name: "Solution revision 2",
+          draftVersion: 1,
+          name: "Solution revision 1",
           acceptedIntentId: record.acceptedIntentId,
         },
         headers: {
           "idempotency-key": expect.any(String) as unknown,
-          "if-match": '"draft:draft_project_a:2"',
+          "if-match": '"draft:draft_project_a:1"',
         },
         path: { projectId: "project_a" },
       },
@@ -1691,7 +1805,7 @@ describe("first repository import uses the existing revision save lifecycle", ()
         ([operation]) => operation === "solution-revisions.create",
       )[1],
     ).toEqual(first);
-    expect(f.requestWithMetadata).toHaveBeenCalledOnce();
+    expect(f.requestWithMetadata).not.toHaveBeenCalled();
   });
   it("does not use an expired editing lease to save a first-import baseline", async () => {
     const request = vi.fn<MetadataRequest>();
@@ -1721,3 +1835,9 @@ describe("first repository import uses the existing revision save lifecycle", ()
     ).toBe(false);
   });
 });
+
+function required<T>(value: T | null | undefined): T {
+  if (value === undefined || value === null)
+    throw new Error("Required synthetic fixture value is missing.");
+  return value;
+}

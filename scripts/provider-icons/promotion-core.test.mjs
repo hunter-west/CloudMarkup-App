@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import {
   mkdtemp,
   mkdir,
+  lstat,
+  readdir,
   readFile,
   rm,
   symlink,
@@ -325,12 +327,9 @@ test("promotion reads a shared staged alias once and promotes one canonical file
       "example.icons.database",
     ]);
     assert.equal(result.promotedAssetCount, 1);
-    assert.deepEqual(
-      await readFile(path.join(repository.assetRoot, "icons")).catch(
-        () => undefined,
-      ),
-      undefined,
-    );
+    assert.deepEqual(await readdir(path.join(repository.assetRoot, "icons")), [
+      "compute.svg",
+    ]);
   } finally {
     await rm(root, { force: true, recursive: true });
   }
@@ -635,12 +634,9 @@ test("promotion blocks recovery artifacts and rolls back a partial replacement",
       /unexpected type/u,
     );
     assert.equal(await readFile(manifestFile, "utf8"), originalManifest);
-    assert.equal(
-      await readFile(path.join(repository.assetRoot, "icons")).catch(
-        () => undefined,
-      ),
-      undefined,
-    );
+    await assert.rejects(lstat(path.join(repository.assetRoot, "icons")), {
+      code: "ENOENT",
+    });
   } finally {
     await rm(root, { force: true, recursive: true });
   }

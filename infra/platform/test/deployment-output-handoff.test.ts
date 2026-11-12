@@ -21,9 +21,9 @@ const outputs = {
     CognitoUserPoolId: "us-east-1_0123456789",
     DatabaseMigrationAppliedManifestSha256:
       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    DatabaseMigrationAppliedVersion: "0139",
-    DatabaseMigrationCount: "121",
-    DatabaseMigrationExpectedVersion: "0139",
+    DatabaseMigrationAppliedVersion: "0142",
+    DatabaseMigrationCount: "124",
+    DatabaseMigrationExpectedVersion: "0142",
     DatabaseMigrationManifestSha256:
       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     DirectOriginProtection: "regional-waf-secrets-manager-edge-marker-required",
@@ -269,8 +269,8 @@ describe("deployment output handoff", () => {
     expect(first).toContain(
       "Direct-origin protection: `regional-waf-secrets-manager-edge-marker-required`",
     );
-    expect(first).toContain("Database schema version: `0139`");
-    expect(first).toContain("Validated migration count: `121`");
+    expect(first).toContain("Database schema version: `0142`");
+    expect(first).toContain("Validated migration count: `124`");
     expect(first).toContain(
       "Migration manifest SHA-256: `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`",
     );
@@ -286,7 +286,7 @@ describe("deployment output handoff", () => {
       "DatabaseMigrationCount"
     ] = "120";
     expect(() => collectDeploymentOutputs(stale)).toThrow(
-      /all 121 checked migrations/u,
+      /all 124 checked migrations/u,
     );
   });
 
@@ -437,7 +437,7 @@ describe("deployment output handoff", () => {
     }
     application["DatabaseMigrationExpectedVersion"] = "0015";
     expect(() => collectDeploymentOutputs(wrongVersion)).toThrow(
-      /exact reviewed schema version 0139/u,
+      /exact reviewed schema version 0142/u,
     );
 
     const invalidManifest = structuredClone(outputs) as Record<

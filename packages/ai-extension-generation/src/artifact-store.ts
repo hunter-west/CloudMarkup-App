@@ -29,6 +29,7 @@ import {
   type CandidateContentKind,
 } from "./security.js";
 import type { MaterializedCandidateFile } from "./materializer.js";
+import { compareUtcInstants } from "./presentation-support.js";
 
 export const candidateArtifactReviewBindingV1Schema = z
   .object({
@@ -304,7 +305,7 @@ export function assertCandidateArtifactSupersession(input: {
     newEditsByPath.set(key, edits);
   }
   if (
-    next.storedAt <= previous.reference.storedAt ||
+    compareUtcInstants(next.storedAt, previous.reference.storedAt) <= 0 ||
     appendedEdits.some((edit) => edit.editedAt !== next.storedAt) ||
     nextFiles.size !== previousFiles.size
   ) {

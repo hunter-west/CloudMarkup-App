@@ -570,6 +570,178 @@ describe("continuous conformance evaluator", () => {
         solutionRevisionId: revision.id,
       });
     }
+
+    const allow = {
+      actionDigest: hashCanonicalValue("read"),
+      effect: "allow" as const,
+      resourceDigest: hashCanonicalValue("bucket"),
+    };
+    const deny = { ...allow, effect: "deny" as const };
+    function permissionLayer(
+      layer: "designed" | "planned",
+      permissions: readonly ConformanceFactV1["iamPermissions"][number][],
+    ) {
+      const value = fact(layer, "iam-policy", "iam.effect", {
+        iamPermissions: [...permissions],
+      });
+      value.semanticDigest = hashCanonicalValue(
+        [...permissions].sort((left, right) =>
+          left.effect < right.effect ? -1 : left.effect > right.effect ? 1 : 0,
+        ),
+      );
+      const evidence = makeLayer(layer, [value]);
+      return {
+        ...evidence,
+        sources: evidence.sources.map((source) => ({
+          ...source,
+          digest: hashCanonicalValue(evidence.facts),
+        })),
+      };
+    }
+    for (const scenario of [
+      {
+        name: "added Deny",
+        before: [allow],
+        after: [allow, deny],
+        kind: "iam-reduction",
+        severity: "warning",
+      },
+      {
+        name: "removed Deny",
+        before: [allow, deny],
+        after: [allow],
+        kind: "iam-expansion",
+        severity: "security-error",
+      },
+      {
+        name: "Allow replaced by Deny",
+        before: [allow],
+        after: [deny],
+        kind: "iam-reduction",
+        severity: "warning",
+      },
+      {
+        name: "Deny replaced by Allow",
+        before: [deny],
+        after: [allow],
+        kind: "iam-expansion",
+        severity: "security-error",
+      },
+      {
+        name: "added Allow",
+        before: [],
+        after: [allow],
+        kind: "iam-expansion",
+        severity: "security-error",
+      },
+      {
+        name: "removed Allow",
+        before: [allow],
+        after: [],
+        kind: "iam-reduction",
+        severity: "warning",
+      },
+      {
+        name: "unchanged Deny",
+        before: [deny],
+        after: [deny],
+        kind: null,
+        severity: null,
+      },
+      {
+        name: "reordered permissions",
+        before: [allow, deny],
+        after: [deny, allow],
+        kind: null,
+        severity: null,
+      },
+    ] as const) {
+      const permissionInput = replaceLayer(
+        replaceLayer(
+          request(),
+          "designed",
+          permissionLayer("designed", scenario.before),
+        ),
+        "planned",
+        permissionLayer("planned", scenario.after),
+      );
+      expect(
+        conformanceEvaluationRequestV1Schema.safeParse(permissionInput).success,
+      ).toBe(true);
+      const original = JSON.stringify(permissionInput);
+      const report = evaluateConformanceV1(permissionInput);
+      const directions = report.differences.filter(
+        ({ layer, subject, kind }) =>
+          layer === "planned" &&
+          subject?.stableKey === "iam.effect" &&
+          (kind === "iam-expansion" || kind === "iam-reduction"),
+      );
+      expect(
+        directions.map(({ kind, severity }) => ({ kind, severity })),
+        scenario.name,
+      ).toEqual(
+        scenario.kind === null
+          ? []
+          : [{ kind: scenario.kind, severity: scenario.severity }],
+      );
+      for (const direction of directions) {
+        expect(direction.sourceIds).toEqual([
+          "source.designed",
+          "source.planned",
+        ]);
+        expect(direction.remediation).toEqual({
+          automatic: false,
+          disposition: "review-required",
+        });
+        expect(direction.differenceDigest).toBe(
+          getConformanceDifferenceDigestV1(direction),
+        );
+      }
+      expect(report.reportDigest).toBe(getConformanceReportDigestV1(report));
+      expect(JSON.stringify(permissionInput)).toBe(original);
+
+      if (scenario.name !== "added Deny" && scenario.name !== "removed Deny")
+        continue;
+      for (const incomplete of [
+        "baseline",
+        "current",
+        "opaque",
+        "operation-only",
+      ] as const) {
+        const uncertain = structuredClone(permissionInput);
+        const layer = uncertain.layers.find(
+          ({ layer }) =>
+            layer === (incomplete === "baseline" ? "designed" : "planned"),
+        );
+        if (!layer?.facts[0]) throw new Error("Missing IAM fixture");
+        layer.facts[0].semanticComparison = {
+          contractVersion: 1,
+          basis: incomplete === "opaque" ? "opaque" : "iam-policy-intent",
+          coverage:
+            incomplete === "operation-only" ? "operation-only" : "partial",
+        };
+        layer.sources = layer.sources.map((source) => ({
+          ...source,
+          digest: hashCanonicalValue(layer.facts),
+        }));
+        expect(
+          conformanceEvaluationRequestV1Schema.safeParse(uncertain).success,
+        ).toBe(true);
+        const uncertainReport = evaluateConformanceV1(uncertain);
+        const differences = uncertainReport.differences.filter(
+          ({ layer, subject }) =>
+            layer === "planned" && subject?.stableKey === "iam.effect",
+        );
+        expect(
+          differences.some(({ kind }) => kind === "unknown-evidence"),
+        ).toBe(true);
+        expect(
+          differences.some(
+            ({ kind }) => kind === "iam-expansion" || kind === "iam-reduction",
+          ),
+        ).toBe(false);
+      }
+    }
   });
 
   it("surfaces external and unmanaged imported resources as distinct differences", () => {

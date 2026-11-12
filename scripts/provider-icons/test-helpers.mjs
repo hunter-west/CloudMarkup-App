@@ -126,13 +126,7 @@ export function createPlaceholderManifest(
     },
   };
 
-  return {
-    ...manifestWithoutDigest,
-    assetSet: {
-      ...manifestWithoutDigest.assetSet,
-      digest: calculateAssetSetDigest(manifestWithoutDigest),
-    },
-  };
+  return withCalculatedAssetSetDigest(manifestWithoutDigest);
 }
 
 export function createApprovedEntry({
@@ -178,19 +172,11 @@ export function createCandidateEntry(options = {}) {
 }
 
 export function withCalculatedAssetSetDigest(manifest) {
-  const withoutDigest = {
+  return {
     ...manifest,
     assetSet: {
       ...manifest.assetSet,
-      digest:
-        "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-    },
-  };
-  return {
-    ...withoutDigest,
-    assetSet: {
-      ...withoutDigest.assetSet,
-      digest: calculateAssetSetDigest(withoutDigest),
+      digest: calculateAssetSetDigest(manifest),
     },
   };
 }

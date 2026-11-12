@@ -1481,6 +1481,7 @@ export type EventFixturePattern =
   | "step-functions-task";
 
 export interface EventRequestOptions {
+  readonly boundedPayloadLists?: boolean;
   readonly catalog?: FixtureCatalog;
   readonly pattern: EventFixturePattern;
   readonly instanceId?: "primary" | "secondary";
@@ -1869,13 +1870,29 @@ export function createEventGenerationRequest(
       !options.invalidS3MetadataStorage
         ? "persistent"
         : "transient",
-    fields: payloadFields.map(([name, scalarType, required]) => ({
-      name,
-      fieldType: { kind: "scalar", scalarType },
-      required,
-      nullable: false,
-      classification: "internal",
-    })),
+    fields: [
+      ...payloadFields.map(([name, scalarType, required]) => ({
+        name,
+        fieldType: { kind: "scalar", scalarType },
+        required,
+        nullable: false,
+        classification: "internal",
+      })),
+      ...(options.boundedPayloadLists
+        ? ["string", "integer", "number", "boolean"].map((itemType) => ({
+            name: `${itemType}Items`,
+            fieldType: {
+              kind: "scalar-list",
+              itemType,
+              minimumItems: 1,
+              maximumItems: 3,
+            },
+            required: itemType !== "boolean",
+            nullable: itemType === "boolean",
+            classification: "internal",
+          }))
+        : []),
+    ],
     indexes: [
       {
         indexId: `index_${deploymentKey}_primary`,

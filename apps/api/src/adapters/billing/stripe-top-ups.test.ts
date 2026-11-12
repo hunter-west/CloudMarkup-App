@@ -5,6 +5,7 @@ import {
 import { describe, expect, it, vi } from "vitest";
 import { REVIEWED_LIVE_STRIPE } from "./reviewed-live-plans.js";
 import { StripeBillingProvider } from "./stripe-billing-provider.js";
+import { createSecretHostedBillingProvider } from "./secret-hosted-provider.js";
 import type { CreditTopUpPurchase } from "../../application/billing-top-ups.js";
 
 function fixture(
@@ -325,6 +326,66 @@ describe("sandbox credit top-up checkout", () => {
       }),
     ).rejects.toMatchObject({ code: "provider-unavailable" });
     expect(f.fetchImplementation).not.toHaveBeenCalled();
+    const start = Date.parse("2026-09-05T12:00:00.000Z");
+    let now = start;
+    const clock = vi.spyOn(Date, "now").mockImplementation(() => now);
+    try {
+      for (const outcome of [999, 1000, 1001, "denied"] as const) {
+        now = start;
+        const current = fixture();
+        const bytes = new TextEncoder().encode("sk_test_boundary_fixture");
+        const authorizeBeforeRequest = vi.fn(async () => {
+          await Promise.resolve();
+          if (outcome === "denied") throw Error("revoked synthetic account");
+          now =
+            start +
+            (authorizeBeforeRequest.mock.calls.length === 1 ? outcome : 2000);
+        });
+        const hosted = createSecretHostedBillingProvider({
+          apiKeyReference:
+            "arn:aws:secretsmanager:us-east-1:111111111111:secret:cloudmarkup/beta/stripe/api-key-AbCdEf",
+          secrets: { resolveSecret: () => Promise.resolve(bytes) },
+          authorizeBeforeRequest,
+          fetchImplementation: current.fetchImplementation,
+        });
+        if (hosted.createCreditTopUpSession === undefined)
+          throw Error("Missing hosted top-up creation");
+        const pending = hosted.createCreditTopUpSession({
+          purchase: current.purchase,
+          retryBefore: new Date(start + 1000).toISOString(),
+          successUrl: "https://beta.example.invalid/",
+          cancelUrl: "https://beta.example.invalid/",
+        });
+        if (outcome === 999) {
+          await expect(pending).resolves.toMatchObject({
+            url: current.session.url,
+          });
+          expect(current.fetchImplementation).toHaveBeenCalledTimes(2);
+          const creation = current.fetchImplementation.mock.calls[0];
+          if (creation === undefined) throw Error("Missing creation request");
+          const [url, init] = creation;
+          expect(url).toBe("https://api.stripe.com/v1/checkout/sessions");
+          expect(init?.method).toBe("POST");
+          expect(new Headers(init?.headers).get("idempotency-key")).toBe(
+            "top-up:" + current.purchase.attemptId,
+          );
+          expect(init?.signal).toBeInstanceOf(AbortSignal);
+          expect(init?.signal?.aborted).toBe(false);
+          // Post-creation evidence reads remain possible after the deadline.
+          expect(now).toBe(start + 2000);
+        } else {
+          await expect(pending).rejects.toMatchObject({
+            code: "provider-unavailable",
+            message: "The billing provider is unavailable.",
+          });
+          expect(current.fetchImplementation).not.toHaveBeenCalled();
+          expect(authorizeBeforeRequest).toHaveBeenCalledOnce();
+        }
+        expect(bytes.every((byte) => byte === 0)).toBe(true);
+      }
+    } finally {
+      clock.mockRestore();
+    }
   });
   it("does not expose checkout creation in a queue-only runtime", () => {
     const f = fixture();

@@ -20,6 +20,7 @@ import type {
 } from "@cloudmarkup/provider-sdk";
 import {
   parseGraphCommandV1,
+  operationIdSchema,
   type ConfigurationValue,
 } from "@cloudmarkup/schemas";
 import type { ServiceCreationOptions } from "../model/placement-rules.js";
@@ -292,9 +293,19 @@ export interface EditorSessionProviderProps {
   ) => void;
   readonly recoveryNow?: () => string;
   readonly recoveryStore?: EditorRecoveryStoreV1;
+  /** Keep snapshot identity bound to the saved head when document comes from
+   * a separately verified command checkpoint. */
+  readonly recoverySeedDocument?: ArchitectureDocument;
+  readonly recoveryContainsSnapshot?: (
+    document: ArchitectureDocument,
+  ) => boolean;
   readonly recoveryWriterId?: string;
   readonly scopeKey?: string;
   readonly onDocumentChange?: (document: ArchitectureDocument) => void;
+  readonly onCommandApplied?: (
+    command: GraphCommandV1,
+    document: ArchitectureDocument,
+  ) => void;
   readonly preserveSessionOnRecoveryRebind?: boolean;
 }
 
@@ -314,6 +325,10 @@ interface EditorDocumentStateProviderProps {
   readonly validationDebounceMilliseconds?: number;
   readonly validationEvaluator?: EditorValidationEvaluator;
   readonly onDocumentChange?: (document: ArchitectureDocument) => void;
+  readonly onCommandApplied?: (
+    command: GraphCommandV1,
+    document: ArchitectureDocument,
+  ) => void;
   readonly preserveSessionOnRecoveryRebind?: boolean;
 }
 
@@ -365,6 +380,10 @@ interface EditorRecoveryDocumentProvidersProps extends Omit<
 > {
   readonly mountKey: string;
   readonly onDocumentChange?: (document: ArchitectureDocument) => void;
+  readonly onCommandApplied?: (
+    command: GraphCommandV1,
+    document: ArchitectureDocument,
+  ) => void;
   readonly preserveSessionOnRecoveryRebind?: boolean;
 }
 
@@ -402,6 +421,7 @@ function EditorDocumentStateProvider({
   layoutAdapter,
   ownedPolicyDescriptors,
   onDocumentChange,
+  onCommandApplied,
   validationDebounceMilliseconds,
   validationEvaluator,
 }: EditorDocumentStateProviderProps) {
@@ -496,6 +516,9 @@ function EditorDocumentStateProvider({
       application: GraphCommandApplicationResult,
       label: string,
     ) => {
+      // Persistence captures the actual operation before local state is accepted;
+      // bounded undo history is not the durable command queue.
+      onCommandApplied?.(command, application.document);
       const history = historyReference.current;
       if (history === null) {
         return;
@@ -519,7 +542,7 @@ function EditorDocumentStateProvider({
           "The architecture change was applied, but older undo history was reset because it could not be verified.",
         );
     },
-    [sessionStore, updateHistory],
+    [onCommandApplied, sessionStore, updateHistory],
   );
 
   const clearConfigurationPreview = useCallback(() => {
@@ -745,16 +768,32 @@ function EditorDocumentStateProvider({
         return { message, ok: false };
       }
 
+      const identity =
+        onCommandApplied === undefined
+          ? undefined
+          : {
+              commandId: operationIdSchema.parse(createId()),
+              inverseCommandId: operationIdSchema.parse(createId()),
+            };
       const result =
         direction === "undo"
-          ? undoEditorCommand(history, currentDocument)
-          : redoEditorCommand(history, currentDocument);
-      updateHistory(result.history);
+          ? undoEditorCommand(history, currentDocument, identity)
+          : redoEditorCommand(history, currentDocument, identity);
       if (!result.ok) {
+        updateHistory(result.history);
         sessionStore.getState().announce(result.message);
         return { message: result.message, ok: false };
       }
 
+      try {
+        onCommandApplied?.(result.command, result.document);
+      } catch {
+        const message =
+          "This change could not enter the save queue. Keep the local draft and review recovery.";
+        sessionStore.getState().announce(message);
+        return { message, ok: false };
+      }
+      updateHistory(result.history);
       const hashes = getArchitectureDocumentHashes(result.document);
       acceptLoadedDocument({
         document: result.document,
@@ -772,6 +811,8 @@ function EditorDocumentStateProvider({
     [
       acceptLoadedDocument,
       clearStaleDocumentPreviews,
+      createId,
+      onCommandApplied,
       sessionStore,
       updateHistory,
     ],
@@ -2208,16 +2249,16 @@ function EditorDocumentStateProvider({
           );
         }
 
-        acceptLoadedDocument({
-          document: commandResult.document,
-          hashes: nextHashes,
-          status: "ready",
-        });
         recordAppliedCommand(
           finding.autoFix.command,
           commandResult,
           `Fix ${finding.title}`,
         );
+        acceptLoadedDocument({
+          document: commandResult.document,
+          hashes: nextHashes,
+          status: "ready",
+        });
         clearStaleDocumentPreviews();
         sessionStore
           .getState()
@@ -2426,9 +2467,12 @@ export function EditorSessionProvider({
   recoveryDownloadDiagnostic,
   recoveryNow,
   recoveryStore,
+  recoverySeedDocument,
+  recoveryContainsSnapshot,
   recoveryWriterId,
   scopeKey,
   onDocumentChange,
+  onCommandApplied,
   preserveSessionOnRecoveryRebind,
   validationDebounceMilliseconds,
   validationEvaluator,
@@ -2450,7 +2494,13 @@ export function EditorSessionProvider({
           : effectiveScopeKey + ":" + documentScopeKey(initialLoad)
       }
       scopeKey={effectiveScopeKey}
-      seedDocument={seedDocument}
+      seedDocument={recoverySeedDocument ?? seedDocument}
+      {...(recoverySeedDocument === undefined || seedDocument === null
+        ? {}
+        : { initialDocument: seedDocument })}
+      {...(recoveryContainsSnapshot === undefined
+        ? {}
+        : { containsSnapshot: recoveryContainsSnapshot })}
       writerId={recoveryWriterId ?? fallbackRecoveryIdentity.writerId}
       {...(recoveryAutosaveDebounceMilliseconds === undefined
         ? {}
@@ -2482,6 +2532,7 @@ export function EditorSessionProvider({
             initialLoad={resolvedLoad}
             mountKey={recoverySession.mountKey}
             {...(onDocumentChange === undefined ? {} : { onDocumentChange })}
+            {...(onCommandApplied === undefined ? {} : { onCommandApplied })}
             {...(ownedPolicyDescriptors === undefined
               ? {}
               : { ownedPolicyDescriptors })}

@@ -87,6 +87,9 @@ func TestRdsNativeExports(t *testing.T) {
 				if artifact == nil {
 					t.Fatal("missing export")
 				}
+				if diagnosticByCode(t, diagnostics, "RDS_READINESS_EXTERNAL").Severity != SeverityWarning {
+					t.Fatalf("%s lost its RDS readiness warning", target)
+				}
 				if !reflect.DeepEqual(m, before) {
 					t.Fatal("source mutated")
 				}

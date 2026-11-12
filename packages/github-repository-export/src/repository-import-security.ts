@@ -175,8 +175,9 @@ export function assertGitHubRepositoryImportScope(input: {
   }
 }
 
+// Excerpts can end before a quoted value closes; redact its retained prefix too.
 const secretAssignment =
-  /\b(?:api[_-]?key|access[_-]?key|client[_-]?secret|password|private[_-]?key|secret|token)\b\s*[:=]\s*(?:["']?)[^\s,"'}]+/giu;
+  /(["']?\b(?:api[_-]?key|access[_-]?key|client[_-]?secret|password|private[_-]?key|secret|token)\b["']?\s*[:=]\s*)(?:"(?:\\.|[^"\\\r\n])*"?|'(?:\\.|[^'\\\r\n])*'?|[^\s,"';}]+)/giu;
 const bearerToken = /\b(?:Bearer\s+)[A-Za-z0-9._~+/-]{12,}={0,2}/giu;
 const privateKey =
   /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/gu;
@@ -198,11 +199,7 @@ export function sanitizeRepositorySourceText(bytes: Uint8Array): {
   const redacted = content
     .replace(privateKey, "[REDACTED_PRIVATE_KEY]")
     .replace(bearerToken, "Bearer [REDACTED]")
-    .replace(secretAssignment, (match) => {
-      const separator = match.includes(":") ? ":" : "=";
-      const key = match.slice(0, match.indexOf(separator)).trim();
-      return `${key}${separator}[REDACTED]`;
-    });
+    .replace(secretAssignment, "$1[REDACTED]");
   if (
     Buffer.byteLength(redacted, "utf8") >
     GITHUB_REPOSITORY_IMPORT_LIMITS.excerptBytes

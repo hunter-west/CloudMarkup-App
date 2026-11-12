@@ -156,6 +156,7 @@ export function GitHubRepositoryImportPanel({
   onImport,
   onRepositorySelectionChange,
   repositories,
+  selection: { integrationId, repositoryId },
 }: {
   readonly assistanceMode: "guided" | "professional";
   readonly disabled?: boolean;
@@ -172,23 +173,21 @@ export function GitHubRepositoryImportPanel({
     input: CreateGithubRepositoryImportV1,
   ) => Promise<void> | void;
   readonly repositories: readonly GithubRepositoryV1[];
-  readonly onRepositorySelectionChange?: (selection: {
+  readonly selection: {
+    readonly integrationId: string;
+    readonly repositoryId: number;
+  };
+  readonly onRepositorySelectionChange: (selection: {
     readonly integrationId: string;
     readonly repositoryId: number;
   }) => void;
 }) {
-  const [integrationId, setIntegrationId] = useState(
-    installations[0]?.integrationId ?? "",
-  );
   const availableRepositories = useMemo(
     () =>
       repositories.filter(
         (repository) => repository.integrationId === integrationId,
       ),
     [integrationId, repositories],
-  );
-  const [repositoryId, setRepositoryId] = useState(
-    availableRepositories[0]?.repositoryId ?? 0,
   );
   const [branch, setBranch] = useState(branches[0]?.name ?? "");
   const selectedBranch = branches.find(
@@ -308,15 +307,12 @@ export function GitHubRepositoryImportPanel({
                 value={integrationId}
                 onChange={(event) => {
                   const next = event.currentTarget.value;
-                  setIntegrationId(next);
                   setSelectedPaths(".");
                   const first = repositories.find(
                     (repository) => repository.integrationId === next,
                   );
                   const nextRepositoryId = first?.repositoryId ?? 0;
-                  setRepositoryId(nextRepositoryId);
-                  setSelectedPaths(".");
-                  onRepositorySelectionChange?.({
+                  onRepositorySelectionChange({
                     integrationId: next,
                     repositoryId: nextRepositoryId,
                   });
@@ -338,9 +334,8 @@ export function GitHubRepositoryImportPanel({
                 value={String(repositoryId)}
                 onChange={(event) => {
                   const nextRepositoryId = Number(event.currentTarget.value);
-                  setRepositoryId(nextRepositoryId);
                   setSelectedPaths(".");
-                  onRepositorySelectionChange?.({
+                  onRepositorySelectionChange({
                     integrationId,
                     repositoryId: nextRepositoryId,
                   });

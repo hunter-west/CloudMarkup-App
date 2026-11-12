@@ -55,7 +55,7 @@ export async function prepareStaffAuthorization(
     input.subject.length > 255 ||
     !["authorized", "revoked"].includes(input.action) ||
     input.permissions.length < 1 ||
-    input.permissions.length > 6 ||
+    input.permissions.length > 7 ||
     new Set(input.permissions).size !== input.permissions.length ||
     !input.permissions.every(
       (p) => staffPermissionV1Schema.safeParse(p).success,
@@ -129,6 +129,130 @@ export async function applyStaffAuthorization(
       principalId: input.principalId,
       action: input.action,
       permissions: preview.permissions,
+    };
+  });
+}
+export type StaffProviderCostOperatorInput = Omit<
+  StaffOperatorInput,
+  "permissions"
+> & {
+  readonly organizationId: string;
+};
+/** A separate exact organization grant; a global reporting permission alone
+ * never grants all-organization access. Existing verified operator identity,
+ * preview digest, serialization and immutable auditing remain authoritative. */
+export async function prepareStaffProviderCostAuthorization(
+  tx: SqlExecutor,
+  input: StaffProviderCostOperatorInput,
+) {
+  if (!id(input.organizationId)) fail();
+  const staff = await prepareStaffAuthorization(tx, {
+    ...input,
+    permissions: ["provider-costs.read"],
+  });
+  const global = staff.previous;
+  if (global === null) return fail();
+  const staffAuthorizationVersion = global["record_version"];
+  if (
+    typeof staffAuthorizationVersion !== "string" ||
+    !/^[1-9][0-9]*$/u.test(staffAuthorizationVersion)
+  )
+    return fail();
+  if (
+    input.action === "authorized" &&
+    (global["revoked"] !== false ||
+      !Array.isArray(global["permissions"]) ||
+      !(global["permissions"] as unknown[]).includes("provider-costs.read"))
+  )
+    fail();
+  const target = await tx.query(
+    sql(
+      "SELECT organization_id,lifecycle_status FROM organizations WHERE organization_id=$1",
+      [input.organizationId],
+    ),
+  );
+  if (
+    target.rows.length !== 1 ||
+    target.rows[0]?.["organization_id"] !== input.organizationId ||
+    (input.action === "authorized" &&
+      !["active", "suspended"].includes(
+        String(target.rows[0]["lifecycle_status"]),
+      ))
+  )
+    fail();
+  const previous =
+    (
+      await tx.query(
+        sql(
+          "SELECT staff_authorization_version::text,record_version::text,revoked_at IS NOT NULL AS revoked FROM platform_staff_provider_cost_authorizations WHERE principal_id=$1 AND organization_id=$2",
+          [input.principalId, input.organizationId],
+        ),
+      )
+    ).rows[0] ?? null;
+  if (input.action === "revoked" && previous === null) fail();
+  return {
+    principalId: input.principalId,
+    organizationId: input.organizationId,
+    permission: "provider-costs.read" as const,
+    staffAuthorizationVersion,
+    action: input.action,
+    previous,
+    operatorReference: input.operatorReference,
+    reason: input.reason,
+    digest: hash({ input, global, previous, target: target.rows[0] }),
+  };
+}
+export async function applyStaffProviderCostAuthorization(
+  database: SqlDatabase,
+  input: StaffProviderCostOperatorInput,
+  confirmation: string,
+) {
+  return database.transaction(async (tx) => {
+    await lockAccountSessions(tx, input.principalId);
+    await tx.query(
+      sql(
+        "SELECT organization_id FROM organizations WHERE organization_id=$1 FOR SHARE",
+        [input.organizationId],
+      ),
+    );
+    const preview = await prepareStaffProviderCostAuthorization(tx, input);
+    if (preview.digest !== confirmation) fail();
+    await tx.query(
+      sql(
+        `INSERT INTO platform_staff_provider_cost_authorizations(principal_id,organization_id,staff_authorization_version,revoked_at)
+      VALUES($1,$2,$3::bigint,CASE WHEN $4='revoked' THEN clock_timestamp() ELSE NULL END)
+      ON CONFLICT(principal_id,organization_id) DO UPDATE SET staff_authorization_version=EXCLUDED.staff_authorization_version,
+      revoked_at=EXCLUDED.revoked_at,record_version=platform_staff_provider_cost_authorizations.record_version+1`,
+        [
+          input.principalId,
+          input.organizationId,
+          preview.staffAuthorizationVersion,
+          input.action,
+        ],
+      ),
+    );
+    const eventId = "staff_cost_authority_" + randomUUID().replaceAll("-", "");
+    await tx.query(
+      sql(
+        "INSERT INTO platform_staff_provider_cost_authorization_events(event_id,principal_id,organization_id,staff_authorization_version,action,operator_reference,reason) VALUES($1,$2,$3,$4::bigint,$5,$6,$7)",
+        [
+          eventId,
+          input.principalId,
+          input.organizationId,
+          preview.staffAuthorizationVersion,
+          input.action,
+          input.operatorReference,
+          input.reason,
+        ],
+      ),
+    );
+    return {
+      eventId,
+      principalId: input.principalId,
+      organizationId: input.organizationId,
+      permission: preview.permission,
+      staffAuthorizationVersion: preview.staffAuthorizationVersion,
+      action: input.action,
     };
   });
 }

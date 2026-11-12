@@ -60,13 +60,13 @@ export function createBetaAiSyncCredits(options: {
         new Date(Date.now() + 300_000).toISOString(),
       );
       let recorded = false;
+      let usage: BetaConverseUsage | undefined;
       try {
         if ((await meter.claim(identity)) !== "dispatch")
           throw new Error("The synchronous AI dispatch is unavailable.");
-        let usage: BetaConverseUsage | undefined;
         const result = await input.run((actual) => {
           usage = actual;
-          return Promise.resolve();
+          return meter.observe(identity, actual);
         });
         if (!usage) throw new Error("Model usage is unavailable.");
         await authority.scope();
@@ -92,7 +92,7 @@ export function createBetaAiSyncCredits(options: {
         await meter.settle(identity);
         return result;
       } catch (error) {
-        if (!recorded) await meter.release(identity);
+        if (!recorded) await meter.release(identity, usage);
         throw error;
       }
     },

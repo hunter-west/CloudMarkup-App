@@ -416,6 +416,7 @@ async function runCommand(
   session: ValidationWorkspaceSession,
   invocation: ValidationCommandInvocation,
   request: TerraformValidationRequestV1,
+  policy: TerraformValidationPolicyV1,
   signal: AbortSignal | undefined,
 ): Promise<{
   readonly diagnostics: readonly TerraformValidationDiagnosticV1[];
@@ -424,12 +425,23 @@ async function runCommand(
 }> {
   const result = await session.execute(invocation, signal);
   return {
-    diagnostics: terminationDiagnostics(
-      invocation,
-      result,
-      request.files,
-      request.solutionRevisionId,
-    ),
+    diagnostics: [
+      ...terminationDiagnostics(
+        invocation,
+        result,
+        request.files,
+        request.solutionRevisionId,
+      ),
+      ...(requiredToolUnavailable(invocation, result, policy)
+        ? [
+            runnerDiagnostic(
+              "terraform.validation.required-tool-unavailable",
+              "A required approved validation tool is unavailable.",
+              request.solutionRevisionId,
+            ),
+          ]
+        : []),
+    ],
     result,
     summary: commandSummary(invocation, result),
   };
@@ -543,6 +555,7 @@ export function createTerraformValidationRunner(
             session,
             invocation,
             request,
+            policy,
             options.signal,
           );
           commandSummaries.push(outcome.summary);
@@ -609,25 +622,11 @@ export function createTerraformValidationRunner(
               session,
               optional.invocation,
               request,
+              policy,
               options.signal,
             );
             commandSummaries.push(outcome.summary);
             diagnostics.push(...outcome.diagnostics);
-            if (
-              requiredToolUnavailable(
-                optional.invocation,
-                outcome.result,
-                policy,
-              )
-            ) {
-              diagnostics.push(
-                runnerDiagnostic(
-                  "terraform.validation.required-tool-unavailable",
-                  "A required approved validation tool is unavailable.",
-                  request.solutionRevisionId,
-                ),
-              );
-            }
             diagnostics.push(
               ...optional.parser(
                 outcome.result,

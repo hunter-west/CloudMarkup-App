@@ -530,8 +530,11 @@ export interface CreditGrantSummaryRecord {
 
 export interface CreditGrantExpirationSummaryRecord {
   readonly asOf: string;
+  /** Complete scoped snapshot total, independent of the bounded detail list. */
   readonly expiringCreditUnits: DecimalIntegerString;
+  /** First 1,000 grants in expiration/start/identity order, including history. */
   readonly grants: readonly CreditGrantSummaryRecord[];
+  readonly grantsTruncated: boolean;
   readonly nextExpirationAt?: string;
   readonly organizationId: string;
   readonly windowEndsAt: string;

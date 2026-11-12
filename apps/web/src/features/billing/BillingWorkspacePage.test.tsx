@@ -848,7 +848,7 @@ describe("hosted billing workspace", () => {
     },
   );
 
-  it("bounds conflict recovery to one retry and never loops or starts a new payment from a redirect", async () => {
+  it("bounds conflict recovery to one retry", async () => {
     const view = renderBilling({
       action: () => Promise.reject(checkoutConflict()),
     });

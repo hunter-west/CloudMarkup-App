@@ -565,6 +565,25 @@ describe("model evaluation dataset and deterministic reports", () => {
 
   it("binds reports to one route tuple, result set, and deterministic baseline", () => {
     const current = report(frozenDataset);
+    const repeatedDigest = structuredClone(current);
+    repeatedDigest.datasetCaseDigests[1] = requireValue(
+      repeatedDigest.datasetCaseDigests[0],
+      "first advertised case digest",
+    );
+    const repeatedDraft = { ...repeatedDigest };
+    delete (repeatedDraft as Partial<ModelEvaluationReportV1>).reportDigest;
+    repeatedDigest.reportDigest = digestCanonicalValue(repeatedDraft);
+    const repeated = modelEvaluationReportV1Schema.safeParse(repeatedDigest);
+    expect(repeated.success).toBe(false);
+    if (!repeated.success) {
+      expect(repeated.error.issues).toEqual([
+        expect.objectContaining({
+          path: ["caseResults"],
+          message:
+            "Report results must cover every dataset case digest exactly once.",
+        }),
+      ]);
+    }
     const firstResult = requireValue(current.caseResults[0], "first result");
     const firstScore = requireValue(firstResult.scores[0], "first score");
     const withRegression = {

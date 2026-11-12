@@ -1331,12 +1331,34 @@ function terminationDiagnostic(
   });
 }
 
+function cancellationDiagnostic(
+  request: ApplicationBuildRequestV1,
+  prepared: PreparedBuild,
+): ApplicationBuildDiagnosticV1 {
+  return diagnostic({
+    code: "application.build.cancelled",
+    detail: "The build was cancelled.",
+    solutionRevisionId: request.solutionRevision.solutionRevisionId,
+    source: "runner",
+    summary: "Application build was cancelled.",
+    workloadId: prepared.workloadId,
+  });
+}
+
 async function execute(
   request: ApplicationBuildRequestV1,
   prepared: PreparedBuild,
   executor: ApplicationBuildWorkspaceExecutor,
   signal: AbortSignal | undefined,
 ): Promise<ExecutedBuild> {
+  const cancelled = () => signal?.aborted === true;
+  if (cancelled()) {
+    return {
+      ...blockedExecution(),
+      diagnostics: [cancellationDiagnostic(request, prepared)],
+      state: "cancelled",
+    };
+  }
   const diagnostics: ApplicationBuildDiagnosticV1[] = [];
   const findings: ApplicationBuildFindingV1[] = [];
   const steps: ApplicationBuildStepSummaryV1[] = [];
@@ -1345,6 +1367,7 @@ async function execute(
     files: prepared.files,
     limits: request.limits,
     lock: request.dependencyLock,
+    ...(signal === undefined ? {} : { signal }),
   });
   let producedFiles: ExecutedBuild["producedFiles"] = [];
   let state: ApplicationBuildResultV1["state"] = "passed";
@@ -1360,18 +1383,9 @@ async function execute(
         ]
       : Object.values(APPROVED_APPLICATION_BUILD_COMMANDS);
     for (const invocation of commands) {
-      if (signal?.aborted === true) {
+      if (cancelled()) {
         state = "cancelled";
-        diagnostics.push(
-          diagnostic({
-            code: "application.build.cancelled",
-            detail: "The build was cancelled.",
-            solutionRevisionId: request.solutionRevision.solutionRevisionId,
-            source: "runner",
-            summary: "Application build was cancelled.",
-            workloadId: prepared.workloadId,
-          }),
-        );
+        diagnostics.push(cancellationDiagnostic(request, prepared));
         break;
       }
       const result = await session.execute(invocation, signal);
@@ -1406,8 +1420,9 @@ async function execute(
         }
       }
       if (
-        invocation.step === "dependency-scan" ||
-        invocation.step === "secret-scan"
+        result.termination === "completed" &&
+        (invocation.step === "dependency-scan" ||
+          invocation.step === "secret-scan")
       ) {
         const parsedFindings = parseTrivyFindings(
           invocation.step === "dependency-scan" ? "dependency" : "secret",

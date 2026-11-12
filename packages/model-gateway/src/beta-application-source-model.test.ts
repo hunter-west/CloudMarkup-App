@@ -36,6 +36,44 @@ vi.mock("@aws-sdk/client-bedrock-runtime", () => ({
 }));
 
 describe("beta application source model routing", () => {
+  it("preserves known usage before rejecting source output and never retries an observation failure", async () => {
+    const response = {
+      stopReason: "end_turn",
+      output: { message: { content: [] } },
+      usage: { inputTokens: 500, outputTokens: 1000 },
+      $metadata: { requestId: "rejected-source-usage" },
+    };
+    const onUsage = vi.fn().mockResolvedValue(undefined);
+    const before = send.mock.calls.length;
+    send.mockResolvedValueOnce(response);
+    await expect(
+      createBetaApplicationSourceModel()({
+        context: {},
+        signal: new AbortController().signal,
+        onUsage,
+      }),
+    ).rejects.toThrow();
+    expect(onUsage).toHaveBeenCalledExactlyOnceWith({
+      inputTokens: 500,
+      outputTokens: 1000,
+      cacheReadInputTokens: 0,
+      providerRequestId: "rejected-source-usage",
+    });
+    expect(send.mock.calls.length - before).toBe(1);
+
+    const unavailable = new Error("synthetic observation storage failure");
+    onUsage.mockRejectedValueOnce(unavailable);
+    send.mockResolvedValueOnce(response);
+    await expect(
+      createBetaApplicationSourceModel()({
+        context: {},
+        signal: new AbortController().signal,
+        onUsage,
+      }),
+    ).rejects.toBe(unavailable);
+    expect(send.mock.calls.length - before).toBe(2);
+    expect(onUsage).toHaveBeenCalledTimes(2);
+  });
   it("requires provider usage for a metered source draft", async () => {
     const source = {
       contractVersion: 1,

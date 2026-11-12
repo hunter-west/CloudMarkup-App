@@ -295,25 +295,25 @@ test("requires review staging to remain canonically outside the repository", asy
         linkedRepository,
         process.platform === "win32" ? "junction" : "dir",
       );
-      await assert.rejects(
-        resolveSafeExternalReviewDirectory(
-          repositoryRoot,
-          path.join(linkedRepository, "redirected-review"),
-        ),
-        /resolves inside the repository/u,
-      );
     } catch (error) {
       if (
-        error instanceof Error &&
-        !/resolves inside the repository/u.test(error.message)
+        !(error instanceof Error) ||
+        !["EACCES", "EPERM", "ENOSYS", "ENOTSUP"].includes(error.code)
       ) {
-        context.diagnostic(
-          `Parent-symlink assertion skipped on this host: ${error.message}`,
-        );
-      } else {
         throw error;
       }
+      context.diagnostic(
+        `Parent-symlink check unavailable on this host: ${error.message}`,
+      );
+      return;
     }
+    await assert.rejects(
+      resolveSafeExternalReviewDirectory(
+        repositoryRoot,
+        path.join(linkedRepository, "redirected-review"),
+      ),
+      /resolves inside the repository/u,
+    );
   } finally {
     await rm(repositoryRoot, { force: true, recursive: true });
     if (sibling !== undefined) {
@@ -367,7 +367,6 @@ test("write mode creates deterministic admitted bytes, manifest, and static regi
       write: true,
     });
 
-    const { readFile } = await import("node:fs/promises");
     assert.equal(repeatedResult.manifestBytes, result.manifestBytes);
     assert.deepEqual(result.orphanedFiles, []);
     assert.deepEqual(repeatedResult.orphanedFiles, ["stale.svg"]);

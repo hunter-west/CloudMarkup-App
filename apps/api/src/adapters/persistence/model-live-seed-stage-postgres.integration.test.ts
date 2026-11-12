@@ -950,6 +950,9 @@ integration(
         stored.rows[0]?.["snapshot"],
         f.scope,
       );
+      expect(stored.rowCount).toBe(1);
+      expect(record.request).toEqual(f.claim.admissionRequest);
+      expect(record.decision).toEqual(f.claim.admissionDecision);
       for (const key of [
         "inputDigest",
         "inputBindingDigest",
@@ -981,7 +984,13 @@ integration(
               ],
             ),
           ),
-        ).rejects.toThrow();
+        ).rejects.toMatchObject({
+          code: "23514",
+          message:
+            key === "inputDigest" || key === "liveEvaluationAuthorityDigest"
+              ? "seed runtime requires its exact current issued input"
+              : "seed runtime input binding differs",
+        });
       }
       await f.store.release({
         executionLease: result.executionLease,

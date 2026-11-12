@@ -298,9 +298,28 @@ func (renderer *terraformRenderer) validateEventFlowCycles() {
 	type arc struct{ target, edge string }
 	adjacency := map[string][]arc{}
 	for _, connection := range renderer.model.Connections {
-		if _, ok := flow[connection.RelationshipType]; ok {
+		_, delivers := flow[connection.RelationshipType]
+		switch connection.RelationshipType {
+		case "aws.sns.topic-owns-subscription", "aws.eventbridge.rule-owns-target":
+			delivers = true
+		case "aws.eventbridge.event-bus-associates-rule":
+			// Schedules are independent triggers, not recipients of bus events.
+			if rule, ok := renderer.resourceByID(connection.Target.NodeID); ok {
+				delivers = rule.ServiceType == "aws.eventbridge.rule" && renderer.configString(rule, "triggerMode") == "EVENT_PATTERN"
+			}
+		}
+		if delivers {
 			adjacency[connection.Source.NodeID] = append(adjacency[connection.Source.NodeID], arc{connection.Target.NodeID, connection.ID})
 		}
+	}
+	for node := range adjacency {
+		sort.Slice(adjacency[node], func(left, right int) bool {
+			a, b := adjacency[node][left], adjacency[node][right]
+			if a.target != b.target {
+				return compareUTF16(a.target, b.target) < 0
+			}
+			return compareUTF16(a.edge, b.edge) < 0
+		})
 	}
 	state := map[string]int{}
 	var visit func(string) bool
@@ -593,13 +612,49 @@ func (renderer *terraformRenderer) renderSQSQueue(resource NormalizedResource) {
 }
 
 func (renderer *terraformRenderer) renderSQSRedriveAllowPolicies() {
+	sourcesByDLQ := map[string]map[string]struct{}{}
+	firstEdgeByDLQ := map[string]string{}
 	for _, connection := range renderer.model.Connections {
 		if connection.RelationshipType != "aws.sqs.uses-dead-letter-queue" {
 			continue
 		}
-		block := hclwrite.NewBlock("resource", []string{"aws_sqs_queue_redrive_allow_policy", renderer.resourceNames[connection.Target.NodeID] + "_" + shortDigest(connection.ID)})
-		block.Body().SetAttributeRaw("queue_url", renderer.resourceAttributeTokens(connection.Target.NodeID, "id"))
-		value := hclwrite.TokensForObject([]hclwrite.ObjectAttrTokens{{Name: hclwrite.TokensForIdentifier("redrivePermission"), Value: hclwrite.TokensForValue(cty.StringVal("byQueue"))}, {Name: hclwrite.TokensForIdentifier("sourceQueueArns"), Value: tupleTokens(renderer.resourceAttributeTokens(connection.Source.NodeID, "arn"))}})
+		dlqID := connection.Target.NodeID
+		if sourcesByDLQ[dlqID] == nil {
+			sourcesByDLQ[dlqID] = map[string]struct{}{}
+		}
+		sourcesByDLQ[dlqID][connection.Source.NodeID] = struct{}{}
+		if first, exists := firstEdgeByDLQ[dlqID]; !exists || compareUTF16(connection.ID, first) < 0 {
+			firstEdgeByDLQ[dlqID] = connection.ID
+		}
+	}
+	dlqIDs := make([]string, 0, len(sourcesByDLQ))
+	for dlqID := range sourcesByDLQ {
+		dlqIDs = append(dlqIDs, dlqID)
+	}
+	sortStringsUTF16(dlqIDs)
+	for _, dlqID := range dlqIDs {
+		sourceIDs := make([]string, 0, len(sourcesByDLQ[dlqID]))
+		for sourceID := range sourcesByDLQ[dlqID] {
+			sourceIDs = append(sourceIDs, sourceID)
+		}
+		sortStringsUTF16(sourceIDs)
+		if len(sourceIDs) > 10 {
+			renderer.error("TARGET_SQS_REDRIVE_SOURCE_LIMIT", "An exact byQueue redrive policy supports at most ten source queues.", SourceReference{Document: DocumentArchitecture, NodeID: dlqID})
+			continue
+		}
+		// Preserve the existing single-source address. A shared DLQ owns one
+		// policy whose address remains stable when its source set changes.
+		seed := dlqID
+		if len(sourceIDs) == 1 {
+			seed = firstEdgeByDLQ[dlqID]
+		}
+		arns := make([]hclwrite.Tokens, 0, len(sourceIDs))
+		for _, sourceID := range sourceIDs {
+			arns = append(arns, renderer.resourceAttributeTokens(sourceID, "arn"))
+		}
+		block := hclwrite.NewBlock("resource", []string{"aws_sqs_queue_redrive_allow_policy", renderer.resourceNames[dlqID] + "_" + shortDigest(seed)})
+		block.Body().SetAttributeRaw("queue_url", renderer.resourceAttributeTokens(dlqID, "id"))
+		value := hclwrite.TokensForObject([]hclwrite.ObjectAttrTokens{{Name: hclwrite.TokensForIdentifier("redrivePermission"), Value: hclwrite.TokensForValue(cty.StringVal("byQueue"))}, {Name: hclwrite.TokensForIdentifier("sourceQueueArns"), Value: tupleTokens(arns...)}})
 		block.Body().SetAttributeRaw("redrive_allow_policy", hclwrite.TokensForFunctionCall("jsonencode", value))
 		appendBlock(renderer.file("eventing.tf"), block)
 	}
@@ -893,6 +948,15 @@ func (renderer *terraformRenderer) validateEventResourcePolicyDocument(document 
 	return valid
 }
 
+// Both targets currently lower EventBusPolicy to the scalar grant form. Refuse
+// richer statements instead of dropping conditions, principals or Deny effects.
+// Its principal is an account ID, never a modeled node ID or an IAM ARN.
+func scalarEventBusGrant(statement terraformPolicyStatement) bool {
+	return statement.Effect == "allow" && len(statement.Actions) == 1 && statement.PrincipalKind == "provider-identity" &&
+		len(statement.Principals) == 1 && len(statement.Principals[0]) == 12 && strings.Trim(statement.Principals[0], "0123456789") == "" &&
+		len(statement.Expressions) == 0 && len(statement.Conditions) == 0
+}
+
 func (renderer *terraformRenderer) renderEventResourcePolicies(documents []terraformPolicyDocument) {
 	if !renderer.isCurrentCatalog() {
 		return
@@ -920,8 +984,8 @@ func (renderer *terraformRenderer) renderEventResourcePolicies(documents []terra
 			appendBlock(renderer.file("security.tf"), block)
 		case "aws.eventbridge.event-bus":
 			for index, statement := range document.Statements {
-				if len(statement.Actions) != 1 || len(statement.Principals) != 1 || statement.PrincipalKind == "all-principals" || len(statement.Expressions) != 0 || len(statement.Conditions) != 0 {
-					renderer.error("TARGET_EVENT_BUS_POLICY_UNSUPPORTED", "EventBridge bus policy statements require one exact action and one explicit principal.", SourceReference{Document: DocumentArchitecture, NodeID: statement.Resource.ID})
+				if !scalarEventBusGrant(statement) {
+					renderer.error("TARGET_EVENT_BUS_POLICY_UNSUPPORTED", "EventBridge scalar grants require Allow, one exact action and one explicit account ID, with no conditions or resource expressions.", SourceReference{Document: DocumentArchitecture, NodeID: statement.Resource.ID})
 					continue
 				}
 				name := renderer.resourceNames[document.Resource.ID]

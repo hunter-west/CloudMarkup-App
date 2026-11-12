@@ -30,6 +30,7 @@ import {
   InMemoryModelCommercialWorkflowStore,
 } from "./commercial-lifecycle-fakes.js";
 import { parseModelCommercialVerifiedTerminalV1 } from "./model-commercial-terminal-recovery.js";
+import { canonicalModelTerminalMetadataSchema } from "./model-commercial-terminal-integrity.js";
 import { digestStructuredValue, sha256Text } from "./security.js";
 import { parseModelLiveCommercialVerifiedTerminalV2 } from "./model-live-commercial-terminal-recovery.js";
 import { syntheticLiveEvaluationFixtureV2 } from "./model-live-evaluation-fakes.js";
@@ -619,7 +620,40 @@ const malformed: readonly Mutation[] = [
   },
   {
     name: "release that still charges",
-    change: (v) => ({ ...v, outcome: { ...v.outcome, kind: "release" } }),
+    change: (v) => {
+      expect(v.outcome).toMatchObject({
+        kind: "release",
+        actualCreditUnits: 2,
+        event: {
+          chargedCreditUnits: 0,
+          compensatedCreditUnits: 2,
+          reservedCreditUnits: 2,
+        },
+        response: {
+          state: "compensated",
+          completedCreditUnits: 0,
+          compensationStatus: "applied",
+        },
+      });
+      const changed = {
+        ...v,
+        outcome: {
+          ...v.outcome,
+          event: {
+            ...v.outcome.event,
+            chargedCreditUnits: 1,
+            compensatedCreditUnits: 1,
+          },
+          response: { ...v.outcome.response, completedCreditUnits: 1 },
+        },
+      };
+      const { authority, ...metadata } = changed;
+      expect(authority).toBe("canonical-model-terminal-v1");
+      expect(canonicalModelTerminalMetadataSchema.parse(metadata)).toEqual(
+        metadata,
+      );
+      return changed;
+    },
   },
   {
     name: "contradictory actual and compensation",
@@ -776,12 +810,33 @@ describe("strict verified terminal recovery envelope", () => {
           name,
         ),
     ),
-  )("rejects $name", async ({ change }) => {
-    const test = await runCoordinator();
-    const value = envelope(test.record);
+  )("rejects $name", async ({ name, change }) => {
+    let test = await runCoordinator();
+    let value = envelope(test.record);
     expect(
       parseModelCommercialVerifiedTerminalV1(value, test.operation),
     ).toEqual(value);
+    if (name === "release that still charges") {
+      // Retain the earlier kind/identity mismatch independently of charge integrity.
+      expect(() =>
+        parseModelCommercialVerifiedTerminalV1(
+          { ...value, outcome: { ...value.outcome, kind: "release" } },
+          test.operation,
+        ),
+      ).toThrow("Canonical model terminal metadata is contradictory.");
+      test = await runCoordinator(terminalCases[1].result);
+      value = envelope(test.record);
+      expect(
+        parseModelCommercialVerifiedTerminalV1(value, test.operation),
+      ).toEqual(value);
+      const chargedRelease = change(value);
+      expect(() =>
+        parseModelCommercialVerifiedTerminalV1(chargedRelease, test.operation),
+      ).toThrow(
+        new TypeError("Canonical model terminal metadata is contradictory."),
+      );
+      return;
+    }
     expect(() =>
       parseModelCommercialVerifiedTerminalV1(change(value), test.operation),
     ).toThrow();

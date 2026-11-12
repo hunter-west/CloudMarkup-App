@@ -46,6 +46,17 @@ interface ACL {
     enabled: boolean;
   }[];
 }
+interface SuccessorReview {
+  state: "REVIEW_ONLY_UNARMED";
+  applied: false;
+  nativeQualified: false;
+  productionActivation: false;
+  predecessorSha256: string;
+  history: ACL["history"];
+  inputs: { path: string; sha256: string }[];
+  changes: Record<string, { before: string; after: string; reason: string }>;
+  additions: Record<string, string>;
+}
 const root = new URL("../../../../../", import.meta.url);
 const proposals = new URL("apps/api/authorization-proposals/", root);
 const read = (file: string) => readFile(new URL(file, proposals), "utf8");
@@ -53,6 +64,10 @@ const digest = (bytes: Uint8Array | string) =>
   createHash("sha256").update(bytes).digest("hex");
 const matrix = async () =>
   JSON.parse(await read("ordinary-local-business-acl.json")) as ACL;
+const successor = async () =>
+  JSON.parse(
+    await read("ordinary-local-business-acl-successor.json"),
+  ) as SuccessorReview;
 
 describe("unarmed ordinary local business ACL contract", () => {
   it("pins the complete history and refuses a claim of installed qualification", async () => {
@@ -86,24 +101,91 @@ describe("unarmed ordinary local business ACL contract", () => {
     const migrations = await loadMigrations(
       fileURLToPath(new URL("apps/api/migrations/", root)),
     );
-    expect(migrations).toHaveLength(acl.history.count);
-    expect(migrations.at(-1)?.version).toBe(acl.history.tip);
-    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(
+    const historical = migrations.filter(
+      ({ version }) => version <= acl.history.tip,
+    );
+    expect(historical).toHaveLength(acl.history.count);
+    expect(historical.at(-1)?.version).toBe(acl.history.tip);
+    expect(historical.reduce((n, m) => n + m.statements.length, 0)).toBe(
       acl.history.statements,
+    );
+    expect(
+      digest(
+        JSON.stringify(
+          {
+            storageContractVersion: 1,
+            migrations: historical.map(({ version, file, checksumSha256 }) => ({
+              version,
+              file,
+              checksumSha256,
+            })),
+          },
+          null,
+          2,
+        ) + "\n",
+      ),
+    ).toBe(acl.history.manifestSha256);
+    const next = await successor();
+    expect(next.state).toBe("REVIEW_ONLY_UNARMED");
+    expect(next.applied).toBe(false);
+    expect(next.nativeQualified).toBe(false);
+    expect(next.productionActivation).toBe(false);
+    expect(digest(await read("ordinary-local-business-acl.json"))).toBe(
+      next.predecessorSha256,
+    );
+    expect(migrations).toHaveLength(next.history.count);
+    expect(migrations.at(-1)?.version).toBe(next.history.tip);
+    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(
+      next.history.statements,
     );
     expect(
       digest(
         await readFile(new URL("apps/api/migrations/manifest.json", root)),
       ),
-    ).toBe(acl.history.manifestSha256);
+    ).toBe(next.history.manifestSha256);
+    for (const input of next.inputs) {
+      expect(input.path).toMatch(
+        /^apps\/api\/(migrations|self-host-migrations|authorization-proposals)\/[a-zA-Z0-9_.-]+$/u,
+      );
+      expect(
+        digest(await readFile(new URL(input.path, root))),
+        input.path,
+      ).toBe(input.sha256);
+    }
   });
 
   it("pins current source inputs without claiming native or optional-runtime admission", async () => {
     const acl = await matrix();
+    const next = await successor();
+    expect(Object.keys(next.changes).sort()).toEqual([
+      "apps/api/src/adapters/persistence/beta-ai-credit-meter.ts",
+      "apps/api/src/adapters/persistence/repositories.ts",
+      "apps/api/src/adapters/persistence/solution-record-repository.ts",
+      "apps/api/src/adapters/persistence/staff-accounts.ts",
+      "apps/api/src/beta-infrastructure-worker.ts",
+      "apps/api/src/production-cleanup-admission.test.ts",
+      "apps/api/src/production-cleanup-schema.ts",
+      "apps/api/src/production-commercial-reads.ts",
+      "apps/api/src/production-composition.ts",
+    ]);
     expect(Object.keys(acl.sources).length).toBeGreaterThan(150);
     for (const [path, hash] of Object.entries(acl.sources)) {
       expect(path).toMatch(/^apps\/api\/(src|migrations)\/[a-zA-Z0-9_./-]+$/);
       expect(path).not.toContain("..");
+      const change = next.changes[path];
+      if (change) {
+        expect(change.before, path).toBe(hash);
+        expect(change.reason.length).toBeGreaterThan(20);
+      }
+      expect(digest(await readFile(new URL(path, root))), path).toBe(
+        change?.after ?? hash,
+      );
+    }
+    expect(Object.keys(next.additions).length).toBeGreaterThan(5);
+    for (const [path, hash] of Object.entries(next.additions)) {
+      expect(path).toMatch(/^apps\/api\/(src|migrations)\/[a-zA-Z0-9_./-]+$/u);
+      expect(path).not.toContain("..");
+      expect(acl.sources[path]).toBeUndefined();
       expect(digest(await readFile(new URL(path, root))), path).toBe(hash);
     }
   });

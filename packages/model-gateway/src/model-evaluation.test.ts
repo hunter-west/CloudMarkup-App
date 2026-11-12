@@ -629,6 +629,7 @@ describe("deterministic model evaluation harness contract smoke", () => {
   });
 
   it("keeps optional judge scores non-authoritative", async () => {
+    let attemptedScoreChanges = 0;
     const judge: ModelEvaluationJudgeV1 = {
       descriptor: modelEvaluationAdapterDescriptorV1Schema.parse({
         adapterId: "cloudmarkup.model-evaluation.optional-fake-judge",
@@ -638,7 +639,19 @@ describe("deterministic model evaluation harness contract smoke", () => {
         modelConfigurationReferences: [],
         promptTemplateDigests: [],
       }),
-      scoreCase({ evaluationCase, outputDigest }) {
+      scoreCase({ deterministicScores, evaluationCase, outputDigest }) {
+        const failed = deterministicScores.find(
+          ({ dimension, passed }) =>
+            dimension === "structured-schema-validity" && !passed,
+        );
+        if (failed !== undefined) {
+          attemptedScoreChanges += 1;
+          Object.assign(failed, {
+            numerator: failed.denominator,
+            basisPoints: 10_000,
+            passed: true,
+          });
+        }
         return Promise.resolve([
           {
             authority: "non-authoritative",
@@ -669,6 +682,32 @@ describe("deterministic model evaluation harness contract smoke", () => {
     expect(result.report.caseResults[0]?.judgeScores[0]).toMatchObject({
       authority: "non-authoritative",
     });
+
+    const failed = await deterministicRun({
+      adapter: transformingAdapter((observation) => ({
+        ...observation,
+        measurements: observation.measurements.map((measurement) =>
+          measurement.dimension === "structured-schema-validity"
+            ? { ...measurement, numerator: 0 }
+            : measurement,
+        ),
+      })),
+      judge,
+    });
+    expect(attemptedScoreChanges).toBe(failed.report.caseResults.length);
+    expect(failed.report.deterministicPassed).toBe(false);
+    expect(failed.report.deterministicQualityBasisPoints).toBeLessThan(10_000);
+    expect(failed.report.activationRecommendation).toBe("hold");
+    expect(failed.report.capabilityActivated).toBe(false);
+    for (const caseResult of failed.report.caseResults) {
+      expect(caseResult.deterministicPassed).toBe(false);
+      expect(
+        caseResult.scores.find(
+          ({ dimension }) => dimension === "structured-schema-validity",
+        ),
+      ).toMatchObject({ numerator: 0, basisPoints: 0, passed: false });
+      expect(caseResult.judgeScores).toHaveLength(1);
+    }
   });
 
   it("reports deterministic regressions using each score direction", async () => {

@@ -87,12 +87,99 @@ describe("immutable export terminal receipt projection", () => {
   });
   it("rejects success without actual workflow output and retained archive bindings", () => {
     const input = fixture();
-    expect(() =>
-      parseSolutionExportTerminalReceipt({
-        ...input,
-        result: { outcome: { outcome: "succeeded" } },
-      }),
-    ).toThrow();
+    const request = input.prepared.workflowSubmission.request;
+    const object = {
+      contractVersion: 1,
+      digest: `sha256:${"a".repeat(64)}`,
+      mediaType: "application/zip",
+      objectId: "object.archive",
+      purpose: "export-package",
+      sizeBytes: 10,
+    };
+    const verifiedPackage = {
+      artifactId: "artifact.archive",
+      availability: { state: "available" },
+      object,
+    };
+    const artifact = {
+      artifactId: verifiedPackage.artifactId,
+      digest: object.digest,
+      kind: "export-package",
+      archiveFileName: "synthetic.zip",
+      manifestDigest: request.subject.manifestDigest,
+      mediaType: object.mediaType,
+      sizeBytes: object.sizeBytes,
+      object,
+    };
+    const valid = parseSolutionExportTerminalReceipt({
+      ...input,
+      result: {
+        outcome: {
+          outcome: "succeeded",
+          outputSizeBytes: 10,
+          output: {
+            contractVersion: 1,
+            family: "solution-export-orchestration",
+            evidenceRecords: [],
+            verifiedPackage,
+          },
+        },
+        persistedOutput: {
+          contractVersion: 1,
+          artifact,
+          diff: {
+            contractVersion: 1,
+            currentDigest: object.digest,
+            state: "no-baseline",
+            entries: [],
+          },
+          evidenceRecords: [],
+          verifiedPackage,
+        },
+        readModel: {
+          contractVersion: 1,
+          artifact,
+          diagnostics: [],
+          downloadPolicy: {
+            state: "eligible",
+            artifactId: verifiedPackage.artifactId,
+            digest: object.digest,
+            maxGrantSeconds: 60,
+          },
+          environment: request.environment,
+          evidenceRecords: [],
+          evidenceSemantics: [],
+          jobId: input.execution.jobId,
+          requestDigest: input.prepared.workflowSubmission.requestDigest,
+          stageReports: [],
+          stages: [],
+          state: "succeeded",
+          subject: request.subject,
+          targetProfileId: request.targetProfileId,
+          targetSettingsDigest: request.targetSettings.digest,
+          warnings: [],
+        },
+      },
+      retained: {
+        manifestObjectId: "object.manifest",
+        archiveObject: object,
+        archiveFileName: "synthetic.zip",
+        fileCount: 0,
+      },
+    });
+    expect(valid.result.outcome.outcome).toBe("succeeded");
+    expect(valid.retained).toBeDefined();
+    for (const retained of [
+      undefined,
+      {
+        ...valid.retained,
+        archiveObject: { ...object, objectId: "object.other-archive" },
+      },
+    ]) {
+      expect(() =>
+        parseSolutionExportTerminalReceipt({ ...valid, retained }),
+      ).toThrow("The terminal receipt must bind one exact prepared execution.");
+    }
   });
   it.each([0, 1.5, Number.MAX_SAFE_INTEGER + 1])(
     "rejects invalid attempt number %s",

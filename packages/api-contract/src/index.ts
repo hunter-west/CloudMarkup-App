@@ -41,6 +41,7 @@ export * from "./account-credentials.js";
 export * from "./account-authenticator.js";
 
 export * from "./staff-accounts.js";
+export * from "./staff-provider-costs.js";
 export * from "./gitlab-projects.js";
 
 export * from "./gitlab-exports.js";

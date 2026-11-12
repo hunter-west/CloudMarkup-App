@@ -208,7 +208,10 @@ suite("actor-owned profiles on isolated PostgreSQL", () => {
       app.update(person, input("user_" + suffix().slice(0, 12)), before.etag),
       app.update(
         person,
-        { ...input(), displayName: "Alternative" },
+        {
+          ...input("other_" + suffix().slice(0, 12)),
+          displayName: "Alternative",
+        },
         before.etag,
       ),
     ]);
@@ -219,6 +222,8 @@ suite("actor-owned profiles on isolated PostgreSQL", () => {
       results.filter((value) => value.status === "rejected"),
     ).toMatchObject([{ reason: { code: "precondition_failed" } }]);
     const current = await app.get(person);
+    expect(current.value.username).not.toBeNull();
+    expect(current.value.version).toBe(before.value.version + 1);
     const cleared = await app.update(
       person,
       {
@@ -229,6 +234,8 @@ suite("actor-owned profiles on isolated PostgreSQL", () => {
       current.etag,
     );
     expect(cleared.value.username).toBeNull();
+    expect(cleared.value.version).toBe(current.value.version + 1);
+    expect((await app.get(person)).value).toEqual(cleared.value);
   });
   it("denies expired, stale-authenticated and suspended actors", async () => {
     const person = await actor(),

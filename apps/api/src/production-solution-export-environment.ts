@@ -71,7 +71,7 @@ export function readProductionSolutionExportEnvironment(
   if (flag === undefined) return unavailable();
   if (
     environment["CLOUDMARKUP_ENVIRONMENT"] !== "beta" ||
-    environment["CLOUDMARKUP_EXPECTED_SCHEMA_VERSION"] !== "0139" ||
+    environment["CLOUDMARKUP_EXPECTED_SCHEMA_VERSION"] !== "0142" ||
     required(environment, prefix + "PROFILE") !==
       PRODUCTION_SOLUTION_EXPORT_PROFILE ||
     required(environment, prefix + "COMPILER_PATH") !==

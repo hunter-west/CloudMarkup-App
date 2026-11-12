@@ -69,16 +69,21 @@ export function applyExactUnifiedPatch(input: {
     }
     const oldStart = Number(match[1]);
     const oldCount = Number(match[2] ?? "1");
+    const newStart = Number(match[3]);
     const newCount = Number(match[4] ?? "1");
-    const hunkSourceIndex = oldStart === 0 ? 0 : oldStart - 1;
+    // An empty range starts after its named line; nonempty ranges include it.
+    const hunkSourceIndex = oldCount === 0 ? oldStart : oldStart - 1;
+    const hunkOutputIndex = newCount === 0 ? newStart : newStart - 1;
     if (
       !Number.isSafeInteger(oldStart) ||
       !Number.isSafeInteger(oldCount) ||
+      !Number.isSafeInteger(newStart) ||
       !Number.isSafeInteger(newCount) ||
       oldCount < 0 ||
       newCount < 0 ||
       hunkSourceIndex < sourceCursor ||
-      hunkSourceIndex > base.lines.length
+      hunkSourceIndex > base.lines.length ||
+      hunkOutputIndex !== output.length + hunkSourceIndex - sourceCursor
     ) {
       throw new Error("Unified patch hunks are out of range or overlap.");
     }
