@@ -985,6 +985,18 @@ by itself. No case, production guard or replay authority is removed.
 
 ### Compiler and generation boundaries
 
+The S3 policy/notification fixture exposed a CloudFormation dependency cycle
+between the Lambda function, its inline role policies and the notifying bucket.
+For this exact owned-bucket/role relationship, policy resources now use the
+validated bucket name and partition without a bucket-resource dependency.
+Bucket/object scopes, explicit Deny, invocation SourceAccount, encryption and
+permission-before-notification ordering remain. The owning golden case now
+checks resource cycles including explicit DependsOn edges; its existing policy,
+negative-admission and deterministic-order checks remain. The expected template
+is updated only at the five affected ARN expressions. Static JSON/source checks
+are not Go/compiler reproduction or provider acceptance; those qualifications
+remain open under the current execution restrictions.
+
 Event payload generation preserves scalar-list item bounds in the emitted type,
 validator, and synthetic fixture. Existing unbounded output and goldens remain
 unchanged. Exact environment node/target-key pairs are required, and endpoint

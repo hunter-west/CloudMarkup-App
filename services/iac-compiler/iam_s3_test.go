@@ -442,7 +442,11 @@ func TestS3PolicyResourceSemanticsAndGoldens(t *testing.T) {
 	if bucketID == "" {
 		t.Fatal("missing bucket")
 	}
-	bucketARN := map[string]any{"Fn::GetAtt": []any{bucketID, "Arn"}}
+	bucketProperties := mapAt(t, resources[bucketID].(map[string]any), "Properties")
+	if bucketProperties["BucketName"] != "cloudmarkup-image-uploads" {
+		t.Fatal("policy scope no longer matches the exact configured bucket name")
+	}
+	bucketARN := map[string]any{"Fn::Sub": "arn:${AWS::Partition}:s3:::cloudmarkup-image-uploads"}
 	objectARN := map[string]any{"Fn::Join": []any{"", []any{bucketARN, "/*"}}}
 	expectedCloudFormation := map[string][]any{
 		"bucket_access": {bucketARN}, "object_access": {objectARN},
@@ -468,6 +472,53 @@ func TestS3PolicyResourceSemanticsAndGoldens(t *testing.T) {
 	}
 	if seen != len(expectedCloudFormation) {
 		t.Fatalf("found %d reviewed CloudFormation policies", seen)
+	}
+	lambdaID, _ := resourceForGraphID(t, resources, "lambda")
+	permissionID, permission := resourceForGraphID(t, resources, "s3_permission")
+	if !reflect.DeepEqual(mapAt(t, permission, "Properties"), map[string]any{
+		"Action": "lambda:InvokeFunction", "FunctionName": map[string]any{"Ref": lambdaID},
+		"Principal": "s3.amazonaws.com", "SourceAccount": map[string]any{"Ref": "AWS::AccountId"}, "SourceArn": bucketARN,
+	}) || !reflect.DeepEqual(resources[bucketID].(map[string]any)["DependsOn"], []any{permissionID}) {
+		t.Fatal("S3 invocation scope or permission-before-notification ordering changed")
+	}
+	assertNoCloudFormationResourceCycle(t, resources)
+
+	// Derive an ARN only for the exact inline-role/notification cycle. Other
+	// policies, scopes and ambiguous role relationships retain their references.
+	for _, variant := range []string{"inline", "generated", "resource-policy", "other-role", "no-notification", "ambiguous-role", "external", "invalid-name"} {
+		candidate := cloneNormalized(t, model)
+		owner, _ := modelResource(candidate, "role")
+		document := terraformPolicyDocument{Kind: "identity-inline", Owner: owner}
+		renderer := &cloudFormationRenderer{model: candidate, logicalIDs: map[string]string{"upload_bucket": bucketID}}
+		switch variant {
+		case "generated":
+			document.Kind = "generated-permission"
+		case "resource-policy":
+			document.Kind = "resource"
+		case "other-role":
+			document.Owner.ID = "unrelated_role"
+		case "no-notification":
+			candidate.Connections = nil
+		case "ambiguous-role":
+			for _, edge := range candidate.Connections {
+				if edge.RelationshipType == "aws.iam.role-assumed-by-lambda" {
+					candidate.Connections = append(candidate.Connections, edge)
+					break
+				}
+			}
+		case "external":
+			renderer.externalByNode = map[string]NormalizedExternalResource{"upload_bucket": {}}
+		case "invalid-name":
+			setResourceValue(candidate, "upload_bucket", "bucketName", stringValueConfig("${Unbound}"))
+		}
+		bucket, _ := modelResource(candidate, "upload_bucket")
+		var expected any = map[string]any{"Fn::GetAtt": []any{bucketID, "Arn"}}
+		if variant == "inline" || variant == "generated" {
+			expected = bucketARN
+		}
+		if actual := renderer.s3PolicyResourceARN(document, bucket); !reflect.DeepEqual(actual, expected) {
+			t.Errorf("%s ARN scope = %#v; want %#v", variant, actual, expected)
+		}
 	}
 
 	reordered := cloneNormalized(t, model)

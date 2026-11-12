@@ -399,12 +399,24 @@ func assertNoCloudFormationResourceCycle(t *testing.T, resources map[string]any)
 	for id, raw := range resources {
 		dependencies[id] = map[string]bool{}
 		collect(raw, dependencies[id])
+		// Permission ordering is an explicit dependency even without a Ref or
+		// GetAtt in the resource's properties.
+		switch value := raw.(map[string]any)["DependsOn"].(type) {
+		case string:
+			dependencies[id][value] = true
+		case []any:
+			for _, dependency := range value {
+				if reference, ok := dependency.(string); ok {
+					dependencies[id][reference] = true
+				}
+			}
+		}
 	}
 	visited, active := map[string]bool{}, map[string]bool{}
 	var visit func(string)
 	visit = func(id string) {
 		if active[id] {
-			t.Fatalf("implicit resource dependency cycle reaches %s", id)
+			t.Fatalf("resource dependency cycle reaches %s", id)
 		}
 		if visited[id] {
 			return
