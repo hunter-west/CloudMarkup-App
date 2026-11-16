@@ -1570,3 +1570,54 @@ generated artifacts, fixtures, runner authority and release gates stay
 protected. Independent review and later immutable integration remain required.
 Source-only checks do not establish browser, compiler, native or hosted
 acceptance.
+
+### Unique reconciliation mapping identities
+
+The separate ICCT-F3 correction starts at published b67a5ee3. A valid proposal
+previously admitted two candidates with one mapping ID and different design
+targets; selectedMappingId then resolved by first match. The operation schema
+now rejects repeated candidate IDs at the duplicate candidate's mappingId path.
+It preserves selection membership, exact observed-input digest binding, bounded
+candidate lists and explicit-review-only authority.
+
+One existing input-binding case now covers both candidate orders and valid
+selections, conflicting, identical, unselected and non-adjacent duplicates,
+individually valid candidate prerequisites, exact failures and input
+immutability. All seven owning cases and three generated-schema checks passed.
+The predecessor failure and its exact test source are retained. No case or
+original assertion was removed, and no comparable full predecessor timing is
+claimed.
+
+The generated JSON Schema shape remains unchanged: candidate-ID uniqueness is
+enforced by runtime validation. This is a schema ambiguity correction, not a
+demonstrated execution bypass or deployed incident. CIDR and GCC-F1 corrections
+remain separate. Independent review and later integration are pending; private
+source, pins, overrides, the running public CI head and all release gates remain
+unchanged.
+
+### Accepted runtime-contract and CIDR integration
+
+This local union retains the published b67a5ee3 browser/editor, accounting,
+deadline and IAM lineage plus the separately accepted workload-ID, canonical
+CIDR and mapping-ID corrections. All six source/test files keep exact accepted
+bytes. Only roadmap appends overlap; all prior sections and both parent chains
+remain. This exact union still requires independent integration review before a
+coordinated later draft update. The current automatic CI stays on b67a5ee3.
+
+Workload-ID and mapping-ID uniqueness require runtime parsing. Generated JSON
+Schema and direct normalization do not enforce property-key uniqueness.
+Previously ambiguous envelopes/proposals now reject without automatic identity
+rewrites or migration; no execution authority is added.
+
+Saved padded CIDRs now produce the existing invalid-CIDR readiness error until
+explicitly corrected. No value is normalized or migrated. Canonical broad-range
+ingress and production-egress diagnostics retain their established behavior.
+
+All existing cases, generated schemas, fixtures, original branches and private
+source remain. The private reference stays 4574e549, with two execution bindings
+and authentic intake/cold composition still open. Native SQL/restore,
+browser/R1, Go/authored-golden reproduction, provider-version and sixteen
+golden-pair refreshes, override removal and cleanup-owner acceptance remain
+unqualified. No new publication, manual CI, live/provider action, security
+change or deployment is part of this integration. Prior browser-child cleanup
+remains unverified.
