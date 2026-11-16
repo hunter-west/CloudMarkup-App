@@ -1524,3 +1524,24 @@ The original timeouts, missing first-probe telemetry and corrected query-scope
 setup failure remain recorded. Exact successor review is required before
 publication. GCC-F1 and other queued findings remain excluded; all existing
 private, native, browser, composition and release gates stay open.
+
+### Commercial expiration source concordance correction
+
+CI on b67a5ee3 correctly found one stale source binding in the unarmed ACL
+successor. The historical baseline still pins the earlier commercial repository.
+The reviewed expiration-summary corrections d187cca9 and 8e2496d8 changed only
+getCreditGrantExpirationSummary, but their current source hash was absent from
+the successor changes map.
+
+The successor now records that exact historical before-image, reviewed current
+after-image and bounded explanation. The existing seven-case contract retains
+its complete source/metadata checks, migration history, exact helper/column
+grants and refusal of qualification claims. No baseline or SQL grant is edited;
+REVIEW_ONLY_UNARMED and all applied/native/activation flags remain unchanged.
+
+This is source concordance, not permission admission. Native ordinary-role,
+allow/deny/tenant, query/driver/concurrency and restore qualification remain
+open. No runtime, financial, database, provider or production action is
+authorized by this correction. The separate three-fix union 1033e17e remains
+frozen; combining these independently reviewable candidates requires an explicit
+later review.

@@ -87,6 +87,11 @@
       "before": "f60649e3a763499077136346e017f05620877c11b39b34eadca51e7fc42cf4da",
       "after": "0ece04449495f5a5b58be3ab2a890cda022334145db6b46824e6be9605be7215",
       "reason": "Carries bounded, stable timestamp/ID continuation before LIMIT while retaining current membership, tenant, project, kind, subject and published-object filters. Existing read columns suffice; no financial or mutation authority is added. Native SQL, role and pagination qualification remains unrun."
+    },
+    "apps/api/src/adapters/persistence/commercial-repositories.ts": {
+      "before": "0ee4b9d97df49ab6f025735b011e2a82ee60ad8f733913f37222f4a1e8e528f2",
+      "after": "4622bf45cfac19815f57d006a2249cfa029402238bdac160ea929ead6073b62b",
+      "reason": "Binds the reviewed d187cca9 and 8e2496d8 expiration-summary corrections: complete-window totals before the bounded detail page, and SQL-derived availability/time decisions with precise text projections. Human commercial.summary.read authority, tenant predicates, repeatable-read/read-only execution and existing base-table/column reads remain. No grants, ledger/settlement writes, optional-purpose admission or activation are added. Native ordinary-role, SQL/driver, concurrency and restore qualification remain unproved."
     }
   },
   "additions": {

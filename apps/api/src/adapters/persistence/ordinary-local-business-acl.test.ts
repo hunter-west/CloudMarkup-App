@@ -159,6 +159,7 @@ describe("unarmed ordinary local business ACL contract", () => {
     const next = await successor();
     expect(Object.keys(next.changes).sort()).toEqual([
       "apps/api/src/adapters/persistence/beta-ai-credit-meter.ts",
+      "apps/api/src/adapters/persistence/commercial-repositories.ts",
       "apps/api/src/adapters/persistence/repositories.ts",
       "apps/api/src/adapters/persistence/solution-record-repository.ts",
       "apps/api/src/adapters/persistence/staff-accounts.ts",
