@@ -8,7 +8,11 @@ import {
 } from "@cloudmarkup/model-gateway";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { ModelCommercialWorkflowPersistenceError } from "./model-commercial-workflow-codec.js";
+import {
+  ModelCommercialWorkflowPersistenceError,
+  parseWorkflowRecord,
+  workflowJson,
+} from "./model-commercial-workflow-codec.js";
 import { PostgresModelCommercialWorkflowStore } from "./model-commercial-workflow-store.js";
 import {
   commercialClaim,
@@ -358,16 +362,79 @@ integrationDescribe(
     });
     it("retains dispatch through a crashed receipt save and never invokes again during recovery", async () => {
       const f = await fixture();
-      let failReceipt = true;
+      let failReceipt = true,
+        dispatchGuardChecked = false;
       const wrapper: ModelCommercialWorkflowStore = {
         claimExecution: (input) => f.store.claimExecution(input),
         releaseExecution: (input) => f.store.releaseExecution(input),
-        compareAndSet: (input) => {
+        compareAndSet: async (input) => {
           if (failReceipt && input.record.invocationReceipt !== null) {
             failReceipt = false;
-            return Promise.reject(
-              new Error("Synthetic crash before receipt commit."),
-            );
+            // Check the evidence guard while the stored record is nonterminal
+            // and still leased. Both column and snapshot revisions advance.
+            await database.transaction(async (tx) => {
+              const scope = [
+                f.scope.organizationId,
+                f.scope.projectId,
+                f.scope.userId,
+                f.scope.tenantScopeDigest.slice(7),
+                f.request.multiCallWorkflowId,
+              ];
+              const read = () =>
+                tx.query(
+                  sql(
+                    "SELECT snapshot,revision,snapshot_sha256,lease_id,lease_expires_at > clock_timestamp() AS lease_active FROM model_commercial_workflows WHERE organization_id=$1 AND project_id=$2 AND principal_id=$3 AND scope_sha256=$4 AND workflow_id=$5 FOR UPDATE",
+                    scope,
+                  ),
+                );
+              const before = await read();
+              expect(before.rowCount).toBe(1);
+              const row = before.rows[0];
+              if (!row) throw Error("Missing synthetic dispatch record");
+              const snapshot = parseWorkflowRecord(row["snapshot"], f.scope);
+              expect(snapshot.dispatchIntent).not.toBeNull();
+              expect(snapshot.invocationReceipt).toBeNull();
+              expect(snapshot.response).toBeNull();
+              expect(row["lease_id"]).not.toBeNull();
+              expect(row["lease_active"]).toBe(true);
+              expect(Number(row["revision"])).toBe(snapshot.revision);
+              expect(row["snapshot_sha256"]).toBe(
+                digestStructuredValue(snapshot).slice(7),
+              );
+              const next = parseWorkflowRecord(
+                { ...snapshot, revision: snapshot.revision + 1 },
+                f.scope,
+              );
+              const update = (candidate: typeof snapshot) =>
+                tx.query(
+                  sql(
+                    "UPDATE model_commercial_workflows SET revision=$6,snapshot=$7::jsonb,snapshot_sha256=$8 WHERE organization_id=$1 AND project_id=$2 AND principal_id=$3 AND scope_sha256=$4 AND workflow_id=$5",
+                    [
+                      ...scope,
+                      candidate.revision,
+                      workflowJson(candidate),
+                      digestStructuredValue(candidate).slice(7),
+                    ],
+                  ),
+                );
+              await tx.query(sql("SAVEPOINT dispatch_evidence_control"));
+              expect((await update(next)).rowCount).toBe(1);
+              await tx.query(
+                sql("ROLLBACK TO SAVEPOINT dispatch_evidence_control"),
+              );
+              await expect(
+                update({ ...next, dispatchIntent: null }),
+              ).rejects.toMatchObject({
+                code: "23514",
+                message: "commercial workflow evidence is immutable",
+              });
+              await tx.query(
+                sql("ROLLBACK TO SAVEPOINT dispatch_evidence_control"),
+              );
+              expect((await read()).rows).toEqual(before.rows);
+            });
+            dispatchGuardChecked = true;
+            throw new Error("Synthetic crash before receipt commit.");
           }
           return f.store.compareAndSet(input);
         },
@@ -377,6 +444,9 @@ integrationDescribe(
       await expect(
         h.coordinator.execute(f.request, invoke),
       ).rejects.toMatchObject({ code: "dependency-failure" });
+      // Assertions inside the dependency callback must not be swallowed by
+      // the coordinator's expected dependency-failure translation.
+      expect(dispatchGuardChecked).toBe(true);
       expect((await h.coordinator.recover(f.request)).state).toBe(
         "reconciliation-required",
       );

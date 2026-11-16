@@ -201,9 +201,10 @@ on exact Node.js 24.18.0.
 The local suite uses an injected fake process boundary and therefore proves
 admission, sequencing, failure, and redaction behavior without claiming that an
 image was built. During the image build, the separate tool self-test uses a
-disposable child beneath `/opt/cloudmarkup/toolchain` so normal Node and
-TypeScript upward resolution reaches the exact installed toolchain; it removes
-that child before the layer completes. This is not the runtime application
+disposable `/tmp/cloudmarkup-tool-self-test-<pid>/application` directory with an
+explicit `node_modules` link to `/opt/cloudmarkup/toolchain/node_modules` for
+Node and TypeScript resolution. It removes the fixture before the layer
+completes. This build-time self-test fixture is not the runtime application
 workspace, whose dependencies are installed from its own bound manifest and
 lockfile. The credentialless workflow must build the linux/amd64 image and run
 the exact pinned tools before publication.

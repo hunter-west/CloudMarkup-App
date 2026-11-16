@@ -3,6 +3,7 @@ import {
   diagramExportResultV1Schema,
   diagramRendererV1Pin,
   diagramRendererSfntV1Pin,
+  diagramRendererBoundedDetailV1Pin,
   diagramRendererPinV1Schema,
   type DiagramRendererPinV1,
   type DiagramExportIconSetV1,
@@ -69,8 +70,12 @@ export function createSolutionExportDiagramRendererPort(input: {
   const samePin = (pin: DiagramRendererPinV1) =>
     pin.version === renderer.version && pin.digest === renderer.digest;
   if (
-    (!samePin(diagramRendererV1Pin) && !samePin(diagramRendererSfntV1Pin)) ||
-    (samePin(diagramRendererSfntV1Pin) && input.service === undefined)
+    ![
+      diagramRendererV1Pin,
+      diagramRendererSfntV1Pin,
+      diagramRendererBoundedDetailV1Pin,
+    ].some(samePin) ||
+    (!samePin(diagramRendererV1Pin) && input.service === undefined)
   ) {
     throw new TypeError(
       "An exact successor renderer requires its explicitly admitted service.",

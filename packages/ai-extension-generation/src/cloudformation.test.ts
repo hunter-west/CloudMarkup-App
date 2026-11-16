@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   cloudFormationExtensionValidationPolicyV1Schema,
   cloudFormationExtensionValidationRequestV1Schema,
+  cloudFormationExtensionValidationResultV1Schema,
   validateCloudFormationExtension,
 } from "./cloudformation.js";
 import { sha256Text } from "./security.js";
@@ -289,10 +290,131 @@ describe("bounded CloudFormation extension validation", () => {
       name: "transform",
       source: `Transform: AWS::Serverless-2016-10-31\n${validSource}`,
     },
-  ])("rejects $name", ({ code, source }) => {
+  ])("rejects $name", ({ code, source, name }) => {
     const result = validateCloudFormationExtension(requestFor(source));
     expect(result.state).toBe("failed");
     expect(result.diagnostics.map((entry) => entry.code)).toContain(code);
+    if (name === "unknown property") {
+      expect(
+        validateCloudFormationExtension(requestFor(validSource)).state,
+      ).toBe("passed");
+      for (const properties of [
+        { ["A".repeat(129)]: true },
+        Object.fromEntries(
+          Array.from({ length: 257 }, (_, index) => [
+            `Unknown${String(index)}`,
+            true,
+          ]),
+        ),
+        Object.fromEntries(
+          Array.from({ length: 1_001 }, (_, index) => [
+            `Unknown${String(index)}`,
+            true,
+          ]),
+        ),
+      ]) {
+        const overflowing = Object.keys(properties).length > 1_000;
+        const bounded = validateCloudFormationExtension(
+          requestFor(
+            JSON.stringify({
+              Resources: {
+                CandidateBucket: {
+                  Type: "AWS::S3::Bucket",
+                  Properties: {
+                    BucketName: "reviewed-candidate-bucket",
+                    NotificationTopic: { Ref: "ExistingTopicArn" },
+                    ...(overflowing
+                      ? { PolicyDocument: { Action: "s3:*" } }
+                      : {}),
+                    ...properties,
+                  },
+                },
+              },
+            }),
+            overflowing ? { targetReadiness: "pending" } : {},
+          ),
+        );
+        expect(
+          cloudFormationExtensionValidationResultV1Schema.parse(bounded),
+        ).toEqual(bounded);
+        expect(bounded.state).toBe("failed");
+        expect(bounded.resources).toEqual([]);
+        expect(bounded.diagnostics.length).toBeLessThanOrEqual(1_000);
+        expect(bounded.diagnostics).toContainEqual(
+          expect.objectContaining({ code, repairable: true }),
+        );
+        if (overflowing) {
+          expect(bounded.diagnostics).toContainEqual(
+            expect.objectContaining({
+              code: "cloudmarkup.ai-extension.cloudformation-diagnostics-exceeded",
+              repairable: false,
+            }),
+          );
+          expect(bounded.diagnostics).toContainEqual(
+            expect.objectContaining({
+              category: "security",
+              severity: "error",
+              code: "cloudmarkup.ai-extension.cloudformation-wildcard-action-denied",
+            }),
+          );
+          expect(bounded.diagnostics).toContainEqual(
+            expect.objectContaining({
+              category: "target-readiness",
+              severity: "error",
+              repairable: false,
+            }),
+          );
+          expect(bounded.evidence.checks).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                checkId: "cloudmarkup.ai-extension.cloudformation-readiness",
+                status: "failed",
+              }),
+              expect.objectContaining({
+                checkId: "cloudmarkup.ai-extension.cloudformation-schema",
+                status: "failed",
+              }),
+              expect.objectContaining({
+                checkId: "cloudmarkup.ai-extension.cloudformation-admission",
+                status: "failed",
+              }),
+              expect.objectContaining({
+                checkId: "cloudmarkup.ai-extension.cloudformation-security",
+                status: "failed",
+              }),
+            ]),
+          );
+        }
+      }
+      const references = validateCloudFormationExtension(
+        requestFor(
+          JSON.stringify({
+            Resources: {
+              CandidateBucket: {
+                Type: "AWS::S3::Bucket",
+                Properties: { BucketName: "reviewed-candidate-bucket" },
+                DependsOn: Array.from(
+                  { length: 1_001 },
+                  (_, index) => `Missing${String(index)}`,
+                ),
+              },
+            },
+          }),
+        ),
+      );
+      expect(references.state).toBe("failed");
+      expect(references.resources).toEqual([]);
+      expect(references.diagnostics.length).toBeLessThanOrEqual(1_000);
+      expect(references.diagnostics).toContainEqual(
+        expect.objectContaining({
+          code: "cloudmarkup.ai-extension.cloudformation-reference-unresolved",
+          path: "iac/extensions/custom/resources.yaml",
+        }),
+      );
+      expect(
+        cloudFormationExtensionValidationResultV1Schema.parse(references),
+      ).toEqual(references);
+    }
   });
 
   it("blocks pending target readiness and deterministic logical-ID shadowing", () => {

@@ -5,7 +5,11 @@ import {
   gitHubInstallationRecordSchema,
   gitHubRepositoryRecordSchema,
 } from "./contracts.js";
-import { InMemoryGitHubExportStore } from "./fakes.js";
+import {
+  InMemoryGitHubExportStore,
+  FakeGitHubRepositoryImportStore,
+} from "./fakes.js";
+import { repositoryImportIdempotencyDigest } from "./repository-import.js";
 import type {
   GitHubRepositoryImportInput,
   GitHubRepositoryImportService,
@@ -141,7 +145,7 @@ async function setup() {
     imports,
     store,
   });
-  return { importRepository, service, store };
+  return { importRepository, service, store, history };
 }
 
 const subscription = {
@@ -158,6 +162,132 @@ const subscription = {
 } as const;
 
 describe("GitHub repository push refresh", () => {
+  it.each([
+    "later-subscription-failure",
+    "lost-import-acknowledgement",
+  ] as const)(
+    "replays persisted import identities after %s without repeating completed work",
+    async (failure) => {
+      const value = await setup();
+      const imports = new FakeGitHubRepositoryImportStore();
+      const completedProjects: string[] = [];
+      let next = 0;
+      let injected = false;
+      const retain = (record: StoredGitHubRepositoryImport) => {
+        const index = value.history.findIndex(
+          ({ importId }) => importId === record.importId,
+        );
+        if (index < 0) value.history.push(record);
+        else value.history[index] = record;
+      };
+      value.importRepository.mockImplementation(async (input) => {
+        const attemptId = `attempt.${String(++next)}`;
+        const claim = await imports.reserveImport({
+          attemptId,
+          record: {
+            ...storedImport(input),
+            importId: `import.${String(next)}`,
+            snapshotId: `snapshot.${String(next)}`,
+            idempotencyDigest: repositoryImportIdempotencyDigest(input),
+            createdAt: "2026-08-25T13:00:00.000Z",
+            state: "running",
+            recordVersion: 1,
+          },
+        });
+        if (claim.outcome === "terminal") return claim.record;
+        if (claim.outcome !== "acquired")
+          throw new Error("Import still running");
+        if (
+          !injected &&
+          failure === "later-subscription-failure" &&
+          input.projectId === "project.2"
+        ) {
+          injected = true;
+          const failed = {
+            ...claim.record,
+            state: "failed-transient" as const,
+            recordVersion: claim.record.recordVersion + 1,
+          };
+          expect(await imports.saveImport({ attemptId, record: failed })).toBe(
+            "saved",
+          );
+          retain(failed);
+          throw new Error("Synthetic second subscription failure");
+        }
+        const completed = {
+          ...claim.record,
+          state: "succeeded" as const,
+          recordVersion: claim.record.recordVersion + 1,
+        };
+        expect(await imports.saveImport({ attemptId, record: completed })).toBe(
+          "saved",
+        );
+        retain(completed);
+        completedProjects.push(input.projectId);
+        if (!injected && failure === "lost-import-acknowledgement") {
+          injected = true;
+          throw new Error("Synthetic import acknowledgement lost");
+        }
+        return completed;
+      });
+      await value.service.configure(subscription);
+      await value.service.configure({
+        ...subscription,
+        projectId: "project.2",
+        idempotencyKey: "refresh-second",
+      });
+      const push = {
+        branch: "main",
+        commitSha: NEXT_SHA,
+        deliveryId: "delivery.partial",
+        forced: false,
+        installationId: 77,
+        integrationId: "integration.1",
+        organizationId: "organization.1",
+        repositoryId: 202,
+      };
+      await expect(value.service.handlePush(push)).rejects.toThrow(
+        /Synthetic/u,
+      );
+      const failedReceipts = structuredClone(value.store.receipts);
+      // A newer, intentional manual import must not become the retry baseline.
+      for (const projectId of ["project.1", "project.2"]) {
+        const baseline = value.history[0];
+        if (baseline === undefined) throw new Error("Missing baseline");
+        value.history.push({
+          ...baseline,
+          projectId,
+          importId: `manual.${projectId}`,
+          createdAt: "2026-08-25T14:00:00.000Z",
+        });
+      }
+      await expect(value.service.handlePush(push)).resolves.toBe("queued");
+      await expect(value.service.handlePush(push)).resolves.toBe("queued");
+      expect(completedProjects).toEqual(["project.1", "project.2"]);
+      for (const projectId of ["project.1", "project.2"]) {
+        const calls = value.importRepository.mock.calls
+          .map(([input]) => input)
+          .filter((input) => input.projectId === projectId);
+        expect(calls.length).toBeGreaterThan(1);
+        expect(new Set(calls.map(repositoryImportIdempotencyDigest)).size).toBe(
+          1,
+        );
+      }
+      expect(value.importRepository.mock.calls[0]?.[0].previousImportId).toBe(
+        "githubimport.previous",
+      );
+      if (failure === "later-subscription-failure")
+        expect(
+          value.importRepository.mock.calls.find(
+            ([input]) => input.projectId === "project.2",
+          )?.[0].previousImportId,
+        ).toBeUndefined();
+      expect(value.store.receipts.slice(0, failedReceipts.length)).toEqual(
+        failedReceipts,
+      );
+    },
+  );
+
   it("imports the exact push commit as immutable history linked to the previous snapshot", async () => {
     const value = await setup();
     const configured = await value.service.configure(subscription);

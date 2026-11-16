@@ -245,6 +245,7 @@ export function parseIpv4Cidr(
   const octets = match.slice(1, 5).map(Number);
   const prefix = Number(match[5]);
   if (
+    `${octets.join(".")}/${String(prefix)}` !== value ||
     octets.some(
       (octet) => !Number.isInteger(octet) || octet < 0 || octet > 255,
     ) ||

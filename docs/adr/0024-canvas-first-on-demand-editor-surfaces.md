@@ -6,7 +6,9 @@
 - **Supersedes:** ADR-0018 only for the concrete desktop Inspector and Workspace
   panel geometry, initial open state, and resize behavior
 - **Refines:** ADR-0013, ADR-0014, and ADR-0016
-- **Superseded by:** None
+- **Superseded by:**
+  [ADR-0058](0058-desktop-service-configuration-and-appearance.md) only for
+  opaque canvas menu surfaces and service-body double-click behavior
 
 ## Context
 

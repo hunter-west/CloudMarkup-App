@@ -58,6 +58,7 @@ export interface GraphCommandApplicationIssue {
 }
 
 export type GraphCommandNonInvertibleReasonCode =
+  | "adopted_resource_restoration_requires_policy"
   | "adoption_requires_explicit_policy"
   | "batch_contains_non_invertible_command"
   | "generated_provenance_changed"
@@ -145,11 +146,7 @@ export interface GraphCommandApplicationResult {
   readonly inversion: GraphCommandInversion;
 }
 
-interface ActionApplicationResult {
-  readonly document: ArchitectureDocument;
-  readonly changes: readonly GraphChangeSummary[];
-  readonly inversion: GraphCommandInversion;
-}
+type ActionApplicationResult = GraphCommandApplicationResult;
 
 function compareUtf16(left: string, right: string): number {
   if (left === right) {
@@ -627,7 +624,17 @@ function applyRemoveNode(
         nodeId: node.id,
       },
     ],
-    inversion: { kind: "available", command: inverse },
+    inversion:
+      node.semantic.lifecycle.ownership === "adopted"
+        ? {
+            kind: "unavailable",
+            reason: {
+              code: "adopted_resource_restoration_requires_policy",
+              message:
+                "Restoring an adopted resource requires an explicit lifecycle policy.",
+            },
+          }
+        : { kind: "available", command: inverse },
   };
 }
 
@@ -904,7 +911,17 @@ function applyRemoveEdge(
         edgeId: edge.id,
       },
     ],
-    inversion: { kind: "available", command: inverse },
+    inversion:
+      edge.semantic.lifecycle.ownership === "adopted"
+        ? {
+            kind: "unavailable",
+            reason: {
+              code: "adopted_resource_restoration_requires_policy",
+              message:
+                "Restoring an adopted resource requires an explicit lifecycle policy.",
+            },
+          }
+        : { kind: "available", command: inverse },
   };
 }
 

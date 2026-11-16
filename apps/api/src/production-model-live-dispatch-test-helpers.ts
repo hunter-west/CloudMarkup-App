@@ -9,6 +9,10 @@ import { modelDispatchCostCeilingSchema } from "./adapters/model-platform-spend.
 type Invocation =
   | ModelProviderHostSeedInvocationV3
   | ModelProviderHostRepairSuccessorInvocationV4;
+
+// Explicit fixture-profile input; it cannot select runtime pricing authority.
+export const syntheticBedrockPricingAccountId = "000000000000";
+
 /** Synthetic reviewed-price fixture; does not claim a live pricing observation. */
 export function syntheticRepairDispatchPricing(invocation: Invocation) {
   const registered = getBedrockModelRegistrationV1(
@@ -20,7 +24,7 @@ export function syntheticRepairDispatchPricing(invocation: Invocation) {
   const pricing = bedrockGlobalPricingEvidenceV1Schema.parse({
     contractVersion: 1,
     policyId: "cloudmarkup.bedrock-global-full-window.v1",
-    accountId: "000000000000",
+    accountId: syntheticBedrockPricingAccountId,
     environment: "beta",
     sourceRegion: "us-east-1",
     endpoint: "bedrock-runtime",

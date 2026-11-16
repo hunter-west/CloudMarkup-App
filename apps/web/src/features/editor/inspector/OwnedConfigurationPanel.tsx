@@ -1,6 +1,7 @@
-import type {
-  ArchitectureConfiguration,
-  ArchitectureNode,
+import {
+  hashCanonicalValue,
+  type ArchitectureConfiguration,
+  type ArchitectureNode,
 } from "@cloudmarkup/domain";
 import type { ConfigurationValue } from "@cloudmarkup/schemas";
 import {
@@ -13,6 +14,7 @@ import {
   Textarea,
 } from "@cloudmarkup/ui";
 import { useMemo, useState, type SyntheticEvent } from "react";
+import { useDocumentDraft } from "./use-document-draft.js";
 
 import type {
   EditorCatalogConfigurationField,
@@ -469,9 +471,16 @@ function StructuredConfigurationForm({
   readonly service: EditorCatalogService;
   readonly submitLabel: string;
 }) {
-  const [values, setValues] = useState(() =>
+  const draftState = useDocumentDraft(
     rawConfigurationValues(service, configuration),
+    hashCanonicalValue({
+      configuration: configuration ?? null,
+      schemaId: service.configuration.schemaId,
+      schemaVersion: service.configuration.schemaVersion,
+      fixedValues,
+    }),
   );
+  const values = draftState.value;
   const [issues, setIssues] = useState<readonly OwnedFormIssue[]>([]);
   const fieldPrefix =
     configurationNodeId === undefined
@@ -485,6 +494,7 @@ function StructuredConfigurationForm({
   };
   const submit = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (draftState.conflicted) return;
     const built = buildConfiguration(
       service,
       identity,
@@ -497,6 +507,7 @@ function StructuredConfigurationForm({
       return;
     }
     const result = onSave(built.configuration);
+    if (result.ok && configuration !== undefined) draftState.reset();
     setIssues(
       result.ok
         ? []
@@ -512,13 +523,44 @@ function StructuredConfigurationForm({
         idPrefix={fieldPrefix}
         issues={issues}
         onChange={(property, value) => {
-          setValues((current) => ({ ...current, [property]: value }));
+          draftState.update((current) => ({ ...current, [property]: value }));
         }}
         service={service}
         values={values}
       />
       <OwnedConfigurationErrors issues={issues} />
-      <Button size="compact" type="submit" variant="primary">
+      {draftState.conflicted ? (
+        <div>
+          <p role="alert">
+            This configuration changed while you were editing. Your edits are
+            kept. Reload current values or keep your edits before saving.
+          </p>
+          <Button
+            onClick={() => {
+              draftState.reset();
+              setIssues([]);
+            }}
+            type="button"
+          >
+            Reload current configuration
+          </Button>
+          <Button
+            onClick={() => {
+              draftState.keep();
+              setIssues([]);
+            }}
+            type="button"
+          >
+            Keep my configuration edits
+          </Button>
+        </div>
+      ) : null}
+      <Button
+        disabled={draftState.conflicted}
+        size="compact"
+        type="submit"
+        variant="primary"
+      >
         {submitLabel}
       </Button>
     </form>

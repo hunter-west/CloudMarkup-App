@@ -752,10 +752,7 @@ export class InMemorySolutionExportStore
     if (current === undefined) {
       throw notFound();
     }
-    if (
-      current.job.state === "cancellation-requested" &&
-      job.job.state === "failed"
-    ) {
+    if (current.job.state === "cancellation-requested") {
       await this.saveJob(
         publicationCancellationAcknowledged({
           ...job,

@@ -4,6 +4,7 @@ import { EXPERIENCE_PREFERENCE_STORAGE_NAMESPACE } from "../../preferences/exper
 import { MODE_PREFERENCE_STORAGE_NAMESPACE } from "../../preferences/mode-preference.js";
 import { NAVIGATION_PREFERENCE_STORAGE_NAMESPACE } from "../../shell/navigation-preference.js";
 import { EDITOR_RECOVERY_INDEXED_DB_NAME } from "../editor/persistence/indexeddb-editor-recovery-store.js";
+import { DRAFT_COMMAND_RECOVERY_DATABASE } from "../editor/persistence/draft-command-checkpoint.js";
 import {
   browserCognitoAuthSession,
   type CognitoBrowserAuthSession,
@@ -66,12 +67,18 @@ function clearPreferenceRecovery(storage: Storage | undefined): void {
 
 function deleteEditorRecoveryDatabase(
   indexedDb: IDBFactory | undefined,
+  name: string,
 ): Promise<void> {
-  if (indexedDb === undefined) return Promise.resolve();
+  if (indexedDb === undefined)
+    return Promise.reject(
+      new TypeError(
+        "CloudMarkup could not clear editor recovery before logout because browser storage is unavailable.",
+      ),
+    );
   return new Promise<void>((resolve, reject) => {
     let request: IDBOpenDBRequest;
     try {
-      request = indexedDb.deleteDatabase(EDITOR_RECOVERY_INDEXED_DB_NAME);
+      request = indexedDb.deleteDatabase(name);
     } catch {
       reject(
         new TypeError(
@@ -117,7 +124,13 @@ export async function performCognitoSignOut({
 
   const logoutUrl = await session.createLogoutUrl();
   if (clearLocalRecovery) {
-    await deleteEditorRecoveryDatabase(environment.indexedDb);
+    // Each deletion must be acknowledged before sign-out reports clear success.
+    // A blocked request may complete later; retry remains safe and idempotent.
+    for (const name of [
+      EDITOR_RECOVERY_INDEXED_DB_NAME,
+      DRAFT_COMMAND_RECOVERY_DATABASE,
+    ])
+      await deleteEditorRecoveryDatabase(environment.indexedDb, name);
     clearPreferenceRecovery(environment.localStorage);
   }
   session.clearSession();

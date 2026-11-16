@@ -18,6 +18,23 @@ describe("host-computed repaired candidate digest", () => {
     expect(f.response.candidateBundle.candidates[0]).not.toHaveProperty(
       "proposedResultDigest",
     );
+    const patch = f.response.candidateBundle.candidates[0];
+    if (patch?.kind !== "patch") throw Error("Missing synthetic patch");
+    patch.unifiedDiff = [
+      `--- a/${f.source.path}`,
+      `+++ b/${f.source.path}`,
+      "@@ -1,0 +2,1 @@",
+      "+export const added = true;",
+      "",
+    ].join("\n");
+    const insertionInput = structuredClone(options);
+    const insertion = materializeHostSeedRepairPatchV2(options);
+    const expected = f.source.content + "export const added = true;\n";
+    expect(insertion.content).toBe(expected);
+    expect(insertion.digest).toBe(sha256Text(expected));
+    expect(insertion.baseDigest).toBe(f.source.contentDigest);
+    expect(insertion.ownership).toBe("user-owned-preserved");
+    expect(options).toEqual(insertionInput);
   });
   it.each([
     "wrong-context",

@@ -184,7 +184,7 @@ describe("explicit standalone schema profile", () => {
     );
     expect(replacement.checksumSha256).not.toBe(original.checksumSha256);
     expect(replacement.statements.join("\n")).toContain("cloudmarkup_owner");
-    expect(profile.migrations.at(-1)?.version).toBe("0139");
+    expect(profile.migrations.at(-1)?.version).toBe("0142");
     expect(hash(await readFile(join(canonical, "manifest.json")))).toBe(
       hash(before),
     );

@@ -170,11 +170,26 @@ it("refuses missing issued records, unknown partial staging and a replaced direc
   const partial = f.create();
   await expect(partial.assertReady()).rejects.toThrow();
   await partial.close();
-  await rename(f.settings.root, join(f.base, "original"));
-  await mkdir(f.settings.root, { mode: 0o700 });
-  for (const name of await readdir(join(f.base, "original")))
-    await copyFile(join(f.base, "original", name), join(f.settings.root, name));
-  const replaced = f.create();
+  // Use healthy independent history: the corrupt pending marker above must
+  // not mask the directory-incarnation refusal.
+  const replacementFixture = await fixture();
+  await provisionRetainedProviderDispatch(
+    replacementFixture.settings,
+    replacementFixture.objects,
+  );
+  const healthy = replacementFixture.create();
+  await healthy.admit(replacementFixture.binding);
+  await expect(healthy.assertReady()).resolves.toBeUndefined();
+  await healthy.close();
+  const heldDirectory = join(replacementFixture.base, "original");
+  await rename(replacementFixture.settings.root, heldDirectory);
+  await mkdir(replacementFixture.settings.root, { mode: 0o700 });
+  for (const name of await readdir(heldDirectory))
+    await copyFile(
+      join(heldDirectory, name),
+      join(replacementFixture.settings.root, name),
+    );
+  const replaced = replacementFixture.create();
   await expect(replaced.assertReady()).rejects.toThrow();
   await replaced.close();
 });

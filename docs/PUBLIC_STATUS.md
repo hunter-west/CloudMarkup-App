@@ -1,5 +1,19 @@
 # Public source status
 
+The
+[local setup refactor](roadmap/plans/repository-local-simplification-20261109.md)
+adds source-derived, non-secret setup templates and image builds independent of
+runtime credentials. Its evidence distinguishes local checks from native
+container and provider acceptance.
+
+The same plan now records unreleased command-based editor saves, retained
+provider-usage evidence, and corrections for recovery capacity, rejected local
+checkpoints and confirmed local clearing. A separately authorized staff cost
+report requires explicit staff and organization grants; its native authority
+admission remains pending. Cleanup checkpoint storage and retention, native
+migration/restore and release admission remain unresolved. The server save
+restriction and supported editor must ship together.
+
 This distribution supports the credential-free synthetic editor. Its seeded
 contributor setup candidate explicitly selects the standalone PG17 profile,
 separate bootstrap/migrator/runtime logins and acknowledged core permissions.
@@ -110,7 +124,26 @@ The [public CI workflow](../.github/workflows/public-ci.yml) uses one standard
 hosted runner with read-only permissions, frozen dependencies and pinned
 actions/toolchains. It runs the public gate, local/operator tooling and the
 existing browser profiles, including their light/dark coverage. It uses no
-deployment credentials and does not deploy or publish. Its first hosted run,
-branch admission and private vulnerability-reporting verification remain
-publication steps; local checks are not evidence that those remote settings are
-active.
+deployment credentials and does not deploy or publish. The refactor remains in
+[draft PR #10](https://github.com/hunter-west/CloudMarkup-App/pull/10). Its
+formatter-only successor passed formatting, then
+[CI failed application admission](https://github.com/hunter-west/CloudMarkup-App/actions/runs/43122559726)
+on migration/schema/profile and source-binding expectations. Local setup and
+browser steps were skipped. Fresh durable standalone and hosted release
+acceptance remain unestablished; local focused checks do not replace them.
+
+The separate
+[operational cleanup proposal](adr/proposed-beta-ai-cleanup-retention.md)
+implements the scoped 60-day eligibility target on a local successor. Qualified
+restore ownership, ordinary-role/native admission, independent review and any
+irreversible retirement activation remain pending. No live deletion is enabled.
+
+The local schema-admission successor repairs the stale current bindings through
+`0142`: standalone profile/core-policy identity, production schema expectations,
+bundled migrator inventory and release guards. Historical migration bytes and
+the original unarmed ACL review remain intact; a separate source concordance
+records the changed consumers. Isolated ordinary database fixtures explicitly
+distinguish their namespace-adapted `0140` from the canonical migration. Focused
+source/setup checks pass, but the actual restricted export-composition check
+timed out at its unchanged limit with the pinned Go toolchain. Independent
+review, successor CI and native/composed release gates remain open.

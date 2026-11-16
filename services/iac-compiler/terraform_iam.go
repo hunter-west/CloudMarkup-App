@@ -863,7 +863,7 @@ func (renderer *terraformRenderer) validateGeneratedPolicyProvenance(documents [
 }
 
 func generatedStatementMatches(document terraformPolicyDocument, statement terraformPolicyStatement, expected expectedGeneratedPolicy) bool {
-	if document.Owner.ID != expected.OwnerID || document.Kind != expected.Kind || !sameStrings(statement.Actions, expected.Actions) || len(statement.Expressions) != 0 || len(statement.Conditions) != 0 {
+	if statement.Effect != "allow" || document.Owner.ID != expected.OwnerID || document.Kind != expected.Kind || !sameStrings(statement.Actions, expected.Actions) || len(statement.Expressions) != 0 || len(statement.Conditions) != 0 {
 		return false
 	}
 	if expected.Principal == "" {

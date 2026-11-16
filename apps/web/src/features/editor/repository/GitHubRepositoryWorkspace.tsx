@@ -200,7 +200,11 @@ export function GitHubRepositoryWorkspace({
     },
   });
   const effectiveRepositoryId =
-    selectedRepositoryId ?? repositories.data?.[0]?.repositoryId ?? 0;
+    repositories.data?.find(
+      ({ repositoryId }) => repositoryId === selectedRepositoryId,
+    )?.repositoryId ??
+    repositories.data?.[0]?.repositoryId ??
+    0;
 
   const branches = useQuery({
     enabled: runtime !== null && effectiveRepositoryId > 0,
@@ -572,6 +576,10 @@ export function GitHubRepositoryWorkspace({
           await importMutation.mutateAsync(input);
         }}
         onRepositorySelectionChange={selectRepository}
+        selection={{
+          integrationId: effectiveIntegrationId,
+          repositoryId: effectiveRepositoryId,
+        }}
         repositories={repositories.data ?? []}
       />
       {comparisonRevisionId !== undefined && baseline.isPending ? (

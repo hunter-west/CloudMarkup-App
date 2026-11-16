@@ -2,9 +2,9 @@
 
 `@cloudmarkup/solution-export` is the pure local export boundary that assembles
 one exact immutable Solution Revision's canonical source projections, generated
-Terraform, supported application source, contracts, placeholders,
-ownership/provenance manifest, and references into a verified file tree and
-deterministic ZIP.
+Terraform or CloudFormation, supported application source, contracts,
+placeholders, ownership/provenance manifest, and references into a verified file
+tree and deterministic ZIP.
 
 The service accepts already-produced compiler and optional application
 generation artifacts as data. It verifies their content addresses and revision
@@ -39,10 +39,13 @@ pnpm check:solution-export
 
 `@cloudmarkup/solution-export-workflow` invokes this pure service through an
 injected packager port only after compilation, any required application build,
-and Terraform static validation have produced exact typed results. The workflow
-then calls `verifySolutionExportArtifact` independently before a storage adapter
-may publish the ZIP. An optional strict `externalStageStatus` carries only
-pre-export build and Terraform-validation truth. It is bound to the selected
+and the selected target's validation have produced exact typed results.
+Terraform uses its injected static-validation runner; CloudFormation uses local
+structural validation of the compiler's JSON template. Neither is an AWS
+deployment or hosted-release acceptance claim. The workflow then calls
+`verifySolutionExportArtifact` independently before a storage adapter may
+publish the ZIP. An optional strict `externalStageStatus` carries only
+pre-export build and target-validation truth. It is bound to the selected
 environment, target settings digest, workflow request digest, report digests,
 and full canonical Evidence-record digests. Every claim must resolve to exactly
 one matching revision/environment-bound `evidence-artifact` supplemental file.

@@ -848,11 +848,12 @@ implies or upgrades a higher one.
 
 Async Job v1 is a provider-neutral coordination aggregate, not a new source of
 architecture, workload, repository, commercial, artifact, or Evidence truth. It
-defines 16 families, the states `queued`, `running`, `awaiting-user-input`,
-`succeeded`, `failed`, `canceled`, `expired`, and `superseded`, and strict
-ownership, correlation, subject, idempotency, limits, progress, attempt,
-checkpoint, output-reference, and safe-error records. Prompt 25 supplies only
-deterministic fake handlers.
+uses the [closed family enumeration](../../packages/schemas/src/async-job-v1.ts)
+and the states `queued`, `running`, `awaiting-user-input`, `succeeded`,
+`failed`, `canceled`, `expired`, and `superseded`, and strict ownership,
+correlation, subject, idempotency, limits, progress, attempt, checkpoint,
+output-reference, and safe-error records. Prompt 25 supplies only deterministic
+fake handlers.
 
 Durable generation and export work binds the exact immutable Solution Revision
 manifest identity and digest. Evidence output references also bind the exact

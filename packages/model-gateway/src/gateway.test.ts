@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   configurationKeySchema,
@@ -1217,23 +1217,16 @@ describe("ProviderNeutralModelGateway", () => {
     "iac-extension.generate" as const,
     "candidate.repair" as const,
   ])("retains invalid %s output in the restricted store", async (operation) => {
+    const invalidResult = (invocation: ModelProviderInvocationV1) => ({
+      ...successfulProviderResult(invocation),
+      content: responseToolContent(invocation, {
+        contractVersion: 1,
+        operation,
+        unexpectedCandidateField: "restricted-debug-evidence",
+      }),
+    });
     const harness = createHarness({
-      adapter: new ScriptedFakeModelAdapter([
-        (invocation) => {
-          const usage = successfulProviderResult(invocation).usage;
-          if (usage === undefined) {
-            throw new Error("Missing synthetic provider usage.");
-          }
-          return {
-            content: responseToolContent(invocation, {
-              contractVersion: 1,
-              operation,
-              unexpectedCandidateField: "restricted-debug-evidence",
-            }),
-            usage,
-          };
-        },
-      ]),
+      adapter: new ScriptedFakeModelAdapter([invalidResult]),
     });
 
     await expectGatewayCode(
@@ -1256,6 +1249,68 @@ describe("ProviderNeutralModelGateway", () => {
     expect(
       harness.invalidProposalStore.records[0]?.proposalCanonicalJson,
     ).toContain("unexpectedCandidateField");
+    expect(harness.usageRecorder.records).toHaveLength(1);
+    expect(harness.usageRecorder.records[0]?.result).toBe("invalid-output");
+
+    const blocked = createHarness({
+      adapter: new ScriptedFakeModelAdapter([invalidResult]),
+    });
+    let markEntered: () => void = () => undefined;
+    const entered = new Promise<void>((resolve) => {
+      markEntered = resolve;
+    });
+    let release: () => void = () => undefined;
+    const released = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const retention = vi
+      .spyOn(blocked.invalidProposalStore, "preserveRestricted")
+      .mockImplementation(async () => {
+        markEntered();
+        await released;
+        throw new Error("restricted-storage-sensitive-detail");
+      });
+    const invocationId = `invocation_retention_failure_${operation.replaceAll(".", "_")}`;
+    const pending = blocked.gateway.invoke(
+      requestFor(operation),
+      modelTestContext(invocationId),
+    );
+    const rejected = expect(pending).rejects.toMatchObject({
+      code: "model-gateway.internal-error",
+      message: "The model request could not be completed.",
+    });
+    try {
+      await entered;
+      expect(blocked.usageRecorder.records).toHaveLength(1);
+      expect(blocked.usageRecorder.records[0]).toMatchObject({
+        attemptNumber: 1,
+        invocationId,
+        inputUnits: "20",
+        outputUnits: "10",
+        thinkingUnits: "3",
+        cacheReadUnits: "0",
+        cacheWriteUnits: "0",
+        providerRequestId: `provider_${invocationId}`,
+        result: "invalid-output",
+        usageRecordId: `model_usage_${digestStructuredValue({ attemptNumber: 1, invocationId }).slice("sha256:".length)}`,
+      });
+    } finally {
+      release();
+      await rejected;
+      retention.mockRestore();
+    }
+    expect(blocked.usageRecorder.records).toHaveLength(1);
+    expect(blocked.adapter.invocations).toHaveLength(1);
+    expect(blocked.invalidProposalStore.records).toHaveLength(0);
+    expect(
+      await blocked.invocationStore.loadCompleted(invocationId),
+    ).toBeNull();
+    expect(JSON.stringify(blocked.logger.events)).not.toContain(
+      "restricted-storage-sensitive-detail",
+    );
+    expect(JSON.stringify(blocked.logger.events)).not.toContain(
+      "restricted-debug-evidence",
+    );
   });
 
   it("rejects malformed, unknown-operation, and oversized output", async () => {

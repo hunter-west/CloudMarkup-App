@@ -165,6 +165,9 @@ export function createProductionCommercialReads(options: {
               },
       });
       await database.context();
+      // Optional accounting maintenance belongs to its separately awaited,
+      // restore-admitted owner. Do not start it, race it or leave background
+      // writes behind a customer read; even admission/storage can remain pending.
       return overview;
     } catch (error) {
       if (error instanceof ApplicationError) throw error;

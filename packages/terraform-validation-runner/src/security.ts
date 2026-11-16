@@ -261,7 +261,7 @@ export function inspectTerraformHcl(
       if (!providerNames.has(providerName)) {
         issues.push({
           code: "terraform.validation.provider-unsupported",
-          detail: `Provider ${providerName} is not approved.`,
+          detail: "Terraform provider is not approved.",
         });
       }
     }
@@ -275,7 +275,7 @@ export function inspectTerraformHcl(
       if (approvedProviderVersion === undefined && !modules.has(source)) {
         issues.push({
           code: "terraform.validation.source-unsupported",
-          detail: `Provider or module source ${source} is not approved.`,
+          detail: "Terraform provider or module source is not approved.",
         });
       } else if (approvedProviderVersion !== undefined) {
         let openIndex = index - 1;

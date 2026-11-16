@@ -1,4 +1,11 @@
 import { createHash } from "node:crypto";
+import {
+  assertListPosition,
+  decodeListCursor,
+  encodeListCursor,
+  listBinding,
+  type RevisionListSelection,
+} from "../../application/list-pagination.js";
 
 import {
   RepositoryError,
@@ -317,6 +324,10 @@ function mapProject(row: ProjectRow): ProjectRecord {
   return {
     createdAt: readTimestamp(row.created_at),
     currentDraftId: readString(row.current_draft_id),
+    ...(row["current_draft_version"] === null ||
+    row["current_draft_version"] === undefined
+      ? {}
+      : { currentDraftVersion: readNumber(row["current_draft_version"]) }),
     ...(deletionRequestedAt === undefined ? {} : { deletionRequestedAt }),
     ...(readOptionalString(row.description) === undefined
       ? {}
@@ -452,6 +463,9 @@ function isPendingDraftReplay(
 function mapRevision(row: RevisionRow): RevisionMetadataRecord {
   const previousRevisionId = readOptionalString(row.previous_revision_id);
   return {
+    ...(row["pagination_created_at"] === undefined
+      ? {}
+      : { paginationCreatedAt: readString(row["pagination_created_at"]) }),
     catalogId: readString(row.catalog_id),
     catalogSha256: readString(row.catalog_sha256),
     catalogVersion: readString(row.catalog_version),
@@ -960,30 +974,47 @@ export class PostgresCloudMarkupRepository implements CloudMarkupRepository {
     if (
       !Number.isSafeInteger(input.limit) ||
       input.limit < 1 ||
-      input.limit > 100 ||
-      (input.cursor !== undefined && !opaqueIdPattern.test(input.cursor))
+      input.limit > 100
     ) {
       return invalidInput();
     }
+    const sort = input.sort ?? "updatedAt";
+    if (!["name", "-name", "updatedAt", "-updatedAt"].includes(sort))
+      return invalidInput();
+    const byName = sort.endsWith("name");
+    const direction = sort.startsWith("-") ? "DESC" : "ASC";
+    const operator = direction === "ASC" ? ">" : "<";
+    const key = byName ? 'p.name COLLATE "C"' : "p.updated_at";
+    const binding = listBinding([
+      "projects",
+      scope.organizationId,
+      scope.principalId,
+      sort,
+      input.lifecycleStatus ?? null,
+    ]);
+    const after = decodeListCursor(input.cursor, binding, !byName);
     const result = await this.#database.query<ProjectRow>(
       sql(
         `SELECT p.project_id, p.organization_id, p.name, p.description,
                 p.lifecycle_status, p.record_version, p.current_draft_id,
                 p.latest_revision_id, p.deletion_requested_at,
-                p.created_at, p.updated_at
+                p.created_at, p.updated_at,
+                ${byName ? "p.name" : `to_char(p.updated_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`} AS pagination_value
          FROM memberships m
          JOIN projects p ON p.organization_id = m.organization_id
          WHERE ${membershipPredicate}
            AND ($4::varchar IS NULL OR p.lifecycle_status = $4)
-           AND ($5::varchar IS NULL OR p.project_id > $5)
-         ORDER BY p.project_id
-         LIMIT $6`,
+           AND ($5::varchar IS NULL OR (${key}, p.project_id COLLATE "C") ${operator}
+             ($5::${byName ? 'varchar COLLATE "C"' : "timestamptz"}, $6::varchar COLLATE "C"))
+         ORDER BY ${key} ${direction}, p.project_id COLLATE "C" ${direction}
+         LIMIT $7`,
         [
           scope.membershipId,
           scope.principalId,
           scope.organizationId,
           input.lifecycleStatus ?? null,
-          input.cursor ?? null,
+          after?.value ?? null,
+          after?.id ?? null,
           input.limit + 1,
         ],
       ),
@@ -992,7 +1023,12 @@ export class PostgresCloudMarkupRepository implements CloudMarkupRepository {
     return {
       items: rows.map(mapProject),
       ...(result.rows.length > input.limit && rows.at(-1) !== undefined
-        ? { nextCursor: readString(rows.at(-1)?.project_id) }
+        ? {
+            nextCursor: encodeListCursor(binding, {
+              id: readString(rows.at(-1)?.project_id),
+              value: readString(rows.at(-1)?.["pagination_value"]),
+            }),
+          }
         : {}),
     };
   }
@@ -1669,7 +1705,11 @@ export class PostgresCloudMarkupRepository implements CloudMarkupRepository {
              RETURNING project_id, organization_id, name, description,
                        lifecycle_status, record_version, current_draft_id,
                        latest_revision_id, deletion_requested_at,
-                       created_at, updated_at`,
+                       created_at, updated_at,
+                       (SELECT d.draft_version FROM architecture_drafts d
+                        WHERE d.organization_id = projects.organization_id
+                          AND d.project_id = projects.project_id
+                          AND d.draft_id = projects.current_draft_id) AS current_draft_version`,
             [
               targetStatus,
               scope.organizationId,
@@ -1724,7 +1764,11 @@ export class PostgresCloudMarkupRepository implements CloudMarkupRepository {
           `SELECT project_id, organization_id, name, description,
                   lifecycle_status, record_version, current_draft_id,
                   latest_revision_id, deletion_requested_at,
-                  created_at, updated_at
+                  created_at, updated_at,
+                  (SELECT d.draft_version FROM architecture_drafts d
+                   WHERE d.organization_id = projects.organization_id
+                     AND d.project_id = projects.project_id
+                     AND d.draft_id = projects.current_draft_id) AS current_draft_version
            FROM projects
            WHERE organization_id = $1 AND project_id = $2`,
           [scope.organizationId, input.projectId],
@@ -2334,12 +2378,17 @@ export class PostgresCloudMarkupRepository implements CloudMarkupRepository {
     scope: AuthorizedOrganizationScope,
     projectId: string,
     limit: number,
+    selection?: RevisionListSelection,
   ): Promise<readonly RevisionMetadataRecord[]> {
     assertScope(scope);
     assertIdentifier(projectId);
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) {
       return invalidInput();
     }
+    const direction = selection?.direction ?? "DESC";
+    if (!["ASC", "DESC"].includes(direction)) return invalidInput();
+    if (selection?.after !== undefined)
+      assertListPosition(selection.after, true);
     const result = await this.#database.query<RevisionRow>(
       sql(
         `SELECT r.revision_id, r.organization_id, r.project_id,
@@ -2351,7 +2400,8 @@ export class PostgresCloudMarkupRepository implements CloudMarkupRepository {
                 r.revision_name, r.revision_number,
                 r.compiler_input_contract_version,
                 r.minimum_compiler_version,
-                r.maximum_compiler_version_exclusive
+                r.maximum_compiler_version_exclusive,
+                to_char(r.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS pagination_created_at
          FROM memberships m
          JOIN architecture_revisions r
            ON r.organization_id = m.organization_id
@@ -2360,14 +2410,18 @@ export class PostgresCloudMarkupRepository implements CloudMarkupRepository {
            ON o.object_id = r.document_object_id
           AND o.lifecycle_state = 'published'
          WHERE ${membershipPredicate}
-         ORDER BY r.created_at DESC, r.revision_id DESC
+           AND ($6::timestamptz IS NULL OR (r.created_at, r.revision_id COLLATE "C") ${direction === "ASC" ? ">" : "<"}
+             ($6::timestamptz, $7::varchar COLLATE "C"))
+         ORDER BY r.created_at ${direction}, r.revision_id COLLATE "C" ${direction}
          LIMIT $5`,
         [
           scope.membershipId,
           scope.principalId,
           scope.organizationId,
           projectId,
-          limit,
+          limit + (selection?.extraRow === true ? 1 : 0),
+          selection?.after?.value ?? null,
+          selection?.after?.id ?? null,
         ],
       ),
     );

@@ -121,12 +121,13 @@ func (renderer *cloudFormationRenderer) policyStatement(document terraformPolicy
 		if scope.ServiceType == serviceKmsKey && document.Owner.ID == scope.ID && document.OwnerEdge.RelationshipType == kmsPolicyOwnerRelationship {
 			resources = append(resources, "*")
 		} else if scope.ServiceType == "aws.s3.bucket" {
+			arn := renderer.s3PolicyResourceARN(document, scope)
 			bucket, objects := s3PolicyResourceKinds(statement.Actions)
 			if bucket {
-				resources = append(resources, renderer.resourceAttribute(scope.ID, "arn"))
+				resources = append(resources, arn)
 			}
 			if objects {
-				resources = append(resources, cloudFormationJoin(renderer.resourceAttribute(scope.ID, "arn"), "/*"))
+				resources = append(resources, cloudFormationJoin(arn, "/*"))
 			}
 		} else {
 			resources = append(resources, renderer.resourceAttribute(scope.ID, "arn"))
@@ -191,6 +192,26 @@ func (renderer *cloudFormationRenderer) policyStatement(document terraformPolicy
 		result["Condition"] = conditions
 	}
 	return result
+}
+
+func (renderer *cloudFormationRenderer) s3PolicyResourceARN(document terraformPolicyDocument, bucket NormalizedResource) any {
+	_, external := renderer.externalByNode[bucket.ID]
+	name := renderer.configString(bucket, "bucketName")
+	if !external && validS3SharedBucketName(name) && document.Owner.ServiceType == "aws.iam.role" && (document.Kind == "identity-inline" || document.Kind == "generated-permission") {
+		for _, connection := range renderer.model.Connections {
+			if connection.RelationshipType != "aws.s3.notifies-lambda" || connection.Source.NodeID != bucket.ID {
+				continue
+			}
+			role, ok := renderer.connectedResource(connection.Target.NodeID, "aws.iam.role-assumed-by-lambda", true)
+			if ok && role.ID == document.Owner.ID {
+				// The inline role policy must precede the notified Lambda. Its
+				// exact validated bucket name avoids the reverse dependency on
+				// the bucket, which must wait for Lambda invocation permission.
+				return cloudFormationSub("arn:${AWS::Partition}:s3:::"+name, nil)
+			}
+		}
+	}
+	return renderer.resourceAttribute(bucket.ID, "arn")
 }
 
 func (renderer *cloudFormationRenderer) generatedPolicySourceArnID(document terraformPolicyDocument, statement terraformPolicyStatement) string {

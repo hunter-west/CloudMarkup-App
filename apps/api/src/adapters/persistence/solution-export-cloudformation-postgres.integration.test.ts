@@ -60,6 +60,7 @@ integrationDescribe(
     let opened: PostgresDatabase | undefined;
     let created = false;
     let historical: Awaited<ReturnType<typeof persistedExportRunFixture>>;
+    let expectedMigrationVersions: readonly string[] = [];
     beforeAll(async () => {
       const connectionString = loopbackUrl();
       if (!/^cm_export_cfn_it_[a-f0-9]{32}$/u.test(schema))
@@ -84,6 +85,7 @@ integrationDescribe(
       const migrations = await loadHistoricalBetaMigrations(
         fileURLToPath(new URL("../../../migrations", import.meta.url)),
       );
+      expectedMigrationVersions = migrations.map(({ version }) => version);
       await runMigrations(
         database,
         migrations.filter(({ version }) => version <= "0054"),
@@ -127,10 +129,19 @@ integrationDescribe(
           "SELECT version FROM cloudmarkup_schema_migrations ORDER BY version",
         ),
       );
-      expect(applied.rows).toHaveLength(82);
-      expect(applied.rows.at(-3)?.["version"]).toBe("0098");
-      expect(applied.rows.at(-2)?.["version"]).toBe("0138");
-      expect(applied.rows.at(-1)?.["version"]).toBe("0139");
+      expect(applied.rows.map((row) => row["version"])).toEqual(
+        expectedMigrationVersions,
+      );
+      expect(expectedMigrationVersions).toEqual(
+        expect.arrayContaining([
+          "0098",
+          "0138",
+          "0139",
+          "0140",
+          "0141",
+          "0142",
+        ]),
+      );
     });
     it("roundtrips exact CloudFormation jobs, replays idempotently and rejects foreign principals and target substitution", async () => {
       const f = await persistedExportRunFixture(database, "cloudformation");

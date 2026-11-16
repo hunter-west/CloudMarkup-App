@@ -2,6 +2,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useState, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  applyGraphCommand,
+  getArchitectureDocumentCanonicalHash,
+} from "@cloudmarkup/domain";
 import type { ConfigurationValue } from "@cloudmarkup/schemas";
 import { awsEditorCatalog } from "../../../provider-catalog/aws-editor-catalog.js";
 import { loadAwsEditorArchitectureDocument } from "../../../provider-catalog/aws-editor-fixture.js";
@@ -558,6 +562,7 @@ interface TestProviderProps {
   readonly layoutAdapter?: LayoutAdapter;
   readonly scopeKey?: string;
   readonly onDocumentChange?: EditorSessionProviderProps["onDocumentChange"];
+  readonly onCommandApplied?: EditorSessionProviderProps["onCommandApplied"];
 }
 
 function TestProvider({
@@ -568,6 +573,7 @@ function TestProvider({
   iconRegistry = foundationIconRegistry,
   layoutAdapter,
   onDocumentChange,
+  onCommandApplied,
   scopeKey,
 }: TestProviderProps) {
   return (
@@ -577,6 +583,7 @@ function TestProvider({
       document={document}
       iconRegistry={iconRegistry}
       {...(onDocumentChange === undefined ? {} : { onDocumentChange })}
+      {...(onCommandApplied === undefined ? {} : { onCommandApplied })}
       {...(layoutAdapter === undefined ? {} : { layoutAdapter })}
       {...(scopeKey === undefined ? {} : { scopeKey })}
     >
@@ -686,8 +693,14 @@ describe("EditorSessionProvider", () => {
 
   it("undoes and redoes accepted commands without restoring transient editor state, then invalidates redo on a new command", () => {
     let sequence = 0;
+    const accepted =
+      vi.fn<NonNullable<EditorSessionProviderProps["onCommandApplied"]>>();
     render(
       <TestProvider
+        onCommandApplied={accepted}
+        onDocumentChange={(document) => {
+          expect(accepted.mock.lastCall?.[1]).toEqual(document);
+        }}
         createId={() => {
           sequence += 1;
           return `history_session_${String(sequence).padStart(4, "0")}`;
@@ -752,6 +765,17 @@ describe("EditorSessionProvider", () => {
     expect(screen.getByTestId("application-position")).toHaveTextContent(
       "560,320",
     );
+    expect(accepted).toHaveBeenCalledTimes(5);
+    expect(
+      new Set(accepted.mock.calls.map(([command]) => command.commandId)).size,
+    ).toBe(5);
+    let replay = loadFoundationArchitectureDocument();
+    for (const [command, document] of accepted.mock.calls) {
+      replay = applyGraphCommand(replay, command).document;
+      expect(getArchitectureDocumentCanonicalHash(replay)).toBe(
+        getArchitectureDocumentCanonicalHash(document),
+      );
+    }
   });
 
   it("moves an unknown catalog resource without invoking placement validation", () => {

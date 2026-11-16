@@ -510,17 +510,11 @@ func (renderer *terraformRenderer) file(name string) *hclwrite.File {
 }
 
 func (renderer *terraformRenderer) error(code string, message string, source SourceReference) {
-	if len(renderer.diagnostics) >= renderer.limits.MaxDiagnostics {
-		return
-	}
-	renderer.diagnostics = append(renderer.diagnostics, Diagnostic{Code: code, Severity: SeverityError, Message: message, Source: source})
+	renderer.diagnostics = retainTargetDiagnostic(renderer.diagnostics, renderer.limits.MaxDiagnostics, Diagnostic{Code: code, Severity: SeverityError, Message: message, Source: source})
 }
 
 func (renderer *terraformRenderer) warning(code string, message string, source SourceReference) {
-	if len(renderer.diagnostics) >= renderer.limits.MaxDiagnostics {
-		return
-	}
-	renderer.diagnostics = append(renderer.diagnostics, Diagnostic{Code: code, Severity: SeverityWarning, Message: message, Source: source})
+	renderer.diagnostics = retainTargetDiagnostic(renderer.diagnostics, renderer.limits.MaxDiagnostics, Diagnostic{Code: code, Severity: SeverityWarning, Message: message, Source: source})
 }
 
 func (renderer *terraformRenderer) hasErrors() bool { return hasErrorDiagnostics(renderer.diagnostics) }

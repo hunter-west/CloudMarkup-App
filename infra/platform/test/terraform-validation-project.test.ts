@@ -362,14 +362,14 @@ describe("Terraform validation CodeBuild sandbox", () => {
         "s3:PutObject",
       ]),
     );
-    expect(actions).not.toEqual(
-      expect.arrayContaining([
-        "sts:AssumeRole",
-        "cloudformation:CreateStack",
-        "codebuild:StartBuild",
-        "iam:PassRole",
-      ]),
-    );
+    for (const action of [
+      "sts:AssumeRole",
+      "cloudformation:CreateStack",
+      "codebuild:StartBuild",
+      "iam:PassRole",
+    ]) {
+      expect(actions).not.toContain(action);
+    }
     expect(actions.some((action) => action.includes("*"))).toBe(false);
 
     const wildcardStatements = statements.filter(

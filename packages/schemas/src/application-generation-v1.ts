@@ -1720,6 +1720,12 @@ export const applicationSourceArtifactV1Schema = z
         });
       }
     }
+    addUniqueStringIssues(
+      value.buildContracts.map((entry) => entry.contract.workloadId),
+      context,
+      ["buildContracts"],
+      "Application build workload IDs",
+    );
     const buildByWorkload = new Map(
       value.buildContracts.map(
         (entry) => [entry.contract.workloadId, entry] as const,

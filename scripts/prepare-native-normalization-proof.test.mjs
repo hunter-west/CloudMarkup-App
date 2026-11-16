@@ -125,6 +125,14 @@ test("bundling fingerprints public inputs without evaluating the entry or writin
   }
 });
 test("public-main workflow isolates native verification and retains only closed metadata", async () => {
+  const assertBefore = (text, guard, operation) => {
+    const guardIndex = text.indexOf(guard);
+    const operationIndex = text.indexOf(operation);
+    assert.ok(guardIndex >= 0, `Missing guard: ${guard}`);
+    assert.ok(operationIndex >= 0, `Missing operation: ${operation}`);
+    assert.ok(guardIndex < operationIndex);
+  };
+
   const workflow = parse(
     await readFile(
       new URL("../.github/workflows/public-native.yml", import.meta.url),
@@ -146,24 +154,22 @@ test("public-main workflow isolates native verification and retains only closed 
     (step) =>
       step.name === "Admit the disposable native host and prepare public tools",
   ).run;
-  assert.ok(
-    preparation.indexOf(
-      'test "\u0024{RUNNER_ENVIRONMENT:-}" = "github-hosted"',
-    ) < preparation.indexOf("sudo -n swapoff"),
+  assertBefore(
+    preparation,
+    'test "\u0024{RUNNER_ENVIRONMENT:-}" = "github-hosted"',
+    "sudo -n swapoff",
   );
-  assert.ok(
-    preparation.indexOf("assertMemoryApplicationBuildHost();") <
-      preparation.indexOf("docker pull"),
+  assertBefore(
+    preparation,
+    "assertMemoryApplicationBuildHost();",
+    "docker pull",
   );
   assert.match(preparation, /"\u0024GITHUB_SHA" "\u0024image_id"/u);
   const execute = steps.find(
     (step) =>
       step.name === "Execute the independently inspected full normalization",
   ).run;
-  assert.ok(
-    execute.indexOf("ulimit -c 0") <
-      execute.indexOf("native-normalization-proof.mjs"),
-  );
+  assertBefore(execute, "ulimit -c 0", "native-normalization-proof.mjs");
   const upload = steps.at(-1);
   assert.equal(upload.if, "\u0024{{ success() }}");
   assert.deepEqual(upload.with.path.trim().split("\n"), [

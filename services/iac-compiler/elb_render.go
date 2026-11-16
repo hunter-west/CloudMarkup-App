@@ -205,7 +205,7 @@ func (r *cloudFormationRenderer) renderElbResource(n NormalizedResource) {
 	}
 	r.addResource(r.logicalIDs[n.ID], res, SourceReference{Document: DocumentArchitecture, NodeID: n.ID})
 	h.elbWarnings(n)
-	r.diagnostics = append(r.diagnostics, h.diagnostics...)
+	r.retainDiagnostics(h.diagnostics)
 }
 
 // An explicit inline rule suppresses AWS's default IPv4/IPv6 egress at creation.

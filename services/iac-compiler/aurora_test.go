@@ -83,6 +83,9 @@ func TestAuroraNativeExports(t *testing.T) {
 				if artifact == nil {
 					t.Fatal("missing Aurora export")
 				}
+				if diagnosticByCode(t, diagnostics, "AURORA_READINESS_EXTERNAL").Severity != SeverityWarning {
+					t.Fatalf("%s lost its Aurora readiness warning", target)
+				}
 				if !reflect.DeepEqual(model, before) {
 					t.Fatal("source mutated")
 				}

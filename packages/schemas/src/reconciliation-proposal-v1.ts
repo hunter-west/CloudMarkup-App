@@ -242,6 +242,17 @@ export const resolveAmbiguousMappingV1Schema = z
   })
   .strict()
   .superRefine((operation, context) => {
+    const mappingIds = new Set<string>();
+    operation.candidates.forEach((candidate, index) => {
+      if (mappingIds.has(candidate.mappingId)) {
+        context.addIssue({
+          code: "custom",
+          path: ["candidates", index, "mappingId"],
+          message: "Mapping candidate IDs must be unique.",
+        });
+      }
+      mappingIds.add(candidate.mappingId);
+    });
     const selected = operation.candidates.find(
       (candidate) => candidate.mappingId === operation.selectedMappingId,
     );

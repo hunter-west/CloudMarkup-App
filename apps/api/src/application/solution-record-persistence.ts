@@ -40,6 +40,7 @@ export interface SolutionRecordMetadata extends Omit<
 > {
   readonly contentObjectId: string;
   readonly createdAt: string;
+  readonly paginationCreatedAt?: string;
   readonly createdByPrincipalId: string;
   readonly organizationId: string;
 }
@@ -49,6 +50,7 @@ export interface ListSolutionRecordsInput {
   readonly projectId: string;
   readonly recordKind?: SolutionRecordKind;
   readonly subjectId?: string;
+  readonly selection?: import("./list-pagination.js").RevisionListSelection;
 }
 
 export interface SolutionRecordRepository {

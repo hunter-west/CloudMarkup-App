@@ -754,31 +754,61 @@ describe("Solution Export API v1", () => {
       progress: {
         completedStages: 2,
         message: "The export failed.",
-        totalStages: 7 as const,
+        totalStages: 8 as const,
       },
+      stages: job().stages.map((stage, index) => ({
+        ...stage,
+        status: index === 1 ? ("failed" as const) : stage.status,
+      })),
       state: "failed" as const,
     };
     expect(
-      solutionExportJobV1Schema.safeParse(failedWithoutReviewTruth).success,
-    ).toBe(false);
+      solutionExportJobV1Schema.safeParse({
+        ...failedWithoutReviewTruth,
+        diagnostics: [
+          {
+            code: "compilation.failed",
+            message: "Compilation failed.",
+            severity: "error",
+            stage: "compilation",
+          },
+        ],
+      }).success,
+    ).toBe(true);
+    const failed = solutionExportJobV1Schema.safeParse(
+      failedWithoutReviewTruth,
+    );
+    expect(
+      failed.error?.issues.map(({ path, code }) => ({ path, code })),
+    ).toEqual([{ path: ["state"], code: "custom" }]);
+    const unacknowledgedCancellation = {
+      ...job(),
+      cancellation: { requestedAt: NOW, state: "requested" as const },
+      completedAt: LATER,
+      pollAfterMilliseconds: undefined,
+      progress: {
+        completedStages: 2,
+        message: "The export was canceled.",
+        totalStages: 8 as const,
+      },
+      stages: job().stages.map((stage, index) => ({
+        ...stage,
+        status: index === 1 ? ("canceled" as const) : stage.status,
+      })),
+      state: "canceled" as const,
+    };
     expect(
       solutionExportJobV1Schema.safeParse({
-        ...job(),
-        cancellation: { requestedAt: NOW, state: "requested" },
-        completedAt: LATER,
-        pollAfterMilliseconds: undefined,
-        progress: {
-          completedStages: 2,
-          message: "The export was canceled.",
-          totalStages: 7 as const,
-        },
-        stages: job().stages.map((stage, index) => ({
-          ...stage,
-          status: index === 1 ? ("canceled" as const) : stage.status,
-        })),
-        state: "canceled",
+        ...unacknowledgedCancellation,
+        cancellation: { requestedAt: NOW, state: "acknowledged" },
       }).success,
-    ).toBe(false);
+    ).toBe(true);
+    const canceled = solutionExportJobV1Schema.safeParse(
+      unacknowledgedCancellation,
+    );
+    expect(
+      canceled.error?.issues.map(({ path, code }) => ({ path, code })),
+    ).toEqual([{ path: ["cancellation"], code: "custom" }]);
   });
 
   it("keeps expired artifact review metadata while making availability explicit", () => {

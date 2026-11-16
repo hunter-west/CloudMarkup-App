@@ -1,8 +1,10 @@
 import type { GitHubExportStore } from "./ports.js";
 import type {
+  GitHubRepositoryImportInput,
   GitHubRepositoryImportService,
   StoredGitHubRepositoryImport,
 } from "./repository-import.js";
+import { repositoryImportIdempotencyDigest } from "./repository-import.js";
 import { assertGitHubRepositoryImportScope } from "./repository-import-security.js";
 import type { GitHubRepositoryWebhookRefreshPort } from "./webhook.js";
 import { gitHubBranchNameSchema } from "./contracts.js";
@@ -143,12 +145,7 @@ export function createGitHubRepositoryRefreshService(options: {
             projectId: subscription.projectId,
             repositoryId: subscription.repositoryId,
           });
-          const previous = [...history]
-            .filter((record) => record.state === "succeeded")
-            .sort((left, right) =>
-              right.createdAt.localeCompare(left.createdAt),
-            )[0];
-          imported = await options.imports.importRepository({
+          const request: GitHubRepositoryImportInput = {
             branch: subscription.branch,
             commitSha: input.commitSha,
             correlationId: input.deliveryId,
@@ -156,16 +153,57 @@ export function createGitHubRepositoryRefreshService(options: {
             ignoredPaths: subscription.ignoredPaths,
             integrationId: subscription.integrationId,
             organizationId: subscription.organizationId,
-            ...(previous === undefined
-              ? {}
-              : { previousImportId: previous.importId }),
             principalId: subscription.createdByPrincipalId,
             projectId: subscription.projectId,
             repositoryId: subscription.repositoryId,
             requestedMode: "professional",
             selectedPaths: subscription.selectedPaths,
             trigger: "webhook",
+          };
+          // A failed delivery can already have committed imports. Recover the
+          // exact persisted baseline, including an originally absent baseline,
+          // before replaying the canonical import claim. Receipt writes may also
+          // have failed; the immutable import itself is the recovery evidence.
+          const matching = history.filter(
+            (record) =>
+              record.idempotencyDigest ===
+              repositoryImportIdempotencyDigest({
+                ...request,
+                ...(record.previousImportId === undefined
+                  ? {}
+                  : { previousImportId: record.previousImportId }),
+              }),
+          );
+          if (matching.length > 1)
+            throw new GitHubExportError("invalid-request");
+          const retained = matching[0];
+          if (
+            retained !== undefined &&
+            (retained.organizationId !== request.organizationId ||
+              retained.projectId !== request.projectId ||
+              retained.integrationId !== request.integrationId ||
+              retained.repositoryId !== request.repositoryId ||
+              retained.createdByPrincipalId !== request.principalId ||
+              retained.commitSha !== request.commitSha ||
+              retained.trigger !== "webhook")
+          )
+            throw new GitHubExportError("invalid-request");
+          const previousImportId =
+            retained === undefined
+              ? [...history]
+                  .filter((record) => record.state === "succeeded")
+                  .sort((left, right) =>
+                    right.createdAt.localeCompare(left.createdAt),
+                  )[0]?.importId
+              : retained.previousImportId;
+          imported = await options.imports.importRepository({
+            ...request,
+            ...(previousImportId === undefined ? {} : { previousImportId }),
           });
+          if (imported.state !== "succeeded")
+            throw new GitHubExportError("service-unavailable", {
+              transient: imported.state !== "failed-permanent",
+            });
           await options.store.saveReceipt({
             commitSha: input.commitSha,
             deliveryId: input.deliveryId,

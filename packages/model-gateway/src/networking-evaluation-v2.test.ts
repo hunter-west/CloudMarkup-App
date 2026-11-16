@@ -40,6 +40,10 @@ async function observationFor(
   if (evaluationCase === undefined || observation === undefined) {
     throw new Error(`Missing frozen networking evaluation case ${caseKind}.`);
   }
+  expect(evaluate(caseKind, observation)).toMatchObject({
+    deterministicPassed: true,
+    diagnosticCodes: [],
+  });
   return structuredClone(observation);
 }
 
@@ -108,6 +112,9 @@ describe("frozen AWS networking model evaluation v2", () => {
     expect(first).toEqual(second);
     expect(first.caseResults).toHaveLength(5);
     expect(first.deterministicPassed).toBe(true);
+    expect(
+      first.observations.map(({ operations }) => operations.length),
+    ).toEqual([1, 31, 3, 7, 19]);
     expect(
       first.caseResults.every((result) => result.deterministicPassed),
     ).toBe(true);

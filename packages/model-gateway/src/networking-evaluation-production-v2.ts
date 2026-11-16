@@ -71,6 +71,18 @@ const productionPathV2 =
   "scripted-fake-adapter/provider-neutral-gateway/review-only-solution-planner" as const;
 const createdAtV2 = "2026-08-26T12:00:00.000Z" as const;
 
+// Trusted bounds for these fixed synthetic scenarios include every graph and
+// Assistant operation. Never derive request authority from a model response.
+const maximumOperationsByCaseV2 = {
+  "private-database": 1,
+  "avoid-nat": 31,
+  "invalid-cidr": 3,
+  "broad-ingress": 7,
+  "multi-az-requirements": 19,
+} as const satisfies Readonly<
+  Record<ModelNetworkingEvaluationCaseKindV2, number>
+>;
+
 const booleanConfigurationKeys = new Set([
   "assignIpv6AddressOnCreation",
   "deletionProtectionEnabled",
@@ -775,7 +787,7 @@ function operationsRequestFor(
       },
       assistantLimits: {
         maximumApplicationContracts: 0,
-        maximumOperations: 8,
+        maximumOperations: maximumOperationsByCaseV2[evaluationCase.caseKind],
         maximumSourceOwnershipDeclarations: 0,
         maximumTestScenarios: 0,
         maximumWorkloadOperations: 0,

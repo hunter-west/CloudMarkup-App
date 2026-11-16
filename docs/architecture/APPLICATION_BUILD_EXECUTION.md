@@ -5,9 +5,12 @@ immutable Solution Revision and a separately produced workload source tree. It
 is implemented by `@cloudmarkup/application-build-runner`; it is not part of the
 application generator, solution exporter, Go compiler, or Terraform renderer.
 
-The reviewed generated runtime profile accepts two exact generator families: the
-Prompt 29A notes descriptor and the Prompt 45A curated-event descriptor. Both
-retain the same runtime and fixed execution surface:
+The reviewed generated runtime profile accepts the exact notes descriptors
+(including `NOTES_IDENTIFIER_RELEASE_V1_1`), the curated-event descriptor, and
+the `HTTP_NO_CONTENT_RELEASE_V1` tuple for the explicit authenticated no-content
+handler. The runner's `approvedGeneratedDescriptor` is the canonical tuple
+check; family names alone do not admit source. These retain the same runtime and
+fixed execution surface:
 
 - Lambda `nodejs24.x` with Node.js `24.18.0`;
 - TypeScript `6.0.3`, ESM, archive entry `index.js`, handler `index.handler`;
@@ -59,13 +62,20 @@ workers, and fake test executors share the same data-only interface. Source
 cannot choose an executable, argument, package script, scanner configuration,
 network policy, output path, or Evidence claim.
 
+Cancellation is checked before workspace acquisition; an already-aborted build
+returns a canceled result without opening a workspace. The same transient signal
+is passed to acquisition and command execution. Acquisition rejection still
+rejects the runner call, and the executor owns cleanup before returning a
+session. Once acquired, the runner disposes the session. No signal is serialized
+into source, request or Evidence records.
+
 ## Admission and fixed execution
 
 Generated execution is admitted only when all of these conditions hold:
 
-1. the Solution Revision, exact notes or curated-event generator artifact,
-   source manifest, and build envelope bind the same immutable revision and
-   approved descriptor;
+1. the Solution Revision, exact notes, curated-event or authenticated no-content
+   generator artifact, source manifest, and build envelope bind the same
+   immutable revision and approved descriptor;
 2. generator, runtime, handler, toolchain, package manifest, dependency set,
    lock bytes, package-manager binary, offline store, and requested profile
    equal their approved pins;

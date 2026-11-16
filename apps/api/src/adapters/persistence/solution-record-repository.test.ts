@@ -128,6 +128,52 @@ function objectRow(overrides: SqlRow = {}): SqlRow {
 }
 
 describe("PostgresSolutionRecordRepository", () => {
+  it("continues exact published revision cohorts with microsecond keysets before LIMIT", async () => {
+    for (const direction of ["ASC", "DESC"] as const) {
+      const stamp = "2026-11-12T12:00:00.123456Z";
+      const database = new RecordingDatabase([
+        result([
+          recordRow({ created_at: stamp, pagination_created_at: stamp }),
+        ]),
+      ]);
+      const records = await new PostgresSolutionRecordRepository(database).list(
+        scope,
+        {
+          projectId: input.projectId,
+          recordKind: "solution-revision-manifest",
+          subjectId: input.subjectId,
+          limit: 2,
+          selection: {
+            direction,
+            extraRow: true,
+            after: { id: input.solutionRecordId, value: stamp },
+          },
+        },
+      );
+      expect(records[0]?.paginationCreatedAt).toBe(stamp);
+      const query = database.statements[0];
+      if (query === undefined) throw new Error("Expected revision query");
+      expect(query.values).toEqual([
+        scope.membershipId,
+        scope.principalId,
+        scope.organizationId,
+        input.projectId,
+        "solution-revision-manifest",
+        input.subjectId,
+        3,
+        stamp,
+        input.solutionRecordId,
+      ]);
+      expect(query.text).toContain(
+        `ORDER BY r.created_at ${direction}, r.solution_record_id COLLATE "C" ${direction}`,
+      );
+      expect(query.text).toContain(direction === "ASC" ? ") >" : ") <");
+      expect(query.text).toContain("o.lifecycle_state = 'published'");
+      expect(query.text).toContain("o.organization_id = r.organization_id");
+      expect(query.text).toContain("m.lifecycle_status = 'active'");
+    }
+  });
+
   it("normalizes Data API record metadata without altering content bindings", async () => {
     const { database, commands } = createDataApiJsonDatabase([
       [recordRow({ created_at: "2026-08-14 12:00:00.123456" })],

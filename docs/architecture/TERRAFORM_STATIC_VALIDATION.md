@@ -51,13 +51,18 @@ configuration. An approved coordinate does not authorize a download: if bytes
 are absent from the reviewed image, initialization fails offline.
 
 The local adapter accepts only an absolute, operator-trusted Docker or Podman
-binary. It runs the digest-pinned image with no network, no privilege, no added
-capabilities, `no-new-privileges`, a read-only root, bounded no-exec tmpfs,
-non-root UID, no inherited AWS/credential environment, a single disposable
-workspace mount, and explicit CPU, memory, process, output, wall-time, file, and
-total-byte limits. It inspects the workspace for symlinks and non-regular or
-oversized outputs after every command and removes the exact temporary workspace
-after collection.
+binary. Validation and post-command inspection run the digest-pinned image with
+no network, no privilege, no added capabilities, `no-new-privileges`, a
+read-only root, bounded no-exec tmpfs, non-root UID, no inherited AWS/credential
+environment, a single disposable workspace volume, and explicit CPU, memory,
+process, output, wall-time, file, and total-byte limits. The separate fixed
+preparation step described in the
+[runner guide](../../packages/terraform-validation-runner/README.md) stages
+validated files into that private volume with only `CHOWN` and `DAC_OVERRIDE`
+after dropping all capabilities. It is networkless and cannot run Terraform or
+caller-selected commands. This description changes no execution approval or
+privilege. The adapter inspects for symlinks and non-regular or oversized
+outputs after each command and disposes the exact workspace.
 
 ## Diagnostics and Evidence
 

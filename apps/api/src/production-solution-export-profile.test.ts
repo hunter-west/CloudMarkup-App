@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   createSfntResvgDiagramRasterizer,
   DIAGRAM_SFNT_FONT,
-  diagramRendererSfntV1Pin,
+  diagramRendererBoundedDetailV1Pin,
 } from "@cloudmarkup/diagram-export";
 import { createSolutionExportDiagramRendererPort } from "@cloudmarkup/solution-export-workflow";
 import { awsCatalogArtifactV1 } from "@cloudmarkup/provider-aws/catalog";
@@ -122,10 +122,12 @@ describe("restricted production CloudFormation profile", () => {
   it("renders actual visible text with both derived pinned fonts and admits only the explicit successor service", async () => {
     const input = await fixture();
     const admitted = await loadProductionSolutionExportProfile(input.config);
-    expect(admitted.diagram.renderer).toEqual(diagramRendererSfntV1Pin);
+    expect(admitted.diagram.renderer).toEqual(
+      diagramRendererBoundedDetailV1Pin,
+    );
     expect(
       admitted.targetSettings.stageDescriptors.diagramRenderer.adapter,
-    ).toEqual(diagramRendererSfntV1Pin);
+    ).toEqual(diagramRendererBoundedDetailV1Pin);
     const rasterizer = createSfntResvgDiagramRasterizer([
       join(
         dirname(input.config.iconBundlePath),

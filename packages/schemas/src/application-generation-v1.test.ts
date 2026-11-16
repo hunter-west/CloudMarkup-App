@@ -16,6 +16,7 @@ import {
   applicationWorkloadContractV1Schema,
   prompt32ABuildArtifactContractV1Schema,
   prompt32ABuildArtifactEnvelopeV1Schema,
+  type Prompt32ABuildArtifactContractV1,
 } from "./application-generation-v1.js";
 
 const digestA = `sha256:${"a".repeat(64)}`;
@@ -810,6 +811,98 @@ describe("application generation protocol v1", () => {
         artifactDigest: digestA,
       }).success,
     ).toBe(false);
+
+    const withBuildContracts = (
+      contracts: readonly Prompt32ABuildArtifactContractV1[],
+      advertised = contracts,
+    ) => {
+      const buildContracts = contracts.map((contract) =>
+        prompt32ABuildArtifactEnvelopeV1Schema.parse({
+          contract,
+          contractDigest: digestCanonicalJson(contract),
+        }),
+      );
+      const sourceManifest = {
+        ...result.artifact.sourceManifest,
+        buildContracts: advertised.map((contract) => ({
+          contractDigest: digestCanonicalJson(contract),
+          workloadId: contract.workloadId,
+        })),
+      };
+      const artifact = {
+        ...result.artifact,
+        buildContracts,
+        sourceManifest,
+        sourceManifestDigest: digestCanonicalJson(sourceManifest),
+      };
+      return {
+        ...result,
+        artifact,
+        artifactDigest: digestCanonicalJson(artifact),
+      };
+    };
+    const first = prompt32ABuildArtifactContractV1Schema.parse(
+      prompt32BuildContract(),
+    );
+    const alternative = prompt32ABuildArtifactContractV1Schema.parse({
+      ...first,
+      expectedArtifact: {
+        ...first.expectedArtifact,
+        artifactId: "artifact.lambda_alternative",
+        path: "application/artifacts/lambda_alternative/function.zip",
+      },
+    });
+    const secondWorkload = prompt32ABuildArtifactContractV1Schema.parse({
+      ...alternative,
+      workloadId: "workload-2",
+    });
+    expect(
+      applicationGenerationResultV1Schema.parse(withBuildContracts([first])),
+    ).toBeDefined();
+    expect(
+      applicationGenerationResultV1Schema.parse(
+        withBuildContracts([first, secondWorkload]),
+      ),
+    ).toBeDefined();
+    expect(
+      applicationGenerationResultV1Schema
+        .safeParse(
+          withBuildContracts([first, secondWorkload], [secondWorkload]),
+        )
+        .error?.issues.map(({ code, message, path }) => ({
+          code,
+          message,
+          path,
+        })),
+    ).toEqual([
+      {
+        code: "custom",
+        message: "Source manifest must enumerate every Prompt 32A contract.",
+        path: ["artifact", "sourceManifest", "buildContracts"],
+      },
+    ]);
+    for (const [earlier, last] of [
+      [first, alternative],
+      [alternative, first],
+      [first, first],
+    ] as const) {
+      const duplicate = withBuildContracts([earlier, last], [last]);
+      expect(
+        applicationGenerationResultV1Schema
+          .safeParse(duplicate)
+          .error?.issues.map(({ code, message, path }) => ({
+            code,
+            message,
+            path,
+          })),
+      ).toEqual([
+        {
+          code: "custom",
+          message: "Application build workload IDs must be unique.",
+          path: ["artifact", "buildContracts", 1],
+        },
+      ]);
+    }
   });
 
   it("requires manifest metadata to equal the exact source-file metadata", () => {

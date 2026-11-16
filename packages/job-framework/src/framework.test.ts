@@ -364,6 +364,96 @@ describe("provider-neutral asynchronous job framework", () => {
     return { ...environment, claimed, handler, execute, workerId };
   }
 
+  it("fences all delayed handler effects from a replacement attempt reusing its worker ID", async () => {
+    const f = await initialClaimFixture();
+    let signalStarted: (context: JobHandlerContextV1) => void = () => undefined;
+    const started = new Promise<JobHandlerContextV1>((resolve) => {
+      signalStarted = resolve;
+    });
+    let finish: (outcome: AsyncJobHandlerOutcomeV1) => void = () => undefined;
+    const finished = new Promise<AsyncJobHandlerOutcomeV1>((resolve) => {
+      finish = resolve;
+    });
+    f.execute.mockImplementation(async (_record, context) => {
+      signalStarted(context);
+      return finished;
+    });
+    const execution = f.worker.runInitialClaimed(f.claimed, f.workerId);
+    const context = await started;
+    f.clock.advance(30_001);
+    expect(
+      await f.worker.reconcileOrphans(systemContext("orphan-reconciler")),
+    ).toBe(1);
+    const queued = await f.repository.get(f.claimed.jobId);
+    if (!queued) throw new Error("Missing synthetic queued job");
+    f.clock.advance(10_000);
+    const replacement = applyAsyncJobLifecycleCommandV1(queued, {
+      kind: "claim",
+      at: f.clock.now().toISOString(),
+      attemptId: asyncJobAttemptIdSchema.parse("attempt_replacement"),
+      dependencies: [],
+      expectedInputDigest: queued.inputDigest,
+      expectedRecordVersion: queued.recordVersion,
+      handler: {
+        family: f.handler.family,
+        handlerId: namespacedIdentifierSchema.parse(f.handler.handlerId),
+        handlerVersion: f.handler.handlerVersion,
+        resumePolicy: f.handler.resumePolicy,
+      },
+      leaseExpiresAt: "2026-08-15T12:01:10.001Z",
+      workerId: f.workerId,
+    });
+    if (replacement.transition === undefined)
+      throw new Error("Missing replacement transition");
+    const saved = await f.repository.saveWithAudit(
+      replacement.job,
+      queued.recordVersion,
+      [
+        createJobAuditOutboxEntryV1({
+          actor: { kind: "worker", workerId: f.workerId },
+          eventType: "attempt-claimed",
+          occurredAt: f.clock.now().toISOString(),
+          record: replacement.job,
+          transition: replacement.transition,
+        }),
+      ],
+    );
+    const auditCount = f.audit.events.length;
+    f.clock.advance(1_000);
+    const rejected = { code: "job.execution-attempt-replaced" };
+    await expect(context.heartbeat()).rejects.toMatchObject(rejected);
+    await expect(
+      context.reportProgress({
+        completedUnits: 1,
+        phase: namespacedIdentifierSchema.parse("cloudmarkup.job.testing"),
+        sequence: (saved.progress?.sequence ?? 0) + 1,
+      }),
+    ).rejects.toMatchObject(rejected);
+    await expect(context.isCancellationRequested()).rejects.toMatchObject(
+      rejected,
+    );
+    await expect(
+      context.saveCheckpoint(
+        asyncJobCheckpointV1Schema.parse({
+          attemptNumber: context.attemptNumber,
+          checkpointId: "checkpoint_stale_attempt",
+          createdAt: f.clock.now().toISOString(),
+          handlerId: f.handler.handlerId,
+          handlerVersion: f.handler.handlerVersion,
+          inputDigest: saved.inputDigest,
+          sequence: 1,
+          state: reference("checkpoint-state"),
+        }),
+      ),
+    ).rejects.toMatchObject(rejected);
+    const completion = expect(execution).rejects.toMatchObject(rejected);
+    finish(proposalOutcome());
+    await completion;
+    expect(await f.repository.get(saved.jobId)).toEqual(saved);
+    expect(f.audit.events).toHaveLength(auditCount);
+    expect(f.execute).toHaveBeenCalledTimes(1);
+  });
+
   it("executes a durably claimed initial job without receiving or acknowledging a delivery", async () => {
     const f = await initialClaimFixture();
     const receive = vi.spyOn(f.queue, "receive");

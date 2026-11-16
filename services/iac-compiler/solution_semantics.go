@@ -26,7 +26,9 @@ func validateEmbeddedRevisionBinding(document map[string]any, field string, arch
 		collector.addError("SEMANTIC_EMBEDDED_DOCUMENT_ID_MISMATCH", "Embedded solution document binds a different Architecture Document identity.", SourceReference{Document: DocumentArchitecture, Path: "$." + field + ".documentId"})
 	}
 	revision := objectValue(document, "revision")
-	if stringValue(revision, "revisionId") != architecture.Revision.RevisionID || intValue(revision, "revisionNumber") != architecture.Revision.RevisionNumber {
+	if stringValue(revision, "revisionId") != architecture.Revision.RevisionID || intValue(revision, "revisionNumber") != architecture.Revision.RevisionNumber ||
+		stringValue(revision, "createdAt") != architecture.Revision.CreatedAt || stringValue(revision, "createdBy") != architecture.Revision.CreatedBy ||
+		stringValue(revision, "previousRevisionId") != architecture.Revision.PreviousRevisionID {
 		collector.addError("SEMANTIC_EMBEDDED_REVISION_MISMATCH", "Embedded solution document binds a different immutable architecture revision.", SourceReference{Document: DocumentArchitecture, Path: "$." + field + ".revision"})
 	}
 }

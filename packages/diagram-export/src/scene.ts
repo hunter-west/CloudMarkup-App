@@ -17,6 +17,7 @@ import type {
 
 import {
   DIAGRAM_EXPORT_LIMITS,
+  DIAGRAM_RENDERER_BOUNDED_DETAIL_VERSION,
   type DiagramExportRequestV1,
   type DiagramExportWarningV1,
 } from "./contracts.js";
@@ -157,6 +158,7 @@ function configurationSummary(
   maximum: number,
   warnings: DiagramExportWarningV1[],
 ): readonly string[] {
+  if (maximum <= 0) return Object.freeze([]);
   const hints = [...service.configuration.uiHints]
     .filter(
       (hint) =>
@@ -477,7 +479,11 @@ export function buildDiagramScene(
       };
     }
     const maximumSummaries = reduceDetail
-      ? 0
+      ? request.renderer.version === DIAGRAM_RENDERER_BOUNDED_DETAIL_VERSION
+        ? 0
+        : // Historical 1.0.0/1.1.0 appended all summaries when their budget was
+          // zero. Retain their exact scene/output behavior under those old pins.
+          Infinity
       : request.profile.kind === "technical"
         ? 3
         : 1;

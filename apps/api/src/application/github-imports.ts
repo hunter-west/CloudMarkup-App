@@ -9,6 +9,7 @@ import type {
   ReviewGithubRepositoryImportV1,
 } from "@cloudmarkup/api-contract";
 import { sha256DigestSchema } from "@cloudmarkup/schemas";
+import { GitHubExportError } from "@cloudmarkup/github-repository-export";
 import type {
   GitHubRepositoryImportService,
   StoredGitHubRepositoryImport,
@@ -103,8 +104,8 @@ export interface GitHubRepositoryImportApplication {
 
 function applicationError(error: unknown): never {
   if (error instanceof ApplicationError) throw error;
-  if (!(error instanceof Error) || !("code" in error)) throw error;
-  const code = String((error as { readonly code: unknown }).code);
+  if (!(error instanceof GitHubExportError)) throw error;
+  const code = error.code;
   throw new ApplicationError(
     code === "rate-limited"
       ? "rate_limited"

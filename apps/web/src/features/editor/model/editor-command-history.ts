@@ -111,6 +111,7 @@ export type EditorCommandHistoryTransitionResult =
   | EditorCommandHistoryFailure
   | {
       readonly application: GraphCommandApplicationResult;
+      readonly command: GraphCommandV1;
       readonly direction: "redo" | "undo";
       readonly document: ArchitectureDocument;
       readonly history: EditorCommandHistory;
@@ -554,6 +555,7 @@ function transitionEditorCommand(
   history: EditorCommandHistory,
   currentDocumentInput: ArchitectureDocument,
   direction: "redo" | "undo",
+  acceptanceIdentity?: Pick<GraphCommandV1, "commandId" | "inverseCommandId">,
 ): EditorCommandHistoryTransitionResult {
   const entryIndex = direction === "undo" ? history.cursor - 1 : history.cursor;
   const entry = history.entries[entryIndex];
@@ -597,8 +599,10 @@ function transitionEditorCommand(
     );
   }
 
-  const command =
-    direction === "undo" ? entry.undoCommand : entry.forwardCommand;
+  const command = parseGraphCommandV1({
+    ...(direction === "undo" ? entry.undoCommand : entry.forwardCommand),
+    ...acceptanceIdentity,
+  });
   let application: GraphCommandApplicationResult;
   try {
     application = applyGraphCommand(currentDocument, command);
@@ -664,6 +668,7 @@ function transitionEditorCommand(
     });
     return Object.freeze({
       application,
+      command,
       direction,
       document: application.document,
       history: checkpointed,
@@ -674,6 +679,7 @@ function transitionEditorCommand(
 
   return Object.freeze({
     application,
+    command,
     direction,
     document: application.document,
     history: transitioned,
@@ -685,13 +691,25 @@ function transitionEditorCommand(
 export function undoEditorCommand(
   history: EditorCommandHistory,
   currentDocument: ArchitectureDocument,
+  acceptanceIdentity?: Pick<GraphCommandV1, "commandId" | "inverseCommandId">,
 ): EditorCommandHistoryTransitionResult {
-  return transitionEditorCommand(history, currentDocument, "undo");
+  return transitionEditorCommand(
+    history,
+    currentDocument,
+    "undo",
+    acceptanceIdentity,
+  );
 }
 
 export function redoEditorCommand(
   history: EditorCommandHistory,
   currentDocument: ArchitectureDocument,
+  acceptanceIdentity?: Pick<GraphCommandV1, "commandId" | "inverseCommandId">,
 ): EditorCommandHistoryTransitionResult {
-  return transitionEditorCommand(history, currentDocument, "redo");
+  return transitionEditorCommand(
+    history,
+    currentDocument,
+    "redo",
+    acceptanceIdentity,
+  );
 }

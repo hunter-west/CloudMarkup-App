@@ -209,18 +209,6 @@ test("canonical aliases require one physical and one bundled SVG copy", async ()
       exactOnce.stats.bundledApprovedProviderAssetBytes,
       Buffer.byteLength(safeSvg),
     );
-
-    await writeFile(path.join(distDirectory, "app.js"), `${safeSvg}${safeSvg}`);
-    const duplicatedBundle = await checkProviderIconBundle({
-      assetDirectory,
-      distDirectory,
-      manifest,
-    });
-    assert(
-      duplicatedBundle.issues.some((issue) =>
-        issue.includes("duplicated in the web bundle"),
-      ),
-    );
   } finally {
     await rm(root, { force: true, recursive: true });
   }

@@ -144,6 +144,8 @@ export interface CreateProjectWithDraftInput {
 export interface ProjectRecord {
   readonly createdAt: string;
   readonly currentDraftId: string;
+  /** Metadata only; remains readable without authorizing deleted draft content. */
+  readonly currentDraftVersion?: number;
   readonly deletionRequestedAt?: string;
   readonly description?: string;
   readonly latestRevisionId?: string;
@@ -180,6 +182,7 @@ export interface ProjectListInput {
   readonly cursor?: string;
   readonly limit: number;
   readonly lifecycleStatus?: ProjectRecord["lifecycleStatus"];
+  readonly sort?: string;
 }
 
 export interface ProjectListResult {
@@ -294,6 +297,8 @@ export interface RevisionMetadataRecord extends Omit<
   | "sourceDraftVisualSha256"
 > {
   readonly createdAt: string;
+  /** Exact database timestamp for keyset continuation, including microseconds. */
+  readonly paginationCreatedAt?: string;
   readonly documentObjectId: string;
   readonly organizationId: string;
   readonly previousRevisionId?: string;
@@ -437,6 +442,7 @@ export interface CloudMarkupRepository {
     scope: AuthorizedOrganizationScope,
     projectId: string,
     limit: number,
+    selection?: import("./list-pagination.js").RevisionListSelection,
   ): Promise<readonly RevisionMetadataRecord[]>;
   markObjectPublished(
     scope: AuthorizedOrganizationScope,

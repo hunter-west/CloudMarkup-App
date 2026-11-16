@@ -1,14 +1,19 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { initializeProviderDispatchHistory } from "./models-history.mjs";
 import { join } from "node:path";
 import test from "node:test";
+import { parseEnv } from "node:util";
+import { prepareSelfHostConfiguration } from "./prepare.mjs";
+import { parseOwnerConfiguration } from "./initialize-owner.mjs";
+import { root } from "./self-host.mjs";
 import {
   applyStandalone,
   applyStandaloneFromPublicEntry,
   inspectMigrations,
+  inspectBootstrap,
   inspectStandaloneProfile,
   parseOperatorConfiguration,
   parseProvisioningConfiguration,
@@ -19,6 +24,122 @@ import {
   migrationDirectory,
   validateProvisioningPassword,
 } from "./bootstrap.mjs";
+
+test("fresh setup derives current source bindings without secrets or acknowledged operations", async () => {
+  const parent = await mkdtemp(join(tmpdir(), "cm-config-"));
+  try {
+    const inspected = await inspectBootstrap();
+    for (const exportsEnabled of [false, true]) {
+      const directory = join(parent, exportsEnabled ? "with exports" : "core");
+      const receipt = await prepareSelfHostConfiguration(directory, {
+        exportsEnabled,
+      });
+      assert.equal(receipt.credentialsCreated, false);
+      assert.equal(receipt.operationsAcknowledged, false);
+      const json = async (name) =>
+        JSON.parse(await readFile(join(directory, name + ".json"), "utf8"));
+      const [runtime, operator, provisioning, owner] = await Promise.all([
+        json("runtime"),
+        json("operator"),
+        json("provisioning"),
+        json("owner"),
+      ]);
+      assert.equal(
+        runtime.persistence.expectedSchemaVersion,
+        inspected.canonical.lastVersion,
+      );
+      assert.equal(runtime.models, null);
+      assert.equal(runtime.identity.ownerPrincipalId, owner.owner.principalId);
+      assert.equal(
+        runtime.adapters.solutionExports?.configurationReference ?? null,
+        exportsEnabled ? "operator.exports" : null,
+      );
+      assert.equal(
+        runtime.credentialSources["operator.exports"]?.path ?? null,
+        exportsEnabled
+          ? "/opt/cloudmarkup/export/native-export-settings.json"
+          : null,
+      );
+      assert.equal(operator.manifestSha256, inspected.canonical.manifestSha256);
+      assert.equal(
+        owner.profileManifestSha256,
+        inspected.installationProfile.manifestSha256,
+      );
+      assert.equal(
+        provisioning.aclManifestSha256,
+        inspected.runtimeAclManifestSha256,
+      );
+      assert.throws(() => parseOperatorConfiguration(operator), /Invalid/);
+      assert.throws(
+        () => parseProvisioningConfiguration(provisioning, "admin"),
+        /Invalid/,
+      );
+      assert.throws(
+        () => parseOwnerConfiguration(owner, (value) => value),
+        /Invalid/,
+      );
+      parseOperatorConfiguration({
+        ...operator,
+        acknowledgeCanonicalMigrations: true,
+        acknowledgeStandaloneProfile: true,
+      });
+      for (const stage of ["admin", "roles", "acl", "check"])
+        parseProvisioningConfiguration(
+          { ...provisioning, acknowledge: stage },
+          stage,
+        );
+      parseOwnerConfiguration(
+        { ...owner, acknowledgeInitializeLocalOwner: true },
+        (value) => value,
+      );
+      const env = parseEnv(
+        await readFile(join(directory, "self-host.env"), "utf8"),
+      );
+      assert.equal(
+        env.CLOUDMARKUP_SELF_HOST_CONFIGURATION_SOURCE,
+        join(directory, "runtime.json").replaceAll("\\", "/"),
+      );
+      assert.equal(env.CLOUDMARKUP_NODE_IMAGE, "");
+      assert.deepEqual(
+        await readdir(join(directory, "runtime-secrets/database")),
+        [],
+      );
+      assert.deepEqual((await readdir(directory)).sort(), [
+        "operator.json",
+        "owner.json",
+        "provisioning.json",
+        "runtime-secrets",
+        "runtime.json",
+        "self-host.env",
+      ]);
+    }
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
+});
+
+test("setup cannot overwrite an installation or write configuration into the source context", async () => {
+  const parent = await mkdtemp(join(tmpdir(), "cm-config-preserve-"));
+  try {
+    await writeFile(join(parent, "existing.txt"), "preserve");
+    await assert.rejects(prepareSelfHostConfiguration(parent), /EEXIST/u);
+    assert.deepEqual(await readdir(parent), ["existing.txt"]);
+    assert.equal(
+      await readFile(join(parent, "existing.txt"), "utf8"),
+      "preserve",
+    );
+    await assert.rejects(
+      prepareSelfHostConfiguration(join(root, "private-config")),
+      /outside/u,
+    );
+    await assert.rejects(
+      prepareSelfHostConfiguration("relative-config"),
+      /absolute/u,
+    );
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
+});
 
 const digest = "a".repeat(64);
 const operator = {
@@ -113,13 +234,13 @@ test("public-entry caller rejects a missing operator host before consuming expor
     },
   );
 });
-test("source receipt checks all 121 current canonical entries through 0139", async () => {
+test("source receipt checks all 124 current canonical entries through 0142", async () => {
   const receipt = await inspectMigrations();
-  assert.equal(receipt.count, 121);
-  assert.equal(receipt.lastVersion, "0139");
+  assert.equal(receipt.count, 124);
+  assert.equal(receipt.lastVersion, "0142");
   assert.equal(
     receipt.manifestSha256,
-    "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
+    "77aa689bb5bc511a653e48da76fc9cda0fc9aa99853a9b61d40ff20304a7fa6c",
   );
 });
 test("tampered and unregistered SQL cannot reach a database", async () => {
@@ -178,7 +299,7 @@ test("standalone inspection binds the canonical source and its two portable file
   assert.equal(receipt.owner, "cloudmarkup_admin");
   assert.equal(
     receipt.canonicalManifestSha256,
-    "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
+    "77aa689bb5bc511a653e48da76fc9cda0fc9aa99853a9b61d40ff20304a7fa6c",
   );
 });
 

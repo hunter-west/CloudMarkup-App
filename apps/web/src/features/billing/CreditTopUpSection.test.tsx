@@ -192,7 +192,7 @@ describe("account credit packs", () => {
     );
     expect(f.openHosted).not.toHaveBeenCalled();
   });
-  it("shows verified balance and prevents a browser return from granting credits", async () => {
+  it("updates balance only from refreshed verified purchase state without starting a purchase", async () => {
     const f = setup({
       value: {
         ...view(),

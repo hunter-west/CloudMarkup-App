@@ -172,6 +172,32 @@ func TestAlarmDatapointsCannotExceedEvaluationPeriods(t *testing.T) {
 				if !reflect.DeepEqual(first, second) || !reflect.DeepEqual(diagnostics, againDiagnostics) {
 					t.Fatal("alarm result is not reproducible")
 				}
+				// The infrastructure warning fills the budget before the alarm is
+				// rendered. A later error must still refuse the whole artifact.
+				model.Workloads[0].ImplementationMode = "infrastructure-only"
+				limits := DefaultLimits()
+				limits.MaxDiagnostics = 1
+				var bounded *TargetArtifact
+				var boundedDiagnostics []Diagnostic
+				if target == "cloudformation" {
+					bounded, boundedDiagnostics = renderCloudFormationArtifact(context.Background(), model, nil, limits)
+				} else {
+					bounded, boundedDiagnostics = renderTerraformArtifact(context.Background(), model, nil, limits)
+				}
+				if len(boundedDiagnostics) != 1 {
+					t.Fatalf("diagnostic budget changed: %#v", boundedDiagnostics)
+				}
+				if pair[0] > pair[1] {
+					code := "TARGET_ALARM_DATAPOINTS_EXCEED_PERIODS"
+					if target == "cloudformation" {
+						code = cloudFormationDiagnosticCode(code)
+					}
+					if bounded != nil || boundedDiagnostics[0].Code != code || boundedDiagnostics[0].Severity != SeverityError || boundedDiagnostics[0].Source.NodeID != "alarm" {
+						t.Fatalf("warning hid a render error: %#v", boundedDiagnostics)
+					}
+				} else if bounded == nil || boundedDiagnostics[0].Severity != SeverityWarning {
+					t.Fatalf("warning-only control refused: %#v", boundedDiagnostics)
+				}
 			})
 		}
 	}

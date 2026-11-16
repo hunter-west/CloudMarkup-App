@@ -22,6 +22,7 @@ import { useOptionalLocalOwnerSession } from "../auth/local-owner-session.js";
 import { RoutePage } from "../../shell/RoutePage.js";
 import "./staff-accounts.css";
 import { useStaffAccess } from "./use-staff-access.js";
+import { StaffProviderCostReport } from "./StaffProviderCostReport.js";
 export function StaffAccountsPage({
   principal,
 }: {
@@ -307,6 +308,13 @@ function StaffAccount({
           export or team features are added.
         </p>
       </section>
+      {permissions.includes("provider-costs.read") ? (
+        <StaffProviderCostReport
+          key={principal.id + ":" + organizationId}
+          runtime={runtime}
+          organizationId={organizationId}
+        />
+      ) : null}
       <StaffActionForm
         key={organizationId}
         runtime={runtime}

@@ -100,8 +100,11 @@ export async function collectAndVerify(
         "The object size does not match its metadata.",
       );
     }
-    hash.update(chunk);
-    chunks.push(chunk);
+    // The producer may reuse its buffer when iteration resumes. Hash and retain
+    // the same owned bytes, never a mutable reference to the producer's chunk.
+    const owned = new Uint8Array(chunk);
+    hash.update(owned);
+    chunks.push(owned);
   }
   if (size !== input.sizeBytes || hash.digest("hex") !== input.contentSha256) {
     throw new ObjectStoreError(
@@ -133,8 +136,11 @@ export async function* verifiedObjectStream(
         "The object size does not match its metadata.",
       );
     }
-    hash.update(chunk);
-    yield chunk;
+    // Retaining readers must see the same bytes that were verified even when
+    // the underlying producer reuses its buffer after the next iteration.
+    const owned = new Uint8Array(chunk);
+    hash.update(owned);
+    yield owned;
   }
   if (size !== expectedSize || hash.digest("hex") !== expectedSha256) {
     throw new ObjectStoreError(

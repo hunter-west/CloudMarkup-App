@@ -492,6 +492,7 @@ function endpointAssumption(
   configuration: NormalizedResource,
   capability: ApplicationReachabilityCapabilityV1,
   routeTables: SelectedRouteTables,
+  subnetPlacement: SelectedSubnetPlacement,
 ): ApplicationReachabilityAssumptionV1 {
   const service = endpointService(capability);
   const routeTablePlacements = routeTables.routeTableIds.map((routeTableId) => {
@@ -538,7 +539,11 @@ function endpointAssumption(
     const routeTablesShareEndpointVpc = routeTablePlacements.every(
       (placement) => placement?.vpc.id === endpointPlacement.parent.id,
     );
-    if (!routeTablesShareEndpointVpc) continue;
+    if (
+      !routeTablesShareEndpointVpc ||
+      subnetPlacement.vpcId !== endpointPlacement.parent.id
+    )
+      continue;
     const routeTableAssociations = relationshipFrom(
       solution,
       endpoint.id,
@@ -583,6 +588,7 @@ function endpointAssumption(
         "$.configuration.values.egressRequirement",
       ),
       ...routeTables.references,
+      ...subnetPlacement.references,
       ...endpointReferences,
     ]),
   };
@@ -738,21 +744,17 @@ function natInternetPath(
   };
 }
 
-function internetAssumption(
+interface SelectedSubnetPlacement {
+  readonly vpcId: string | undefined;
+  readonly references: readonly ApplicationReachabilitySourceReferenceV1[];
+}
+
+function selectedSubnetPlacement(
   solution: NormalizedSolutionInput,
   resources: ReadonlyMap<string, NormalizedResource>,
-  workloadId: string,
-  configuration: NormalizedResource,
-  routeTables: SelectedRouteTables,
   subnetIds: readonly string[],
-): ApplicationReachabilityAssumptionV1 {
-  const sourceReferences: ApplicationReachabilitySourceReferenceV1[] = [
-    resourceReference(
-      configuration,
-      "$.configuration.values.egressRequirement",
-    ),
-    ...routeTables.references,
-  ];
+): SelectedSubnetPlacement {
+  const sourceReferences: ApplicationReachabilitySourceReferenceV1[] = [];
   const subnetPlacements = subnetIds.map((subnetId) => {
     const subnet = resourceById(resources, subnetId, RESOURCE.subnet);
     return subnet === undefined
@@ -774,6 +776,26 @@ function internetAssumption(
     workloadVpcIds.length === 1
       ? workloadVpcIds[0]
       : undefined;
+  return { vpcId: workloadVpcId, references: sourceReferences };
+}
+
+function internetAssumption(
+  solution: NormalizedSolutionInput,
+  resources: ReadonlyMap<string, NormalizedResource>,
+  workloadId: string,
+  configuration: NormalizedResource,
+  routeTables: SelectedRouteTables,
+  subnetPlacement: SelectedSubnetPlacement,
+): ApplicationReachabilityAssumptionV1 {
+  const workloadVpcId = subnetPlacement.vpcId;
+  const sourceReferences: ApplicationReachabilitySourceReferenceV1[] = [
+    resourceReference(
+      configuration,
+      "$.configuration.values.egressRequirement",
+    ),
+    ...routeTables.references,
+    ...subnetPlacement.references,
+  ];
   let complete =
     routeTables.complete &&
     routeTables.routeTableIds.length > 0 &&
@@ -974,6 +996,11 @@ function workloadBinding(
     resources,
     [...new Set(subnetIds)].sort(compareUtf16),
   );
+  const subnetPlacement = selectedSubnetPlacement(
+    solution,
+    resources,
+    [...new Set(subnetIds)].sort(compareUtf16),
+  );
   const assumptions = requiredCapabilities(requirement).map((capability) =>
     capability === "internet-egress"
       ? internetAssumption(
@@ -982,7 +1009,7 @@ function workloadBinding(
           workload.id,
           configuration,
           routeTables,
-          [...new Set(subnetIds)].sort(compareUtf16),
+          subnetPlacement,
         )
       : endpointAssumption(
           solution,
@@ -991,6 +1018,7 @@ function workloadBinding(
           configuration,
           capability,
           routeTables,
+          subnetPlacement,
         ),
   );
   const outboundRequirement =

@@ -1994,8 +1994,9 @@ export async function runModelEvaluationDatasetV1(input: {
       let rawJudgeScores: unknown;
       try {
         rawJudgeScores = await input.judge.scoreCase({
-          deterministicScores: scores,
-          evaluationCase,
+          // The optional judge observes evidence; it cannot rewrite its owner.
+          deterministicScores: structuredClone(scores),
+          evaluationCase: structuredClone(evaluationCase),
           outputDigest: observation.outputDigest,
           ...(input.signal === undefined ? {} : { signal: input.signal }),
         });

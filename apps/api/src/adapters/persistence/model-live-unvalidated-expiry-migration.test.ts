@@ -8,8 +8,8 @@ describe("additive expiry of known unvalidated completion", () => {
   it("preserves every historical migration byte and the canonical financial calculation", async () => {
     const directory = new URL("../../../migrations/", import.meta.url);
     const migrations = await loadMigrations(fileURLToPath(directory));
-    expect(migrations).toHaveLength(121);
-    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(1374);
+    expect(migrations).toHaveLength(124);
+    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(1397);
     const prior = {
       storageContractVersion: 1,
       migrations: migrations

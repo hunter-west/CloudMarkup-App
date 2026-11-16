@@ -68,16 +68,22 @@ describe("API contract v1", () => {
         organizationId: "org_other",
       }).success,
     ).toBe(false);
-    expect(
-      createRevisionV1Schema.safeParse({
-        contractVersion: 1,
-        draftId: "draft_notes",
-        draftVersion: 1,
-        organizationId: "org_other",
-        principalId: "principal_other",
-        validationRunId: "validation_notes",
-      }).success,
-    ).toBe(false);
+    const revision = {
+      contractVersion: 1,
+      draftId: "draft_notes",
+      draftVersion: 1,
+      name: "Reviewed revision",
+      validationRunId: "validation_notes",
+    };
+    expect(createRevisionV1Schema.safeParse(revision).success).toBe(true);
+    for (const authority of [
+      { organizationId: "org_other" },
+      { principalId: "principal_other" },
+    ]) {
+      expect(
+        createRevisionV1Schema.safeParse({ ...revision, ...authority }).success,
+      ).toBe(false);
+    }
   });
 
   it("defines bounded pagination and consequential mutation headers", () => {
@@ -160,18 +166,76 @@ describe("derived typed client", () => {
     });
   });
 
-  it.each(
-    [
+  it("serializes validated numeric queries and string cursors without losing pagination", async () => {
+    const captured: ApiTransportRequest[] = [];
+    const page = { apiVersion: "v1", data: [], page: { hasMore: false } };
+    const discovery = {
+      apiVersion: "v1",
+      data: {
+        contractVersion: 1,
+        organizationId: "org_local",
+        principalId: "principal_local",
+        connectionId: "gitlab_11111111111111111111111111111111",
+        projects: [],
+        nextPage: null,
+      },
+    };
+    const client = createCloudMarkupClient({
+      baseUrl: "https://api.example.test",
+      transport: (request) => {
+        captured.push(request);
+        return Promise.resolve({
+          headers: { get: () => null },
+          status: 200,
+          text: () =>
+            Promise.resolve(
+              JSON.stringify(
+                request.url.includes("/projects?") ? discovery : page,
+              ),
+            ),
+        });
+      },
+    });
+    const path = {
+      organizationId: "org_local",
+      connectionId: "gitlab_11111111111111111111111111111111",
+    };
+    await client.request("gitlab-projects.discover", {
+      path,
+      query: { page: "2" },
+    });
+    await client.request("gitlab-project-selections.list", {
+      path,
+      query: { limit: 100, cursor: "41" },
+    });
+    await client.request("gitlab-connections.list", {
+      path: { organizationId: "org_local" },
+      query: { cursor: "gitlab_11111111111111111111111111111111", limit: "75" },
+    });
+    expect(captured.map((request) => request.url)).toEqual([
+      "https://api.example.test/v1/organizations/org_local/gitlab-connections/gitlab_11111111111111111111111111111111/projects?page=2",
+      "https://api.example.test/v1/organizations/org_local/gitlab-connections/gitlab_11111111111111111111111111111111/project-selections?cursor=41&limit=100",
+      "https://api.example.test/v1/organizations/org_local/gitlab-connections?cursor=gitlab_11111111111111111111111111111111&limit=75",
+    ]);
+    for (const invalidPage of [
       0,
+      201,
       1.5,
       Number.NaN,
       Number.POSITIVE_INFINITY,
-      Number.MAX_SAFE_INTEGER + 1,
-      "malformed",
-    ].filter(
-      (_, index) => index !== 1 && index !== 2 && index !== 3 && index !== 4,
-    ),
-  )(
+      { page: 2 },
+    ]) {
+      await expect(
+        client.request("gitlab-projects.discover", {
+          path,
+          query: { page: invalidPage },
+        }),
+      ).rejects.toThrow();
+    }
+    expect(captured).toHaveLength(3);
+  });
+
+  it.each([0, "malformed"])(
     "rejects invalid numeric GitHub path input %s before transport",
     async (repositoryId) => {
       let transportCalls = 0;

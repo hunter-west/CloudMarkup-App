@@ -159,7 +159,14 @@ function buildQuery(query: unknown): string {
   }
 
   const entries = Object.entries(query as Readonly<Record<string, unknown>>)
-    .filter((entry): entry is [string, string] => typeof entry[1] === "string")
+    .filter(([, value]) => value !== undefined)
+    .map(([key, value]): [string, string] => {
+      if (typeof value === "string") return [key, value];
+      if (typeof value === "number" && Number.isFinite(value)) {
+        return [key, String(value)];
+      }
+      throw new Error(`Unsupported query parameter: ${key}`);
+    })
     .sort(([left], [right]) => left.localeCompare(right));
 
   if (entries.length === 0) {

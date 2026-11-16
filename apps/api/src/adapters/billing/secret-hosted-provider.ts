@@ -26,7 +26,7 @@ export function createSecretHostedBillingProvider(options: {
     throw new TypeError(
       "Hosted billing requires one exact API-key secret ARN.",
     );
-  async function provider() {
+  async function provider(creationRetryBefore?: string) {
     try {
       return new StripeBillingProvider({
         apiKey: decodeStripeApiKey(
@@ -38,6 +38,19 @@ export function createSecretHostedBillingProvider(options: {
         verificationMode: "hosted-sessions-only",
         fetchImplementation: async (input, init) => {
           await options.authorizeBeforeRequest();
+          // Creation can wait on current authority. Keep its original retry
+          // deadline at the actual send boundary; evidence reads may continue.
+          if (
+            init?.method === "POST" &&
+            creationRetryBefore !== undefined &&
+            (!Number.isFinite(Date.parse(creationRetryBefore)) ||
+              Date.now() >= Date.parse(creationRetryBefore))
+          ) {
+            throw new BillingApplicationError(
+              "provider-unavailable",
+              "The purchase attempt requires reconciliation.",
+            );
+          }
           return (options.fetchImplementation ?? fetch)(input, init);
         },
       });
@@ -58,11 +71,11 @@ export function createSecretHostedBillingProvider(options: {
   }
   return {
     createCreditTopUpSession: async (input) =>
-      (await provider()).createCreditTopUpSession(input),
+      (await provider(input.retryBefore)).createCreditTopUpSession(input),
     getCreditTopUpSession: async (input) =>
       (await provider()).getCreditTopUpSession(input),
     createCheckoutSession: async (input) =>
-      (await provider()).createCheckoutSession(input),
+      (await provider(input.retryBefore)).createCheckoutSession(input),
     getCheckoutSession: async (input) =>
       (await provider()).getCheckoutSession(input),
     createPortalSession: async (input) =>

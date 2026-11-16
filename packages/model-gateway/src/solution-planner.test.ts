@@ -1402,6 +1402,71 @@ describe("ReviewOnlySolutionProposalPlannerV1", () => {
         diagnostics: [expect.objectContaining({ code })],
       });
       expect(request.architecture).toEqual(original);
+      if (restriction === "combined limit") {
+        for (const [composition, operationCount] of [
+          ["assistant", 1],
+          ["assistant", 2],
+          ["mixed", 2],
+        ] as const) {
+          const boundedGateway = new TransformingPlanningGateway(
+            configuredFakeGateway(),
+            (response) => ({
+              ...response,
+              batches: [
+                ...(composition === "mixed"
+                  ? response.batches.filter((batch) => batch.kind === "graph")
+                  : []),
+                ...Array.from(
+                  { length: composition === "mixed" ? 1 : operationCount },
+                  (_, index) => ({
+                    kind: "assistant" as const,
+                    batch: assistantOperationBatchV1Schema.parse({
+                      baseArchitectureDigest:
+                        getArchitectureDocumentCanonicalHash(original),
+                      contractVersion: 1,
+                      kind: "cloudmarkup.assistant-operation-batch",
+                      operations: [
+                        {
+                          blocking: false,
+                          evidenceIds: [],
+                          kind: "request-clarification",
+                          operationId: `assistant_budget_${String(index)}`,
+                          question: "Confirm the reviewed runtime detail?",
+                          questionId: `question_budget_${String(index)}`,
+                          rationale: "Retain a nonblocking review question.",
+                        },
+                      ],
+                    }),
+                  }),
+                ),
+              ],
+              solutionProposal: {
+                ...solutionProposalFor(response),
+                externalResources: [],
+              },
+            }),
+          );
+          const bounded = await planner(boundedGateway).planner.propose(
+            plannerInput(
+              request,
+              `invocation_budget_${composition}_${String(operationCount)}`,
+            ),
+          );
+          if (operationCount === 1) {
+            expect(bounded.disposition).toBe("ready-for-review");
+            if (bounded.disposition === "rejected")
+              throw new Error("Unexpected at-limit rejection.");
+            expect(bounded.assistantOperations).toHaveLength(1);
+            expect(bounded.candidateArchitecture).toEqual(original);
+          } else {
+            expect(bounded).toMatchObject({
+              disposition: "rejected",
+              diagnostics: [expect.objectContaining({ code })],
+            });
+          }
+          expect(request.architecture).toEqual(original);
+        }
+      }
     },
   );
 

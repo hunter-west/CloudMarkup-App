@@ -16,8 +16,10 @@ import {
   asyncJobRecordV1Schema,
   asyncJobObjectReferenceV1Schema,
   existingApplicationFileV1Schema,
+  evidenceRecordV1Schema,
   repositoryRelativePathSchema,
   serializeCanonicalJson,
+  solutionExportOrchestrationJobOutputV1Schema,
   type AsyncJobCheckpointV1,
   type AsyncJobEvidenceReferenceV1,
   type EvidenceRecordV1,
@@ -50,6 +52,8 @@ import {
   solutionExportApplicationBuildBatchReportDigest,
   solutionExportApplicationBuildBatchResultV1Schema,
   solutionExportWorkflowFailureV1Schema,
+  solutionExportWorkflowPersistedOutputV1Schema,
+  solutionExportWorkflowReadModelV1Schema,
   type SolutionExportApplicationBuildBatchResultV1,
 } from "./contracts.js";
 import {
@@ -111,12 +115,14 @@ interface HarnessOptions {
   readonly latePersistenceCancellation?: boolean;
   readonly liveCompilerCancellation?: boolean;
   readonly longCompilerHeartbeat?: boolean;
+  readonly diagramInterruption?: "monitor" | "cancel" | "renderer";
   readonly noCheckpointExpected?: boolean;
   readonly fixture?: WorkflowFixture;
   readonly generatedOverride?: ReturnType<typeof generateApplication>;
   readonly substituteFinalEvidenceReference?: boolean;
   readonly validationEvidenceMismatch?: "environment" | "revision";
   readonly validationState?: "passed" | "failed" | "cancelled";
+  readonly completeValidationEvidence?: boolean;
 }
 
 interface HarnessResult {
@@ -235,6 +241,7 @@ async function runHarness(
   } = {};
   let heartbeatCalls = 0;
   let compilerIsActive = false;
+  let diagramIsActive = false;
   let outputPersisted = false;
   let releaseLongCompiler: (() => void) | undefined;
   const applicationGenerator = createSolutionExportApplicationGeneratorPort();
@@ -335,7 +342,26 @@ async function runHarness(
         return generated;
       },
     },
-    cancellation: createTimerSolutionExportWorkflowCancellationPollPort(1),
+    cancellation:
+      options.diagramInterruption === undefined
+        ? createTimerSolutionExportWorkflowCancellationPollPort(1)
+        : {
+            async wait({ signal }) {
+              if (diagramIsActive) throw new Error("synthetic monitor failure");
+              if (signal.aborted) return;
+              await new Promise<void>((resolve) => {
+                signal.addEventListener(
+                  "abort",
+                  () => {
+                    resolve();
+                  },
+                  {
+                    once: true,
+                  },
+                );
+              });
+            },
+          },
     clock: { now: () => new Date("2026-08-18T12:00:00.000Z") },
     compiler: {
       async compile(input) {
@@ -399,6 +425,24 @@ async function runHarness(
         expect(input.settings).toEqual(
           fixture.request.targetSettings.stageDescriptors.diagramRenderer,
         );
+        if (options.diagramInterruption === "renderer") {
+          throw new Error("synthetic private renderer detail");
+        }
+        if (options.diagramInterruption !== undefined) {
+          diagramIsActive = true;
+          return new Promise((_resolve, reject) => {
+            input.signal.addEventListener(
+              "abort",
+              () => {
+                handoff.runnerSignalAborted = true;
+                const error = new Error("synthetic diagram aborted");
+                error.name = "AbortError";
+                reject(error);
+              },
+              { once: true },
+            );
+          });
+        }
         const architectureDocument = architectureDocumentV3Schema.parse(
           input.sources.architectureDocument,
         );
@@ -647,6 +691,27 @@ async function runHarness(
           options.validationState ?? "passed",
         );
         const evidence = validation.evidenceRecords[0];
+        if (options.completeValidationEvidence && evidence !== undefined) {
+          validation.evidenceRecords.unshift(
+            evidenceRecordV1Schema.parse({
+              ...evidence,
+              id: "evidence_infrastructure_compilation_capacity",
+              checks: [
+                {
+                  checkId:
+                    "cloudmarkup.evidence.deterministic-infrastructure-compilation",
+                  generationCoverageRequirement:
+                    "deterministic-infrastructure-compilation",
+                  artifactDigests: [input.infrastructure.artifactDigest],
+                  issueIds: [],
+                  status: "passed",
+                  summary:
+                    "Synthetic compiler evidence for the capacity boundary.",
+                },
+              ],
+            }),
+          );
+        }
         if (
           options.validationEvidenceMismatch === undefined ||
           evidence === undefined
@@ -688,6 +753,7 @@ async function runHarness(
       await Promise.resolve();
       return (
         (options.liveCompilerCancellation === true && compilerIsActive) ||
+        (options.diagramInterruption === "cancel" && diagramIsActive) ||
         (options.latePersistenceCancellation === true && outputPersisted)
       );
     },
@@ -1107,6 +1173,154 @@ describe("solution export workflow orchestration", () => {
     expect(readModel?.downloadPolicy.state).toBe("eligible");
   });
 
+  it.each(["terraform", "cloudformation"] as const)(
+    "retains the full supported build-batch evidence in %s output and terminal projections",
+    async (target) => {
+      // Exercise real one-build workflow projections, then expand only the
+      // schema-bound references. This does not execute 32 external builds.
+      const result = await runHarness({
+        buildSuccess: true,
+        completeValidationEvidence: true,
+        fixture: workflowFixture("complete-supported-pattern", target),
+      });
+      expect(result.orchestratorResult.outcome.outcome).toBe("succeeded");
+      const { readModel, persistedOutput } = result.orchestratorResult;
+      const verification = readModel?.applicationVerification;
+      const buildReference = readModel?.stageReports.find(
+        ({ stage }) => stage === "build-application",
+      )?.evidenceRecords[0];
+      if (
+        !readModel ||
+        !persistedOutput ||
+        !verification ||
+        !buildReference ||
+        result.orchestratorResult.outcome.outcome !== "succeeded"
+      ) {
+        throw new Error("Capacity control requires a valid completed build.");
+      }
+      const validationReferences = readModel.stageReports.find(
+        ({ stage }) => stage === "validate-infrastructure",
+      )?.evidenceRecords;
+      expect(validationReferences).toHaveLength(target === "terraform" ? 2 : 1);
+      const validationSemantics = readModel.evidenceSemantics.filter(
+        ({ kind }) => kind !== "application-build",
+      );
+      for (const buildCount of [31, 32]) {
+        const builds = Array.from({ length: buildCount }, (_, index) => {
+          const id = index.toString().padStart(2, "0");
+          return {
+            reference: {
+              ...buildReference,
+              evidenceId: `evidence_capacity_${id}`,
+              record: {
+                ...buildReference.record,
+                digest: sha256Digest(`capacity-evidence-${id}`),
+                objectId: `object.evidence.capacity.${id}`,
+              },
+            },
+            coverage: {
+              ...verification,
+              buildRequestDigest: sha256Digest(`capacity-request-${id}`),
+              evidenceId: `evidence_capacity_${id}`,
+              workloadId: `workload_capacity_${id}`,
+            },
+          };
+        });
+        const evidenceRecords = [
+          ...builds.map(({ reference }) => reference),
+          ...(validationReferences ?? []),
+        ].sort((a, b) => (a.evidenceId < b.evidenceId ? -1 : 1));
+        const evidenceSemantics = [
+          ...builds.map(({ reference }) => ({
+            evidenceId: reference.evidenceId,
+            kind: "application-build" as const,
+            status: "passed" as const,
+          })),
+          ...validationSemantics,
+        ].sort((a, b) => (a.evidenceId < b.evidenceId ? -1 : 1));
+        const projected = {
+          ...readModel,
+          applicationVerification: undefined,
+          applicationVerifications: builds.map(({ coverage }) => coverage),
+          evidenceRecords,
+          evidenceSemantics,
+          stageReports: readModel.stageReports.map((report) =>
+            report.stage === "build-application"
+              ? {
+                  ...report,
+                  evidenceRecords: builds.map(({ reference }) => reference),
+                }
+              : report,
+          ),
+        };
+        expect(
+          solutionExportWorkflowReadModelV1Schema.parse(projected)
+            .evidenceRecords,
+        ).toEqual(evidenceRecords);
+        expect(
+          solutionExportWorkflowPersistedOutputV1Schema.parse({
+            ...persistedOutput,
+            evidenceRecords,
+          }).evidenceRecords,
+        ).toEqual(evidenceRecords);
+        expect(
+          solutionExportOrchestrationJobOutputV1Schema.parse({
+            ...result.orchestratorResult.outcome.output,
+            evidenceRecords,
+          }).evidenceRecords,
+        ).toEqual(evidenceRecords);
+        const failure = {
+          classification: "transient" as const,
+          code: "cloudmarkup.export.dependency-temporarily-unavailable",
+          publicMessage: "export-temporarily-unavailable" as const,
+          retryAfterSeconds: 30,
+          stage: "persist-output" as const,
+        };
+        const failed = solutionExportWorkflowReadModelV1Schema.parse({
+          ...projected,
+          artifact: undefined,
+          downloadPolicy: { reason: "stage-failed", state: "blocked" },
+          failure,
+          stages: projected.stages.map((stage) =>
+            stage.stage === "persist-output"
+              ? { ...stage, artifact: undefined, failure, state: "failed" }
+              : stage,
+          ),
+          state: "failed",
+        });
+        expect(failed.evidenceRecords).toEqual(evidenceRecords);
+        expect(failed.evidenceSemantics).toEqual(evidenceSemantics);
+        expect(failed.downloadPolicy.state).toBe("blocked");
+      }
+      // 32 builds + the larger two-record validation path is the finite bound.
+      const oversized = Array.from({ length: 35 }, () => buildReference);
+      for (const schema of [
+        solutionExportWorkflowReadModelV1Schema,
+        solutionExportWorkflowPersistedOutputV1Schema,
+      ]) {
+        const parsed = schema.safeParse({
+          ...(schema === solutionExportWorkflowReadModelV1Schema
+            ? readModel
+            : persistedOutput),
+          evidenceRecords: oversized,
+        });
+        expect(parsed.success).toBe(false);
+        expect(
+          parsed.error?.issues.some(
+            (issue) =>
+              issue.code === "too_big" && issue.path[0] === "evidenceRecords",
+          ),
+        ).toBe(true);
+      }
+      expect(
+        solutionExportOrchestrationJobOutputV1Schema.safeParse({
+          ...result.orchestratorResult.outcome.output,
+          evidenceRecords: oversized,
+        }).success,
+      ).toBe(false);
+    },
+  );
+
   it("fails atomically when compiler target metadata references a different generated ZIP", async () => {
     const fixture = multiWorkloadEventWorkflowFixture();
     const result = await runHarness({
@@ -1513,6 +1727,48 @@ describe("solution export workflow orchestration", () => {
       1,
     );
   });
+
+  it.each(["monitor", "cancel", "renderer"] as const)(
+    "preserves the %s outcome while a diagram stage is active",
+    async (diagramInterruption) => {
+      const result = await runHarness({ diagramInterruption });
+      const { outcome, readModel, persistedOutput } = result.orchestratorResult;
+      expect(result.invocations).not.toContain("packager");
+      expect(result.invocations).not.toContain("persist-output");
+      expect(persistedOutput).toBeUndefined();
+      expect(readModel?.downloadPolicy.state).toBe("blocked");
+      if (diagramInterruption === "cancel") {
+        expect(outcome).toEqual({ outcome: "canceled" });
+      } else {
+        const monitor = diagramInterruption === "monitor";
+        const expected = {
+          classification: monitor ? "transient" : "permanent",
+          code: monitor
+            ? "cloudmarkup.export.active-stage-monitor-unavailable"
+            : "cloudmarkup.export.diagram-render-failed",
+          publicMessage: monitor
+            ? "export-temporarily-unavailable"
+            : "export-diagram-failed",
+          stage: "render-diagram",
+          ...(monitor ? { retryAfterSeconds: 30 } : {}),
+        };
+        expect(readModel?.failure).toEqual(expected);
+        expect(outcome).toMatchObject({
+          outcome: "failed",
+          failure: {
+            classification: expected.classification,
+            code: expected.code,
+            ...(monitor ? { retryAfterSeconds: 30 } : {}),
+          },
+        });
+        expect(JSON.stringify(result.orchestratorResult)).not.toContain(
+          "synthetic private",
+        );
+      }
+      if (diagramInterruption !== "renderer")
+        expect(result.handoff.runnerSignalAborted).toBe(true);
+    },
+  );
 
   it("heartbeats during a long active compiler stage", async () => {
     const result = await runHarness({ longCompilerHeartbeat: true });

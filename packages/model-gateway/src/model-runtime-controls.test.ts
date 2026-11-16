@@ -3287,17 +3287,16 @@ describe("ModelRuntimeControlServiceV1", () => {
       expect(
         new Set(harness.telemetry.pairs.map((pair) => pair.audit.eventKind)),
       ).toEqual(
-        expect.objectContaining(
-          new Set([
-            "credits",
-            "estimated-cost",
-            "model-route",
-            "request",
-            "reserve",
-            "settle",
-            "tokens",
-          ]),
-        ),
+        new Set([
+          "credits",
+          "estimated-cost",
+          "latency",
+          "model-route",
+          "request",
+          "reserve",
+          "settle",
+          "tokens",
+        ]),
       );
     },
   );

@@ -11,6 +11,11 @@ import type {
   VerifiedPrincipalContext,
 } from "../../application/persistence.js";
 import { PostgresCloudMarkupRepository } from "./repositories.js";
+import {
+  decodeListCursor,
+  encodeListCursor,
+  listBinding,
+} from "../../application/list-pagination.js";
 import type {
   SqlDatabase,
   SqlExecutor,
@@ -73,6 +78,208 @@ function result(
 }
 
 describe("PostgreSQL repositories", () => {
+  it("continues project lists in the requested SQL order with bound filters and exact timestamps", async () => {
+    const timestamp = "2026-11-12T12:00:00.123456Z";
+    const row = (id: string, name: string, key: string) => ({
+      project_id: id,
+      organization_id: scope.organizationId,
+      name,
+      description: null,
+      lifecycle_status: "active",
+      record_version: 1,
+      current_draft_id: "draft_test",
+      latest_revision_id: null,
+      deletion_requested_at: null,
+      created_at: timestamp,
+      updated_at: timestamp,
+      pagination_value: key,
+    });
+    for (const sort of ["name", "-name", "updatedAt", "-updatedAt"]) {
+      const key = sort.includes("name") ? "same name" : timestamp;
+      const database = new RecordingDatabase([
+        result([
+          row("project_c", "same name", key),
+          row("project_a", "same name", key),
+          row("project_b", "later", key),
+        ]),
+        result([row("project_b", "later", key)]),
+      ]);
+      const repository = new PostgresCloudMarkupRepository(database);
+      const first = await repository.listProjects(scope, {
+        limit: 2,
+        sort,
+        lifecycleStatus: "active",
+      });
+      expect(first.items.map(({ projectId }) => projectId)).toEqual([
+        "project_c",
+        "project_a",
+      ]);
+      expect(first.nextCursor).toBeDefined();
+      if (first.nextCursor === undefined)
+        throw new Error("Expected continuation");
+      const second = await repository.listProjects(scope, {
+        limit: 2,
+        sort,
+        lifecycleStatus: "active",
+        cursor: first.nextCursor,
+      });
+      expect(second.items.map(({ projectId }) => projectId)).toEqual([
+        "project_b",
+      ]);
+      expect(second.nextCursor).toBeUndefined();
+      const query = database.statements[1];
+      if (query === undefined) throw new Error("Expected continuation query");
+      expect(query.values).toEqual([
+        scope.membershipId,
+        scope.principalId,
+        scope.organizationId,
+        "active",
+        key,
+        "project_a",
+        3,
+      ]);
+      const direction = sort.startsWith("-") ? "DESC" : "ASC";
+      expect(query.text).toContain(
+        `ORDER BY ${sort.includes("name") ? 'p.name COLLATE "C"' : "p.updated_at"} ${direction}, p.project_id COLLATE "C" ${direction}`,
+      );
+      expect(query.text).toContain(direction === "ASC" ? ") >" : ") <");
+      expect(query.text).toContain("m.lifecycle_status = 'active'");
+      for (const changed of [
+        { sort: sort === "name" ? "-name" : "name" },
+        { lifecycleStatus: "archived" as const },
+      ])
+        await expect(
+          repository.listProjects(scope, {
+            limit: 2,
+            sort,
+            lifecycleStatus: "active",
+            cursor: first.nextCursor,
+            ...changed,
+          }),
+        ).rejects.toMatchObject({ code: "invalid-input" });
+      await expect(
+        repository.listProjects(
+          { ...scope, organizationId: "organization_other" },
+          {
+            limit: 2,
+            sort,
+            lifecycleStatus: "active",
+            cursor: first.nextCursor,
+          },
+        ),
+      ).rejects.toMatchObject({ code: "invalid-input" });
+      expect(database.statements).toHaveLength(2);
+    }
+    const binding = listBinding(["projects", scope.organizationId]);
+    const position = { id: "project_test", value: "\u0001".repeat(119) + "名" };
+    const cursor = encodeListCursor(binding, position);
+    expect(cursor.length).toBeLessThanOrEqual(512);
+    expect(decodeListCursor(cursor, binding)).toEqual(position);
+    for (const invalid of [
+      "bad",
+      cursor + "x",
+      cursor.replace(":12:", ":0:"),
+      "x".repeat(513),
+    ])
+      expect(() => decodeListCursor(invalid, binding)).toThrow();
+  });
+
+  it("replays lifecycle receipts before CAS and returns closed draft version metadata only", async () => {
+    for (const operation of ["archiveProject", "deleteProject"] as const) {
+      const status =
+        operation === "archiveProject" ? "archived" : "deletion-pending";
+      const projectId = "project_lifecycle";
+      const database = new RecordingDatabase([
+        result([{ project_id: projectId }]),
+        result([{ membership_id: scope.membershipId, role_key: "owner" }]),
+        result([{ request_sha256: digest, resource_id: projectId }]),
+        result([
+          {
+            project_id: projectId,
+            organization_id: scope.organizationId,
+            name: "Lifecycle",
+            description: null,
+            lifecycle_status: status,
+            record_version: 2,
+            current_draft_id: "draft_lifecycle",
+            current_draft_version: 7,
+            latest_revision_id: null,
+            deletion_requested_at: null,
+            created_at: "2026-11-12T00:00:00.000Z",
+            updated_at: "2026-11-12T00:00:00.000Z",
+          },
+        ]),
+      ]);
+      const repository = new PostgresCloudMarkupRepository(database);
+      await expect(
+        repository[operation](scope, {
+          projectId,
+          expectedRecordVersion: 1,
+          idempotencyKey: "lifecycle-request-key",
+          requestSha256: digest,
+        }),
+      ).resolves.toMatchObject({
+        recordVersion: 2,
+        currentDraftVersion: 7,
+        lifecycleStatus: status,
+      });
+      expect(database.statements).toHaveLength(4);
+      expect(database.statements[2]?.text).toContain(
+        "FROM idempotency_records",
+      );
+      expect(database.statements[3]?.text).toContain("d.draft_version");
+      expect(database.statements[3]?.text).not.toContain("document_object_id");
+      expect(
+        database.statements.some(({ text }) =>
+          text.startsWith("UPDATE projects"),
+        ),
+      ).toBe(false);
+    }
+  });
+
+  it("applies revision keysets and tie breakers before a bounded SQL limit", async () => {
+    for (const direction of ["ASC", "DESC"] as const) {
+      const database = new RecordingDatabase([result()]);
+      const repository = new PostgresCloudMarkupRepository(database);
+      const after = {
+        id: "revision_previous",
+        value: "2026-11-12T00:00:00.123456Z",
+      };
+      await repository.listRevisions(scope, "project_test", 2, {
+        direction,
+        after,
+        extraRow: true,
+      });
+      const query = database.statements[0];
+      if (query === undefined) throw new Error("Expected revision query");
+      expect(query.values).toEqual([
+        scope.membershipId,
+        scope.principalId,
+        scope.organizationId,
+        "project_test",
+        3,
+        after.value,
+        after.id,
+      ]);
+      expect(query.text).toContain(
+        `ORDER BY r.created_at ${direction}, r.revision_id COLLATE "C" ${direction}`,
+      );
+      expect(query.text).toContain("AS pagination_created_at");
+      expect(query.text).toContain("o.lifecycle_state = 'published'");
+      expect(query.text).toContain(direction === "ASC" ? ") >" : ") <");
+      await expect(
+        repository.listRevisions(scope, "project_test", 101),
+      ).rejects.toMatchObject({ code: "invalid-input" });
+      await expect(
+        repository.listRevisions(scope, "project_test", 2, {
+          direction,
+          after: { ...after, value: "invalid" },
+        }),
+      ).rejects.toMatchObject({ code: "invalid-input" });
+      expect(database.statements).toHaveLength(1);
+    }
+  });
+
   it("normalizes Data API environment timestamps for the public response contract", async () => {
     const { database, commands } = createDataApiJsonDatabase([
       [

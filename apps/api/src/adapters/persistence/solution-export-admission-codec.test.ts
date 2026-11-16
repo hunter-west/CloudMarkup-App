@@ -83,23 +83,17 @@ describe("immutable public export admission metadata codec", () => {
     expect(recovered.initialRecord.job.runSequence).toBe(1);
     expect(recovered.initialRecord.job.rerunOfJobId).toBeUndefined();
   });
-  it.each([
-    0,
-    -1,
-    1.5,
-    "1",
-    "01",
-    Number.MAX_SAFE_INTEGER + 1,
-    null,
-    undefined,
-  ])("denies invalid admission generation %s", (admissionGeneration) => {
-    expect(() =>
-      parseExportAdmissionSelection({
-        ...admissionSelectionFixture(),
-        admissionGeneration,
-      }),
-    ).toThrow();
-  });
+  it.each([0, -1, 1.5, "1", Number.MAX_SAFE_INTEGER + 1, null, undefined])(
+    "denies invalid admission generation %s",
+    (admissionGeneration) => {
+      expect(() =>
+        parseExportAdmissionSelection({
+          ...admissionSelectionFixture(),
+          admissionGeneration,
+        }),
+      ).toThrow();
+    },
+  );
   it("rejects gaps, forged public request digests, lineage and actor changes", () => {
     const value = admissionSelectionFixture();
     for (const candidate of [

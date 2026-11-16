@@ -112,7 +112,7 @@ artifacts remain identifiable for audit.
 
 ## Contract artifacts
 
-`check:artifacts` rebuilds the package and verifies all 36 generated Draft
+`check:artifacts` rebuilds the package and verifies all 41 generated Draft
 2020-12 JSON Schemas plus canonical v1/v2/v3 Architecture and Intent fixture
 snapshots byte-for-byte. That set includes `model-evaluation-v1.schema.json`,
 which publishes the frozen evaluation, report, providerless live-authority,

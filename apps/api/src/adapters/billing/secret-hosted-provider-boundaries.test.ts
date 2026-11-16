@@ -147,7 +147,7 @@ describe("hosted secret boundary independent acceptance", () => {
     },
   );
 
-  it("does not retry an unknown Checkout after the deadline elapsed during secret resolution", async () => {
+  it("does not retry an unknown Checkout after the deadline elapsed during secret resolution or authorization", async () => {
     const start = Date.parse("2026-09-05T12:00:00.000Z");
     let now = start;
     vi.spyOn(Date, "now").mockImplementation(() => now);
@@ -178,6 +178,28 @@ describe("hosted secret boundary independent acceptance", () => {
     expect(authorizeBeforeRequest).not.toHaveBeenCalled();
     expect(send).not.toHaveBeenCalled();
     expect(bytes.every((byte) => byte === 0)).toBe(true);
+    now = start;
+    const lateAuthorization = vi.fn(async () => {
+      await Promise.resolve();
+      now = start + 1000;
+    });
+    const afterAuthorization = createSecretHostedBillingProvider({
+      apiKeyReference: reference,
+      secrets: {
+        resolveSecret: () =>
+          Promise.resolve(new TextEncoder().encode("sk_test_boundary_fixture")),
+      },
+      authorizeBeforeRequest: lateAuthorization,
+      fetchImplementation: send,
+    });
+    await expect(
+      afterAuthorization.createCheckoutSession({
+        ...checkoutInput,
+        retryBefore: new Date(start + 1000).toISOString(),
+      }),
+    ).rejects.toMatchObject({ code: "provider-unavailable" });
+    expect(lateAuthorization).toHaveBeenCalledOnce();
+    expect(send).not.toHaveBeenCalled();
   });
 
   it("erases malformed UTF-8 and exposes only a safe decoding error", () => {

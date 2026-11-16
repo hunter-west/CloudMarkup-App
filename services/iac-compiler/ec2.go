@@ -356,7 +356,7 @@ func (r *cloudFormationRenderer) renderEc2Resource(n NormalizedResource) {
 		properties["IamInstanceProfile"] = r.resourceAttribute(profile.ID, "name")
 	}
 	r.addResource(r.logicalIDs[n.ID], cloudFormationResource{Type: "AWS::EC2::Instance", Properties: properties, Metadata: r.resourceMetadata(n)}, SourceReference{Document: DocumentArchitecture, NodeID: n.ID})
-	helper := &terraformRenderer{model: r.model}
+	helper := &terraformRenderer{ctx: r.ctx, model: r.model, limits: r.limits}
 	helper.ec2Warnings(n)
-	r.diagnostics = append(r.diagnostics, helper.diagnostics...)
+	r.retainDiagnostics(helper.diagnostics)
 }

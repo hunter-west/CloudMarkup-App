@@ -344,6 +344,20 @@ describe.skipIf(isRepositoryCoverage)(
 
         const diagnostics = compileGeneratedTree(pattern, result);
         expect(diagnosticsText(diagnostics)).toBe("");
+        if (pattern === "sqs-consumer-dlq") {
+          const bounded = generateApplication(
+            createEventGenerationRequest({
+              pattern,
+              boundedPayloadLists: true,
+            }),
+          );
+          expect(bounded.artifact.diagnostics).toEqual([]);
+          expect(
+            diagnosticsText(
+              compileGeneratedTree(`${pattern}-bounded`, bounded),
+            ),
+          ).toBe("");
+        }
       },
       120_000,
     );

@@ -231,11 +231,6 @@ describe("solution export reads without mutation or workflow ports", () => {
       ],
     });
   });
-  it("uses a transport ceiling safe for REST-v1 base64 plus a bounded response envelope", () => {
-    const encodedBytes =
-      Math.ceil(BUFFERED_SOLUTION_EXPORT_DOWNLOAD_BYTES / 3) * 4;
-    expect(encodedBytes + 64 * 1024).toBeLessThan(6 * 1024 * 1024);
-  });
   it("serializes the actual REST-v1 binary response at the ceiling below Lambda's payload limit", async () => {
     // Transport-only synthetic bytes: this case does not claim ZIP validation.
     const bytes = new Uint8Array(BUFFERED_SOLUTION_EXPORT_DOWNLOAD_BYTES);
@@ -297,6 +292,10 @@ describe("solution export reads without mutation or workflow ports", () => {
     );
     expect(response.statusCode).toBe(200);
     expect(response.isBase64Encoded).toBe(true);
+    const encodedBytes =
+      Math.ceil(BUFFERED_SOLUTION_EXPORT_DOWNLOAD_BYTES / 3) * 4;
+    expect(encodedBytes + 64 * 1024).toBeLessThan(6 * 1024 * 1024);
+    expect(response.body.length).toBe(encodedBytes);
     expect(Buffer.from(response.body, "base64").length).toBe(bytes.length);
     expect(Buffer.byteLength(JSON.stringify(response))).toBeLessThan(
       6 * 1024 * 1024,

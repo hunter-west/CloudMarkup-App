@@ -116,7 +116,6 @@ jobs:
           scripts/memory-proof-diagnostics.test.mjs
           scripts/memory-image-layout.test.mjs
           scripts/prepare-memory-application-image.test.mjs
-          scripts/beta-application-package-verification.test.mjs
       - name: Build the actual runner and fixed generator
         run: >-
           pnpm exec turbo run build
@@ -218,6 +217,7 @@ jobs:
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
       - name: Verify acquisition and workflow boundaries
+        if: matrix.group == 'http-and-storage'
         run: node --test scripts/beta-application-package-verification.test.mjs
       - name: Enable exact local image references on this ephemeral runner
         shell: bash

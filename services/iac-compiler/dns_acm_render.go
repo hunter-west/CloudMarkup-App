@@ -81,7 +81,7 @@ func (r *cloudFormationRenderer) renderDnsResource(n NormalizedResource) {
 		props["Tags"] = r.tagList()
 	}
 	r.addResource(r.logicalIDs[n.ID], resource, SourceReference{Document: DocumentArchitecture, NodeID: n.ID})
-	helper := &terraformRenderer{model: r.model}
+	helper := &terraformRenderer{ctx: r.ctx, model: r.model, limits: r.limits}
 	helper.dnsWarnings(n)
-	r.diagnostics = append(r.diagnostics, helper.diagnostics...)
+	r.retainDiagnostics(helper.diagnostics)
 }

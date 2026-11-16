@@ -177,6 +177,54 @@ function pause(milliseconds: number, signal: AbortSignal) {
 function proposalDeadlineError(jobId: string) {
   return new BetaInfrastructureRequestError("ai.deadline", jobId);
 }
+async function readBeforeProposalDeadline<T>(
+  read: (signal: AbortSignal) => Promise<T>,
+  signal: AbortSignal,
+  deadline: number,
+  jobId: string,
+): Promise<T> {
+  signal.throwIfAborted();
+  if (Date.now() >= deadline) throw proposalDeadlineError(jobId);
+  const controller = new AbortController();
+  let cancel: () => void = () => undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const interrupted = new Promise<never>((_resolve, reject) => {
+    cancel = () => {
+      reject(new DOMException("Cancelled", "AbortError"));
+      controller.abort();
+    };
+    signal.addEventListener("abort", cancel, { once: true });
+    timer = setTimeout(() => {
+      reject(proposalDeadlineError(jobId));
+      controller.abort();
+    }, deadline - Date.now());
+  });
+  try {
+    // Race the complete read, including its body. An abort signal alone does
+    // not settle a transport/body promise that ignores cancellation.
+    const result = await Promise.race([
+      Promise.resolve().then(() => {
+        controller.signal.throwIfAborted();
+        if (Date.now() >= deadline) throw proposalDeadlineError(jobId);
+        return read(controller.signal);
+      }),
+      interrupted,
+    ]);
+    signal.throwIfAborted();
+    // Background tabs may resume after the wall-clock deadline but before
+    // their throttled timer callback runs.
+    if (Date.now() >= deadline) throw proposalDeadlineError(jobId);
+    return result;
+  } catch (error) {
+    controller.abort();
+    signal.throwIfAborted();
+    if (Date.now() >= deadline) throw proposalDeadlineError(jobId);
+    throw error;
+  } finally {
+    clearTimeout(timer);
+    signal.removeEventListener("abort", cancel);
+  }
+}
 function waitForVisibleDocument(
   signal: AbortSignal,
   deadline: number,
@@ -268,31 +316,45 @@ export async function requestBetaInfrastructureProposal(input: {
       await response.json(),
     ).data;
     jobId = job.id;
+    const deadline = Date.now() + 600_000;
     const readCredits = async () => {
       if (!input.onCredits) return;
       try {
-        const receipt = await fetch(
-          `${url}/${encodeURIComponent(job.id)}/credits`,
-          {
-            signal: input.signal,
-            cache: "no-store",
-            credentials: "same-origin",
-            headers: headers(),
+        const credits = await readBeforeProposalDeadline(
+          async (signal) => {
+            const receipt = await fetch(
+              `${url}/${encodeURIComponent(job.id)}/credits`,
+              {
+                signal,
+                cache: "no-store",
+                credentials: "same-origin",
+                headers: headers(),
+              },
+            );
+            signal.throwIfAborted();
+            if (!receipt.ok) throw new Error("Credit receipt unavailable.");
+            return betaInfrastructureJobCreditsResponseV1Schema.parse(
+              await receipt.json(),
+            ).data;
           },
+          input.signal,
+          deadline,
+          job.id,
         );
-        if (!receipt.ok) throw new Error("Credit receipt unavailable.");
-        const credits = betaInfrastructureJobCreditsResponseV1Schema.parse(
-          await receipt.json(),
-        ).data;
         if (credits.jobId !== job.id)
           throw new Error("Credit receipt identity changed.");
         input.onCredits(credits);
-      } catch {
+      } catch (error) {
         input.onCredits(null);
+        input.signal.throwIfAborted();
+        if (
+          error instanceof BetaInfrastructureRequestError &&
+          error.code === "ai.deadline"
+        )
+          throw error;
       }
     };
     await readCredits();
-    const deadline = Date.now() + 600_000;
     let completedPolls = 0;
     while (job.state === "queued" || job.state === "running") {
       input.signal.throwIfAborted();
@@ -303,26 +365,36 @@ export async function requestBetaInfrastructureProposal(input: {
           : "Designing your infrastructure… This can take a few minutes.",
       );
       // Keep the first updates quick, then reduce status traffic for long jobs.
-      await pause(completedPolls < 2 ? 2000 : 5000, input.signal);
+      await pause(
+        Math.min(completedPolls < 2 ? 2000 : 5000, deadline - Date.now()),
+        input.signal,
+      );
       // The durable worker continues while this tab is hidden. Resume status
       // reads on return, preserving cancellation and the ten-minute deadline.
       await waitForVisibleDocument(input.signal, deadline, job.id);
-      const poll = await fetch(`${url}/${encodeURIComponent(job.id)}`, {
-        signal: input.signal,
-        cache: "no-store",
-        credentials: "same-origin",
-        headers: headers(),
-      });
-      if (!poll.ok)
-        throw new BetaInfrastructureRequestError(
-          poll.status === 401
-            ? "ai.sign-in-required"
-            : "ai.proposal-unavailable",
-          jobId,
-        );
-      const next = betaInfrastructureJobResponseV1Schema.parse(
-        await poll.json(),
-      ).data;
+      const next = await readBeforeProposalDeadline(
+        async (signal) => {
+          const poll = await fetch(`${url}/${encodeURIComponent(job.id)}`, {
+            signal,
+            cache: "no-store",
+            credentials: "same-origin",
+            headers: headers(),
+          });
+          signal.throwIfAborted();
+          if (!poll.ok)
+            throw new BetaInfrastructureRequestError(
+              poll.status === 401
+                ? "ai.sign-in-required"
+                : "ai.proposal-unavailable",
+              jobId,
+            );
+          return betaInfrastructureJobResponseV1Schema.parse(await poll.json())
+            .data;
+        },
+        input.signal,
+        deadline,
+        job.id,
+      );
       if (
         next.id !== jobId ||
         next.architectureDigest !== job.architectureDigest

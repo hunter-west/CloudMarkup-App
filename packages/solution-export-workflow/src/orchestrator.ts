@@ -1622,7 +1622,11 @@ export function createSolutionExportWorkflowOrchestrator(
             }),
           );
         } catch (error) {
-          if (errorSignalsCancellation(error)) throw error;
+          if (
+            error instanceof SolutionExportWorkflowFailureError ||
+            errorSignalsCancellation(error)
+          )
+            throw error;
           fail(
             "render-diagram",
             "cloudmarkup.export.diagram-render-failed",

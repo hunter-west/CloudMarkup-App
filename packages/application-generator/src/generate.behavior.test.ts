@@ -246,6 +246,29 @@ describe("deterministic application generation behavior", () => {
     ).toEqual(["operation_create_note", "operation_read_note"]);
     expect(bindings).toContain("NOTES_TABLE_NAME");
     expect(bindings).toContain("NOTES_ARCHIVE_TABLE_NAME");
+    const request = createNotesGenerationRequest(options);
+    for (const workload of request.normalizedSolution.workloads) {
+      for (const binding of workload.environment) {
+        if (binding.resource === undefined) continue;
+        const resource = request.normalizedSolution.resources.find(
+          ({ id }) => id === binding.resource?.nodeId,
+        );
+        expect(binding.resource.targetKey).toBe(resource?.targetKey);
+        expect(bindings).toContain(JSON.stringify(binding.resource.targetKey));
+      }
+    }
+    const changed = structuredClone(request);
+    const binding = changed.normalizedSolution.workloads[0]?.environment.find(
+      ({ resource }) => resource !== undefined,
+    );
+    if (binding?.resource === undefined)
+      throw new Error("Missing resource fixture.");
+    binding.resource.targetKey = "unrelated_but_valid_target";
+    const refused = generateApplication(changed);
+    expect(diagnosticCodes(refused)).toContain(
+      "APPLICATION_ENVIRONMENT_BINDING_MISMATCH",
+    );
+    expect(refused.artifact.buildContracts).toEqual([]);
   });
 
   it("fails closed for incompatible multiple-trigger input identities", () => {

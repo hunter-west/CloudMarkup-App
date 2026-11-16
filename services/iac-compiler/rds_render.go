@@ -109,7 +109,7 @@ func (r *cloudFormationRenderer) renderRdsResource(n NormalizedResource) {
 		res.UpdateReplacePolicy = "Retain"
 	}
 	r.addResource(r.logicalIDs[n.ID], res, SourceReference{Document: DocumentArchitecture, NodeID: n.ID})
-	helper := &terraformRenderer{model: r.model}
+	helper := &terraformRenderer{ctx: r.ctx, model: r.model, limits: r.limits}
 	helper.rdsWarnings(n)
-	r.diagnostics = append(r.diagnostics, helper.diagnostics...)
+	r.retainDiagnostics(helper.diagnostics)
 }

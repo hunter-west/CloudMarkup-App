@@ -107,6 +107,19 @@ func TestEc2BothTargetsExactLaunchAndGolden(t *testing.T) {
 			if a == nil {
 				t.Fatal("missing export")
 			}
+			for _, code := range []string{"EC2_IMAGE_READINESS_EXTERNAL", "EC2_LAUNCH_READINESS_EXTERNAL"} {
+				if diagnosticByCode(t, d, code).Severity != SeverityWarning {
+					t.Fatalf("%s readiness warning missing", target)
+				}
+			}
+			if target == "cloudformation" {
+				limits := DefaultLimits()
+				limits.MaxDiagnostics = 1
+				bounded, diagnostics := renderCloudFormationArtifact(context.Background(), m, nil, limits)
+				if bounded == nil || len(diagnostics) != 1 || diagnostics[0].Severity != SeverityWarning {
+					t.Fatalf("warning budget changed valid EC2 output: %#v", diagnostics)
+				}
+			}
 			if !reflect.DeepEqual(m, before) {
 				t.Fatal("source mutated")
 			}

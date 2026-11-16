@@ -421,6 +421,76 @@ describe("GitHub repository import and synchronization", () => {
     ).toHaveLength(3);
   }, 30_000);
 
+  it("reclaims the same import after initial progress failure and fences the old attempt", async () => {
+    const harness = await system({});
+    const reserve = vi.spyOn(harness.store, "reserveImport");
+    vi.spyOn(harness.progress, "record").mockRejectedValueOnce(
+      new Error("Synthetic initial progress failure"),
+    );
+    const input = request(harness.branch.sha, "progress-retry");
+    await expect(harness.service.importRepository(input)).rejects.toMatchObject(
+      {
+        code: "service-unavailable",
+        transient: true,
+      },
+    );
+    const firstClaim = reserve.mock.calls[0]?.[0];
+    if (firstClaim === undefined) throw new Error("Missing initial claim.");
+    expect(
+      await harness.store.getImport({
+        importId: firstClaim.record.importId,
+        organizationId: ORGANIZATION_ID,
+        projectId: PROJECT_ID,
+      }),
+    ).toMatchObject({ state: "failed-transient", recordVersion: 2 });
+    expect(harness.github.requestedSessions).toHaveLength(0);
+    const completed = await harness.service.importRepository(input);
+    expect(completed).toMatchObject({
+      importId: firstClaim.record.importId,
+      snapshotId: firstClaim.record.snapshotId,
+      idempotencyDigest: firstClaim.record.idempotencyDigest,
+      state: "succeeded",
+      recordVersion: 4,
+    });
+    expect(
+      await harness.store.saveImport({
+        attemptId: firstClaim.attemptId,
+        record: {
+          ...firstClaim.record,
+          state: "failed-transient",
+          recordVersion: 2,
+        },
+      }),
+    ).toBe("stale");
+    await expect(harness.service.importRepository(input)).resolves.toEqual(
+      completed,
+    );
+    expect(harness.github.requestedSessions).toHaveLength(1);
+    expect(harness.audit.events.map(({ outcome }) => outcome)).toEqual([
+      "failed",
+      "succeeded",
+    ]);
+    // A notification failure after the terminal commit must not rewrite that
+    // commit or append a false failed-operation event.
+    vi.spyOn(harness.progress, "record").mockImplementation((event) =>
+      event.stage === "persistence" && event.state === "succeeded"
+        ? Promise.reject(new Error("Synthetic terminal progress failure"))
+        : Promise.resolve(),
+    );
+    const terminalInput = request(harness.branch.sha, "terminal-progress");
+    await expect(
+      harness.service.importRepository(terminalInput),
+    ).rejects.toMatchObject({ code: "service-unavailable" });
+    await expect(
+      harness.service.importRepository(terminalInput),
+    ).resolves.toMatchObject({ state: "succeeded" });
+    expect(harness.github.requestedSessions).toHaveLength(2);
+    expect(harness.audit.events.map(({ outcome }) => outcome)).toEqual([
+      "failed",
+      "succeeded",
+    ]);
+  }, 30_000);
+
   it("routes only unresolved application evidence to grounded interpretation and rejects invented references", async () => {
     let latestRequest:
       | Parameters<GitHubRepositoryImportRunner["importPinnedSnapshot"]>[0]
@@ -453,7 +523,28 @@ describe("GitHub repository import and synchronization", () => {
         } as RepositoryImportResultV1;
       },
     };
-    const harness = await system({ runner });
+    const syntheticSecrets = [
+      "synthetic-double",
+      "synthetic-single",
+      "synthetic-bare",
+      "synthetic-escaped",
+      "synthetic-truncated-double",
+      "synthetic-truncated-single",
+    ];
+    const harness = await system({
+      runner,
+      files: {
+        "application/index.ts": [
+          'const settings = {"token":"synthetic-double", label:"public-context"};',
+          "const other = {'token':'synthetic-single'};",
+          "const token = 'synthetic-bare';",
+          'const escaped = {"token":"before\\"synthetic-escaped"};',
+          'const partial = {"token":"synthetic-truncated-double',
+          "const otherPartial = {'token':'synthetic-truncated-single",
+          "export const handler = () => settings;",
+        ].join("\n"),
+      },
+    });
     const interpreterCalls: Parameters<
       GitHubRepositoryInterpretationPort["interpret"]
     >[0][] = [];
@@ -482,6 +573,12 @@ describe("GitHub repository import and synchronization", () => {
     expect(interpreterCalls).toHaveLength(1);
     expect(interpreterCalls[0]?.privateRepository).toBe(true);
     expect(interpreterCalls[0]?.evidence[0]?.content).toContain("[REDACTED]");
+    expect(interpreterCalls[0]?.evidence[0]?.redacted).toBe(true);
+    expect(interpreterCalls[0]?.evidence[0]?.content).toContain(
+      'label:"public-context"',
+    );
+    for (const secret of syntheticSecrets)
+      expect(interpreterCalls[0]?.evidence[0]?.content).not.toContain(secret);
     expect(imported.result?.inferenceClaims[0]).toMatchObject({
       category: "connection",
       confidenceBasisPoints: 7_500,

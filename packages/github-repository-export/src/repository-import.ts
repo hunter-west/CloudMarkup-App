@@ -61,6 +61,27 @@ export interface GitHubRepositoryImportInput {
   readonly trigger: GitHubRepositoryImportTrigger;
 }
 
+/** The existing durable import key, shared with webhook recovery. */
+export function repositoryImportIdempotencyDigest(
+  raw: GitHubRepositoryImportInput,
+): Sha256Digest {
+  return canonicalDigest({
+    branch: raw.branch,
+    commitSha: repositoryCommitShaSchema.parse(raw.commitSha),
+    idempotencyKey: raw.idempotencyKey,
+    ignoredPaths: [...raw.ignoredPaths].sort(),
+    integrationId: raw.integrationId,
+    operation: GITHUB_REPOSITORY_IMPORT_OPERATION,
+    organizationId: raw.organizationId,
+    previousImportId: raw.previousImportId ?? null,
+    projectId: raw.projectId,
+    repositoryId: raw.repositoryId,
+    selectedPaths: [...raw.selectedPaths].sort(),
+    trigger: raw.trigger,
+    version: GITHUB_REPOSITORY_IMPORT_VERSION,
+  });
+}
+
 export interface GitHubRepositoryImportFile {
   readonly digest: Sha256Digest;
   readonly path: string;
@@ -639,21 +660,7 @@ export function createGitHubRepositoryImportService(options: {
       const now = clock().toISOString();
       let importId = `githubimport_${id()}`;
       let snapshotId = `repository-snapshot.${id()}`;
-      const idempotencyDigest = canonicalDigest({
-        branch: raw.branch,
-        commitSha,
-        idempotencyKey: raw.idempotencyKey,
-        ignoredPaths: [...raw.ignoredPaths].sort(),
-        integrationId: raw.integrationId,
-        operation: GITHUB_REPOSITORY_IMPORT_OPERATION,
-        organizationId: raw.organizationId,
-        previousImportId: raw.previousImportId ?? null,
-        projectId: raw.projectId,
-        repositoryId: raw.repositoryId,
-        selectedPaths: [...raw.selectedPaths].sort(),
-        trigger: raw.trigger,
-        version: GITHUB_REPOSITORY_IMPORT_VERSION,
-      });
+      const idempotencyDigest = repositoryImportIdempotencyDigest(raw);
       const existingPrevious =
         raw.previousImportId === undefined
           ? null
@@ -729,8 +736,8 @@ export function createGitHubRepositoryImportService(options: {
 
       importId = claim.record.importId;
       snapshotId = claim.record.snapshotId;
-      await progress(raw, importId, "authorization", "succeeded");
       try {
+        await progress(raw, importId, "authorization", "succeeded");
         const context = await options.context.load({
           organizationId: raw.organizationId,
           projectId: raw.projectId,
@@ -870,7 +877,7 @@ export function createGitHubRepositoryImportService(options: {
       } catch (error) {
         const safe = safeGitHubExportError(error);
         const failedAt = clock().toISOString();
-        await options.store.saveImport({
+        const failureSaved = await options.store.saveImport({
           attemptId,
           record: {
             ...claim.record,
@@ -880,18 +887,22 @@ export function createGitHubRepositoryImportService(options: {
             updatedAt: failedAt,
           },
         });
-        await options.audit.record({
-          action: "github.repository-import.failed",
-          correlationId: raw.correlationId,
-          occurredAt: failedAt,
-          organizationId: raw.organizationId,
-          outcome: "failed",
-          principalId: raw.principalId,
-          summary: "GitHub repository import failed safely.",
-          targetId: importId,
-          targetKind: "repository",
-        });
-        await progress(raw, importId, "complete", "failed");
+        // Only the attempt that actually records a failed transition may emit
+        // that outcome. A completed import or replacement attempt is immutable.
+        if (failureSaved === "saved") {
+          await options.audit.record({
+            action: "github.repository-import.failed",
+            correlationId: raw.correlationId,
+            occurredAt: failedAt,
+            organizationId: raw.organizationId,
+            outcome: "failed",
+            principalId: raw.principalId,
+            summary: "GitHub repository import failed safely.",
+            targetId: importId,
+            targetKind: "repository",
+          });
+          await progress(raw, importId, "complete", "failed");
+        }
         throw safe;
       }
     },

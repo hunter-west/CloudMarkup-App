@@ -23,7 +23,31 @@ describe("exact unified patch materialization", () => {
       ].join("\n"),
     };
     expect(applyExactUnifiedPatch(input)).toBe("export const answer = 42;\n");
-    expect(applyExactUnifiedPatch(input)).toBe(applyExactUnifiedPatch(input));
+    for (const [baseContent, hunks, expected] of [
+      ["a\nb\n", "@@ -0,0 +1,1 @@\n+x\n", "x\na\nb\n"],
+      ["a\nb\n", "@@ -1,0 +2,1 @@\n+x\n", "a\nx\nb\n"],
+      ["a\nb\n", "@@ -2,0 +3,1 @@\n+x\n", "a\nb\nx\n"],
+      ["a\nb\n", "@@ -1,0 +2,1 @@\n+x\n@@ -2,0 +4,1 @@\n+y\n", "a\nx\nb\ny\n"],
+      ["a\nb", "@@ -1,0 +2,1 @@\n+x\n", "a\nx\nb"],
+      ["", "@@ -0,0 +1,1 @@\n+x\n", "x"],
+    ] as const) {
+      expect(
+        applyExactUnifiedPatch({
+          ...input,
+          baseContent,
+          unifiedDiff: `--- a/${input.path}\n+++ b/${input.path}\n${hunks}`,
+        }),
+      ).toBe(expected);
+    }
+    for (const header of ["@@ -1,0 +1,1 @@", "@@ -0,1 +1,1 @@"]) {
+      expect(() =>
+        applyExactUnifiedPatch({
+          ...input,
+          baseContent: "a\nb\n",
+          unifiedDiff: `--- a/${input.path}\n+++ b/${input.path}\n${header}\n+x\n`,
+        }),
+      ).toThrow(/out of range|overlap/u);
+    }
   });
 
   it.each([

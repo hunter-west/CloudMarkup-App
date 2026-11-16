@@ -34,6 +34,16 @@ The typed client is transport-injected. A browser transport may add its
 authorization token without adding authoritative actor or tenant IDs to request
 bodies.
 
+Draft semantic changes use `drafts.apply-command` with the actual versioned
+command or atomic batch, original ETag, current editing lease and stable retry
+identity. `drafts.save` accepts only existing node labels/positions while all
+other canonical document fields, including provenance, remain unchanged.
+Semantic snapshot writes return `unsupported_version` with field issue
+`draft.command-history-required` before staging content. Clients must retain
+unsaved work for command recovery, download or a project copy; they must not
+retry a rejected snapshot with a new ETag. Deploy this restriction together with
+the supported command-aware editor. No old-client grace period is established.
+
 Presentation preferences include only Guided/Professional mode and contextual
 learning. They remain outside the Architecture Document and deliberately omit
 panels, tabs, hover, selection, viewport, and other transient editor state.

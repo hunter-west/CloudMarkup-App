@@ -8,6 +8,7 @@ import {
   getArchitectureDocumentHashes,
   parseArchitectureDocument,
 } from "@cloudmarkup/domain";
+import { parseGraphCommandV1 } from "@cloudmarkup/schemas";
 import { QueryClient } from "@tanstack/react-query";
 import {
   act,
@@ -28,9 +29,13 @@ import { RouterProvider } from "../../routing/index.js";
 import { EditorRoute } from "./EditorRoute.js";
 import { loadFoundationArchitectureDocument } from "./model/index.js";
 import {
+  createEditorRecoveryBindingV1,
   createEditorRecoveryEnvelopeV1,
+  inspectEditorRecoveryEnvelopeV1,
   prepareEditorRecoverySnapshotV1,
 } from "./persistence/editor-recovery-envelope.js";
+import { DraftCommandCheckpoint } from "./persistence/draft-command-checkpoint.js";
+import { DraftCommandDrain } from "./persistence/draft-command-drain.js";
 import type { IndexedDbEditorRecoveryStoreV1 } from "./persistence/indexeddb-editor-recovery-store.js";
 import type {
   EditorRecoveryCheckpointRequest,
@@ -140,6 +145,7 @@ async function settle() {
 function setup(
   store?: IndexedDbEditorRecoveryStoreV1,
   lifecycleStatus: ProjectV1["lifecycleStatus"] = "active",
+  leaseHeld = false,
 ) {
   storeSeam.create.mockReturnValue(store);
   vi.stubGlobal("indexedDB", {});
@@ -155,6 +161,15 @@ function setup(
         });
       if (!operation.startsWith("project-editing-leases."))
         return Promise.reject(new Error("Unexpected request"));
+      if (leaseHeld)
+        return Promise.resolve({
+          data: {
+            contractVersion: 1,
+            projectId,
+            state: "held",
+            expiresAt: new Date(Date.now() + 60_000).toISOString(),
+          },
+        });
       if (operation === "project-editing-leases.acquire") leaseEpoch += 1;
       return Promise.resolve({
         data: {
@@ -169,10 +184,10 @@ function setup(
       });
     });
   const saves = vi
-    .fn<(operation: string) => Promise<unknown>>()
+    .fn<(operation: string, input: unknown) => Promise<unknown>>()
     .mockRejectedValue(new TypeError("Synthetic offline save"));
   let readFailure = false;
-  const requestWithMetadata = vi.fn((operation: string) =>
+  const requestWithMetadata = vi.fn((operation: string, input: unknown) =>
     operation === "drafts.get" || operation === "projects.get"
       ? readFailure
         ? Promise.reject(new TypeError("Synthetic background read failure"))
@@ -188,7 +203,7 @@ function setup(
                   : '"project:recovery:' + String(serverProject.version) + '"',
             },
           })
-      : saves(operation),
+      : saves(operation, input),
   );
   const client = {
     request,
@@ -237,6 +252,9 @@ function setup(
     requestWithMetadata,
     saves,
     queryClient,
+    expireLease: () => {
+      leaseHeld = false;
+    },
     closeProject: (status: "deletion-pending" | "deleted") => {
       serverProject = {
         ...serverProject,
@@ -310,6 +328,244 @@ afterEach(() => {
 });
 
 describe("real editor recovery survives editing lease loss", () => {
+  it.each([
+    "matching",
+    "older",
+    "unaccounted",
+    "invalid",
+    "empty",
+    "unavailable",
+  ] as const)(
+    "reconciles verified commands after lease reacquisition with a %s snapshot without implicit writes",
+    async (snapshotKind) => {
+      const original = { draft, etag: '"draft:recovery:1"' };
+      const drain = new DraftCommandDrain(original);
+      const command = parseGraphCommandV1({
+        schemaVersion: 1,
+        commandId: "command_retained_move",
+        inverseCommandId: "command_retained_move_inverse",
+        origin: "user",
+        target: {
+          documentId: document.documentId,
+          architectureId: document.architectureId,
+          revisionId: document.revision.revisionId,
+        },
+        kind: "move-node",
+        nodeId: "node_application",
+        expectedPosition: document.nodes.find(
+          (node) => node.id === "node_application",
+        )?.presentation.position,
+        position: { x: 184, y: 192 },
+      });
+      const recoveredDocument = drain.enqueue(
+        command,
+        "draft-command:retained-move",
+      );
+      const failedSend = vi
+        .fn()
+        .mockRejectedValue(new TypeError("Synthetic offline save"));
+      await expect(
+        drain.flush({
+          send: failedSend,
+          editingLease: () => ({
+            leaseId: "projectlease_00000000-0000-4000-8000-000000000000",
+            token: "a".repeat(43),
+          }),
+          isCurrent: () => true,
+        }),
+      ).rejects.toThrow("Synthetic offline save");
+      const retained = drain.recovery();
+      expect(retained.attempt).not.toBeNull();
+      vi.spyOn(DraftCommandCheckpoint.prototype, "load").mockResolvedValue(
+        retained,
+      );
+      const checkpoint = vi
+        .spyOn(DraftCommandCheckpoint.prototype, "save")
+        .mockResolvedValue();
+      const binding = createEditorRecoveryBindingV1({
+        scopeKey: [
+          "server-draft",
+          principal.id,
+          organizationId,
+          projectId,
+          draft.id,
+          "1",
+        ].join(":"),
+        seedDocument: document,
+      });
+      const prepared = prepareEditorRecoverySnapshotV1(
+        binding,
+        snapshotKind === "older"
+          ? document
+          : snapshotKind === "unaccounted"
+            ? parseArchitectureDocument({
+                ...recoveredDocument,
+                nodes: recoveredDocument.nodes.map((node) =>
+                  node.id === "node_application"
+                    ? {
+                        ...node,
+                        presentation: {
+                          ...node.presentation,
+                          label: "Uncaptured local edit",
+                        },
+                      }
+                    : node,
+                ),
+              })
+            : recoveredDocument,
+      );
+      if (!prepared.ok) throw new Error("Expected valid snapshot prerequisite");
+      const envelope = createEditorRecoveryEnvelopeV1(prepared.snapshot, {
+        generation: 1,
+        savedAt: draft.updatedAt,
+        writerId: "writer_before_reload",
+      });
+      const storedEnvelope =
+        snapshotKind === "invalid"
+          ? {
+              ...envelope,
+              binding: {
+                ...binding,
+                scopeFingerprint: "sha256:" + "f".repeat(64),
+              },
+            }
+          : envelope;
+      const load = vi.fn((requested: typeof binding) =>
+        Promise.resolve(
+          snapshotKind === "unavailable"
+            ? {
+                status: "unavailable" as const,
+                code: "database-error" as const,
+                message: "Synthetic unavailable snapshot store",
+              }
+            : snapshotKind === "empty"
+              ? { status: "empty" as const }
+              : requested.scopeFingerprint === binding.scopeFingerprint
+                ? inspectEditorRecoveryEnvelopeV1(storedEnvelope, requested)
+                : { status: "empty" as const },
+        ),
+      );
+      const store = {
+        contractVersion: 1,
+        close: vi.fn(),
+        load,
+        checkpoint: vi.fn().mockResolvedValue({
+          status: "unchanged",
+          head: {
+            generation: 1,
+            snapshotDigest: envelope.checkpoint.snapshotDigest,
+          },
+        }),
+        discard: vi.fn().mockResolvedValue({ status: "empty" }),
+        remediateRejected: vi.fn().mockResolvedValue({ status: "discarded" }),
+        subscribe: () => () => undefined,
+      } satisfies IndexedDbEditorRecoveryStoreV1;
+      const f = setup(store, "active", true);
+      await settle();
+      expect(screen.getByRole("button", { name: "Try editing" })).toBeEnabled();
+      expect(load).not.toHaveBeenCalled();
+      f.expireLease();
+      fireEvent.click(screen.getByRole("button", { name: "Try editing" }));
+      await settle();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1);
+      });
+      expect(load).toHaveBeenCalledOnce();
+      if (snapshotKind === "unaccounted") {
+        expect(await load.mock.results[0]?.value).toMatchObject({
+          status: "ready",
+        });
+        expect(screen.getByRole("status")).toHaveTextContent(
+          "outside the recovered command history",
+        );
+        expect(
+          screen.queryByLabelText("Application position"),
+        ).not.toBeInTheDocument();
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(1000);
+        });
+        expect(f.saves).not.toHaveBeenCalled();
+        expect(checkpoint).not.toHaveBeenCalled();
+        expect(store.checkpoint).not.toHaveBeenCalled();
+        expect(store.discard).not.toHaveBeenCalled();
+        expect(store.remediateRejected).not.toHaveBeenCalled();
+        return;
+      }
+      if (snapshotKind === "invalid") {
+        expect(await load.mock.results[0]?.value).toMatchObject({
+          status: "rejected",
+          classification: "binding-mismatch",
+        });
+        expect(screen.getByText("Recovery required")).toBeInTheDocument();
+        expect(
+          screen.queryByLabelText("Application position"),
+        ).not.toBeInTheDocument();
+        expect(f.saves).not.toHaveBeenCalled();
+        expect(checkpoint).not.toHaveBeenCalled();
+        expect(store.checkpoint).not.toHaveBeenCalled();
+        expect(store.remediateRejected).not.toHaveBeenCalled();
+        return;
+      }
+      expect(load).toHaveBeenCalledWith(binding);
+      expect(screen.getByLabelText("Application position")).toHaveTextContent(
+        "184",
+      );
+      expect(screen.queryByText("Recovery required")).not.toBeInTheDocument();
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1000);
+      });
+      expect(f.saves).not.toHaveBeenCalled();
+      expect(checkpoint).not.toHaveBeenCalled();
+      expect(store.discard).not.toHaveBeenCalled();
+      expect(store.remediateRejected).not.toHaveBeenCalled();
+      const acceptedDraft = {
+        ...draft,
+        architectureDocument: recoveredDocument,
+        version: 2,
+        contentDigest:
+          getArchitectureDocumentHashes(recoveredDocument).contentHash,
+      };
+      f.saves.mockResolvedValue({
+        data: {
+          apiVersion: "v1",
+          data: {
+            contractVersion: 1,
+            appliedCommandId: command.commandId,
+            draft: acceptedDraft,
+          },
+        },
+        metadata: { etag: '"draft:recovery:2"' },
+      });
+      fireEvent.click(
+        screen.getByRole("button", { name: "Open save and recovery status" }),
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Save now" }));
+      await settle();
+      expect(f.saves).toHaveBeenCalledOnce();
+      expect(f.saves).toHaveBeenCalledWith("drafts.apply-command", {
+        path: { projectId },
+        headers: {
+          "if-match": original.etag,
+          "idempotency-key": retained.pending[0]?.idempotencyKey,
+        },
+        body: {
+          ...retained.pending[0]?.body,
+          editingLease: {
+            leaseId: "projectlease_00000000-0000-4000-8000-000000000001",
+            token: expect.any(String) as unknown,
+          },
+        },
+      });
+      expect(
+        screen.getByText(/Saved.*server draft version 2/u, { selector: "dd" }),
+      ).toBeInTheDocument();
+      expect(checkpoint.mock.lastCall?.[0]).toMatchObject({
+        pending: [],
+        attempt: null,
+        baseline: { draft: acceptedDraft },
+      });
+    },
+  );
   it.each(["deletion-pending", "deleted"] as const)(
     "keeps unsaved RAM-only work downloadable when an active project becomes %s",
     async (status) => {

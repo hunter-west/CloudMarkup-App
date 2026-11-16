@@ -203,7 +203,43 @@ describe("controlled-beta billing reconciliation", () => {
       ]),
     );
     expect(first).toEqual(second);
+    for (const adjustmentCreditUnits of [-10, 0, 10]) {
+      expect(
+        reconcileBillingUsageV1(
+          snapshot({
+            balances: {
+              grantedCreditUnits: 200,
+              adjustmentCreditUnits,
+              availableCreditUnits: 200 + adjustmentCreditUnits,
+              reservedCreditUnits: 0,
+              settledCreditUnits: 0,
+            },
+          }),
+        ).findings.some(
+          (finding) => finding.code === "negative-or-impossible-balance",
+        ),
+      ).toBe(false);
+    }
     for (const balances of [
+      {
+        availableCreditUnits: 0,
+        reservedCreditUnits: 0,
+        settledCreditUnits: 0,
+        grantedCreditUnits: 100,
+        adjustmentCreditUnits: -101,
+      },
+      ...[
+        "grantedCreditUnits",
+        "reservedCreditUnits",
+        "settledCreditUnits",
+      ].map((field) => ({
+        availableCreditUnits: 0,
+        reservedCreditUnits: 0,
+        settledCreditUnits: 0,
+        grantedCreditUnits: 100,
+        adjustmentCreditUnits: 0,
+        [field]: -1,
+      })),
       {
         availableCreditUnits: -1,
         reservedCreditUnits: 0,

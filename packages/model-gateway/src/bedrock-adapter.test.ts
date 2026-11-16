@@ -637,24 +637,35 @@ describe("Amazon Bedrock Runtime ModelProvider adapter", () => {
   });
 
   it("rejects Region and structured-output configuration contradictions", () => {
-    expect(
-      () =>
-        new BedrockModelProviderAdapter({
-          client: { send: vi.fn() },
-          profile: profile({ native: false }),
-          routes: [
-            {
-              enabled: true,
-              invocationTarget: profileId,
-              modelConfigurationReference: configurationReference,
-              nativeStructuredOutputSupported: true,
-              region: "eu-west-1",
-              supportedRegions: ["us-east-1"],
-              transport: "converse",
-            },
-          ],
-        }),
-    ).toThrow(BedrockModelProviderConfigurationError);
+    const configured = (region = "us-east-1", native = false) =>
+      new BedrockModelProviderAdapter({
+        client: { send: vi.fn() },
+        profile: profile({ native: false }),
+        routes: [
+          {
+            enabled: true,
+            invocationTarget: profileId,
+            modelConfigurationReference: configurationReference,
+            nativeStructuredOutputSupported: native,
+            region,
+            supportedRegions: ["us-east-1"],
+            transport: "converse",
+          },
+        ],
+      });
+    expect(() => configured()).not.toThrow();
+    expect(() => configured("eu-west-1")).toThrow(
+      expect.objectContaining({
+        name: BedrockModelProviderConfigurationError.name,
+        code: "model-provider.configuration-invalid",
+      }),
+    );
+    expect(() => configured("us-east-1", true)).toThrow(
+      expect.objectContaining({
+        name: BedrockModelProviderConfigurationError.name,
+        code: "model-provider.configuration-contradiction",
+      }),
+    );
     expect(
       toBedrockStructuredOutputSchemaV1({
         additionalProperties: false,

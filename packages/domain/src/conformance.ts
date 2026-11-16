@@ -374,12 +374,24 @@ function compareLayerFacts(
           `${permission.effect}:${permission.actionDigest}:${permission.resourceDigest}`,
       ),
     );
+    const permissionsComparable =
+      before !== undefined && semanticFactsAreComparable(before, currentFact);
     const permissionExpanded =
-      before !== undefined &&
-      [...currentPermissionKeys].some((key) => !beforePermissionKeys.has(key));
+      permissionsComparable &&
+      ([...currentPermissionKeys].some(
+        (key) => key.startsWith("allow:") && !beforePermissionKeys.has(key),
+      ) ||
+        [...beforePermissionKeys].some(
+          (key) => key.startsWith("deny:") && !currentPermissionKeys.has(key),
+        ));
     const permissionReduced =
-      before !== undefined &&
-      [...beforePermissionKeys].some((key) => !currentPermissionKeys.has(key));
+      permissionsComparable &&
+      ([...beforePermissionKeys].some(
+        (key) => key.startsWith("allow:") && !currentPermissionKeys.has(key),
+      ) ||
+        [...currentPermissionKeys].some(
+          (key) => key.startsWith("deny:") && !beforePermissionKeys.has(key),
+        ));
     if (permissionExpanded || currentFact.iamAccess === "expanded") {
       output.push(
         factDifference(request, layer, {

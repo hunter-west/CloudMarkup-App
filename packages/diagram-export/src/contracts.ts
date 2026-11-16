@@ -13,6 +13,7 @@ export const DIAGRAM_EXPORT_CONTRACT_VERSION = 1 as const;
 export const DIAGRAM_RENDERER_ID = "cloudmarkup.diagram-renderer" as const;
 export const DIAGRAM_RENDERER_VERSION = "1.0.0" as const;
 export const DIAGRAM_RENDERER_SFNT_VERSION = "1.1.0" as const;
+export const DIAGRAM_RENDERER_BOUNDED_DETAIL_VERSION = "1.2.0" as const;
 export const DIAGRAM_LAYOUT_ID = "cloudmarkup.diagram-layout" as const;
 export const DIAGRAM_LAYOUT_VERSION = "1.0.0" as const;
 
@@ -62,7 +63,11 @@ export const diagramRendererPinV1Schema = z
   .object({
     digest: sha256DigestSchema,
     id: z.literal(DIAGRAM_RENDERER_ID),
-    version: z.enum([DIAGRAM_RENDERER_VERSION, DIAGRAM_RENDERER_SFNT_VERSION]),
+    version: z.enum([
+      DIAGRAM_RENDERER_VERSION,
+      DIAGRAM_RENDERER_SFNT_VERSION,
+      DIAGRAM_RENDERER_BOUNDED_DETAIL_VERSION,
+    ]),
   })
   .strict();
 

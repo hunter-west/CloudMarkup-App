@@ -34,9 +34,16 @@ describe("operator account security configuration", () => {
   ])(
     "rejects malformed and unsafe operator input without echoing it",
     (value) => {
-      expect(() =>
-        readProductionAccountSecurity({ CLOUDMARKUP_ACCOUNT_SECURITY: value }),
-      ).toThrow("CLOUDMARKUP_ACCOUNT_SECURITY is invalid.");
+      expect.assertions(2);
+      try {
+        readProductionAccountSecurity({ CLOUDMARKUP_ACCOUNT_SECURITY: value });
+      } catch (error) {
+        expect(error).toBeInstanceOf(TypeError);
+        expect(error).toHaveProperty(
+          "message",
+          "CLOUDMARKUP_ACCOUNT_SECURITY is invalid.",
+        );
+      }
     },
   );
 });

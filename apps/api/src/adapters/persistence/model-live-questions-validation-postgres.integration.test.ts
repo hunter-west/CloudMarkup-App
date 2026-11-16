@@ -1,8 +1,7 @@
 import { createHash } from "node:crypto";
-import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { modelBlockingQuestionsResponseV1Schema } from "@cloudmarkup/schemas";
-import { loadMigrations } from "./migrations.js";
+import { loadRegisteredEvaluationSuccessor } from "./model-live-registered-successor-test-helpers.js";
 import { sql } from "./sql.js";
 import { PostgresModelLiveCommercialAccounting } from "./model-live-commercial-accounting.js";
 import { readProductionModelLiveObservationV2 } from "../../production-model-live-observation.js";
@@ -214,11 +213,7 @@ integration("durable actual clarification case assessment", () => {
     }
   }, 120000);
   it("preserves all 48 historical migrations byte-for-byte", async () => {
-    const migrations = await loadMigrations(
-      fileURLToPath(new URL("../../../migrations", import.meta.url)),
-    );
-    expect(migrations).toHaveLength(121);
-    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(1374);
+    const migrations = await loadRegisteredEvaluationSuccessor("0142");
     const prior = {
       storageContractVersion: 1,
       migrations: migrations

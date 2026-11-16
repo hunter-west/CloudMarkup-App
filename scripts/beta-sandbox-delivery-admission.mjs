@@ -223,7 +223,7 @@ function preparedProjectCleanup(resources, stacks) {
   const migrations = resources.filter(
     ({ resource }) =>
       resource.Type === "AWS::CloudFormation::CustomResource" &&
-      resource.Properties?.ExpectedSchemaVersion === "0139",
+      resource.Properties?.ExpectedSchemaVersion === "0142",
   );
   const schedules = resources.filter(
     ({ resource }) =>
@@ -236,7 +236,7 @@ function preparedProjectCleanup(resources, stacks) {
     CLOUDMARKUP_DATABASE_ARN: apiEnv.CLOUDMARKUP_DATABASE_ARN,
     CLOUDMARKUP_DATABASE_SECRET_ARN: apiEnv.CLOUDMARKUP_DATABASE_SECRET_ARN,
     CLOUDMARKUP_DATABASE_NAME: "cloudmarkup",
-    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
+    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0142",
     CLOUDMARKUP_CONTENT_BUCKET:
       "cloudmarkup-beta-000000000000-us-east-1-content",
     CLOUDMARKUP_CLEANUP_SCHEDULE_ARN: cleanupScheduleArn,

@@ -882,33 +882,44 @@ describe("ModelCommercialLifecycleCoordinator", () => {
   });
 
   it("reconciles an attempt that exceeds its accepted estimate", async () => {
-    const test = harness();
-    const response = await test.coordinator.execute(request(), async () =>
-      invocation({
-        attempts: [
-          attempt({
-            attemptKind: "repair",
-            usage: usage(450, 100),
-          }),
-        ],
-      }),
-    );
-    expect(response).toMatchObject({
-      completedCreditUnits: null,
-      compensationStatus: "pending",
-      reconciliationState: "pending-missing-usage",
-      state: "reconciliation-required",
-    });
-    expect(test.accounting.events[1]).toMatchObject({
-      attempts: [],
-      chargedCreditUnits: 0,
-      failureCategory: "unsafe-provider-receipt",
-      status: "reconciliation-required",
-    });
-    expect(test.accounting.getAvailableCreditUnits("org_one")).toBe(98);
+    const operation = request();
+    const planned = primaryPlannedCall(operation);
+    const atLimit = harness();
+    await expect(
+      atLimit.coordinator.execute(operation, async () =>
+        invocation({ attempts: [attempt({ usage: planned.maximumUsage })] }),
+      ),
+    ).resolves.toMatchObject({ state: "completed" });
     expect(
-      test.accounting.getReservationStatus(request(), "reservation_one"),
-    ).toBe("active");
+      atLimit.accounting.getReservationStatus(operation, "reservation_one"),
+    ).toBe("settled");
+    for (const overLimit of [usage(151, 20), usage(100, 36)]) {
+      expect(overLimit.totalUnits).toBeLessThanOrEqual(
+        planned.maximumUsage.totalUnits,
+      );
+      const receipt = attempt({ usage: overLimit });
+      expect(receipt.attemptKind).toBe(planned.kind);
+      const test = harness();
+      const response = await test.coordinator.execute(operation, async () =>
+        invocation({ attempts: [receipt] }),
+      );
+      expect(response).toMatchObject({
+        completedCreditUnits: null,
+        compensationStatus: "pending",
+        reconciliationState: "pending-missing-usage",
+        state: "reconciliation-required",
+      });
+      expect(test.accounting.events[1]).toMatchObject({
+        attempts: [],
+        chargedCreditUnits: 0,
+        failureCategory: "unsafe-provider-receipt",
+        status: "reconciliation-required",
+      });
+      expect(test.accounting.getAvailableCreditUnits("org_one")).toBe(98);
+      expect(
+        test.accounting.getReservationStatus(operation, "reservation_one"),
+      ).toBe("active");
+    }
   });
 
   it("accepts a confirmed user-selected Deep Design route with its own estimate", async () => {

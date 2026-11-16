@@ -2116,11 +2116,20 @@ export function validateCreditAccountStateV1(
     ) {
       fail("invalid-input", "Usage credit effects must use safe integers.");
     }
-    validateCreditStateAllocations(
+    const allocationUnits = validateCreditStateAllocations(
       eventValue["allocations"],
       grantIds,
       "Usage event allocations",
     );
+    if (
+      eventKind === "settlement" &&
+      customerCreditEffectUnits !== -allocationUnits
+    ) {
+      fail(
+        "invalid-input",
+        "Settlement allocations must match the customer charge.",
+      );
+    }
     const grantId = eventValue["grantId"];
     if (
       grantId !== null &&

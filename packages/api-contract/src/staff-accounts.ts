@@ -10,11 +10,12 @@ export const staffPermissionV1Schema = z.enum([
   "operations.manage",
   "trials.grant",
   "trials.revoke",
+  "provider-costs.read",
 ]);
 export const staffAccessV1Schema = z
   .object({
     contractVersion: z.literal(1),
-    permissions: z.array(staffPermissionV1Schema).max(6),
+    permissions: z.array(staffPermissionV1Schema).max(7),
   })
   .strict();
 export const staffAccessResponseV1Schema =

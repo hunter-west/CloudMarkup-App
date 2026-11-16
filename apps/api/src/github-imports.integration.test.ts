@@ -4,8 +4,12 @@ import type {
   GithubRepositoryRefreshSubscriptionV1,
 } from "@cloudmarkup/api-contract";
 import { describe, expect, it, vi } from "vitest";
+import { GitHubExportError } from "@cloudmarkup/github-repository-export";
+import type { GitHubRepositoryImportService } from "@cloudmarkup/github-repository-export/repository-import";
 
 import type { GitHubRepositoryImportApplication } from "./application/github-imports.js";
+import { GitHubRepositoryImportApplicationService } from "./application/github-imports.js";
+import { ApplicationError } from "./application/errors.js";
 import { createApp } from "./app.js";
 import {
   FixedPrincipalResolver,
@@ -56,7 +60,7 @@ const discoveryInput = {
   repositoryId: 42,
   selectedPaths: ["."],
 };
-function fixture() {
+function fixture(implementation?: GitHubRepositoryImportApplication) {
   const discoverRepository = vi.fn<
     GitHubRepositoryImportApplication["discoverRepository"]
   >((_principal, projectId, input) =>
@@ -115,7 +119,7 @@ function fixture() {
     application: new InMemoryCloudMarkupApplication({}),
     authenticationClock: () => new Date(at),
     correlationIdFactory: () => "correlation-github-import",
-    githubImports,
+    githubImports: implementation ?? githubImports,
     principalResolver: new FixedPrincipalResolver({
       [token]: {
         authenticatedAt: at,
@@ -148,6 +152,69 @@ function authorized(body?: unknown): RequestInit {
 }
 
 describe("GitHub repository import API", () => {
+  it("exposes only trusted import errors, never arbitrary coded storage diagnostics", async () => {
+    const authorizeProject = vi.fn(() =>
+      Promise.resolve({
+        organizationId: "organization_test",
+      }),
+    );
+    const review = vi.fn<GitHubRepositoryImportService["review"]>();
+    const service = new GitHubRepositoryImportApplicationService({
+      access: { authorizeProject },
+      imports: { review } as unknown as GitHubRepositoryImportService,
+      subscriptions: { configure: vi.fn() },
+    });
+    const value = fixture(service);
+    for (const [error, status, message] of [
+      [
+        Object.assign(new Error("synthetic storage-only diagnostic"), {
+          code: "23505",
+        }),
+        500,
+        undefined,
+      ],
+      [
+        Object.assign(new Error("synthetic forged domain diagnostic"), {
+          code: "repository-not-found",
+        }),
+        500,
+        undefined,
+      ],
+      [
+        new GitHubExportError("repository-not-found"),
+        404,
+        new GitHubExportError("repository-not-found").message,
+      ],
+      [
+        new GitHubExportError("rate-limited"),
+        429,
+        new GitHubExportError("rate-limited").message,
+      ],
+      [
+        new ApplicationError("conflict", "This reviewed operation is stale."),
+        409,
+        "This reviewed operation is stale.",
+      ],
+    ] as const) {
+      review.mockRejectedValueOnce(error);
+      const response = await value.app.request(
+        `/v1/projects/project_test/github-repository-imports/${record.importId}/reviews`,
+        authorized({
+          contractVersion: 1,
+          decision: "keep-observed",
+          expectedSnapshotDigest: digest,
+          operationId: "operation.1",
+        }),
+      );
+      expect(response.status).toBe(status);
+      const body = await response.text();
+      expect(body).not.toContain("synthetic");
+      if (message !== undefined) expect(body).toContain(message);
+    }
+    expect(authorizeProject).toHaveBeenCalledTimes(5);
+    expect(review).toHaveBeenCalledTimes(5);
+  });
+
   it("creates and lists exact-commit snapshots without exposing raw repository bytes", async () => {
     const value = fixture();
     const response = await value.app.request(

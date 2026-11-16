@@ -292,6 +292,40 @@ describe("GitHub App repository export API contract", () => {
       authorityId: "githubexport_previous",
       inventoryDigest: digest,
     });
+
+    const request = {
+      artifactId: parsed.artifactId,
+      baseBranch: parsed.baseBranch,
+      contractVersion: 1,
+      destinationFolder: parsed.destinationFolder,
+      featureBranch: parsed.featureBranch,
+      includeWorkflows: false,
+      integrationId: parsed.integrationId,
+      repositoryId: parsed.repositoryId,
+    };
+    expect(createGithubExportPreviewV1Schema.parse(request)).toEqual(request);
+    for (const field of ["baseBranch", "featureBranch"] as const) {
+      for (const branch of ["main", "cloudmarkup/nested/export"]) {
+        expect(
+          createGithubExportPreviewV1Schema.parse({
+            ...request,
+            [field]: branch,
+          })[field],
+        ).toBe(branch);
+      }
+      for (const branch of ["cloudmarkup/.hidden", "cloudmarkup/test.lock"]) {
+        const invalid = createGithubExportPreviewV1Schema.safeParse({
+          ...request,
+          [field]: branch,
+        });
+        expect(invalid.success).toBe(false);
+        if (invalid.success)
+          throw new TypeError("Unsafe branch component must be rejected.");
+        expect(invalid.error.issues).toEqual([
+          expect.objectContaining({ code: "custom", path: [field] }),
+        ]);
+      }
+    }
   });
 
   it("strictly exposes reviewed workflow safeguards without secret values", () => {

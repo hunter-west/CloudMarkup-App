@@ -228,20 +228,41 @@ describe("ModelGateway routing and prompt registry", () => {
   });
 
   it("strictly rejects unknown, duplicate, and non-finite routing configuration", () => {
+    expect(modelRoutingConfigurationV1Schema.safeParse(routing).success).toBe(
+      true,
+    );
     expect(
       modelRoutingConfigurationV1Schema.safeParse({
         ...routing,
         browserModelOverride: "bedrock.deep",
       }).success,
     ).toBe(false);
-    expect(
-      modelRoutingConfigurationV1Schema.safeParse({
-        ...routing,
-        routes: [...routing.routes, routing.routes[0]],
-      }).success,
-    ).toBe(false);
+    const overCapacity = modelRoutingConfigurationV1Schema.safeParse({
+      ...routing,
+      routes: [...routing.routes, routing.routes[0]],
+    });
+    expect(overCapacity.error?.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "too_big",
+          path: ["routes"],
+          maximum: 5,
+        }),
+      ]),
+    );
     const firstRoute = routing.routes[0];
     if (firstRoute === undefined) throw new Error("Missing routing fixture.");
+    const duplicateRole = modelRoutingConfigurationV1Schema.safeParse({
+      ...routing,
+      routes: [firstRoute, firstRoute],
+    });
+    expect(duplicateRole.error?.issues).toEqual([
+      expect.objectContaining({
+        code: "custom",
+        path: ["routes"],
+        message: "A routing configuration cannot repeat one role route.",
+      }),
+    ]);
     expect(
       modelRoutingConfigurationV1Schema.safeParse({
         ...routing,

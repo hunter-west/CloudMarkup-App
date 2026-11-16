@@ -7,8 +7,8 @@ describe("additive V2 failure-only terminal migration", () => {
   it("preserves 39 historical migrations and the shared financial algorithm", async () => {
     const directory = new URL("../../../migrations/", import.meta.url);
     const migrations = await loadMigrations(fileURLToPath(directory));
-    expect(migrations).toHaveLength(121);
-    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(1374);
+    expect(migrations).toHaveLength(124);
+    expect(migrations.reduce((n, m) => n + m.statements.length, 0)).toBe(1397);
     const addition = migrations.find((m) => m.version === "0040");
     expect(addition).toMatchObject({
       version: "0040",
@@ -33,7 +33,7 @@ describe("additive V2 failure-only terminal migration", () => {
       "84ddd5433d66f39471a3b0651f8ed1a704c5636e7ae159039870abe712f7b414",
     );
     expect(hash(await readFile(new URL("manifest.json", directory)))).toBe(
-      "163b32059ae12aba71805405cbb6f98d767b5fb5380324040a2d9f9b5521bf47",
+      "77aa689bb5bc511a653e48da76fc9cda0fc9aa99853a9b61d40ff20304a7fa6c",
     );
     const original =
       migrations

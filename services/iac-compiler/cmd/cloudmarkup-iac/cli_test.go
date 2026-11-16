@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -33,6 +34,7 @@ func TestRunCLINormalizesArchitectureFromStdin(t *testing.T) {
 	if stderr.Len() != 0 {
 		t.Fatalf("stderr = %q, want empty", stderr.String())
 	}
+	assertCLIOutputBudget(t, []string{"normalize", "--architecture", "-"}, architecture, stdout.Bytes(), 0)
 }
 
 func TestRunCLICompileUsesTheTargetBoundary(t *testing.T) {
@@ -54,6 +56,7 @@ func TestRunCLICompileUsesTheTargetBoundary(t *testing.T) {
 	if stderr.Len() != 0 {
 		t.Fatalf("stderr = %q, want structured stdout diagnostics", stderr.String())
 	}
+	assertCLIOutputBudget(t, []string{"compile", "--architecture", "-"}, representativeFixture(t), stdout.Bytes(), 2)
 }
 
 func TestRunCLICompileSelectsCloudFormation(t *testing.T) {
@@ -87,6 +90,7 @@ func TestRunCLICompileSelectsCloudFormation(t *testing.T) {
 	if !foundTemplate || stderr.Len() != 0 {
 		t.Fatalf("CloudFormation CLI output missing template or wrote stderr: %q", stderr.String())
 	}
+	assertCLIOutputBudget(t, []string{"compile", "--architecture", "-", "--target", "cloudformation"}, cloudFormationCLIFixture(t), stdout.Bytes(), 0)
 }
 
 func TestRunCLICompileSelectsCloudFormationForCuratedEventWorkload(t *testing.T) {
@@ -155,6 +159,31 @@ func TestRunCLIRejectsUnsupportedCommandAndUnsafeOverwrite(t *testing.T) {
 	if exitCode != 2 || !strings.Contains(stderr.String(), "must not overwrite") {
 		t.Fatalf("overwrite exit code = %d, stderr = %q", exitCode, stderr.String())
 	}
+	aliasPath := filepath.Join(directory, "output-alias.json")
+	if err := os.Link(inputPath, aliasPath); err != nil {
+		t.Fatalf("create required input-alias fixture: %v", err)
+	}
+	for _, inputFlag := range []string{"--architecture", "--workload", "--solution-revision"} {
+		args := []string{"normalize", "--architecture", "-", inputFlag, inputPath, "--output", aliasPath}
+		stdout.Reset()
+		stderr.Reset()
+		if code := runCLI(context.Background(), args, bytes.NewReader(representativeFixture(t)), &stdout, &stderr); code != 2 || !strings.Contains(stderr.String(), "must not overwrite") {
+			t.Fatalf("%s alias refusal: code %d, stderr %q", inputFlag, code, stderr.String())
+		}
+	}
+	input, err := os.Open(inputPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer input.Close()
+	if _, closeOutput, err := openOutput(aliasPath, &stdout, input); err == nil {
+		closeOutput()
+		t.Fatal("opened-object alias bypassed the final pre-truncation check")
+	}
+	contents, err := os.ReadFile(inputPath)
+	if err != nil || !bytes.Equal(contents, representativeFixture(t)) {
+		t.Fatalf("input bytes changed after alias refusal: %v", err)
+	}
 }
 
 func TestRunCLIReturnsStructuredDiagnosticsForInvalidInput(t *testing.T) {
@@ -168,6 +197,46 @@ func TestRunCLIReturnsStructuredDiagnosticsForInvalidInput(t *testing.T) {
 	}
 	if !strings.Contains(stdout.String(), "COMPAT_SCHEMA_VERSION_UNSUPPORTED") || strings.Contains(stdout.String(), `schemaVersion\":4`) {
 		t.Fatalf("stdout = %q, want stable content-free diagnostic", stdout.String())
+	}
+	assertCLIOutputBudget(t, []string{"normalize", "--architecture", "-"}, []byte(`{"kind":"cloudmarkup.architecture-document","schemaVersion":4}`), stdout.Bytes(), 2)
+}
+
+func assertCLIOutputBudget(t *testing.T, args []string, input, expected []byte, expectedCode int) {
+	t.Helper()
+	if len(expected) == 0 || expected[len(expected)-1] != '\n' {
+		t.Fatal("expected complete newline-terminated result")
+	}
+	outputPath := filepath.Join(t.TempDir(), "result.json")
+	for _, destination := range []string{"-", outputPath} {
+		for _, limit := range []int{1, len(expected) - 1, len(expected)} {
+			preserved := []byte("existing output must survive refusal")
+			if err := os.WriteFile(outputPath, preserved, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			var stdout, stderr bytes.Buffer
+			boundedArgs := append(append([]string{}, args...), "--output", destination, "--max-output-bytes", strconv.Itoa(limit))
+			code := runCLI(context.Background(), boundedArgs, bytes.NewReader(input), &stdout, &stderr)
+			fileBytes, err := os.ReadFile(outputPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if limit < len(expected) {
+				if code != 1 || stdout.Len() != 0 || !bytes.Equal(fileBytes, preserved) || !strings.Contains(stderr.String(), "output limit") {
+					t.Fatalf("budget %d did not preserve output: code %d, stderr %q", limit, code, stderr.String())
+				}
+				continue
+			}
+			actual := stdout.Bytes()
+			if destination != "-" {
+				actual = fileBytes
+				if stdout.Len() != 0 {
+					t.Fatal("file output also wrote stdout")
+				}
+			}
+			if code != expectedCode || stderr.Len() != 0 || !bytes.Equal(actual, expected) {
+				t.Fatalf("exact complete-output budget changed result: code %d, stderr %q", code, stderr.String())
+			}
+		}
 	}
 }
 

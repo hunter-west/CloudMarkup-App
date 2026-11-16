@@ -428,13 +428,14 @@ export function reconcileBillingUsageV1(
     });
   }
 
-  const balanceValues = Object.values(input.balances);
+  const { adjustmentCreditUnits, ...nonnegativeBalances } = input.balances;
   const maximumAvailable =
-    input.balances.grantedCreditUnits + input.balances.adjustmentCreditUnits;
+    input.balances.grantedCreditUnits + adjustmentCreditUnits;
   const allocated =
     input.balances.availableCreditUnits + input.balances.reservedCreditUnits;
   if (
-    balanceValues.some((value) => value < 0) ||
+    Object.values(nonnegativeBalances).some((value) => value < 0) ||
+    maximumAvailable < 0 ||
     !Number.isSafeInteger(maximumAvailable) ||
     !Number.isSafeInteger(allocated) ||
     allocated > maximumAvailable ||

@@ -247,11 +247,17 @@ composition, audit-outbox publication, orphan reconciliation, billing queue
 consumption and production reconciliation, model/handler invocation, compiler
 execution, artifact publication, and Evidence creation remain absent.
 
-The development fixture keeps every optional feature off. The explicit beta
-candidate enables beta access, deterministic application generation, static
-validation, and WAF, while billing, AI authoring, GitHub export, and customer
-plan/deployment workflow export remain off. The runtime validator rejects
-missing or unknown feature keys and non-Boolean values before those flags affect
+The development fixture keeps every optional feature off. The historical
+September 1, 2026 setup candidate enabled beta access, application generation,
+static validation, and WAF, with the other optional features off. The simplified
+beta profile superseded those generation/validation enablements on September
+2, 2026. The current
+[beta configuration factory](../../infra/platform/lib/config/environments/beta.ts)
+keeps application generation and static validation disabled, enables beta access
+and WAF, and selects billing separately through its reviewed service profile.
+These are source configuration facts; current activation and exact release
+evidence still belong to STATUS. The runtime validator rejects missing or
+unknown feature keys and non-Boolean values before those flags affect
 permissions. Disabled Stripe/GitHub features receive no secret-read IAM, and
 disabled AI receives no Bedrock IAM. Literal secret values and customer-cloud
 permissions are not present in templates.

@@ -13,6 +13,7 @@ import { createLiveJournalPgFixture } from "./model-live-invocation-journal-pg-t
 import { createLiveHostEvidencePgFixture } from "./model-live-runtime-host-evidence-pg-test-helpers.js";
 import { PostgresModelLiveCommercialAccounting } from "./model-live-commercial-accounting.js";
 import { PostgresModelLiveEvaluationPlans } from "./model-live-evaluation-plans.js";
+import { liveJournalBindingSchema } from "./model-live-invocation-journal-codec.js";
 import {
   ModelLiveStoredObservationError,
   readStoredModelLiveObservationV2,
@@ -363,9 +364,22 @@ integration(
       expect(await state(f)).toBe(before);
       expect(selected.writes).toEqual([]);
     });
-    it("cannot use another tenant's matching invocation identifier", async () => {
+    it("scopes matching invocation identifiers and rejects foreign journal bindings", async () => {
       const other = await fixture();
-      const selected = reader(other);
+      expect(other.scope.organizationId).not.toBe(settled.scope.organizationId);
+      expect(other.scope.projectId).not.toBe(settled.scope.projectId);
+      expect(other.scope.userId).not.toBe(settled.scope.userId);
+      expect(other.journal.binding.invocationId).toBe(
+        settled.journal.binding.invocationId,
+      );
+      const before = await Promise.all([state(settled), state(other)]);
+      const journalQueries: SqlStatement[] = [];
+      const selected = reader(other, {
+        beforeQuery(statement) {
+          if (statement.text.includes("AS journal_binding"))
+            journalQueries.push(statement);
+        },
+      });
       await expect(
         readStoredModelLiveObservationV2({
           ...selected.input,
@@ -374,6 +388,72 @@ integration(
         }),
       ).rejects.toBeInstanceOf(ModelLiveStoredObservationError);
       expect(selected.writes).toEqual([]);
+      expect(journalQueries).toEqual([]);
+
+      // Invocation IDs are tenant scoped. The same literal selects this
+      // authorized tenant's own settled record, never the other tenant's row.
+      const own = await readStoredModelLiveObservationV2({
+        ...selected.input,
+        invocationId: settled.journal.binding.invocationId,
+      });
+      expect(other.original).toBeDefined();
+      expect(own).toMatchObject(other.original ?? {});
+      expect(own.journalBindingDigest).toBe(
+        digestStructuredValue(other.journal.binding),
+      );
+      expect(own.journalBindingDigest).not.toBe(
+        digestStructuredValue(settled.journal.binding),
+      );
+      expect(journalQueries).toHaveLength(2);
+      for (const statement of journalQueries)
+        expect(statement.values).toEqual([
+          other.scope.organizationId,
+          other.scope.projectId,
+          other.scope.userId,
+          settled.journal.binding.invocationId,
+        ]);
+      expect(selected.writes).toEqual([]);
+
+      // Keep valid local plan/approval selectors and a valid, rehashed binding
+      // shape so foreign ownership must be rejected after journal lookup.
+      const foreignBinding = liveJournalBindingSchema.parse({
+        ...other.journal.binding,
+        scope: {
+          ...other.journal.binding.scope,
+          organizationId: settled.scope.organizationId,
+          projectId: settled.scope.projectId,
+          userId: settled.scope.userId,
+        },
+      });
+      journalQueries.length = 0;
+      let substituted = false;
+      const crossed = reader(other, {
+        beforeQuery(statement) {
+          if (statement.text.includes("AS journal_binding"))
+            journalQueries.push(statement);
+        },
+        fault(statement, rows) {
+          if (statement.text.includes("AS journal_binding") && rows[0]) {
+            rows[0]["journal_binding"] = foreignBinding;
+            rows[0]["journal_sha256"] =
+              digestStructuredValue(foreignBinding).slice(7);
+            substituted = true;
+          }
+        },
+      });
+      await expect(crossed.read()).rejects.toBeInstanceOf(
+        ModelLiveStoredObservationError,
+      );
+      expect(substituted).toBe(true);
+      expect(journalQueries).toHaveLength(1);
+      expect(journalQueries[0]?.values).toEqual([
+        other.scope.organizationId,
+        other.scope.projectId,
+        other.scope.userId,
+        settled.journal.binding.invocationId,
+      ]);
+      expect(crossed.writes).toEqual([]);
+      expect(await Promise.all([state(settled), state(other)])).toEqual(before);
     });
     it.each([
       "journal",

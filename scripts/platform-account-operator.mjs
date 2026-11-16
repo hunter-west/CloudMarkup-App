@@ -12,6 +12,7 @@ export function parseOperatorArguments(args) {
     "--reason",
     "--confirm-digest",
     "--permissions",
+    "--organization-id",
     "--pending-checkout-attempt",
     "--pending-checkout-session",
     "--pending-checkout-request",
@@ -33,12 +34,16 @@ export function parseOperatorArguments(args) {
     !flags["--profile"] ||
     !flags["--email"] ||
     !flags["--reason"] ||
-    !["staff-authorize", "staff-revoke", "live-cutover"].includes(
-      flags["--action"],
-    )
+    ![
+      "staff-authorize",
+      "staff-revoke",
+      "staff-cost-authorize",
+      "staff-cost-revoke",
+      "live-cutover",
+    ].includes(flags["--action"])
   )
     throw Error(
-      "Specify --profile, --email, --reason and --action (staff-authorize, staff-revoke, live-cutover).",
+      "Specify --profile, --email, --reason and --action (staff-authorize, staff-revoke, staff-cost-authorize, staff-cost-revoke, live-cutover).",
     );
   if (
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(flags["--email"]) ||
@@ -71,10 +76,24 @@ export function parseOperatorArguments(args) {
           "operations.manage",
           "trials.grant",
           "trials.revoke",
+          "provider-costs.read",
         ].includes(p),
     )
   )
     throw Error("Invalid staff permissions.");
+  const scoped = ["staff-cost-authorize", "staff-cost-revoke"].includes(
+    flags["--action"],
+  );
+  if (
+    scoped
+      ? !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/u.test(
+          flags["--organization-id"] ?? "",
+        ) || flags["--permissions"] !== undefined
+      : flags["--organization-id"] !== undefined
+  )
+    throw Error(
+      "Cost access requires one explicit --organization-id and its separate scoped action; global permission selection cannot imply an organization grant.",
+    );
   const pendingFlags = [
     "--pending-checkout-attempt",
     "--pending-checkout-session",
@@ -109,7 +128,26 @@ export function parseOperatorArguments(args) {
     reason: flags["--reason"],
     confirmation: flags["--confirm-digest"],
     permissions,
+    organizationId: flags["--organization-id"],
   };
+}
+/** Pure validation of the verified provider lookup. Revocation remains possible
+ * for a disabled principal; authorization still requires an active identity. */
+export function validateOperatorUser(user, input) {
+  const attributes = Object.fromEntries(
+    (user.UserAttributes ?? []).map((a) => [a.Name, a.Value]),
+  );
+  if (
+    (!["staff-revoke", "staff-cost-revoke"].includes(input.action) &&
+      (user.Enabled !== true || user.UserStatus !== "CONFIRMED")) ||
+    attributes.email_verified !== "true" ||
+    attributes.email?.toLowerCase() !== input.email.toLowerCase() ||
+    typeof attributes.sub !== "string"
+  )
+    throw Error(
+      "A verified Cognito identity is required; grants require an active account.",
+    );
+  return attributes;
 }
 async function main(args) {
   const input = parseOperatorArguments(args);
@@ -169,19 +207,7 @@ async function main(args) {
     "--username",
     input.email,
   ]);
-  const attributes = Object.fromEntries(
-    (user.UserAttributes ?? []).map((a) => [a.Name, a.Value]),
-  );
-  if (
-    (input.action !== "staff-revoke" &&
-      (user.Enabled !== true || user.UserStatus !== "CONFIRMED")) ||
-    attributes.email_verified !== "true" ||
-    attributes.email?.toLowerCase() !== input.email.toLowerCase() ||
-    typeof attributes.sub !== "string"
-  )
-    throw Error(
-      "An enabled, confirmed Cognito account with this verified email is required.",
-    );
+  const attributes = validateOperatorUser(user, input);
   const outfile = resolve(
     root,
     "apps/api/.cache/operator/platform-operator.mjs",
@@ -210,7 +236,7 @@ async function main(args) {
     const issuer =
       "https://cognito-idp.us-east-1.amazonaws.com/" + env.COGNITO_USER_POOL_ID;
     const result = await database.query({
-      text: "SELECT p.principal_id FROM principal_identity_references i JOIN principals p ON p.principal_id=i.principal_id WHERE i.identity_provider='cognito' AND i.issuer=$1 AND i.subject_reference=$2 AND ($3='staff-revoke' OR p.lifecycle_status='active')",
+      text: "SELECT p.principal_id FROM principal_identity_references i JOIN principals p ON p.principal_id=i.principal_id WHERE i.identity_provider='cognito' AND i.issuer=$1 AND i.subject_reference=$2 AND ($3 IN ('staff-revoke','staff-cost-revoke') OR p.lifecycle_status='active')",
       values: [issuer, attributes.sub, input.action],
     });
     if (
@@ -269,6 +295,28 @@ async function main(args) {
               principalId,
               terminalCheckouts,
             ),
+          );
+    } else if (
+      ["staff-cost-authorize", "staff-cost-revoke"].includes(input.action)
+    ) {
+      const request = {
+        issuer,
+        subject: attributes.sub,
+        principalId,
+        operatorReference: caller.Arn,
+        reason: input.reason,
+        organizationId: input.organizationId,
+        action:
+          input.action === "staff-cost-authorize" ? "authorized" : "revoked",
+      };
+      output = input.confirmation
+        ? await runtime.applyStaffProviderCostAuthorization(
+            database,
+            request,
+            input.confirmation,
+          )
+        : await database.transaction((tx) =>
+            runtime.prepareStaffProviderCostAuthorization(tx, request),
           );
     } else {
       const request = {

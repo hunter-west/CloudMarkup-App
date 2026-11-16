@@ -196,6 +196,9 @@ function InspectorTestControls() {
       >
         Undo inspector change
       </button>
+      <button onClick={() => session.redo()} type="button">
+        Redo inspector change
+      </button>
     </div>
   );
 }
@@ -849,6 +852,163 @@ describe("SelectedResourceInspector", () => {
     });
     expect(screen.getByTestId("content-hash").textContent).toBe(
       initialContentHash,
+    );
+  });
+
+  it("preserves dirty workload purpose and I/O across unrelated configuration and resolves history conflicts explicitly", async () => {
+    renderInspector();
+    selectLambda();
+    const implementation = screen
+      .getByText("Implementation", { selector: "span" })
+      .closest("summary");
+    if (implementation === null) throw new Error("Expected implementation.");
+    const workloadRegion = screen.getByRole("region", {
+      name: "Application behavior",
+    });
+    const workload = () => {
+      expect(workloadRegion).toBeInTheDocument();
+      return within(workloadRegion);
+    };
+    fireEvent.click(implementation);
+    fireEvent.click(screen.getByText("Inputs and outputs (optional)"));
+    const purpose = "Validate a note and return its stable identifier.";
+    fireEvent.change(workload().getByLabelText(/^Purpose/u), {
+      target: { value: purpose },
+    });
+    fireEvent.change(workload().getByLabelText(/^Inputs/u), {
+      target: { value: "noteId:uuid:internal:required" },
+    });
+    fireEvent.change(workload().getByLabelText(/^Outputs/u), {
+      target: { value: "accepted:boolean:internal:required" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Preview purpose and I/O" }),
+    );
+    expect(screen.getByLabelText("Prepared workload operation")).toBeVisible();
+    fireEvent.change(screen.getByLabelText(/^Memory \(MB\)/u), {
+      target: { value: "512" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Review changes" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Apply configuration" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("memory-value")).toHaveTextContent("512"),
+    );
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue(purpose);
+    expect(workload().getByLabelText(/^Inputs/u)).toHaveValue(
+      "noteId:uuid:internal:required",
+    );
+    expect(workload().getByLabelText(/^Outputs/u)).toHaveValue(
+      "accepted:boolean:internal:required",
+    );
+    expect(screen.queryByLabelText("Prepared workload operation")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Apply purpose and I/O" }),
+    ).toBeNull();
+    expect(screen.getByTestId("application-contract-count")).toHaveTextContent(
+      "0",
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Preview purpose and I/O" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Apply purpose and I/O" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("behavior-purpose")).toHaveTextContent(purpose),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Undo inspector change" }),
+    );
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue("");
+    expect(workload().getByLabelText(/^Inputs/u)).toHaveValue("");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Redo inspector change" }),
+    );
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue(purpose);
+    fireEvent.change(workload().getByLabelText(/^Purpose/u), {
+      target: { value: "Keep this unsaved purpose." },
+    });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Undo inspector change" }),
+    );
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue(
+      "Keep this unsaved purpose.",
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "changed while you were editing",
+    );
+    expect(
+      screen.getByRole("button", { name: "Preview purpose and I/O" }),
+    ).toBeDisabled();
+    expect(screen.getByTestId("application-contract-count")).toHaveTextContent(
+      "0",
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Reload current purpose and I/O" }),
+    );
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue("");
+    expect(screen.queryByRole("alert")).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Redo inspector change" }),
+    );
+    expect(workload().getByLabelText(/^Purpose/u)).toHaveValue(purpose);
+  });
+
+  it("isolates local workload drafts when the selected operation changes", () => {
+    const source = loadAwsEditorArchitectureDocument();
+    const workload = source.workloadBehavior.workloads.find(
+      (item) => item.operations.length > 0,
+    );
+    if (workload === undefined)
+      throw new Error("Expected workload operations.");
+    const operation = workload.operations[0];
+    if (operation === undefined) throw new Error("Expected an operation.");
+    const secondId = "operation_inspector_secondary";
+    renderInspector({
+      document: parseArchitectureDocument({
+        ...source,
+        workloadBehavior: {
+          ...source.workloadBehavior,
+          workloads: source.workloadBehavior.workloads.map((item) =>
+            item.id === workload.id
+              ? {
+                  ...item,
+                  operations: [
+                    ...item.operations,
+                    { ...operation, id: secondId },
+                  ],
+                }
+              : item,
+          ),
+        },
+      }),
+    });
+    selectLambda();
+    const implementation = screen
+      .getByText("Implementation", { selector: "span" })
+      .closest("summary");
+    if (implementation === null) throw new Error("Expected implementation.");
+    fireEvent.click(implementation);
+    fireEvent.change(screen.getByLabelText(/^Purpose/u), {
+      target: { value: "First operation draft." },
+    });
+    fireEvent.change(
+      screen.getByRole("combobox", { name: /^Workload operation/u }),
+      { target: { value: secondId } },
+    );
+    expect(screen.getByLabelText(/^Purpose/u)).toHaveValue("");
+    fireEvent.change(screen.getByLabelText(/^Purpose/u), {
+      target: { value: "Second operation draft." },
+    });
+    fireEvent.change(
+      screen.getByRole("combobox", { name: /^Workload operation/u }),
+      { target: { value: operation.id } },
+    );
+    expect(screen.getByLabelText(/^Purpose/u)).toHaveValue("");
+    expect(screen.getByTestId("application-contract-count")).toHaveTextContent(
+      "0",
     );
   });
 

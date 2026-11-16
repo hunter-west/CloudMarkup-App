@@ -46,6 +46,10 @@ export function createBetaApplicationSourceModel() {
       new ConverseCommand(betaApplicationSourceModelRequest(input)),
       { abortSignal: input.signal },
     );
+    if (input.onUsage)
+      await input.onUsage(
+        requireBetaConverseUsage(result.usage, result.$metadata.requestId),
+      );
     const calls = (result.output?.message?.content ?? []).flatMap((block) =>
       block.toolUse ? [block.toolUse] : [],
     );
@@ -62,10 +66,6 @@ export function createBetaApplicationSourceModel() {
           ? betaApplicationSourceV2Schema
           : betaApplicationSourceV1Schema
     ).parse(calls[0].input);
-    if (input.onUsage)
-      await input.onUsage(
-        requireBetaConverseUsage(result.usage, result.$metadata.requestId),
-      );
     return output;
   };
 }

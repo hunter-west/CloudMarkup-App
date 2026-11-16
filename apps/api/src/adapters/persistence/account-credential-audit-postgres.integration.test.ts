@@ -176,7 +176,10 @@ suite("account credential audit on isolated PostgreSQL", () => {
           principal.principalId,
         ]),
       ),
-    ).rejects.toThrow();
+    ).rejects.toMatchObject({
+      code: "55000",
+      message: "immutable record cannot be changed",
+    });
   });
   it("denies reusing an attempt, including after completion", async () => {
     const { principal } = await actor(),

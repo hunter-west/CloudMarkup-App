@@ -13,7 +13,7 @@ import {
   Tabs,
   Textarea,
 } from "@cloudmarkup/ui";
-import type { ArchitectureEdge } from "@cloudmarkup/domain";
+import { hashCanonicalValue, type ArchitectureEdge } from "@cloudmarkup/domain";
 import {
   AlertTriangle,
   ArrowDownToLine,
@@ -63,6 +63,7 @@ import {
   type ConfigurationFormFieldModel,
 } from "./configuration-form-model.js";
 import { OwnedConfigurationPanel } from "./OwnedConfigurationPanel.js";
+import { useDocumentDraft } from "./use-document-draft.js";
 import {
   AdvancedConfigurationFields,
   ConfigurationInput,
@@ -730,7 +731,7 @@ function WorkloadOperationForm({
 
   return (
     <WorkloadOperationEditableForm
-      key={`${workload.id}:${operationId}:${session.hashes.contentHash}`}
+      key={`${workload.id}:${operationId}`}
       descriptionId={descriptionId}
       displayNameId={displayNameId}
       initialDraft={resolution.draft}
@@ -738,6 +739,14 @@ function WorkloadOperationForm({
       model={model}
       operationId={operationId}
       outputFieldsId={outputFieldsId}
+      snapshotKey={hashCanonicalValue({
+        draft: resolution.draft,
+        operation:
+          workload.operations.find(
+            (operation) => operation.id === operationId,
+          ) ?? null,
+        implementation: workload.implementation,
+      })}
     />
   );
 }
@@ -750,6 +759,7 @@ function WorkloadOperationEditableForm({
   model,
   operationId,
   outputFieldsId,
+  snapshotKey,
 }: {
   readonly descriptionId: string;
   readonly displayNameId: string;
@@ -758,13 +768,28 @@ function WorkloadOperationEditableForm({
   readonly model: SelectedNodeInspectorModel;
   readonly operationId: string;
   readonly outputFieldsId: string;
+  readonly snapshotKey: string;
 }) {
   const session = useReadyEditorDocumentSession();
   const workload = model.workload;
-  const [draft, setDraft] = useState(initialDraft);
-  const [preview, setPreview] =
-    useState<PreparedWorkloadOperationCommand | null>(null);
+  const draftState = useDocumentDraft(initialDraft, snapshotKey);
+  const draft = draftState.value;
+  const [preparedPreview, setPreview] = useState<{
+    readonly prepared: PreparedWorkloadOperationCommand;
+    readonly contentHash: string;
+  } | null>(null);
+  const preview =
+    !draftState.conflicted &&
+    preparedPreview?.contentHash === session.hashes.contentHash
+      ? preparedPreview.prepared
+      : null;
   const [error, setError] = useState("");
+  if (
+    preparedPreview !== null &&
+    preparedPreview.contentHash !== session.hashes.contentHash
+  ) {
+    setPreview(null);
+  }
   if (workload === null) {
     return null;
   }
@@ -773,7 +798,7 @@ function WorkloadOperationEditableForm({
     key: TKey,
     value: WorkloadOperationDraft[TKey],
   ) => {
-    setDraft((current) => ({ ...current, [key]: value }));
+    draftState.update((current) => ({ ...current, [key]: value }));
     setPreview(null);
     setError("");
   };
@@ -783,6 +808,7 @@ function WorkloadOperationEditableForm({
       className="selected-inspector__behavior-form"
       onSubmit={(event) => {
         event.preventDefault();
+        if (draftState.conflicted) return;
         try {
           const prepared = prepareWorkloadOperationCommand({
             commandId: session.createId(),
@@ -792,7 +818,7 @@ function WorkloadOperationEditableForm({
             operationId,
             workloadId: workload.id,
           });
-          setPreview(prepared);
+          setPreview({ prepared, contentHash: session.hashes.contentHash });
           setError("");
         } catch (preparationError) {
           setPreview(null);
@@ -831,6 +857,35 @@ function WorkloadOperationEditableForm({
           value={draft.description}
         />
       </FormField>
+      {draftState.conflicted ? (
+        <div>
+          <p role="alert">
+            Purpose and I/O changed while you were editing. Your edits are kept.
+            Reload current values or keep your edits before reviewing them
+            again.
+          </p>
+          <Button
+            onClick={() => {
+              draftState.reset();
+              setPreview(null);
+              setError("");
+            }}
+            type="button"
+          >
+            Reload current purpose and I/O
+          </Button>
+          <Button
+            onClick={() => {
+              draftState.keep();
+              setPreview(null);
+              setError("");
+            }}
+            type="button"
+          >
+            Keep my purpose and I/O edits
+          </Button>
+        </div>
+      ) : null}
       {error === "" ? null : (
         <p className="selected-inspector__behavior-error" role="alert">
           {error}
@@ -889,7 +944,11 @@ function WorkloadOperationEditableForm({
       )}
       <div className="selected-inspector__actions">
         {preview === null ? (
-          <Button type="submit" variant="secondary">
+          <Button
+            disabled={draftState.conflicted}
+            type="submit"
+            variant="secondary"
+          >
             Preview purpose and I/O
           </Button>
         ) : (
@@ -902,6 +961,7 @@ function WorkloadOperationEditableForm({
                   setPreview(null);
                 } else {
                   setPreview(null);
+                  draftState.reset();
                 }
               }}
               type="button"

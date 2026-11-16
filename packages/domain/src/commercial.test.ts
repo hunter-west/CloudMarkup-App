@@ -1719,6 +1719,22 @@ describe("grant-backed credit accounting", () => {
       },
     });
     expect(settleReservationV1(state, settlementInput).replayed).toBe(true);
+    const mismatchedEffect = {
+      ...state,
+      usageEvents: state.usageEvents.map((event) =>
+        event.eventId === "ledger_settlement_1"
+          ? { ...event, customerCreditEffectUnits: -1 }
+          : event,
+      ),
+    };
+    expectDomainError(
+      () => deriveCreditBalanceV1(mismatchedEffect, later),
+      "invalid-input",
+    );
+    expectDomainError(
+      () => deriveUsageSummaryV1(mismatchedEffect),
+      "invalid-input",
+    );
     expectDomainError(
       () =>
         settleReservationV1(state, {

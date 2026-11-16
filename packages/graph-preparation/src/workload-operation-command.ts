@@ -433,6 +433,17 @@ export function resolveWorkloadOperationDraft(input: {
     (contract) => contract.contractId === ids.behavior,
   );
   if (behaviorContract === undefined) {
+    if (
+      input.document.applicationContracts.contracts.some(
+        (contract) => managedContractRole(contract.contractId, ids) !== null,
+      )
+    ) {
+      return {
+        editable: false,
+        reason:
+          "This operation has existing compact-editor contracts without a matching behavior reference. Review those contracts before changing them.",
+      };
+    }
     return {
       draft: {
         description: "",
@@ -472,14 +483,46 @@ export function resolveWorkloadOperationDraft(input: {
         "This operation uses nested or non-entity contracts that the compact field editor cannot represent safely.",
     };
   }
+  const draft = {
+    description: behaviorContract.description ?? "",
+    displayName: behaviorContract.displayName,
+    inputFields,
+    outputFields,
+  };
+  // Ownership is not representability. Compare the entire canonical records,
+  // including provenance and references, with the same builder used for edits.
+  // Richer saved contracts remain intact and require an editor that supports them.
+  try {
+    const roundTrip = managedOperationContracts({
+      document: input.document,
+      workloadId: workload.id,
+      operationId: operation.id,
+      capability: operation.capability,
+      draft,
+    });
+    const original = input.document.applicationContracts.contracts.filter(
+      (contract) => managedContractRole(contract.contractId, ids) !== null,
+    );
+    if (
+      original.length === roundTrip.contracts.length &&
+      original.every((contract) =>
+        roundTrip.contracts.some(
+          (replacement) =>
+            replacement.contractId === contract.contractId &&
+            getApplicationContractRecordContentHash(replacement) ===
+              getApplicationContractRecordContentHash(contract),
+        ),
+      )
+    ) {
+      return { draft, editable: true };
+    }
+  } catch {
+    // A valid saved contract may exceed this compact form's grammar or bounds.
+  }
   return {
-    draft: {
-      description: behaviorContract.description ?? "",
-      displayName: behaviorContract.displayName,
-      inputFields,
-      outputFields,
-    },
-    editable: true,
+    editable: false,
+    reason:
+      "This operation contains saved contract details that the compact editor cannot preserve. Review those contracts in the architecture source before changing them.",
   };
 }
 
@@ -514,6 +557,95 @@ function dataEntityContract(
     indexes: [],
     supportedOperations: [],
   });
+}
+
+function managedOperationContracts(input: {
+  readonly document: ArchitectureDocument;
+  readonly workloadId: string;
+  readonly operationId: string;
+  readonly capability: WorkloadV2["operations"][number]["capability"];
+  readonly draft: WorkloadOperationDraft;
+}) {
+  const ids = contractIds(input.workloadId, input.operationId);
+  const { displayName, description } = input.draft;
+  const inputFields = parseFieldLines(input.draft.inputFields, "$.inputFields");
+  const outputFields = parseFieldLines(
+    input.draft.outputFields,
+    "$.outputFields",
+  );
+  const inputContract =
+    inputFields.length === 0
+      ? null
+      : dataEntityContract(
+          ids.input,
+          `${displayName} input`,
+          `${ids.input}.entity`,
+          inputFields,
+          input.document,
+          editorContractSourceReferenceIds(
+            "input",
+            input.workloadId,
+            input.operationId,
+          ),
+        );
+  const outputContract =
+    outputFields.length === 0
+      ? null
+      : dataEntityContract(
+          ids.output,
+          `${displayName} output`,
+          `${ids.output}.entity`,
+          outputFields,
+          input.document,
+          editorContractSourceReferenceIds(
+            "output",
+            input.workloadId,
+            input.operationId,
+          ),
+        );
+  const inputReference =
+    inputContract === null ? null : contractReference(inputContract);
+  const outputReference =
+    outputContract === null ? null : contractReference(outputContract);
+  const behaviorContract = applicationContractRecordV1Schema.parse({
+    contractKind: "behavior-operation",
+    contractId: ids.behavior,
+    contractVersion: "1.0.0",
+    displayName,
+    description,
+    provenance: {
+      source: "designed",
+      sourceReferenceIds: editorContractSourceReferenceIds(
+        "behavior",
+        input.workloadId,
+        input.operationId,
+      ),
+      recordedAt: input.document.revision.createdAt,
+      recordedBy: input.document.revision.createdBy,
+    },
+    capability: input.capability,
+    input:
+      inputReference === null
+        ? { kind: "none" }
+        : { kind: "contract-reference", reference: inputReference },
+    output:
+      outputReference === null
+        ? { kind: "none" }
+        : { kind: "contract-reference", reference: outputReference },
+    failureOutcomes: [],
+  });
+  return {
+    inputReference,
+    outputReference,
+    behaviorContract,
+    inputFieldCount: inputFields.length,
+    outputFieldCount: outputFields.length,
+    contracts: [
+      ...(inputContract === null ? [] : [inputContract]),
+      ...(outputContract === null ? [] : [outputContract]),
+      behaviorContract,
+    ],
+  };
 }
 
 export function prepareWorkloadOperationCommand(input: {
@@ -561,115 +693,32 @@ export function prepareWorkloadOperationCommand(input: {
     );
   }
 
-  const inputFields = parseFieldLines(input.draft.inputFields, "$.inputFields");
-  const outputFields = parseFieldLines(
-    input.draft.outputFields,
-    "$.outputFields",
-  );
-  const ids = contractIds(workload.id, operation.id);
-  if (
-    hasUnsafeManagedContractCollision(
-      input.document.applicationContracts.contracts,
-      ids,
-      workload.id,
-      operation.id,
-    )
-  ) {
-    return fail(
-      "existing-contract-not-editable",
-      "A reserved compact-editor contract identity is already owned by another source. Review that contract instead of replacing it here.",
-      "$.applicationContracts",
-    );
-  }
-
-  const managedIds: ReadonlySet<string> = new Set<string>([
-    ids.behavior,
-    ids.input,
-    ids.output,
-  ]);
-  const referencedBehaviorContracts = workload.behaviorContracts.flatMap(
-    (reference) =>
-      input.document.applicationContracts.contracts.filter(
-        (contract) =>
-          contract.contractKind === "behavior-operation" &&
-          contract.contractId === reference.contractId &&
-          contract.contractVersion === reference.contractVersion &&
-          contract.capability === operation.capability,
-      ),
-  );
-  if (
-    referencedBehaviorContracts.some(
-      (contract) => contract.contractId !== ids.behavior,
-    )
-  ) {
-    return fail(
-      "existing-contract-not-editable",
-      "This operation already uses an independently owned Application Contract. Review that contract instead of replacing it here.",
-      "$.applicationContracts",
-    );
-  }
-
-  const inputContract =
-    inputFields.length === 0
-      ? null
-      : dataEntityContract(
-          ids.input,
-          `${displayName} input`,
-          `${ids.input}.entity`,
-          inputFields,
-          input.document,
-          editorContractSourceReferenceIds("input", workload.id, operation.id),
-        );
-  const outputContract =
-    outputFields.length === 0
-      ? null
-      : dataEntityContract(
-          ids.output,
-          `${displayName} output`,
-          `${ids.output}.entity`,
-          outputFields,
-          input.document,
-          editorContractSourceReferenceIds("output", workload.id, operation.id),
-        );
-  const inputReference =
-    inputContract === null ? null : contractReference(inputContract);
-  const outputReference =
-    outputContract === null ? null : contractReference(outputContract);
-  const behaviorContract = applicationContractRecordV1Schema.parse({
-    contractKind: "behavior-operation",
-    contractId: ids.behavior,
-    contractVersion: "1.0.0",
-    displayName,
-    description,
-    provenance: {
-      source: "designed",
-      sourceReferenceIds: editorContractSourceReferenceIds(
-        "behavior",
-        workload.id,
-        operation.id,
-      ),
-      recordedAt: input.document.revision.createdAt,
-      recordedBy: input.document.revision.createdBy,
-    },
-    capability: operation.capability,
-    input:
-      inputReference === null
-        ? { kind: "none" }
-        : { kind: "contract-reference", reference: inputReference },
-    output:
-      outputReference === null
-        ? { kind: "none" }
-        : { kind: "contract-reference", reference: outputReference },
-    failureOutcomes: [],
+  const resolution = resolveWorkloadOperationDraft({
+    ...input,
+    fallbackDisplayName: displayName,
   });
+  if (!resolution.editable) {
+    return fail(
+      "existing-contract-not-editable",
+      resolution.reason,
+      "$.applicationContracts",
+    );
+  }
+  const managed = managedOperationContracts({
+    document: input.document,
+    workloadId: workload.id,
+    operationId: operation.id,
+    capability: operation.capability,
+    draft: { ...input.draft, displayName, description },
+  });
+  const { inputReference, outputReference, behaviorContract } = managed;
   const behaviorReference = contractReference(behaviorContract);
+  const ids = contractIds(workload.id, operation.id);
   const nextContracts = [
     ...input.document.applicationContracts.contracts.filter(
-      (contract) => !managedIds.has(contract.contractId),
+      (contract) => managedContractRole(contract.contractId, ids) === null,
     ),
-    ...(inputContract === null ? [] : [inputContract]),
-    ...(outputContract === null ? [] : [outputContract]),
-    behaviorContract,
+    ...managed.contracts,
   ];
   const applicationContracts = normalizeApplicationContractsV1(
     applicationContractsV1Schema.parse({
@@ -750,9 +799,9 @@ export function prepareWorkloadOperationCommand(input: {
   const preview = applyGraphCommand(input.document, command);
   return {
     command,
-    inputFieldCount: inputFields.length,
+    inputFieldCount: managed.inputFieldCount,
     operationId: operation.id,
-    outputFieldCount: outputFields.length,
+    outputFieldCount: managed.outputFieldCount,
     previewDocument: preview.document,
     previewHashes: getArchitectureDocumentHashes(preview.document),
     workloadId: workload.id,

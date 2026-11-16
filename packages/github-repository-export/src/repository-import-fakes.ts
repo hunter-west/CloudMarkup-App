@@ -85,6 +85,26 @@ export class FakeGitHubRepositoryImportStore implements GitHubRepositoryImportSt
       const existing = this.#records.get(existingId);
       if (existing === undefined)
         throw new Error("Fake import state is corrupt.");
+      if (existing.state === "failed-transient") {
+        const retained = { ...existing };
+        delete retained.failureCode;
+        delete retained.result;
+        delete retained.snapshotDigest;
+        delete retained.completedAt;
+        const reclaimed: StoredGitHubRepositoryImport = {
+          ...retained,
+          branchHeadSha: input.record.branchHeadSha,
+          recordVersion: existing.recordVersion + 1,
+          state: "running",
+          updatedAt: input.record.updatedAt,
+        };
+        this.#attempts.set(existing.importId, input.attemptId);
+        this.#records.set(existing.importId, reclaimed);
+        return Promise.resolve({
+          outcome: "acquired" as const,
+          record: structuredClone(reclaimed),
+        });
+      }
       return Promise.resolve({
         outcome:
           existing.state === "running"
@@ -106,7 +126,14 @@ export class FakeGitHubRepositoryImportStore implements GitHubRepositoryImportSt
     readonly attemptId: string;
     readonly record: StoredGitHubRepositoryImport;
   }): Promise<"saved" | "stale"> {
-    if (this.#attempts.get(input.record.importId) !== input.attemptId) {
+    const existing = this.#records.get(input.record.importId);
+    if (
+      this.#attempts.get(input.record.importId) !== input.attemptId ||
+      existing?.state !== "running" ||
+      existing.recordVersion !== input.record.recordVersion - 1 ||
+      existing.organizationId !== input.record.organizationId ||
+      existing.projectId !== input.record.projectId
+    ) {
       return Promise.resolve("stale");
     }
     this.#records.set(input.record.importId, structuredClone(input.record));

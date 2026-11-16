@@ -59,7 +59,7 @@ export class ProjectCleanupWake extends Construct {
       CLOUDMARKUP_CLEANUP_WAKE_SCHEDULE_ARN: scheduleArn,
       CLOUDMARKUP_ENVIRONMENT: "beta",
       CLOUDMARKUP_ACCOUNT_ID: props.account,
-      CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
+      CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0142",
       CLOUDMARKUP_PROJECT_CLEANUP_ENABLED: "true",
       CLOUDMARKUP_DATABASE_ARN: props.databaseArn,
       CLOUDMARKUP_DATABASE_SECRET_ARN: props.databaseSecretArn,

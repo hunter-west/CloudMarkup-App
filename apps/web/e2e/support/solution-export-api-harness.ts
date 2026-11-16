@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import type { BrowserContext, Request, Route } from "@playwright/test";
 import {
   createSolutionExportJobV1Schema,
@@ -76,8 +74,7 @@ export type SolutionExportScenario =
   | "application-test-error"
   | "terraform-validation-error"
   | "retry-cancel"
-  | "expired-artifact"
-  | "reproducible-rerun";
+  | "expired-artifact";
 
 export interface SolutionExportRecordedRequest {
   readonly body: unknown;
@@ -1046,8 +1043,4 @@ export class SolutionExportExportApiHarness {
     );
     return false;
   }
-}
-
-export function solution_exportArchiveSha256(): string {
-  return `sha256:${createHash("sha256").update(ARCHIVE_CONTENT, "utf8").digest("hex")}`;
 }

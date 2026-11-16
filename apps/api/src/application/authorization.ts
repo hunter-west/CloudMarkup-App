@@ -109,6 +109,7 @@ export const API_AUTHORIZATION_REQUIREMENTS = {
   "staff.access.get": { kind: "principal" },
   "staff.accounts.list": { kind: "principal" },
   "staff.accounts.get": { kind: "principal" },
+  "staff.provider-costs.get": { kind: "principal" },
   "staff.accounts.act": { kind: "principal" },
   "staff.workspaces.list": { kind: "principal" },
   "staff.workspaces.get": { kind: "principal" },
@@ -624,14 +625,9 @@ export async function runSensitiveAction<TValue>(input: {
     throw error;
   }
 
+  let result: TValue;
   try {
-    const result = await input.operation();
-    await input.auditSink.append({
-      ...baseEvent,
-      occurredAt: input.now().toISOString(),
-      outcome: "succeeded",
-    });
-    return result;
+    result = await input.operation();
   } catch (error) {
     await input.auditSink.append({
       ...baseEvent,
@@ -640,4 +636,13 @@ export async function runSensitiveAction<TValue>(input: {
     });
     throw error;
   }
+
+  // Delivery failure does not undo or change the outcome of completed work.
+  // Keep that failure visible without retrying the operation or auditing it as failed.
+  await input.auditSink.append({
+    ...baseEvent,
+    occurredAt: input.now().toISOString(),
+    outcome: "succeeded",
+  });
+  return result;
 }

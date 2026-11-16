@@ -100,37 +100,40 @@ function account(row: SqlRow): StaffAccountSummary {
 }
 const accountSelect = `SELECT a.billing_account_id,a.organization_id,a.lifecycle_status,a.expensive_operations_enabled,a.record_version,o.display_name,o.workspace_kind,o.lifecycle_status AS organization_state,s.normalized_status AS subscription_state,CASE WHEN d.plan_key='starter' AND s.provider_environment='live' THEN 'Standard' WHEN d.plan_key='pro' THEN 'Professional' ELSE d.display_name END AS plan_display_name FROM organization_billing_accounts a JOIN organizations o ON o.organization_id=a.organization_id LEFT JOIN organization_subscription_projections s ON s.organization_id=a.organization_id AND s.billing_account_id=a.billing_account_id LEFT JOIN commercial_plan_versions v ON v.plan_version_id=s.plan_version_id LEFT JOIN commercial_plan_definitions d ON d.plan_id=v.plan_id`;
 const searchableWorkspaceSelect = `SELECT a.billing_account_id,o.organization_id,a.lifecycle_status,a.expensive_operations_enabled,a.record_version,o.record_version AS organization_version,o.display_name,o.workspace_kind,o.lifecycle_status AS organization_state,s.normalized_status AS subscription_state,CASE WHEN d.plan_key='starter' AND s.provider_environment='live' THEN 'Standard' WHEN d.plan_key='pro' THEN 'Professional' ELSE d.display_name END AS plan_display_name FROM organizations o LEFT JOIN organization_billing_accounts a ON a.organization_id=o.organization_id LEFT JOIN organization_subscription_projections s ON s.organization_id=a.organization_id AND s.billing_account_id=a.billing_account_id LEFT JOIN commercial_plan_versions v ON v.plan_version_id=s.plan_version_id LEFT JOIN commercial_plan_definitions d ON d.plan_id=v.plan_id`;
+export async function authorizePlatformStaff(
+  tx: SqlExecutor,
+  principal: PrincipalContext,
+  permission?: StaffPermissionV1,
+  write = false,
+  lockPermissions = true,
+) {
+  await lockAccountSessions(tx, principal.principalId);
+  if (!(await accountSessionAllowed(tx, principal)))
+    throw new ApplicationError(
+      "authentication_required",
+      "Sign in again to continue.",
+    );
+  if (write) requireRecentAuthentication(principal, new Date());
+  const rows = await tx.query(
+    sql(
+      "SELECT permissions FROM platform_staff_authorizations WHERE principal_id=$1 AND revoked_at IS NULL" +
+        (write || lockPermissions ? " FOR SHARE" : ""),
+      [principal.principalId],
+    ),
+  );
+  const permissions = staffAccessV1Schema.parse({
+    contractVersion: 1,
+    permissions: rows.rows[0]?.["permissions"] ?? [],
+  }).permissions;
+  if (permission && !permissions.includes(permission)) denied();
+  return { contractVersion: 1 as const, permissions };
+}
+
 /** No browser role, email or organization membership can create platform authority. */
 export class PostgresStaffAccounts implements StaffAccountsApplication {
   readonly database: SqlDatabase;
   constructor(database: SqlDatabase) {
     this.database = database;
-  }
-  async #authorize(
-    tx: SqlExecutor,
-    principal: PrincipalContext,
-    permission?: StaffPermissionV1,
-    write = false,
-  ) {
-    await lockAccountSessions(tx, principal.principalId);
-    if (!(await accountSessionAllowed(tx, principal)))
-      throw new ApplicationError(
-        "authentication_required",
-        "Sign in again to continue.",
-      );
-    if (write) requireRecentAuthentication(principal, new Date());
-    const rows = await tx.query(
-      sql(
-        "SELECT permissions FROM platform_staff_authorizations WHERE principal_id=$1 AND revoked_at IS NULL FOR SHARE",
-        [principal.principalId],
-      ),
-    );
-    const permissions = staffAccessV1Schema.parse({
-      contractVersion: 1,
-      permissions: rows.rows[0]?.["permissions"] ?? [],
-    }).permissions;
-    if (permission && !permissions.includes(permission)) denied();
-    return { contractVersion: 1 as const, permissions };
   }
   async #transaction<T>(work: (tx: SqlExecutor) => Promise<T>): Promise<T> {
     try {
@@ -150,7 +153,7 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
   }
   access: StaffAccountsApplication["access"] = (principal) => {
     const actor = Object.freeze({ ...principal });
-    return this.#transaction((tx) => this.#authorize(tx, actor));
+    return this.#transaction((tx) => authorizePlatformStaff(tx, actor));
   };
   search: StaffAccountsApplication["search"] = (
     principal,
@@ -168,7 +171,7 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
       );
     const value = parsed.data;
     return this.#transaction(async (tx) => {
-      await this.#authorize(tx, actor, "accounts.read");
+      await authorizePlatformStaff(tx, actor, "accounts.read");
       const result = await tx.query(
         sql(
           searchableWorkspaceSelect +
@@ -178,7 +181,7 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
       );
       const items = result.rows.slice(0, 50).map(account),
         nextCursor = items.at(-1)?.organizationId;
-      await this.#authorize(tx, actor, "accounts.read");
+      await authorizePlatformStaff(tx, actor, "accounts.read");
       return staffAccountListSchema.parse({
         contractVersion: items.some((item) => item.contractVersion === 2)
           ? 2
@@ -222,7 +225,7 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
   ) => {
     const actor = Object.freeze({ ...principal });
     return this.#transaction(async (tx) => {
-      await this.#authorize(tx, actor, "accounts.read");
+      await authorizePlatformStaff(tx, actor, "accounts.read");
       const target = await this.#account(tx, organizationId);
       if (target.contractVersion === 2) {
         if (previewVersion !== "2")
@@ -230,7 +233,7 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
             "not_found",
             "This billing account is unavailable.",
           );
-        await this.#authorize(tx, actor, "accounts.read");
+        await authorizePlatformStaff(tx, actor, "accounts.read");
         return {
           value: staffAccountDetailV2Schema.parse({
             contractVersion: 2,
@@ -290,7 +293,7 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
           readActionReceipt(row["receipt_json"]),
         ),
       });
-      await this.#authorize(tx, actor, "accounts.read");
+      await authorizePlatformStaff(tx, actor, "accounts.read");
       return { value, etag: etag(target) };
     });
   };
@@ -329,7 +332,7 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
         JSON.stringify({ organizationId, input: value, expectedEtag }),
       );
     return this.#transaction(async (tx) => {
-      await this.#authorize(tx, actor, permission, true);
+      await authorizePlatformStaff(tx, actor, permission, true);
       await tx.query(
         sql("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [
           "staff-action:" + actor.principalId + ":" + key,
@@ -382,7 +385,7 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
             "idempotency_key_reused",
             "This attempt was already used for a different action.",
           );
-        await this.#authorize(tx, actor, permission, true);
+        await authorizePlatformStaff(tx, actor, permission, true);
         return readActionReceipt(replay["receipt_json"]);
       }
       if (value.confirmBillingAccountId !== target.billingAccountId) invalid();
@@ -590,7 +593,7 @@ export class PostgresStaffAccounts implements StaffAccountsApplication {
           ],
         ),
       );
-      await this.#authorize(tx, actor, permission, true);
+      await authorizePlatformStaff(tx, actor, permission, true);
       return receipt;
     });
   };

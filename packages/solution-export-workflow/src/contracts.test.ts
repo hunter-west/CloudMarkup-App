@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   solutionExportRepositoryWorkflowReviewV1Schema,
   solutionExportWorkflowCheckpointIdentity,
+  solutionExportWorkflowCheckpointV1Schema,
   solutionExportWorkflowReadModelV1Schema,
   solutionExportWorkflowRequestV1Schema,
   solutionExportWorkflowRequestDigest,
@@ -70,7 +71,7 @@ describe("solution export workflow contracts", () => {
         solutionExportWorkflowRequestV1Schema.safeParse(value).success,
       ).toBe(false);
   });
-  it("distinguishes the immutable manifest record ID from its content object", () => {
+  it("requires the exact Solution Revision content digest and durable JSON sources", () => {
     const fixture = workflowFixture();
 
     expect(fixture.request.subject.manifestRecordId).toBe(
@@ -82,14 +83,6 @@ describe("solution export workflow contracts", () => {
     expect(fixture.request.subject.manifestRecordId).not.toBe(
       fixture.request.sources.solutionRevision.objectId,
     );
-    expect(
-      solutionExportWorkflowRequestV1Schema.safeParse(fixture.request).success,
-    ).toBe(true);
-  });
-
-  it("requires the exact Solution Revision content digest and durable JSON sources", () => {
-    const fixture = workflowFixture();
-
     expect(
       solutionExportWorkflowRequestV1Schema.safeParse({
         ...fixture.request,
@@ -397,5 +390,27 @@ describe("solution export workflow contracts", () => {
     expect(solutionExportWorkflowCheckpointIdentity(checkpoint)).toBe(
       solutionExportWorkflowCheckpointIdentity(structuredClone(checkpoint)),
     );
+    const checkpointIdentity =
+      solutionExportWorkflowCheckpointIdentity(checkpoint);
+    expect(
+      solutionExportWorkflowCheckpointV1Schema.parse({
+        ...checkpoint,
+        checkpointIdentity,
+      }),
+    ).toEqual({ ...checkpoint, checkpointIdentity });
+    const changed = {
+      ...checkpoint,
+      inputDigest: sha256Digest("different-immutable-input"),
+    };
+    expect(solutionExportWorkflowCheckpointIdentity(changed)).not.toBe(
+      checkpointIdentity,
+    );
+    const substituted = solutionExportWorkflowCheckpointV1Schema.safeParse({
+      ...changed,
+      checkpointIdentity,
+    });
+    expect(substituted.error?.issues.map(({ path }) => path)).toEqual([
+      ["checkpointIdentity"],
+    ]);
   });
 });

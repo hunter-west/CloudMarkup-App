@@ -186,6 +186,24 @@ func TestS3AccuracyStablePairSources(t *testing.T) {
 	if !reflect.DeepEqual(renderer.diagnostics, repeated.diagnostics) {
 		t.Fatal("input ordering changed pair diagnostics")
 	}
+	for _, id := range []string{"overlap_third", "overlap_fourth", "overlap_fifth"} {
+		for _, edge := range model.Connections {
+			if edge.ID == "edge_second_notification" {
+				edge.ID = id
+				model.Connections = append(model.Connections, edge)
+				break
+			}
+		}
+	}
+	for _, limit := range []int{1, 2} {
+		limits := DefaultLimits()
+		limits.MaxDiagnostics = limit
+		bounded := &terraformRenderer{ctx: context.Background(), model: model, limits: limits}
+		bounded.validateS3Accuracy()
+		if len(bounded.diagnostics) != limit || !bounded.hasErrors() || !reflect.DeepEqual(bounded.diagnostics[0], renderer.diagnostics[0]) {
+			t.Fatalf("overlap diagnostics lost their bound or exact source: %#v", bounded.diagnostics)
+		}
+	}
 }
 
 func TestS3AccuracyRejectsFabricatedCatalogBindings(t *testing.T) {

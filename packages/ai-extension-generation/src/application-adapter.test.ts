@@ -954,6 +954,78 @@ describe("application candidate validation adapter", () => {
     expect(JSON.stringify(result.diagnostics)).not.toContain("redacted by");
   });
 
+  it.each([
+    ["dependency", "HIGH", "failed"],
+    ["dependency", "CRITICAL", "failed"],
+    ["secret", "LOW", "failed"],
+    ["dependency", "MEDIUM", "passed"],
+  ] as const)(
+    "projects %s %s findings from successful scanner commands as security %s",
+    async (source, severity, expected) => {
+      let captured:
+        Awaited<ReturnType<ApplicationBuildRunner["run"]>> | undefined;
+      const test = fixture({
+        overrides: {
+          [source === "secret" ? "secret-scan" : "dependency-scan"]: ok(
+            JSON.stringify({
+              Results: [
+                {
+                  Target: "application/pnpm-lock.yaml",
+                  [source === "secret" ? "Secrets" : "Vulnerabilities"]: [
+                    {
+                      [source === "secret" ? "RuleID" : "VulnerabilityID"]:
+                        "synthetic-reviewed-finding",
+                      Severity: severity,
+                      Title: "Synthetic bounded scanner finding",
+                    },
+                  ],
+                },
+              ],
+            }),
+          ),
+        },
+        runnerWrapper: (runner) => ({
+          async run(raw, options) {
+            captured = await runner.run(raw, options);
+            return captured;
+          },
+        }),
+      });
+      const result = await test.validator.validate(test.validationInput);
+      expect(
+        captured?.steps.filter(({ step }) => step.endsWith("-scan")),
+      ).toEqual([
+        expect.objectContaining({ step: "dependency-scan", state: "passed" }),
+        expect.objectContaining({ step: "secret-scan", state: "passed" }),
+      ]);
+      expect(captured?.findings).toEqual([
+        expect.objectContaining({ source, severity: severity.toLowerCase() }),
+      ]);
+      expect(result.state).toBe(expected);
+      expect(result.outcomes).toContainEqual(
+        expect.objectContaining({ kind: "security", result: expected }),
+      );
+      expect(result.evidence).toHaveLength(1);
+      expect(result.evidence[0]?.checks).toContainEqual(
+        expect.objectContaining({
+          generationCoverageRequirement: "application-security-checks",
+          status: expected,
+        }),
+      );
+      expect(result.evidence[0]?.provenance.inputDigests).toContain(
+        test.validationInput.artifact.artifactDigest,
+      );
+      if (expected === "passed") {
+        expect(result.diagnostics).toContainEqual(
+          expect.objectContaining({
+            category: "security",
+            severity: "warning",
+          }),
+        );
+      }
+    },
+  );
+
   it("rejects valid but stale runner Evidence from another candidate", async () => {
     let cached: Awaited<ReturnType<ApplicationBuildRunner["run"]>> | undefined;
     const test = fixture({

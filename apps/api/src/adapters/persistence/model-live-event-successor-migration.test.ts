@@ -54,7 +54,7 @@ it("registers exact 0059 and preserves the actual parser predecessor guards", as
   const registered = await loadMigrations(
     fileURLToPath(new URL("../../../migrations/", import.meta.url)),
   );
-  expect(registered.at(-1)?.version).toBe("0139");
+  expect(registered.at(-1)?.version).toBe("0142");
   expect(
     registered
       .filter((m) => m.version >= "0058" && m.version <= "0059")

@@ -9,7 +9,9 @@
 - **Owners:** Cloud Markup product and application maintainers
 - **Supersedes:** Configuration-exclusion scope of ADR-0056 and ADR-0057 for new
   opt-in versions only
-- **Superseded by:** None
+- **Partially superseded by:** [ADR-0089](0089-complete-reviewed-ai-context.md)
+  for context-v3 read-context exclusions only; existing policy-edit authority
+  and historical contracts remain unchanged.
 
 ## Context
 

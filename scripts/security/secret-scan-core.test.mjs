@@ -5,6 +5,7 @@ import { join } from "node:path";
 import test from "node:test";
 
 import {
+  findSecretPatterns,
   formatSecretScanResult,
   scanSecretDirectory,
   SECRET_SCAN_LIMITS,
@@ -95,6 +96,55 @@ test("reviewed fake-secret exceptions are path, label, and content-digest bound"
     });
     assert.deepEqual(reviewed.findings, []);
 
+    // Exceptions cannot consume the retained-finding budget or conceal a later
+    // match, including one from a later pattern family.
+    const later = ["whsec", "F".repeat(24)].join("_");
+    const prefix = `${fake}\n`.repeat(SECRET_SCAN_LIMITS.maximumFindings + 1);
+    await writeFile(join(root, "fixture.txt"), prefix + later + "\n");
+    const saturated = await scanSecretDirectory(root, {
+      reviewedFixtureExceptions: exception,
+    });
+    assert.equal(saturated.findings.length, 1);
+    assert.equal(
+      saturated.findings[0].line,
+      SECRET_SCAN_LIMITS.maximumFindings + 2,
+    );
+    assert.equal(saturated.findingOverflow, false);
+    assert.deepEqual(saturated.coverageErrors, []);
+    assert.doesNotMatch(
+      formatSecretScanResult(saturated),
+      new RegExp(later, "u"),
+    );
+
+    const earlyFamily = "AKIA" + "Z".repeat(16);
+    const earlyFinding = findSecretPatterns(earlyFamily, "fixture.txt")[0];
+    await writeFile(
+      join(root, "fixture.txt"),
+      `${earlyFamily}\n`.repeat(257) + later,
+    );
+    const laterFamily = await scanSecretDirectory(root, {
+      reviewedFixtureExceptions: new Set([
+        ["fixture.txt", earlyFinding.label, earlyFinding.matchDigest].join(
+          "\u0000",
+        ),
+      ]),
+    });
+    assert.equal(laterFamily.findings.length, 1);
+    assert.equal(
+      laterFamily.findings[0].label,
+      "Stripe webhook signing secret",
+    );
+    assert.equal(laterFamily.findings[0].line, 258);
+
+    await writeFile(join(root, "fixture.txt"), prefix + later + "\n");
+
+    await writeFile(join(root, "other.txt"), fake + "\n");
+    const otherPath = await scanSecretDirectory(root, {
+      reviewedFixtureExceptions: exception,
+    });
+    assert.ok(otherPath.findings.some(({ path }) => path === "other.txt"));
+    await rm(join(root, "other.txt"));
+
     await writeFile(join(root, "fixture.txt"), `${fake}changed\n`);
     const changed = await scanSecretDirectory(root, {
       reviewedFixtureExceptions: exception,
@@ -112,6 +162,23 @@ test("bounds high-density findings before formatting", async () => {
     const result = await scanSecretDirectory(root);
     assert.equal(result.findings.length, SECRET_SCAN_LIMITS.maximumFindings);
     assert.equal(result.findingOverflow, true);
+
+    const first = result.findings[0];
+    const prefix = `${values[0]}\n`.repeat(
+      SECRET_SCAN_LIMITS.maximumFindings + 1,
+    );
+    await writeFile(
+      join(root, "dense.txt"),
+      prefix + values.slice(1).join("\n"),
+    );
+    const withExceptions = await scanSecretDirectory(root, {
+      reviewedFixtureExceptions: new Set([
+        ["dense.txt", first.label, first.matchDigest].join("\u0000"),
+      ]),
+      limits: { ...SECRET_SCAN_LIMITS, maximumFindings: 3 },
+    });
+    assert.equal(withExceptions.findings.length, 3);
+    assert.equal(withExceptions.findingOverflow, true);
   });
 });
 

@@ -264,6 +264,29 @@ function OwnedConfigurationPanelHarness({
       >
         Redo owned configuration
       </button>
+      <button
+        onClick={() => {
+          const result = session.previewConfiguration(
+            { id: "node_api_handler", kind: "node" },
+            { memoryMegabytes: { kind: "integer", value: 512 } },
+          );
+          if (!result.ok)
+            throw new Error("Expected unrelated configuration preview.");
+        }}
+        type="button"
+      >
+        Preview unrelated Lambda configuration
+      </button>
+      <button
+        onClick={() => {
+          if (!session.applyConfigurationPreview().ok) {
+            throw new Error("Expected unrelated configuration apply.");
+          }
+        }}
+        type="button"
+      >
+        Apply unrelated Lambda configuration
+      </button>
       <OwnedConfigurationPanel model={model} />
     </>
   );
@@ -861,6 +884,93 @@ describe("OwnedConfigurationPanel non-policy configurations", () => {
     );
     expect(screen.getByTestId("history-label")).toHaveTextContent(
       "Update Ingress rules",
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Undo owned configuration" }),
+    );
+    expect(screen.getByTestId("owned-node-description")).toHaveTextContent(
+      "Reviewed application ingress",
+    );
+    expect(within(card).getByLabelText(/Purpose/u)).toHaveValue(
+      "Reviewed application ingress",
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Redo owned configuration" }),
+    );
+    expect(within(card).getByLabelText(/Purpose/u)).toHaveValue(
+      "Allow reviewed application ingress",
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Undo owned configuration" }),
+    );
+    fireEvent.change(within(card).getByLabelText(/To port or ICMP code/u), {
+      target: { value: "8443" },
+    });
+    fireEvent.click(
+      within(card).getByRole("button", { name: "Save configuration" }),
+    );
+    expect(screen.getByTestId("owned-node-description")).toHaveTextContent(
+      "Reviewed application ingress",
+    );
+    expect(within(card).getByLabelText(/To port or ICMP code/u)).toHaveValue(
+      "8443",
+    );
+    fireEvent.change(within(card).getByLabelText(/Purpose/u), {
+      target: { value: "Allow reviewed application ingress" },
+    });
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Preview unrelated Lambda configuration",
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Apply unrelated Lambda configuration",
+      }),
+    );
+    expect(within(card).getByLabelText(/Purpose/u)).toHaveValue(
+      "Allow reviewed application ingress",
+    );
+    expect(
+      within(card).getByRole("button", { name: "Save configuration" }),
+    ).toBeEnabled();
+    expect(within(card).queryByRole("alert")).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Undo owned configuration" }),
+    );
+    expect(within(card).getByLabelText(/Purpose/u)).toHaveValue(
+      "Allow reviewed application ingress",
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Undo owned configuration" }),
+    );
+    expect(within(card).getByLabelText(/Purpose/u)).toHaveValue(
+      "Allow reviewed application ingress",
+    );
+    expect(within(card).getByRole("alert")).toHaveTextContent(
+      "changed while you were editing",
+    );
+    expect(
+      within(card).getByRole("button", { name: "Save configuration" }),
+    ).toBeDisabled();
+    expect(screen.getByTestId("owned-node-description")).toHaveTextContent(
+      "Reviewed application ingress",
+    );
+    fireEvent.click(
+      within(card).getByRole("button", { name: "Keep my configuration edits" }),
+    );
+    expect(
+      within(card).getByRole("button", { name: "Save configuration" }),
+    ).toBeEnabled();
+    expect(screen.getByTestId("owned-node-description")).toHaveTextContent(
+      "Reviewed application ingress",
+    );
+    fireEvent.click(
+      within(card).getByRole("button", { name: "Save configuration" }),
+    );
+    expect(screen.getByTestId("owned-node-description")).toHaveTextContent(
+      "Allow reviewed application ingress",
     );
 
     fireEvent.click(

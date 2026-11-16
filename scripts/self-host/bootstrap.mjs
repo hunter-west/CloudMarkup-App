@@ -210,37 +210,26 @@ export async function applyStandalone(
     await database.close();
   }
 }
+export async function inspectBootstrap() {
+  const hash = async (name) =>
+    createHash("sha256")
+      .update(
+        await readFile(join(root, "apps/api/authorization-proposals", name)),
+      )
+      .digest("hex");
+  return {
+    canonical: await inspectMigrations(),
+    installationProfile: await inspectStandaloneProfile(),
+    runtimeAclManifestSha256: await hash("self-host-core-runtime-acl-v2.json"),
+    providerDirectAclManifestSha256: await hash(
+      "self-host-runtime-acl-v1.json",
+    ),
+  };
+}
 export async function main(command = process.argv[2]) {
   if (command === "inspect") {
     process.stdout.write(
-      `${JSON.stringify(
-        {
-          canonical: await inspectMigrations(),
-          installationProfile: await inspectStandaloneProfile(),
-          runtimeAclManifestSha256: createHash("sha256")
-            .update(
-              await readFile(
-                join(
-                  root,
-                  "apps/api/authorization-proposals/self-host-core-runtime-acl-v2.json",
-                ),
-              ),
-            )
-            .digest("hex"),
-          providerDirectAclManifestSha256: createHash("sha256")
-            .update(
-              await readFile(
-                join(
-                  root,
-                  "apps/api/authorization-proposals/self-host-runtime-acl-v1.json",
-                ),
-              ),
-            )
-            .digest("hex"),
-        },
-        null,
-        2,
-      )}\n`,
+      `${JSON.stringify(await inspectBootstrap(), null, 2)}\n`,
     );
     return;
   }

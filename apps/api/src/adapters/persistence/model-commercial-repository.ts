@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import {
   CommercialPersistenceError,
   type TrustedCommercialAccountingContext,
@@ -37,6 +39,7 @@ const validPricingStatuses = new Set([
 ]);
 const validPolicyStatuses = new Set(["enabled", "disabled"]);
 const postgresBigintMaximum = 9_223_372_036_854_775_807n;
+const explicitTimestamp = z.iso.datetime({ offset: true });
 
 type PricingRow = SqlRow & {
   readonly cache_read_micros_per_million_units: unknown;
@@ -126,9 +129,56 @@ function assertIdentifier(value: string): void {
 }
 
 function assertTimestamp(value: string): void {
-  if (!Number.isFinite(Date.parse(value))) {
+  if (!explicitTimestamp.safeParse(value).success) {
     fail("invalid-input", "The model commercial timestamp is invalid.");
   }
+  readTimestamp(value);
+}
+
+/** Only declared timestamptz columns: Data API sessions use UTC. Preserve
+ * PostgreSQL's microseconds; never normalize nested JSON or opaque evidence. */
+function readTimestamp(value: unknown): string {
+  const raw =
+    value instanceof Date && Number.isFinite(value.getTime())
+      ? value.toISOString()
+      : value;
+  const normalized =
+    typeof raw === "string" &&
+    /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d{1,6})?$/u.test(raw)
+      ? raw.replace(" ", "T") + "Z"
+      : raw;
+  const parsed = explicitTimestamp.safeParse(normalized);
+  if (!parsed.success)
+    return fail("invalid-input", "The model commercial timestamp is invalid.");
+  const fraction =
+    /\.(\d+)(?:Z|[+-]\d{2}:\d{2})$/u.exec(parsed.data)?.[1] ?? "";
+  if (fraction.length > 6)
+    return fail("invalid-input", "The model commercial timestamp is invalid.");
+  const milliseconds = new Date(parsed.data).toISOString();
+  const submillisecond = fraction.slice(3).replace(/0+$/u, "");
+  return milliseconds.slice(0, -1) + submillisecond + "Z";
+}
+
+function readOptionalTimestamp(value: unknown): string | undefined {
+  return value === null || value === undefined
+    ? undefined
+    : readTimestamp(value);
+}
+
+function timestampMicros(value: string): bigint {
+  const normalized = readTimestamp(value);
+  const fraction = /\.(\d+)Z$/u.exec(normalized)?.[1] ?? "";
+  return (
+    BigInt(Date.parse(normalized)) * 1000n +
+    BigInt(fraction.slice(3).padEnd(3, "0"))
+  );
+}
+
+/** Fixed internal column identifiers, never caller-controlled SQL. Text avoids
+ * native pg's Date conversion discarding the lower three fractional digits. */
+function timestampColumn(column: string): string {
+  const alias = column.slice(column.lastIndexOf(".") + 1);
+  return `to_char(${column} AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS ${alias}`;
 }
 
 function unsignedInteger(value: string, positive = false): bigint {
@@ -228,7 +278,7 @@ function validateEffectiveRange(
   assertTimestamp(effectiveFrom);
   if (effectiveUntil !== undefined) {
     assertTimestamp(effectiveUntil);
-    if (Date.parse(effectiveUntil) <= Date.parse(effectiveFrom)) {
+    if (timestampMicros(effectiveUntil) <= timestampMicros(effectiveFrom)) {
       fail("invalid-input", "The effective range must be non-empty.");
     }
   }
@@ -252,7 +302,7 @@ function mapPricing(row: PricingRow): ModelProviderPricingVersionRecord {
   const cacheWrite = readOptionalString(
     row.cache_write_micros_per_million_units,
   );
-  const effectiveUntil = readOptionalString(row.effective_until);
+  const effectiveUntil = readOptionalTimestamp(row.effective_until);
   const inferenceProfileId = readOptionalString(row.inference_profile_id);
   return {
     ...(cacheRead === undefined
@@ -262,8 +312,8 @@ function mapPricing(row: PricingRow): ModelProviderPricingVersionRecord {
       ? {}
       : { cacheWriteMicrosPerMillionUnits: cacheWrite }),
     costCurrency: readString(row.cost_currency).trim(),
-    createdAt: readString(row.created_at),
-    effectiveFrom: readString(row.effective_from),
+    createdAt: readTimestamp(row.created_at),
+    effectiveFrom: readTimestamp(row.effective_from),
     ...(effectiveUntil === undefined ? {} : { effectiveUntil }),
     environment: readString(
       row.environment,
@@ -285,12 +335,12 @@ function mapPricing(row: PricingRow): ModelProviderPricingVersionRecord {
 }
 
 function mapPolicy(row: PolicyRow): CreditNormalizationPolicyVersionRecord {
-  const effectiveUntil = readOptionalString(row.effective_until);
+  const effectiveUntil = readOptionalTimestamp(row.effective_until);
   return {
     costCurrency: readString(row.cost_currency).trim(),
-    createdAt: readString(row.created_at),
+    createdAt: readTimestamp(row.created_at),
     creditUnitMicros: readDecimal(row.credit_unit_micros),
-    effectiveFrom: readString(row.effective_from),
+    effectiveFrom: readTimestamp(row.effective_from),
     ...(effectiveUntil === undefined ? {} : { effectiveUntil }),
     normalizationPolicyVersionId: readString(
       row.normalization_policy_version_id,
@@ -304,16 +354,26 @@ function mapPolicy(row: PolicyRow): CreditNormalizationPolicyVersionRecord {
 
 const pricingSelect =
   "SELECT pricing_version_id, provider_key, model_key, model_version, " +
-  "inference_profile_id, environment, effective_from, effective_until, " +
+  "inference_profile_id, environment, " +
+  timestampColumn("effective_from") +
+  ", " +
+  timestampColumn("effective_until") +
+  ", " +
   "pricing_status, cost_currency, input_micros_per_million_units, " +
   "output_micros_per_million_units, cache_read_micros_per_million_units, " +
   "cache_write_micros_per_million_units, provider_specific_unit_rates, " +
-  "created_at FROM model_provider_pricing_versions";
+  timestampColumn("created_at") +
+  " FROM model_provider_pricing_versions";
 
 const policySelect =
-  "SELECT normalization_policy_version_id, cost_currency, effective_from, " +
-  "effective_until, policy_status, operating_buffer_basis_points, " +
-  "credit_unit_micros, created_at FROM credit_normalization_policy_versions";
+  "SELECT normalization_policy_version_id, cost_currency, " +
+  timestampColumn("effective_from") +
+  ", " +
+  timestampColumn("effective_until") +
+  ", " +
+  "policy_status, operating_buffer_basis_points, credit_unit_micros, " +
+  timestampColumn("created_at") +
+  " FROM credit_normalization_policy_versions";
 
 const detailSelect =
   "SELECT detail.model_usage_event_id, " +
@@ -326,12 +386,18 @@ const detailSelect =
   "detail.cache_write_units, detail.total_units, detail.provider_specific_units, " +
   "detail.estimated_provider_cost_micros, detail.reserved_credit_units, " +
   "detail.charged_credit_units, detail.compensated_credit_units, " +
-  "detail.started_at, detail.completed_at, detail.latency_milliseconds, " +
+  timestampColumn("detail.started_at") +
+  ", " +
+  timestampColumn("detail.completed_at") +
+  ", " +
+  "detail.latency_milliseconds, " +
   "detail.lifecycle_status, detail.failure_category, detail.attempts, " +
   "detail.multi_call_workflow_id, detail.reconciliation_state, " +
   "event.organization_id, event.acting_principal_id, event.project_id, " +
   "event.job_id, event.feature_key, event.request_id, event.reservation_id, " +
-  "event.provider_key, event.model_key, event.model_version, detail.occurred_at " +
+  "event.provider_key, event.model_key, event.model_version, " +
+  timestampColumn("detail.occurred_at") +
+  " " +
   "FROM model_usage_event_details detail JOIN usage_ledger_entries event " +
   "ON event.organization_id = detail.organization_id " +
   "AND event.ledger_entry_id = detail.ledger_entry_id";
@@ -378,10 +444,10 @@ function mapDetail(row: DetailRow): ModelUsageEventDetailRecord {
     return fail("invalid-input", "Persisted model attempts are invalid.");
   }
   const optional = {
-    completedAt: readOptionalString(row.completed_at),
+    completedAt: readOptionalTimestamp(row.completed_at),
     failureCategory: readOptionalString(row.failure_category),
     inferenceProfileId: readOptionalString(row.inference_profile_id),
-    startedAt: readOptionalString(row.started_at),
+    startedAt: readOptionalTimestamp(row.started_at),
     templateId: readOptionalString(row.template_id),
     templateVersion: readOptionalString(row.template_version),
   };
@@ -424,7 +490,7 @@ function mapDetail(row: DetailRow): ModelUsageEventDetailRecord {
     normalizationPolicyVersionId: readString(
       row.normalization_policy_version_id,
     ),
-    occurredAt: readString(row.occurred_at),
+    occurredAt: readTimestamp(row.occurred_at),
     organizationId: readString(row.organization_id),
     outputUnits: readDecimal(row.output_units),
     pricingVersionId: readString(row.pricing_version_id),
@@ -538,13 +604,23 @@ function matchesInput(
   existing: object,
   input: object,
   omittedKeys: ReadonlySet<string>,
+  timestampKeys: ReadonlySet<string>,
 ): boolean {
   const projected = Object.fromEntries(
     Object.entries(existing).filter(([key]) => !omittedKeys.has(key)),
   );
+  const normalize = (value: object) =>
+    Object.fromEntries(
+      Object.entries(value).map(([key, field]) => [
+        key,
+        timestampKeys.has(key) && field !== undefined
+          ? readTimestamp(field)
+          : field,
+      ]),
+    );
   return (
-    JSON.stringify(canonicalize(projected)) ===
-    JSON.stringify(canonicalize(input))
+    JSON.stringify(canonicalize(normalize(projected))) ===
+    JSON.stringify(canonicalize(normalize(input)))
   );
 }
 
@@ -565,7 +641,12 @@ function sameRecord(
   existing: ModelUsageEventDetailRecord,
   input: AppendModelUsageEventDetailInput,
 ): boolean {
-  return matchesInput(existing, input, detailAuthorityKeys);
+  return matchesInput(
+    existing,
+    input,
+    detailAuthorityKeys,
+    new Set(["occurredAt", "startedAt", "completedAt"]),
+  );
 }
 
 export class PostgresModelCommercialPersistenceRepository implements ModelCommercialPersistenceRepository {
@@ -621,7 +702,14 @@ export class PostgresModelCommercialPersistenceRepository implements ModelCommer
       );
       if (existing.rows[0] !== undefined) {
         const record = mapPricing(existing.rows[0]);
-        if (matchesInput(record, input, new Set(["createdAt"]))) {
+        if (
+          matchesInput(
+            record,
+            input,
+            new Set(["createdAt"]),
+            new Set(["effectiveFrom", "effectiveUntil"]),
+          )
+        ) {
           return record;
         }
         return fail("idempotency-conflict", "The pricing identity was reused.");
@@ -636,10 +724,15 @@ export class PostgresModelCommercialPersistenceRepository implements ModelCommer
             "cache_write_micros_per_million_units, provider_specific_unit_rates" +
             ") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::JSONB) " +
             "RETURNING pricing_version_id, provider_key, model_key, model_version, " +
-            "inference_profile_id, environment, effective_from, effective_until, " +
+            "inference_profile_id, environment, " +
+            timestampColumn("effective_from") +
+            ", " +
+            timestampColumn("effective_until") +
+            ", " +
             "pricing_status, cost_currency, input_micros_per_million_units, " +
             "output_micros_per_million_units, cache_read_micros_per_million_units, " +
-            "cache_write_micros_per_million_units, provider_specific_unit_rates, created_at",
+            "cache_write_micros_per_million_units, provider_specific_unit_rates, " +
+            timestampColumn("created_at"),
           [
             input.pricingVersionId,
             input.providerKey,
@@ -705,7 +798,12 @@ export class PostgresModelCommercialPersistenceRepository implements ModelCommer
       );
       if (existing.rows[0] !== undefined) {
         const record = mapPolicy(existing.rows[0]);
-        return matchesInput(record, input, new Set(["createdAt"]))
+        return matchesInput(
+          record,
+          input,
+          new Set(["createdAt"]),
+          new Set(["effectiveFrom", "effectiveUntil"]),
+        )
           ? record
           : fail("idempotency-conflict", "The policy identity was reused.");
       }
@@ -716,8 +814,12 @@ export class PostgresModelCommercialPersistenceRepository implements ModelCommer
             "effective_until, policy_status, operating_buffer_basis_points, " +
             "credit_unit_micros) VALUES ($1,$2,$3,$4,$5,$6,$7) " +
             "RETURNING normalization_policy_version_id, cost_currency, " +
-            "effective_from, effective_until, policy_status, " +
-            "operating_buffer_basis_points, credit_unit_micros, created_at",
+            timestampColumn("effective_from") +
+            ", " +
+            timestampColumn("effective_until") +
+            ", " +
+            "policy_status, operating_buffer_basis_points, credit_unit_micros, " +
+            timestampColumn("created_at"),
           [
             input.normalizationPolicyVersionId,
             input.costCurrency,

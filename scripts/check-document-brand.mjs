@@ -1,98 +1,124 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { relative } from "node:path";
-import { fileURLToPath } from "node:url";
-
+import { relative, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { parsers } from "prettier/plugins/markdown";
 import { markdownFiles } from "./markdown-files.mjs";
 
 const repositoryRoot = fileURLToPath(new URL("..", import.meta.url));
-const write = process.argv.slice(2).includes("--write");
-const formerProductName = /CloudCanvas/gu;
-const retiredDisplayName = /CloudMarkup/gu;
+const literalNodes = new Set([
+  "code",
+  "inlineCode",
+  "html",
+  "definition",
+  "linkReference",
+  "imageReference",
+  "image",
+  "yaml",
+  "toml",
+  "math",
+  "inlineMath",
+]);
 
-function replaceProse(segment, preserveHistoricalName) {
-  const currentDisplayName = segment.replaceAll(
-    retiredDisplayName,
-    "Cloud Markup",
-  );
-  return preserveHistoricalName
-    ? currentDisplayName
-    : currentDisplayName.replaceAll(formerProductName, "Cloud Markup");
-}
-
-function processInlineCode(line, replace) {
-  let cursor = 0;
-  let output = "";
-  while (cursor < line.length) {
-    const opening = line.indexOf("`", cursor);
-    if (opening === -1) return output + replace(line.slice(cursor));
-    output += replace(line.slice(cursor, opening));
-    let endOfRun = opening;
-    while (line[endOfRun] === "`") endOfRun += 1;
-    const delimiter = line.slice(opening, endOfRun);
-    const closing = line.indexOf(delimiter, endOfRun);
-    if (closing === -1) return output + line.slice(opening);
-    output += line.slice(opening, closing + delimiter.length);
-    cursor = closing + delimiter.length;
-  }
-  return output;
-}
-
-function transformMarkdown(source, preserveHistoricalName) {
-  let fence = null;
-  const lines = source.split(/(?<=\n)/u);
-  const findings = [];
-  const transformed = lines.map((line, index) => {
-    const fenceMatch = /^\s*(`{3,}|~{3,})/u.exec(line);
-    if (fenceMatch !== null) {
-      const marker = fenceMatch[1]?.[0] ?? null;
-      if (fence === null) fence = marker;
-      else if (marker === fence) fence = null;
-      return line;
+export async function transformMarkdown(
+  source,
+  preserveHistoricalName = false,
+) {
+  if (preserveHistoricalName) return { findings: [], source };
+  const tree = await parsers.markdown.parse(source);
+  const edits = [];
+  const findings = new Set();
+  const visit = (node) => {
+    if (literalNodes.has(node.type)) return;
+    // Autolinks display their destination as text. Ordinary link labels may
+    // change, but their destination/title never become edit ranges.
+    if (node.type === "link" && source[node.position.start.offset] !== "[")
+      return;
+    if (node.type === "text") {
+      const start = node.position.start.offset;
+      const text = source.slice(start, node.position.end.offset);
+      const urls = [
+        ...text.matchAll(
+          /(?:\b[a-z][a-z\d+.-]*:\/\/|mailto:|www\.)[^\s<>]+/giu,
+        ),
+      ];
+      for (const match of text.matchAll(/CloudMarkup|CloudCanvas/gu)) {
+        const offset = match.index;
+        const before = text[offset - 1] ?? "";
+        const after = text[offset + match[0].length] ?? "";
+        const following = text[offset + match[0].length + 1] ?? "";
+        if (
+          /[\p{L}\p{N}_./:@%+[\]-]/u.test(before) ||
+          /[\p{L}\p{N}_/@%+([\]-]/u.test(after) ||
+          (after === "." && /[\p{L}\p{N}_]/u.test(following)) ||
+          urls.some(
+            (url) => offset >= url.index && offset < url.index + url[0].length,
+          )
+        )
+          continue;
+        edits.push({
+          start: start + offset,
+          end: start + offset + match[0].length,
+        });
+        findings.add(source.slice(0, start + offset).split("\n").length);
+      }
     }
-    if (fence !== null) return line;
-    const replaced = processInlineCode(line, (segment) =>
-      replaceProse(segment, preserveHistoricalName),
+    for (const child of node.children ?? []) visit(child);
+  };
+  visit(tree);
+  let transformed = source;
+  for (const edit of edits.sort((left, right) => right.start - left.start)) {
+    transformed =
+      transformed.slice(0, edit.start) +
+      "Cloud Markup" +
+      transformed.slice(edit.end);
+  }
+  return {
+    findings: [...findings].sort((left, right) => left - right),
+    source: transformed,
+  };
+}
+
+export async function checkDocumentBrand(root, { write = false } = {}) {
+  const files = (await markdownFiles(root)).sort((left, right) =>
+    left === right ? 0 : left < right ? -1 : 1,
+  );
+  const unresolved = [];
+  let changed = 0;
+  for (const path of files) {
+    const source = await readFile(path, "utf8");
+    const relativePath = relative(root, path).replaceAll("\\", "/");
+    const preserveHistoricalName =
+      /^docs\/adr\/(?:00(?:0[1-9]|1[0-9]|2[0-8]))-/u.test(relativePath) &&
+      /^- (?:\*\*Status:\*\*|Status:) (?:Accepted|Superseded)$/mu.test(source);
+    const result = await transformMarkdown(source, preserveHistoricalName);
+    if (result.findings.length === 0) continue;
+    if (write) {
+      await writeFile(path, result.source, "utf8");
+      changed += 1;
+    } else {
+      for (const line of result.findings)
+        unresolved.push(`${relativePath}:${String(line)}`);
+    }
+  }
+  return { changed, files: files.length, unresolved };
+}
+
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(resolve(process.argv[1])).href
+) {
+  const write = process.argv.slice(2).includes("--write");
+  const result = await checkDocumentBrand(repositoryRoot, { write });
+  if (result.unresolved.length > 0) {
+    process.stderr.write(
+      `Retired human-facing product names remain:\n${result.unresolved.join("\n")}\n`,
     );
-    if (replaced !== line) findings.push(index + 1);
-    return replaced;
-  });
-  return { findings, source: transformed.join("") };
-}
-
-const files = (await markdownFiles(repositoryRoot)).sort((left, right) =>
-  left === right ? 0 : left < right ? -1 : 1,
-);
-const unresolved = [];
-let changed = 0;
-for (const path of files) {
-  const source = await readFile(path, "utf8");
-  const relativePath = relative(repositoryRoot, path).replaceAll("\\", "/");
-  const preserveHistoricalName =
-    /^docs\/adr\/(?:00(?:0[1-9]|1[0-9]|2[0-8]))-/u.test(relativePath) &&
-    /^- (?:\*\*Status:\*\*|Status:) (?:Accepted|Superseded)$/mu.test(source);
-  const result = transformMarkdown(source, preserveHistoricalName);
-  if (result.findings.length === 0) continue;
-  if (write) {
-    await writeFile(path, result.source, "utf8");
-    changed += 1;
+    process.exitCode = 1;
   } else {
-    for (const line of result.findings) {
-      unresolved.push(
-        `${path.slice(repositoryRoot.length + 1)}:${String(line)}`,
-      );
-    }
+    process.stdout.write(
+      write
+        ? `Updated ${String(result.changed)} Markdown files to the Cloud Markup display name.\n`
+        : `Checked ${String(result.files)} Markdown files; Cloud Markup display naming is current.\n`,
+    );
   }
-}
-
-if (unresolved.length > 0) {
-  process.stderr.write(
-    `Retired human-facing product names remain:\n${unresolved.join("\n")}\n`,
-  );
-  process.exitCode = 1;
-} else {
-  process.stdout.write(
-    write
-      ? `Updated ${String(changed)} Markdown files to the Cloud Markup display name.\n`
-      : `Checked ${String(files.length)} Markdown files; Cloud Markup display naming is current.\n`,
-  );
 }

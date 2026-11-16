@@ -204,7 +204,11 @@ describe("ContinuousConformanceWorkspace", () => {
     expect(connectionAlternative).toHaveTextContent(
       "Sensitive label redacted → invokes → imported target",
     );
-    expect(container.querySelector("#unmapped\\.imported\\.bucket")).toBeNull();
+    expect(
+      screen.getByRole("img", {
+        name: "imported safely mapped evidence diagram",
+      }),
+    ).not.toHaveTextContent("Imported bucket without a stable key");
     expect(screen.getByText(/never fabricated as inventory/u)).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Current drift" }));

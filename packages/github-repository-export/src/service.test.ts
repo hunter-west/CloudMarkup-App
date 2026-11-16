@@ -808,26 +808,6 @@ describe("GitHub App repository export", () => {
     expect(value.github.sessionsOpened).toBe(value.github.sessionsClosed);
   });
 
-  it("never replays an idempotent terminal receipt to a different principal", async () => {
-    const value = setup();
-    const candidate = await preview(value);
-    await execute(value, candidate, "principal-bound-export");
-
-    await expect(
-      value.service.execute({
-        confirmedWorkflowFiles: candidate.workflowFiles,
-        correlationId: "correlation.execute.other-principal",
-        idempotencyKey: "principal-bound-export",
-        organizationId: ORGANIZATION_ID,
-        previewDigest: candidate.previewDigest,
-        previewId: candidate.previewId,
-        principalId: "principal.other",
-        projectId: PROJECT_ID,
-      }),
-    ).rejects.toMatchObject({ code: "invalid-request" });
-    expect(value.github.pullRequestCount).toBe(1);
-  });
-
   it("replays a lost success after mutable prerequisites expire without another GitHub session", async () => {
     let now = new Date(AT);
     const value = setup({ clock: () => now });

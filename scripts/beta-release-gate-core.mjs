@@ -10,7 +10,7 @@ import {
 } from "./beta-sandbox-delivery-admission.mjs";
 
 const BETA_PROJECT_CLEANUP_SCHEMA_CHECKSUM =
-  "b5cd0bcb42f94baaa6266ed43e0222a89af7c4bd2b84535d9e6949a5c7a0ad4b";
+  "9ae4f3bc42624d52d3c17265539cf21650645a1035b91fce936023500d3f21f0";
 
 export const BETA_RELEASE_EXPECTED = Object.freeze({
   accountId: "000000000000",
@@ -1654,7 +1654,7 @@ export function validateBetaAssembly(stacks, environment, assets = []) {
             .CLOUDMARKUP_PROJECT_CLEANUP_ENABLED !==
             (cleanupEnabled ? "true" : "false") ||
           lambdaVariables(entry.resource)
-            .CLOUDMARKUP_EXPECTED_SCHEMA_VERSION !== "0139"))
+            .CLOUDMARKUP_EXPECTED_SCHEMA_VERSION !== "0142"))
     ) {
       findings.push(
         finding(
@@ -1748,7 +1748,7 @@ export function validateBetaAssembly(stacks, environment, assets = []) {
       ].every((marker) => runtimeConfig.includes(marker));
       productionApiSeen =
         variables.CLOUDMARKUP_RUNTIME_COMPOSITION === "production-v1" &&
-        variables.CLOUDMARKUP_EXPECTED_SCHEMA_VERSION === "0139" &&
+        variables.CLOUDMARKUP_EXPECTED_SCHEMA_VERSION === "0142" &&
         runtimeConfigValid;
     }
     if (
@@ -1775,7 +1775,7 @@ export function validateBetaAssembly(stacks, environment, assets = []) {
       finding(
         "BETA_PRODUCTION_COMPOSITION_MISSING",
         "cloudmarkup-beta-api",
-        "The API must bind the production-v1 composition, exact schema version 0139, and complete Cognito public runtime config.",
+        "The API must bind the production-v1 composition, exact schema version 0142, and complete Cognito public runtime config.",
       ),
     );
   }
@@ -1788,7 +1788,7 @@ export function validateBetaAssembly(stacks, environment, assets = []) {
   const migrationResources = resources.filter(
     ({ resource }) =>
       resource.Type === "AWS::CloudFormation::CustomResource" &&
-      resource.Properties?.ExpectedSchemaVersion === "0139" &&
+      resource.Properties?.ExpectedSchemaVersion === "0142" &&
       /^[0-9a-f]{64}$/u.test(resource.Properties?.ManifestSha256 ?? ""),
   );
   if (migrators.length !== 1 || migrationResources.length !== 1) {
@@ -1796,7 +1796,7 @@ export function validateBetaAssembly(stacks, environment, assets = []) {
       finding(
         "BETA_MIGRATION_GATE_MISSING",
         "cloudmarkup-beta-application",
-        "The beta assembly must contain one checksum-bound schema-0044 migrator and CloudFormation gate.",
+        "The beta assembly must contain one checksum-bound schema-0142 migrator and CloudFormation gate.",
       ),
     );
   }

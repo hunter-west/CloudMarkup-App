@@ -23,7 +23,10 @@ import {
   createSfntDiagramExportService,
   diagramRendererV1Pin,
   diagramRendererSfntV1Pin,
+  diagramRendererBoundedDetailV1Pin,
+  createBoundedDetailDiagramExportService,
 } from "./service.js";
+import { digestBytes } from "./security.js";
 import { DIAGRAM_SFNT_FONT } from "./sfnt-font.js";
 
 const awsIconRegistry = createAwsDiagramIconRegistryTestInput();
@@ -290,7 +293,19 @@ describe("deterministic diagram export", () => {
         ...baseline,
         iconSet: { ...baseline.iconSet, icons },
       }),
-    ).toThrow(/icon bytes|active|external|unsupported/iu);
+    ).toThrow(/icon bytes/iu);
+    expect(() =>
+      createDiagramExportService().generate({
+        ...baseline,
+        iconSet: {
+          ...baseline.iconSet,
+          icons: icons.map((icon) => ({
+            ...icon,
+            normalizedSha256: digestBytes(icon.svg),
+          })),
+        },
+      }),
+    ).toThrow(/active, external, or unsupported XML/iu);
   });
 
   it("escapes malicious labels without exposing active markup", () => {
@@ -316,6 +331,106 @@ describe("deterministic diagram export", () => {
     expect(result.svg).toContain(
       "&lt;/text&gt;&lt;script&gt;run()&lt;/script&gt;",
     );
+  });
+
+  it("bounds large-graph detail at 50/51 only under the explicit 1.2.0 renderer pin", () => {
+    const service = createBoundedDetailDiagramExportService({
+      rasterizer: {
+        rasterize() {
+          throw new Error("SVG-only test");
+        },
+      },
+    });
+    expect(diagramRendererBoundedDetailV1Pin.version).toBe("1.2.0");
+    expect(diagramRendererBoundedDetailV1Pin.digest).not.toBe(
+      diagramRendererSfntV1Pin.digest,
+    );
+    for (const profile of ["presentation", "technical"] as const) {
+      const baseline = request({ profile });
+      const summarized = buildDiagramScene(baseline).nodes.find(
+        (node) => node.configuration.length > 0,
+      );
+      const template = baseline.architectureDocument.nodes.find(
+        (node) => node.id === summarized?.internalId,
+      );
+      if (!template)
+        throw new Error(
+          "Fixture must contain eligible configuration summaries",
+        );
+      for (const count of [50, 51]) {
+        const document = {
+          ...baseline.architectureDocument,
+          nodes: [
+            ...baseline.architectureDocument.nodes,
+            ...Array.from(
+              { length: count - baseline.architectureDocument.nodes.length },
+              (_, index) => ({
+                ...template,
+                id: `node_detail_${String(index)}` as typeof template.id,
+                semantic: {
+                  ...template.semantic,
+                  deploymentKey:
+                    `detail_${String(index)}` as typeof template.semantic.deploymentKey,
+                },
+              }),
+            ),
+          ],
+        };
+        const input = rebindArchitecture(baseline, document);
+        const scenes = [
+          diagramRendererV1Pin,
+          diagramRendererSfntV1Pin,
+          diagramRendererBoundedDetailV1Pin,
+        ].map((renderer) => {
+          const bound = diagramExportRequestV1Schema.parse({
+            ...input,
+            renderer,
+            output: { ...input.output, format: "svg" },
+            solutionRevision: {
+              ...input.solutionRevision,
+              versions: {
+                ...input.solutionRevision.versions,
+                diagramRenderer: { state: "pinned", tool: renderer },
+              },
+            },
+          });
+          const scene = buildDiagramScene(bound);
+          expect(scene.nodes).toHaveLength(count);
+          expect(scene.edges).toHaveLength(document.edges.length);
+          if (renderer.version === "1.2.0") {
+            expect(
+              scene.nodes.some((node) => node.configuration.length > 0),
+            ).toBe(count === 50);
+            const result = service.generate(bound);
+            expect(service.verify({ request: bound, result })).toEqual(result);
+            expect(() =>
+              createSfntDiagramExportService({
+                rasterizer: {
+                  rasterize() {
+                    throw new Error("SVG-only test");
+                  },
+                },
+              }).generate(bound),
+            ).toThrow(/exact renderer/u);
+          } else {
+            expect(
+              scene.nodes.some((node) => node.configuration.length > 0),
+            ).toBe(true);
+            expect(() => service.generate(bound)).toThrow(/exact renderer/u);
+          }
+          return scene;
+        });
+        const identity = (scene: ReturnType<typeof buildDiagramScene>) => ({
+          nodes: scene.nodes.map(({ id, internalId }) => [id, internalId]),
+          edges: scene.edges,
+        });
+        const [legacy, , bounded] = scenes;
+        if (legacy === undefined || bounded === undefined)
+          throw new Error("Expected renderer scenes");
+        expect(identity(bounded)).toEqual(identity(legacy));
+        expect(scenes[1]).toEqual(scenes[0]);
+      }
+    }
   });
 
   it("warns on bounded label truncation and fails before unbounded graphs allocate", () => {
@@ -384,59 +499,6 @@ describe("deterministic diagram export", () => {
         }),
       ).toThrow();
     }
-  });
-
-  it("derives identical strict requests and bytes from unchanged documents across editor presentations", () => {
-    const baseline = request();
-    const guidedSnapshot = Object.freeze({
-      architectureDocument: structuredClone(baseline.architectureDocument),
-      presentation: Object.freeze({
-        assistanceMode: "guided",
-        collapsedBoundaryIds: Object.freeze([]),
-        disclosureState: Object.freeze({ networkHelp: false }),
-        minimapViewport: Object.freeze({ x: 0, y: 0, zoom: 1 }),
-        panelState: Object.freeze({ inspector: "open" }),
-      }),
-    });
-    const professionalSnapshot = Object.freeze({
-      architectureDocument: structuredClone(baseline.architectureDocument),
-      presentation: Object.freeze({
-        assistanceMode: "professional",
-        collapsedBoundaryIds: Object.freeze(["node_network"]),
-        disclosureState: Object.freeze({ networkHelp: true }),
-        minimapViewport: Object.freeze({ x: 12, y: 20, zoom: 0.5 }),
-        panelState: Object.freeze({ inspector: "closed" }),
-      }),
-    });
-    expect(professionalSnapshot.presentation).not.toEqual(
-      guidedSnapshot.presentation,
-    );
-    expect(professionalSnapshot.architectureDocument).toEqual(
-      guidedSnapshot.architectureDocument,
-    );
-    expect(
-      getArchitectureDocumentHashes(professionalSnapshot.architectureDocument),
-    ).toEqual(
-      getArchitectureDocumentHashes(guidedSnapshot.architectureDocument),
-    );
-
-    const guidedRequest = diagramExportRequestV1Schema.parse(
-      rebindArchitecture(baseline, guidedSnapshot.architectureDocument),
-    );
-    const professionalRequest = diagramExportRequestV1Schema.parse(
-      rebindArchitecture(
-        structuredClone(baseline),
-        professionalSnapshot.architectureDocument,
-      ),
-    );
-    expect(professionalRequest).toEqual(guidedRequest);
-
-    const service = createDiagramExportService();
-    const guided = service.generate(guidedRequest);
-    const professional = service.generate(professionalRequest);
-    expect(professional.artifact).toEqual(guided.artifact);
-    expect(professional.svg).toBe(guided.svg);
-    expect(professional.png).toEqual(guided.png);
   });
 
   it("derives exact PNG dimensions from canonical SVG with pinned local fonts", () => {

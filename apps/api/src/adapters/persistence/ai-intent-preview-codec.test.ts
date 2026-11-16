@@ -1,4 +1,3 @@
-import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
 import {
   aiPreviewProofSchema,
@@ -9,18 +8,12 @@ import {
 import { AiIntentPreviewError } from "../../application/ai-intent-preview-journal.js";
 import { aiPreviewFixture } from "./ai-intent-preview-test-helpers.js";
 import { PostgresAiIntentPreviewJournal } from "./ai-intent-preview.js";
-import { loadMigrations } from "./migrations.js";
+import { loadRegisteredEvaluationSuccessor } from "./model-live-registered-successor-test-helpers.js";
 import type { SqlDatabase } from "./sql.js";
 
 describe("strict memory-only preview metadata", () => {
   it("preserves the five immutable preview statements within the current migration chain", async () => {
-    const migrations = await loadMigrations(
-      fileURLToPath(new URL("../../../migrations", import.meta.url)),
-    );
-    expect(migrations).toHaveLength(121);
-    expect(
-      migrations.reduce((count, item) => count + item.statements.length, 0),
-    ).toBe(1374);
+    const migrations = await loadRegisteredEvaluationSuccessor("0142");
     const previewMigration = migrations.find(
       ({ version }) => version === "0026",
     );

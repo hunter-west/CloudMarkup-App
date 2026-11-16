@@ -82,7 +82,7 @@ const prohibitedTextPatterns = [
   {
     code: "EXPORT_CONTENT_SECRET_VALUE",
     pattern:
-      /\b(?:api[_-]?key|access[_-]?token|password|passwd|secret[_-]?key)\s*[:=]\s*["']?[A-Za-z0-9+/_.=-]{12,}/iu,
+      /["']?\b(?:api[_-]?key|access[_-]?token|password|passwd|secret[_-]?key)["']?\s*[:=]\s*["']?[A-Za-z0-9+/_.=-]{12,}/iu,
   },
   {
     code: "EXPORT_CONTENT_SIGNED_URL",
@@ -295,6 +295,7 @@ export function inspectTextContent(
     !mediaType.startsWith("text/") &&
     mediaType !== "application/yaml" &&
     mediaType !== "application/json" &&
+    mediaType !== "application/vnd.cyclonedx+json" &&
     mediaType !== "application/vnd.amazon.cloudformation.template+json" &&
     mediaType !== "application/vnd.hashicorp.terraform" &&
     mediaType !== "image/svg+xml"

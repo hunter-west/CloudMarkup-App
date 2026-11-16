@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { reconciliationProposalV1Schema } from "./reconciliation-proposal-v1.js";
+import {
+  reconciliationMappingCandidateV1Schema,
+  reconciliationProposalV1Schema,
+} from "./reconciliation-proposal-v1.js";
 import { normalizeReconciliationProposalV1 } from "./solution-normalization.js";
 
 const digest = (character: string) => `sha256:${character.repeat(64)}`;
@@ -243,6 +246,70 @@ describe("Reconciliation Proposal v1 schema", () => {
         ],
       }).success,
     ).toBe(false);
+
+    const mapping = operations[6];
+    const [first, second] = mapping.candidates;
+    for (const candidates of [
+      [first, second],
+      [second, first],
+    ]) {
+      for (const selectedMappingId of [first.mappingId, second.mappingId]) {
+        expect(
+          reconciliationProposalV1Schema.safeParse({
+            ...proposal,
+            operations: [{ ...mapping, candidates, selectedMappingId }],
+          }).success,
+        ).toBe(true);
+      }
+    }
+    const mismatchedDigest = reconciliationProposalV1Schema.safeParse({
+      ...proposal,
+      operations: [
+        {
+          ...mapping,
+          domainOperation: {
+            ...mapping.domainOperation,
+            expectedInputDigest: digest("f"),
+          },
+        },
+      ],
+    });
+    expect(mismatchedDigest.error?.issues).toEqual([
+      {
+        code: "custom",
+        path: ["operations", 0, "domainOperation", "expectedInputDigest"],
+        message: "Mapping operation must bind the selected observation digest.",
+      },
+    ]);
+
+    for (const [candidates, duplicateIndex] of [
+      [[first, { ...second, mappingId: first.mappingId }], 1],
+      [[{ ...second, mappingId: first.mappingId }, first], 1],
+      [[first, first], 1],
+      [[first, second, second], 2],
+      [[first, second, first], 2],
+    ] as const) {
+      for (const candidate of candidates) {
+        expect(
+          reconciliationMappingCandidateV1Schema.safeParse(candidate).success,
+        ).toBe(true);
+      }
+      const duplicate = {
+        ...proposal,
+        operations: [{ ...mapping, candidates }],
+      };
+      const before = structuredClone(duplicate);
+      const result = reconciliationProposalV1Schema.safeParse(duplicate);
+      expect(result.success).toBe(false);
+      expect(result.error?.issues).toEqual([
+        {
+          code: "custom",
+          path: ["operations", 0, "candidates", duplicateIndex, "mappingId"],
+          message: "Mapping candidate IDs must be unique.",
+        },
+      ]);
+      expect(duplicate).toEqual(before);
+    }
   });
 
   it("keeps proposals non-authoritative and rejects executable callbacks", () => {

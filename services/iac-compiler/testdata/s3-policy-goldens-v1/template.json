@@ -127,10 +127,7 @@
                   "Effect": "Allow",
                   "Resource": [
                     {
-                      "Fn::GetAtt": [
-                        "Uploads",
-                        "Arn"
-                      ]
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::cloudmarkup-image-uploads"
                     }
                   ],
                   "Sid": "bucketaccess"
@@ -152,20 +149,14 @@
                   "Effect": "Allow",
                   "Resource": [
                     {
-                      "Fn::GetAtt": [
-                        "Uploads",
-                        "Arn"
-                      ]
+                      "Fn::Sub": "arn:${AWS::Partition}:s3:::cloudmarkup-image-uploads"
                     },
                     {
                       "Fn::Join": [
                         "",
                         [
                           {
-                            "Fn::GetAtt": [
-                              "Uploads",
-                              "Arn"
-                            ]
+                            "Fn::Sub": "arn:${AWS::Partition}:s3:::cloudmarkup-image-uploads"
                           },
                           "/*"
                         ]
@@ -195,10 +186,7 @@
                         "",
                         [
                           {
-                            "Fn::GetAtt": [
-                              "Uploads",
-                              "Arn"
-                            ]
+                            "Fn::Sub": "arn:${AWS::Partition}:s3:::cloudmarkup-image-uploads"
                           },
                           "/*"
                         ]
@@ -226,10 +214,7 @@
                         "",
                         [
                           {
-                            "Fn::GetAtt": [
-                              "Uploads",
-                              "Arn"
-                            ]
+                            "Fn::Sub": "arn:${AWS::Partition}:s3:::cloudmarkup-image-uploads"
                           },
                           "/*"
                         ]

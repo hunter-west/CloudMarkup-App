@@ -359,6 +359,19 @@ suite("account authenticator journal on isolated PostgreSQL", () => {
     expect(await journal.begin(principal, id, "disable")).toBeNull();
     await journal.assertCurrent(principal, id);
     await journal.finish(principal, id, "succeeded");
+    // Keep the enrollment-constraint negative below, and independently reach
+    // the immutable-row trigger with an otherwise valid, unchanged value.
+    await expect(
+      typed.query(
+        sql(
+          "UPDATE account_authenticator_attempts SET action=action WHERE principal_id=$1",
+          [principal.principalId],
+        ),
+      ),
+    ).rejects.toMatchObject({
+      code: "55000",
+      message: "immutable record cannot be changed",
+    });
     await expect(
       typed.query(
         sql(

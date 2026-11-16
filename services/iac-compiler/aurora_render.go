@@ -78,7 +78,7 @@ func (r *terraformRenderer) renderAuroraResource(n NormalizedResource) {
 func (r *cloudFormationRenderer) renderAuroraResource(n NormalizedResource) {
 	properties := map[string]any{"Tags": r.tagList()}
 	resource := cloudFormationResource{Type: cloudFormationResourceTypeByService[n.ServiceType], Properties: properties, Metadata: r.resourceMetadata(n), DeletionPolicy: "Retain", UpdateReplacePolicy: "Retain"}
-	helper := &terraformRenderer{model: r.model}
+	helper := &terraformRenderer{ctx: r.ctx, model: r.model, limits: r.limits}
 	switch n.ServiceType {
 	case serviceAuroraParameters:
 		properties["DBClusterParameterGroupName"] = r.configString(n, "name")
@@ -127,5 +127,5 @@ func (r *cloudFormationRenderer) renderAuroraResource(n NormalizedResource) {
 	}
 	r.addResource(r.logicalIDs[n.ID], resource, SourceReference{Document: DocumentArchitecture, NodeID: n.ID})
 	helper.auroraWarnings(n)
-	r.diagnostics = append(r.diagnostics, helper.diagnostics...)
+	r.retainDiagnostics(helper.diagnostics)
 }

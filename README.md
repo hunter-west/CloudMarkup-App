@@ -116,19 +116,29 @@ native contributor acceptance remains pending. See
 Installation does not enable cloud integrations or grant credentials.
 
 For a persisted standalone installation using real local-owner sessions and the
-shared application image, follow the
+shared application image, prepare current non-secret configuration templates:
+
+```powershell
+node scripts/self-host/prepare.mjs C:/CloudMarkupPrivate
+# Add --exports for the existing infrastructure-only CloudFormation export adapter.
+```
+
+Use a new absolute directory outside the clone, under an existing private
+parent. The helper derives source hashes and matching identities, preserves
+existing directories, and leaves all privileged acknowledgements unapproved. It
+creates no credentials or services. Then follow the
 [standalone operator route](scripts/self-host/README.md). This core profile
 keeps models and optional adapters disabled. The operator guide records prior
 synthetic acceptance; verify the actual image, database, browser and restart
 behavior for each installation before relying on it. It uses a distinct durable
 storage format and explicit operator provisioning. Run the guide in this order:
-inspect source hashes; prepare the pinned images and every private
-configuration/password/proof file; build; start PostgreSQL; provision the
-empty-database roles; apply the standalone migrations; activate the core
-permissions; initialize the local owner; check runtime permissions; start the
-app and its foreground transport; then verify readiness, browser sessions and
-persistence. The guide gives the exact commands and acknowledgement changes for
-each stage.
+inspect source hashes; prepare pinned Node/Go images and build; complete the
+PostgreSQL pin and private configuration/password/proof files; start PostgreSQL;
+provision the empty-database roles; apply the standalone migrations; activate
+the core permissions; initialize the local owner; check runtime permissions;
+start the app and its foreground transport; then verify readiness, browser
+sessions and persistence. The guide gives the exact commands and acknowledgement
+changes for each stage.
 
 AI and other optional integrations remain part of the maintained application
 source, but are unavailable in this standalone core profile. A provider key,

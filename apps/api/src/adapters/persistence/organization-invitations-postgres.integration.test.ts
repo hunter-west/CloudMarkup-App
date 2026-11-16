@@ -706,6 +706,21 @@ integration("registered sharing migration on isolated real PostgreSQL", () => {
         checksum_sha256:
           "b2b99e854c95c8a33ed271de58a35a573e00ccb4c22b6e3b17b1758264864c31",
       },
+      {
+        version: "0140",
+        checksum_sha256:
+          "f059dbd2b1ec63666eee0c57312477feb3c4e3c912842f0dd35ab4717747b328",
+      },
+      {
+        version: "0141",
+        checksum_sha256:
+          "358f79f5d19cd2e5540c03f3e72d1010bd726c5c82500e3174ef20ca3249b956",
+      },
+      {
+        version: "0142",
+        checksum_sha256:
+          "9ae4f3bc42624d52d3c17265539cf21650645a1035b91fce936023500d3f21f0",
+      },
     ]);
     const plans = await database.query(
       sql(

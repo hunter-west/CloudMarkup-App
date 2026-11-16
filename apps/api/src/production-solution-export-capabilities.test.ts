@@ -19,7 +19,7 @@ function environment(enabled?: boolean): NodeJS.ProcessEnv {
   return {
     AWS_REGION: "us-east-1",
     CLOUDMARKUP_ENVIRONMENT: "beta",
-    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
+    CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0142",
     CLOUDMARKUP_RUNTIME_COMPOSITION: "production-v1",
     CLOUDMARKUP_CONTENT_BUCKET: "synthetic-content-bucket",
     CLOUDMARKUP_DATABASE_ARN:

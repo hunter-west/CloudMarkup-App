@@ -48,6 +48,9 @@ func TestDnsNativeExports(t *testing.T) {
 			if artifact == nil {
 				t.Fatal("missing DNS export")
 			}
+			if diagnosticByCode(t, d, "DNS_CERTIFICATE_READINESS_EXTERNAL").Severity != SeverityWarning {
+				t.Fatalf("%s lost its DNS readiness warning", target)
+			}
 			if !reflect.DeepEqual(m, before) {
 				t.Fatal("source mutated")
 			}

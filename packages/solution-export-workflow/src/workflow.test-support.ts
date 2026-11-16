@@ -342,21 +342,8 @@ export function multiWorkloadEventApplicationFixture() {
   const generationRequest = pinCompiler(
     createMultiWorkloadEventGenerationRequest(),
   );
-  const generation = generateApplication(generationRequest);
-  const applicationBuildRequests = [...generation.artifact.buildContracts]
-    .sort((left, right) => {
-      const leftKey = `${left.contract.workloadId}\u0000${left.contractDigest}`;
-      const rightKey = `${right.contract.workloadId}\u0000${right.contractDigest}`;
-      return leftKey === rightKey ? 0 : leftKey < rightKey ? -1 : 1;
-    })
-    .map(({ contractDigest }) =>
-      applicationBuildRequestForGeneration(
-        generationRequest,
-        generation,
-        TEST_ENVIRONMENT,
-        contractDigest,
-      ),
-    );
+  const { generation, applicationBuildRequests } =
+    eventApplicationFixtureForGenerationRequest(generationRequest);
   if (applicationBuildRequests.length !== 2) {
     throw new TypeError(
       "Multi-workload event application fixture requires exactly two builds.",

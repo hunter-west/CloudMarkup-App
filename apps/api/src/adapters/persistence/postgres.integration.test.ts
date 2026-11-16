@@ -679,6 +679,9 @@ integrationDescribe("local PostgreSQL persistence", () => {
       "0098",
       "0138",
       "0139",
+      "0140",
+      "0141",
+      "0142",
     ]);
     expect(applied.rows[7]).toMatchObject({
       checksum_sha256: billingMigrationChecksum,

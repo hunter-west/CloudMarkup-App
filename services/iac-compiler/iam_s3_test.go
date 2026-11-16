@@ -62,6 +62,16 @@ func TestEventInvocationPermissionAcceptsOnlyExactGeneratedOwnerScope(t *testing
 					if first == nil || !reflect.DeepEqual(first, second) || !reflect.DeepEqual(diagnostics, againDiagnostics) {
 						t.Fatal("exact owner-scoped invocation permission is not reproducible")
 					}
+					denied := cloneNormalized(t, candidate)
+					setResourceValue(denied, statementID, "effect", stringValueConfig("deny"))
+					deniedBefore := cloneNormalized(t, denied)
+					deniedArtifact, deniedDiagnostics := render(denied)
+					if deniedArtifact != nil || !hasDiagnostic(deniedDiagnostics, "TARGET_GENERATED_POLICY_PROVENANCE_INVALID") {
+						t.Fatalf("generated Deny became an invocation grant: %#v", deniedDiagnostics)
+					}
+					if !reflect.DeepEqual(deniedBefore, denied) {
+						t.Fatal("refusal rewrote the Deny statement")
+					}
 					if test.name != "s3" {
 						return // The same matcher protects all three service grants.
 					}
@@ -101,6 +111,100 @@ func TestEventInvocationPermissionAcceptsOnlyExactGeneratedOwnerScope(t *testing
 				})
 			}
 		})
+	}
+}
+
+func TestEventBusScalarPoliciesRefuseLossyLowering(t *testing.T) {
+	for _, mutation := range []string{"none", "condition", "multiple-principals", "deny", "all-principals", "architecture-node"} {
+		for _, target := range []string{"terraform", "cloudformation"} {
+			t.Run(mutation+"-"+target, func(t *testing.T) {
+				model := eventCustomBusPatternModel()
+				bus, _ := modelResource(model, "event_bus")
+				addPolicy(model, "bus_policy", "resource", bus, "aws.eventbridge.event-bus-owns-resource-policy", []string{"events:PutEvents"}, "provider-identity", []string{"111122223333"}, &bus, false, nil)
+				switch mutation {
+				case "condition":
+					statement, _ := modelResource(model, "bus_policy_statement")
+					condition := resource("bus_condition", "bus_condition", "aws.iam.policy-condition", configuration("aws.iam.policy-condition.configuration", map[string]ConfigurationValue{
+						"key": stringValueConfig("aws:PrincipalOrgID"), "operator": stringValueConfig("StringEquals"), "values": stringList("o-synthetic"),
+					}))
+					model.Resources = append(model.Resources, condition)
+					model.Connections = append(model.Connections, connection("bus_condition_owner", "aws.iam.statement-owns-condition", condition, statement, "aws.iam.policy-condition-membership.connection", nil))
+				case "multiple-principals":
+					setResourceValue(model, "bus_policy_statement", "principals", stringList("111122223333", "444455556666"))
+				case "deny":
+					setResourceValue(model, "bus_policy_statement", "effect", stringValueConfig("deny"))
+				case "all-principals":
+					setResourceValue(model, "bus_policy_statement", "principalKind", stringValueConfig("all-principals"))
+					setResourceValue(model, "bus_policy_statement", "principals", stringList("*"))
+				case "architecture-node":
+					role, ok := modelResource(model, "role")
+					if !ok || role.ServiceType != "aws.iam.role" {
+						t.Fatal("modeled-principal fixture must contain the referenced IAM role")
+					}
+					setResourceValue(model, "bus_policy_statement", "principalKind", stringValueConfig("architecture-node"))
+					setResourceValue(model, "bus_policy_statement", "principals", stringList(role.ID))
+				}
+				finalizeEventModel(model)
+				reader := &terraformRenderer{ctx: context.Background(), model: model, limits: DefaultLimits(), resourceNames: map[string]string{}}
+				reader.assignResourceNames()
+				documents := reader.collectPolicyDocuments()
+				assertNoTargetErrors(t, reader.diagnostics)
+				found := false
+				for _, document := range documents {
+					if document.Resource.ID != "bus_policy" {
+						continue
+					}
+					found = true
+					if len(document.Statements) != 1 || scalarEventBusGrant(document.Statements[0]) != (mutation == "none") {
+						t.Fatal("scalar lowering did not inspect the complete admitted statement")
+					}
+					if mutation == "none" {
+						for _, principal := range []struct{ kind, value string }{
+							{"architecture-node", "111122223333"}, {"service", "111122223333"}, {"federated", "111122223333"}, {"none", "111122223333"}, {"all-principals", "111122223333"},
+							{"provider-identity", "arn:aws:iam::111122223333:role/synthetic"}, {"provider-identity", "*"}, {"provider-identity", ""},
+							{"provider-identity", "11112222333"}, {"provider-identity", "1111222233333"}, {"provider-identity", "11112222333x"},
+						} {
+							statement := document.Statements[0]
+							statement.PrincipalKind, statement.Principals = principal.kind, []string{principal.value}
+							if scalarEventBusGrant(statement) {
+								t.Fatal("scalar lowering accepted a non-account principal")
+							}
+						}
+						for _, actions := range [][]string{nil, {"events:PutEvents", "events:DescribeEventBus"}} {
+							statement := document.Statements[0]
+							statement.Actions = actions
+							if scalarEventBusGrant(statement) {
+								t.Fatal("scalar lowering ignored action cardinality")
+							}
+						}
+					}
+				}
+				if !found {
+					t.Fatal("fixture did not reach the resource policy lowering boundary")
+				}
+				before := cloneNormalized(t, model)
+				var artifact *TargetArtifact
+				var diagnostics []Diagnostic
+				code := "TARGET_EVENT_BUS_POLICY_UNSUPPORTED"
+				if target == "cloudformation" {
+					code = cloudFormationDiagnosticCode(code)
+					artifact, diagnostics = renderCloudFormationArtifact(context.Background(), model, nil, DefaultLimits())
+				} else {
+					artifact, diagnostics = renderTerraformArtifact(context.Background(), model, nil, DefaultLimits())
+				}
+				if mutation == "none" {
+					assertNoTargetErrors(t, diagnostics)
+					if artifact == nil {
+						t.Fatal("exact scalar Allow grant refused")
+					}
+				} else if artifact != nil || diagnosticByCode(t, diagnostics, code).Source.NodeID != "bus_policy_statement" {
+					t.Fatalf("lossy policy lowering was not refused at its statement: %#v", diagnostics)
+				}
+				if !reflect.DeepEqual(before, model) {
+					t.Fatal("policy admission mutated caller-owned semantics")
+				}
+			})
+		}
 	}
 }
 
@@ -356,7 +460,11 @@ func TestS3PolicyResourceSemanticsAndGoldens(t *testing.T) {
 	if bucketID == "" {
 		t.Fatal("missing bucket")
 	}
-	bucketARN := map[string]any{"Fn::GetAtt": []any{bucketID, "Arn"}}
+	bucketProperties := mapAt(t, resources[bucketID].(map[string]any), "Properties")
+	if bucketProperties["BucketName"] != "cloudmarkup-image-uploads" {
+		t.Fatal("policy scope no longer matches the exact configured bucket name")
+	}
+	bucketARN := map[string]any{"Fn::Sub": "arn:${AWS::Partition}:s3:::cloudmarkup-image-uploads"}
 	objectARN := map[string]any{"Fn::Join": []any{"", []any{bucketARN, "/*"}}}
 	expectedCloudFormation := map[string][]any{
 		"bucket_access": {bucketARN}, "object_access": {objectARN},
@@ -382,6 +490,53 @@ func TestS3PolicyResourceSemanticsAndGoldens(t *testing.T) {
 	}
 	if seen != len(expectedCloudFormation) {
 		t.Fatalf("found %d reviewed CloudFormation policies", seen)
+	}
+	lambdaID, _ := resourceForGraphID(t, resources, "lambda")
+	permissionID, permission := resourceForGraphID(t, resources, "s3_permission")
+	if !reflect.DeepEqual(mapAt(t, permission, "Properties"), map[string]any{
+		"Action": "lambda:InvokeFunction", "FunctionName": map[string]any{"Ref": lambdaID},
+		"Principal": "s3.amazonaws.com", "SourceAccount": map[string]any{"Ref": "AWS::AccountId"}, "SourceArn": bucketARN,
+	}) || !reflect.DeepEqual(resources[bucketID].(map[string]any)["DependsOn"], []any{permissionID}) {
+		t.Fatal("S3 invocation scope or permission-before-notification ordering changed")
+	}
+	assertNoCloudFormationResourceCycle(t, resources)
+
+	// Derive an ARN only for the exact inline-role/notification cycle. Other
+	// policies, scopes and ambiguous role relationships retain their references.
+	for _, variant := range []string{"inline", "generated", "resource-policy", "other-role", "no-notification", "ambiguous-role", "external", "invalid-name"} {
+		candidate := cloneNormalized(t, model)
+		owner, _ := modelResource(candidate, "role")
+		document := terraformPolicyDocument{Kind: "identity-inline", Owner: owner}
+		renderer := &cloudFormationRenderer{model: candidate, logicalIDs: map[string]string{"upload_bucket": bucketID}}
+		switch variant {
+		case "generated":
+			document.Kind = "generated-permission"
+		case "resource-policy":
+			document.Kind = "resource"
+		case "other-role":
+			document.Owner.ID = "unrelated_role"
+		case "no-notification":
+			candidate.Connections = nil
+		case "ambiguous-role":
+			for _, edge := range candidate.Connections {
+				if edge.RelationshipType == "aws.iam.role-assumed-by-lambda" {
+					candidate.Connections = append(candidate.Connections, edge)
+					break
+				}
+			}
+		case "external":
+			renderer.externalByNode = map[string]NormalizedExternalResource{"upload_bucket": {}}
+		case "invalid-name":
+			setResourceValue(candidate, "upload_bucket", "bucketName", stringValueConfig("${Unbound}"))
+		}
+		bucket, _ := modelResource(candidate, "upload_bucket")
+		var expected any = map[string]any{"Fn::GetAtt": []any{bucketID, "Arn"}}
+		if variant == "inline" || variant == "generated" {
+			expected = bucketARN
+		}
+		if actual := renderer.s3PolicyResourceARN(document, bucket); !reflect.DeepEqual(actual, expected) {
+			t.Errorf("%s ARN scope = %#v; want %#v", variant, actual, expected)
+		}
 	}
 
 	reordered := cloneNormalized(t, model)

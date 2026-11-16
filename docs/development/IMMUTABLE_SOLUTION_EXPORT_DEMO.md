@@ -43,8 +43,9 @@ The suite verifies these browser behaviors against those fixtures:
 - the mocked retry/cancellation scenario retains the same displayed revision and
   job while exercising the cancellation action;
 - expired and cross-tenant artifacts cannot be downloaded;
-- reloading the same mocked completed run retains its exact archive digest, and
-  a separate fixture shows the fixed previous-export semantic/file diff;
+- after the successful authenticated download, reloading the same mocked job
+  displays the verified archive digest again in its Manifest tab; a separate
+  case shows the fixed previous-export semantic/file diff;
 - Guided and Professional modes keep identical tabs, controls, selected file,
   and job URL while only the reserved help text changes; and
 - the Diagram tab previews the canonical SVG through a non-executable image

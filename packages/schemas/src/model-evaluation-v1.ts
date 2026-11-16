@@ -66,6 +66,7 @@ function hasExactSet(
   return (
     actual.length === expected.length &&
     duplicateValues(actual).length === 0 &&
+    duplicateValues(expected).length === 0 &&
     expected.every((value) => actual.includes(value))
   );
 }

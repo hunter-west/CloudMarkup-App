@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { digestCanonicalValue as digest } from "@cloudmarkup/schemas";
 import { finalRepairCandidateFixtureV4 } from "./model-live-repair-successor-candidate-test-helpers.js";
 import { modelLiveSeedCandidateReceiptV1Schema } from "./model-live-seed-candidate-codec.js";
+import { ModelLiveSequenceAuthorityError } from "./model-live-sequence-authority-codec.js";
 import {
   prepareFinalRepairCandidateOutcomeV4,
   projectFinalRepairCandidateOutcomeV4,
@@ -77,5 +78,43 @@ describe("final candidate receipt from actual retained validation", () => {
     if (kind === "cleanup")
       Object.assign(f.host.observation, { cleanup: "failed" });
     expect(() => prepareFinalRepairCandidateOutcomeV4(f)).toThrow();
+    if (kind === "predecessor-report") {
+      expect(
+        modelLiveSeedCandidateReceiptV1Schema.safeParse(f.predecessor.receipt)
+          .success,
+      ).toBe(false);
+      const { receiptId, receiptDigest, ...body } = f.predecessor.receipt;
+      void receiptId;
+      void receiptDigest;
+      const identified = {
+        ...body,
+        receiptId: "seed_candidate_" + digest(body).slice(7),
+      };
+      f.predecessor.receipt = {
+        ...identified,
+        receiptDigest: digest(identified),
+      };
+      expect(
+        modelLiveSeedCandidateReceiptV1Schema.safeParse(f.predecessor.receipt)
+          .success,
+      ).toBe(true);
+      expect(
+        digest({
+          baseDigest: f.host.candidate.baseDigest,
+          inputDigest: f.host.candidate.inputDigest,
+          invocationId: f.host.candidate.invocationId,
+          patchDigest: f.host.candidate.patchDigest,
+          responseDigest: f.host.candidate.responseDigest,
+          predecessorRequestDigest:
+            f.predecessor.receipt.bindings.requestDigest,
+          predecessorReportDigest: f.predecessor.receipt.reportDigest,
+          predecessorLineageDigest:
+            f.predecessor.receipt.bindings.repairLineageDigest,
+        }),
+      ).not.toBe(f.host.observation.bindings.repairLineageDigest);
+      expect(() => prepareFinalRepairCandidateOutcomeV4(f)).toThrow(
+        ModelLiveSequenceAuthorityError,
+      );
+    }
   });
 });

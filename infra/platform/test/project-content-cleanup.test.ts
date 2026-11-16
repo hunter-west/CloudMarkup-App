@@ -48,7 +48,7 @@ describe("authorized beta project cleanup infrastructure", () => {
       Environment: {
         Variables: Match.objectLike({
           CLOUDMARKUP_PROJECT_CLEANUP_ENABLED: "true",
-          CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0139",
+          CLOUDMARKUP_EXPECTED_SCHEMA_VERSION: "0142",
           CLOUDMARKUP_CONTENT_BUCKET: `cloudmarkup-beta-${account}-${region}-content`,
         }),
       },

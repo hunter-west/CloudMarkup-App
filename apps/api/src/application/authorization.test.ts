@@ -419,6 +419,57 @@ describe("recent authentication and sensitive audit hooks", () => {
     },
   );
 
+  it("keeps operation failures distinct from uncertain success-audit delivery", async () => {
+    for (const stage of [
+      "operation",
+      "audit-before-write",
+      "audit-after-write",
+    ] as const) {
+      const failure = new Error(`synthetic-${stage}`);
+      const events: SensitiveAuditEvent[] = [];
+      const operation = vi.fn(() =>
+        stage === "operation"
+          ? Promise.reject(failure)
+          : Promise.resolve("done"),
+      );
+      const append = vi.fn((event: SensitiveAuditEvent) => {
+        if (stage !== "audit-before-write") events.push(event);
+        return stage === "operation"
+          ? Promise.resolve()
+          : Promise.reject(failure);
+      });
+      await expect(
+        runSensitiveAction({
+          action: "billing.session-created",
+          auditSink: { append },
+          context,
+          family: "billing",
+          now: () => NOW,
+          operation,
+          permission: "billing.manage",
+          safeSummary: "Billing session requested.",
+          targetKind: "billing-account",
+        }),
+      ).rejects.toBe(failure);
+      expect(operation).toHaveBeenCalledTimes(1);
+      expect(append).toHaveBeenCalledTimes(1);
+      expect(append).toHaveBeenCalledWith(
+        expect.objectContaining({
+          outcome: stage === "operation" ? "failed" : "succeeded",
+          correlationId: context.correlationId,
+          organizationId: context.organizationId,
+        }),
+      );
+      expect(events.map((event) => event.outcome)).toEqual(
+        stage === "operation"
+          ? ["failed"]
+          : stage === "audit-after-write"
+            ? ["succeeded"]
+            : [],
+      );
+    }
+  });
+
   it("denies stale authentication before work and records a safe denial", async () => {
     const events: SensitiveAuditEvent[] = [];
     const operation = vi.fn();

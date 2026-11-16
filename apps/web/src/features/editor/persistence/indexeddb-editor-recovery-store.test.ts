@@ -11,228 +11,10 @@ import type {
 } from "./editor-recovery-store.js";
 import { createIndexedDbEditorRecoveryStore } from "./indexeddb-editor-recovery-store.js";
 
-interface FakeRequest<T> {
-  error: DOMException | null;
-  onerror: (() => void) | null;
-  onsuccess: (() => void) | null;
-  result: T | undefined;
-}
-
-interface FakeOpenRequest extends FakeRequest<IDBDatabase> {
-  onblocked: (() => void) | null;
-  onupgradeneeded: ((event: { readonly oldVersion: number }) => void) | null;
-  result: IDBDatabase;
-  transaction: IDBTransaction | null;
-}
-
-interface MutableRecoveryEnvelope {
-  canonicalDocument: string;
-  schemaVersion: number;
-}
-
-interface MutableRecoveryRecord {
-  latest: MutableRecoveryEnvelope;
-}
-
-function structuredCopy<T>(value: T): T {
-  return structuredClone(value);
-}
-
-class MemoryTransaction {
-  public error: DOMException | null = null;
-  public onabort: (() => void) | null = null;
-  public oncomplete: (() => void) | null = null;
-  public onerror: (() => void) | null = null;
-
-  readonly #records: Map<string, unknown>;
-  #aborted = false;
-  #completed = false;
-  #completionTimer: ReturnType<typeof setTimeout> | undefined;
-  #pending = 0;
-
-  public constructor(records: Map<string, unknown>) {
-    this.#records = records;
-    this.#scheduleCompletion();
-  }
-
-  public abort(): void {
-    if (this.#completed || this.#aborted) {
-      return;
-    }
-    this.#aborted = true;
-    if (this.#completionTimer !== undefined) {
-      clearTimeout(this.#completionTimer);
-    }
-    queueMicrotask(() => {
-      this.onabort?.();
-    });
-  }
-
-  public objectStore(): IDBObjectStore {
-    return {
-      count: () => this.#request(() => this.#records.size),
-      delete: (key: IDBValidKey) =>
-        this.#request(() => {
-          if (typeof key !== "string") {
-            throw new DOMException("Expected a string key.", "DataError");
-          }
-          this.#records.delete(key);
-          return undefined;
-        }),
-      get: (key: IDBValidKey) =>
-        this.#request(() => {
-          if (typeof key !== "string") {
-            throw new DOMException("Expected a string key.", "DataError");
-          }
-          const value = this.#records.get(key);
-          return value === undefined ? undefined : structuredCopy(value);
-        }),
-      put: (value: unknown) =>
-        this.#request(() => {
-          if (
-            typeof value !== "object" ||
-            value === null ||
-            !("scopeFingerprint" in value) ||
-            typeof value.scopeFingerprint !== "string"
-          ) {
-            throw new DOMException("Missing scope fingerprint.", "DataError");
-          }
-          this.#records.set(value.scopeFingerprint, structuredCopy(value));
-          return value.scopeFingerprint;
-        }),
-    } as unknown as IDBObjectStore;
-  }
-
-  public toIdbTransaction(): IDBTransaction {
-    return this as unknown as IDBTransaction;
-  }
-
-  #request<T>(operation: () => T): IDBRequest<T> {
-    this.#pending += 1;
-    const request: FakeRequest<T> = {
-      error: null,
-      onerror: null,
-      onsuccess: null,
-      result: undefined,
-    };
-    queueMicrotask(() => {
-      if (this.#aborted) {
-        return;
-      }
-      try {
-        request.result = operation();
-        request.onsuccess?.();
-      } catch (error) {
-        request.error =
-          error instanceof DOMException
-            ? error
-            : new DOMException("Memory request failed.", "UnknownError");
-        request.onerror?.();
-        this.error = request.error;
-        this.onerror?.();
-      } finally {
-        this.#pending -= 1;
-        this.#scheduleCompletion();
-      }
-    });
-    return request as unknown as IDBRequest<T>;
-  }
-
-  #scheduleCompletion(): void {
-    if (
-      this.#aborted ||
-      this.#completed ||
-      this.#pending > 0 ||
-      this.#completionTimer !== undefined
-    ) {
-      return;
-    }
-    this.#completionTimer = setTimeout(() => {
-      this.#completionTimer = undefined;
-      if (this.#pending === 0 && !this.#aborted && !this.#completed) {
-        this.#completed = true;
-        this.oncomplete?.();
-      }
-    }, 0);
-  }
-}
-
-class MemoryIndexedDb {
-  readonly #records = new Map<string, unknown>();
-  #hasStore = false;
-
-  public readonly factory = {
-    open: () => this.#open(),
-  } as unknown as IDBFactory;
-
-  public mutate(
-    scopeFingerprint: string,
-    mutate: (record: MutableRecoveryRecord) => void,
-  ): void {
-    const rawRecord = this.#records.get(scopeFingerprint);
-    if (typeof rawRecord !== "object" || rawRecord === null) {
-      throw new Error("Expected a stored recovery record.");
-    }
-    const record = structuredCopy(rawRecord) as MutableRecoveryRecord;
-    mutate(record);
-    this.#records.set(scopeFingerprint, record);
-  }
-  public setRaw(scopeFingerprint: string, value: unknown): void {
-    this.#records.set(scopeFingerprint, structuredCopy(value));
-  }
-
-  public replaceField(
-    scopeFingerprint: string,
-    key: "latest" | "schemaVersion",
-    value: unknown,
-  ): void {
-    const rawRecord = this.#records.get(scopeFingerprint);
-    if (typeof rawRecord !== "object" || rawRecord === null) {
-      throw new Error("Expected a stored recovery record.");
-    }
-    const record = structuredCopy(rawRecord) as Record<string, unknown>;
-    record[key] = structuredCopy(value);
-    this.#records.set(scopeFingerprint, record);
-  }
-
-  #database(): IDBDatabase {
-    const objectStoreNames = {
-      contains: (name: string) => name === "recovery-scopes" && this.#hasStore,
-    };
-    return {
-      close: () => undefined,
-      createObjectStore: () => {
-        this.#hasStore = true;
-        return {} as IDBObjectStore;
-      },
-      objectStoreNames,
-      onversionchange: null,
-      transaction: () =>
-        new MemoryTransaction(this.#records).toIdbTransaction(),
-    } as unknown as IDBDatabase;
-  }
-
-  #open(): IDBOpenDBRequest {
-    const request: FakeOpenRequest = {
-      error: null,
-      onblocked: null,
-      onerror: null,
-      onsuccess: null,
-      onupgradeneeded: null,
-      result: this.#database(),
-      transaction: null,
-    };
-    queueMicrotask(() => {
-      if (!this.#hasStore) {
-        request.onupgradeneeded?.({ oldVersion: 0 });
-      }
-      queueMicrotask(() => {
-        request.onsuccess?.();
-      });
-    });
-    return request as unknown as IDBOpenDBRequest;
-  }
-}
+import {
+  MemoryIndexedDb,
+  structuredCopy,
+} from "./indexeddb-recovery.test-support.js";
 
 interface TestChannel {
   close(): void;
@@ -320,6 +102,72 @@ function checkpointRequest(
 }
 
 describe("IndexedDB editor recovery store", () => {
+  it("owns request and aborted-transaction failures in every recovery operation", async () => {
+    for (const operation of [
+      "load",
+      "checkpoint",
+      "discard",
+      "remediate",
+    ] as const) {
+      // The write controls get through the initial read before failing. Every
+      // failing request also rejects the independently observed transaction.
+      for (const successfulRequests of operation === "load" ? [0] : [0, 1]) {
+        const memory = new MemoryIndexedDb();
+        const store = createIndexedDbEditorRecoveryStore({
+          indexedDb: memory.factory,
+          createBroadcastChannel: null,
+          databaseName: "synthetic-request-abort",
+        });
+        const { binding, document } = createBinding("scope-request-abort");
+        const first = await store.checkpoint(
+          checkpointRequest(binding, document, null, "writer_one"),
+        );
+        if (first.status !== "stored")
+          throw new Error("Expected synthetic checkpoint");
+        const changed = movedDocument(document, 240, 320, "request_abort");
+        if (operation === "remediate")
+          memory.mutate(binding.scopeFingerprint, (record) => {
+            record.latest.canonicalDocument = "{broken";
+          });
+        const before = await store.load(binding);
+        memory.failRequestAfter(successfulRequests);
+        const result =
+          operation === "load"
+            ? await store.load(binding)
+            : operation === "checkpoint"
+              ? await store.checkpoint(
+                  checkpointRequest(binding, changed, first.head, "writer_one"),
+                )
+              : operation === "discard"
+                ? await store.discard({
+                    binding,
+                    expectedHead: first.head,
+                    writerId: "writer_one",
+                  })
+                : before.status === "rejected"
+                  ? await store.remediateRejected({
+                      action: "replace",
+                      binding,
+                      document: changed,
+                      expectedClassification: before.classification,
+                      expectedHead: first.head,
+                      savedAt: "2026-07-30T12:30:00.000Z",
+                      writerId: "writer_one",
+                    })
+                  : undefined;
+        expect(result).toMatchObject({
+          status: "unavailable",
+          code: "database-error",
+        });
+        // Let the aborted transaction and unhandled-rejection turn complete;
+        // Vitest must report no unhandled error and the prior bytes survive.
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(await store.load(binding)).toEqual(before);
+        store.close();
+      }
+    }
+  });
+
   it("uses strict CAS and retains one prior validated checkpoint for corrupt recovery", async () => {
     const memory = new MemoryIndexedDb();
     const store = createIndexedDbEditorRecoveryStore({
