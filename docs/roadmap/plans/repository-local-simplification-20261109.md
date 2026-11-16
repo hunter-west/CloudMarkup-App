@@ -1621,3 +1621,45 @@ golden-pair refreshes, override removal and cleanup-owner acceptance remain
 unqualified. No new publication, manual CI, live/provider action, security
 change or deployment is part of this integration. Prior browser-child cleanup
 remains unverified.
+
+### Commercial expiration source concordance correction
+
+CI on b67a5ee3 correctly found one stale source binding in the unarmed ACL
+successor. The historical baseline still pins the earlier commercial repository.
+The reviewed expiration-summary corrections d187cca9 and 8e2496d8 changed only
+getCreditGrantExpirationSummary, but their current source hash was absent from
+the successor changes map.
+
+The successor now records that exact historical before-image, reviewed current
+after-image and bounded explanation. The existing seven-case contract retains
+its complete source/metadata checks, migration history, exact helper/column
+grants and refusal of qualification claims. No baseline or SQL grant is edited;
+REVIEW_ONLY_UNARMED and all applied/native/activation flags remain unchanged.
+
+This is source concordance, not permission admission. Native ordinary-role,
+allow/deny/tenant, query/driver/concurrency and restore qualification remain
+open. No runtime, financial, database, provider or production action is
+authorized by this correction. The separate three-fix union 1033e17e remains
+frozen; combining these independently reviewable candidates requires an explicit
+later review.
+
+### Contract/readiness and ACL binding integration — November 16
+
+This local merge combines accepted union 1033e17e with accepted ACL repair
+34b48283, preserving their exact source/test bytes and both roadmap appendices.
+It retains published b67a5ee3 and every accepted constituent. The separately
+sealed authentication correction and all other audit work remain excluded.
+
+The ACL change only records reviewed expiration-source correspondence in the
+unarmed proposal; applied, nativeQualified and productionActivation remain
+false. The historical baseline and all grants, SQL and authorization runtime are
+intact. Padded CIDRs intentionally fail readiness until explicitly corrected;
+nothing is normalized or migrated. Workload and mapping uniqueness still require
+runtime parsing; JSON Schema does not express those refinements.
+
+The earlier union's timed-out JSON-schema case and unchanged isolated follow-up
+pass remain distinct evidence, not a performance conclusion. Existing private
+reference 4574e549 retains its two unresolved execution bindings. This candidate
+requires exact integration review before coordinated publication. No CI, native,
+browser, provider, private composition, permission or deployment acceptance is
+inferred from the merge or focused checks.
